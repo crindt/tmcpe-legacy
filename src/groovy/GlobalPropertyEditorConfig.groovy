@@ -2,6 +2,7 @@ import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.propertyeditors.CustomNumberEditor
 import org.codehaus.groovy.grails.web.binding.GrailsDataBinder
 import org.postgis.Geometry
+import org.postgis.Point
 import org.apache.log4j.*
 
 class GlobalPropertyEditorConfig { 
@@ -23,5 +24,6 @@ private static void registerCustomEditors(request, binder) {
         // FIXME:crindt:Should probably define a Location type
         //              or at least restrict the class to be a Point
         binder.registerCustomEditor(Geometry.class, new LocationEditor())
+        binder.registerCustomEditor(Point.class, new LocationEditor())
     } 
 }

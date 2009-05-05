@@ -22,9 +22,11 @@ class TmcLogEntry implements Comparable {
     String memo
 
     static mapping = {
-        table 'actlog'
+        table 'ct_al_backup_2007'
         id column: 'keyfield'
 //        cache usage:'read-only'
+        // turn off optimistic locking, i.e., versioning
+        version false
     }
 
     static constraints = {

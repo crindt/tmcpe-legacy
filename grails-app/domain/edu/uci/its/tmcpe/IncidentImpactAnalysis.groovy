@@ -3,6 +3,7 @@ package edu.uci.its.tmcpe
 class IncidentImpactAnalysis {
 
     String analysisName
+    static belongsTo = Incident
 
     // should have core parameters that define the analysis so we can
     // cache results

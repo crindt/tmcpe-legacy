@@ -7,7 +7,7 @@ import org.postgis.hibernate.GeometryType
 class Incident {
 
     String cad
-    SortedSet tmcLogEntries
+//    SortedSet tmcLogEntries
 
     Geometry location
 
@@ -15,7 +15,7 @@ class Incident {
     String facilityDirection
 
     static hasMany = [ 
-        tmcLogEntries: TmcLogEntry,
+//        tmcLogEntries: TmcLogEntry,
         analyses: IncidentImpactAnalysis
     ]
 
@@ -32,10 +32,15 @@ class Incident {
         // fixme: this is a bit of a hack, but may be necessary if the
         //        CAD database is live
         // update tmcLogEntries
-        for ( logEntry in TmcLogEntry.findAllByCad( cad ) )
-        {
-            addToTmcLogEntries( logEntry )
-        }
+//        for ( logEntry in TmcLogEntry.findAllByCad( cad ) )
+//        {
+//            addToTmcLogEntries( logEntry )
+//        }
+    }
+
+    List getTmcLogEntries()
+    {
+        return TmcLogEntry.findAllByCad( cad );
     }
 
     String toString() {

@@ -1,7 +1,0 @@
-package edu.uci.its.tmcpe
-
-class Section {
-
-    static constraints = {
-    }
-}

@@ -30,6 +30,8 @@ class Vds {
             district column: 'district_id'
         }
         geom type:GeometryType
+        // turn off optimistic locking, i.e., versioning
+        version false
     }
 
     static constraints = {
