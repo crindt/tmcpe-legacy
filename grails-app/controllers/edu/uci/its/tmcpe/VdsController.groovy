@@ -98,4 +98,11 @@ class VdsController {
             render(view:'create',model:[vdsInstance:vdsInstance])
         }
     }
+
+    // FIXME: To be done later
+//    def listAllAsKml = {
+//        render(contentType:"application/xml",
+//               view:'listAllAsKml',
+//               model:[ vdsKmlList: Vds.listAllAsKml( ) ])
+//    }
 }

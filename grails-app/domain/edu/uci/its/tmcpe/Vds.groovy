@@ -36,4 +36,5 @@ class Vds {
 
     static constraints = {
     }
+    
 }

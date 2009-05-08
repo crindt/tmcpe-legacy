@@ -26,12 +26,31 @@
                     <table>
                         <tbody>
                         
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="startSection">Start Section:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:incidentFacilityImpactAnalysisInstance,field:'startSection','errors')}">
+                                    <g:select optionKey="id" from="${edu.uci.its.tmcpe.FacilitySection.list()}" name="startSection.id" value="${incidentFacilityImpactAnalysisInstance?.startSection?.id}" ></g:select>
+                                </td>
+                            </tr> 
+
                             <tr class="prop">
                                 <td valign="top" class="name">
                                     <label for="endSection">End Section:</label>
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean:incidentFacilityImpactAnalysisInstance,field:'endSection','errors')}">
                                     <g:select optionKey="id" from="${edu.uci.its.tmcpe.FacilitySection.list()}" name="endSection.id" value="${incidentFacilityImpactAnalysisInstance?.endSection?.id}" ></g:select>
+                                </td>
+                            </tr> 
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="startTime">Start Time:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:incidentFacilityImpactAnalysisInstance,field:'startTime','errors')}">
+                                    <g:datePicker name="startTime" value="${incidentFacilityImpactAnalysisInstance?.startTime}" ></g:datePicker>
                                 </td>
                             </tr> 
                         
@@ -60,7 +79,7 @@
                                 <td valign="top" class="value ${hasErrors(bean:incidentFacilityImpactAnalysisInstance,field:'facilityName','errors')}">
                                     <input type="text" id="facilityName" name="facilityName" value="${fieldValue(bean:incidentFacilityImpactAnalysisInstance,field:'facilityName')}"/>
                                 </td>
-                            </tr> 
+                            </tr>
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
@@ -68,24 +87,6 @@
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean:incidentFacilityImpactAnalysisInstance,field:'incidentImpactAnalysis','errors')}">
                                     <g:select optionKey="id" from="${edu.uci.its.tmcpe.IncidentImpactAnalysis.list()}" name="incidentImpactAnalysis.id" value="${incidentFacilityImpactAnalysisInstance?.incidentImpactAnalysis?.id}" ></g:select>
-                                </td>
-                            </tr> 
-                        
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="startSection">Start Section:</label>
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean:incidentFacilityImpactAnalysisInstance,field:'startSection','errors')}">
-                                    <g:select optionKey="id" from="${edu.uci.its.tmcpe.FacilitySection.list()}" name="startSection.id" value="${incidentFacilityImpactAnalysisInstance?.startSection?.id}" ></g:select>
-                                </td>
-                            </tr> 
-                        
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="startTime">Start Time:</label>
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean:incidentFacilityImpactAnalysisInstance,field:'startTime','errors')}">
-                                    <g:datePicker name="startTime" value="${incidentFacilityImpactAnalysisInstance?.startTime}" ></g:datePicker>
                                 </td>
                             </tr> 
                         
