@@ -71,7 +71,9 @@
 //                 })
 //             });
 
-//             map.addLayers([mapnik, gmap, networkLines, vds]);
+            map.addLayers([mapnik, gmap, networkLines
+//			   , vds
+			  ]);
 
 
             selectNetwork = new OpenLayers.Control.SelectFeature(networkLines);
@@ -132,13 +134,9 @@
     </script>
   </head>
   <body onload="init()">
-      <h1 id="title">OSM + Google Maps + KML Reprojection</h1>
+      <h1 id="title">Testbed Network OpenStreetMap Overlay</h1>
 
       <div id="tags"></div>
-
-      <p id="shortdesc">
-          Demonstrates loading and displaying a KML file on top of OpenStreetMap (OSM) and Google Maps data. Loads data from a KML file of networkLines.
-    </p>
 
     <div id="map" class="smallmap"></div>
 

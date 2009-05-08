@@ -14,7 +14,7 @@
        <Placemark>
            <name>facility</name>
            <styleUrl>#yellowLine</styleUrl>
-	   ${testbedLineInstance.kml}
+	   ${testbedLineInstance.toKml()}
       </Placemark>
     </g:each>
   </Document>
