@@ -1,5 +1,5 @@
 
-<%@ page import="edu.uci.its.tmcpe.Vds" %>
+<%@ page import="edu.uci.its.testbed.Vds" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -51,6 +51,13 @@
                         </tr>
                     
                         <tr class="prop">
+                            <td valign="top" class="name">Freeway:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'freeway')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
                             <td valign="top" class="name">Freeway Dir:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'freewayDir')}</td>
@@ -58,16 +65,16 @@
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Freeway Id:</td>
+                            <td valign="top" class="name">Geom:</td>
                             
-                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'freewayId')}</td>
+                            <td valign="top" class="value"><g:link controller="null" action="show" id="${vdsInstance?.geom}">${vdsInstance?.geom?.encodeAsHTML()}</g:link></td>
                             
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Geom:</td>
+                            <td valign="top" class="name">Gid:</td>
                             
-                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'geom')}</td>
+                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'gid')}</td>
                             
                         </tr>
                     
@@ -79,13 +86,6 @@
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Last Modified:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'lastModified')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
                             <td valign="top" class="name">Name:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'name')}</td>
@@ -93,9 +93,23 @@
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Type:</td>
+                            <td valign="top" class="name">Segment Length:</td>
                             
-                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'type')}</td>
+                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'segmentLength')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Vds Type:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'vdsType')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Version Ts:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'versionTs')}</td>
                             
                         </tr>
                     

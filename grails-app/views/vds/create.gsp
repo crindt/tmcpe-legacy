@@ -1,5 +1,5 @@
 
-<%@ page import="edu.uci.its.tmcpe.Vds" %>
+<%@ page import="edu.uci.its.testbed.Vds" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -55,19 +55,19 @@
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="freewayDir">Freeway Dir:</label>
+                                    <label for="freeway">Freeway:</label>
                                 </td>
-                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'freewayDir','errors')}">
-                                    <input type="text" id="freewayDir" name="freewayDir" value="${fieldValue(bean:vdsInstance,field:'freewayDir')}"/>
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'freeway','errors')}">
+                                    <input type="text" id="freeway" name="freeway" value="${fieldValue(bean:vdsInstance,field:'freeway')}" />
                                 </td>
                             </tr> 
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="freewayId">Freeway Id:</label>
+                                    <label for="freewayDir">Freeway Dir:</label>
                                 </td>
-                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'freewayId','errors')}">
-                                    <input type="text" id="freewayId" name="freewayId" value="${fieldValue(bean:vdsInstance,field:'freewayId')}" />
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'freewayDir','errors')}">
+                                    <input type="text" id="freewayDir" name="freewayDir" value="${fieldValue(bean:vdsInstance,field:'freewayDir')}"/>
                                 </td>
                             </tr> 
                         
@@ -82,19 +82,19 @@
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="lanes">Lanes:</label>
+                                    <label for="gid">Gid:</label>
                                 </td>
-                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'lanes','errors')}">
-                                    <input type="text" id="lanes" name="lanes" value="${fieldValue(bean:vdsInstance,field:'lanes')}" />
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'gid','errors')}">
+                                    <input type="text" id="gid" name="gid" value="${fieldValue(bean:vdsInstance,field:'gid')}" />
                                 </td>
                             </tr> 
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="lastModified">Last Modified:</label>
+                                    <label for="lanes">Lanes:</label>
                                 </td>
-                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'lastModified','errors')}">
-                                    <g:datePicker name="lastModified" value="${vdsInstance?.lastModified}" ></g:datePicker>
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'lanes','errors')}">
+                                    <input type="text" id="lanes" name="lanes" value="${fieldValue(bean:vdsInstance,field:'lanes')}" />
                                 </td>
                             </tr> 
                         
@@ -109,10 +109,28 @@
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="type">Type:</label>
+                                    <label for="segmentLength">Segment Length:</label>
                                 </td>
-                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'type','errors')}">
-                                    <input type="text" id="type" name="type" value="${fieldValue(bean:vdsInstance,field:'type')}"/>
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'segmentLength','errors')}">
+                                    <input type="text" id="segmentLength" name="segmentLength" value="${fieldValue(bean:vdsInstance,field:'segmentLength')}" />
+                                </td>
+                            </tr> 
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="vdsType">Vds Type:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'vdsType','errors')}">
+                                    <input type="text" id="vdsType" name="vdsType" value="${fieldValue(bean:vdsInstance,field:'vdsType')}"/>
+                                </td>
+                            </tr> 
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="versionTs">Version Ts:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'versionTs','errors')}">
+                                    <g:datePicker name="versionTs" value="${vdsInstance?.versionTs}" ></g:datePicker>
                                 </td>
                             </tr> 
                         

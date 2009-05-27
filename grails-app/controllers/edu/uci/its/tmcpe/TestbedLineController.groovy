@@ -101,7 +101,7 @@ class TestbedLineController {
 
     def listAllAsKml = {
         //[ testbedLineInstanceList: TestbedLine.list( ), testbedLineInstanceTotal: TestbedLine.count() ]
-        render(contentType:"application/xml",
+        render(contentType:"text/xml",
                view:'listAllAsKml',
                model:[ testbedLineInstanceList: TestbedLine.list( ), testbedLineInstanceTotal: TestbedLine.count() ])
     }

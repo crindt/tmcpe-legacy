@@ -2,10 +2,19 @@
   <head>
     <title>Testbed Network View Using Openlayers</title>
     <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjpkAC9ePGem0lIq5XcMiuhR_wWLPFku8Ix9i2SXYRVK3e45q1BQUd_beF8dtzKET_EteAjPdGDwqpQ'></script>
+    <meta name="layout" content="main" />
+<!--
     <link rel="stylesheet" href="../theme/default/style.css" type="text/css" />
     <link rel="stylesheet" href="style.css" type="text/css" />
+-->
 
     <style type="text/css">
+        #body {
+            width: 100%;
+            height: 80%;
+            border: 1px solid black;
+        }
+
         #map {
             width: 100%;
             height: 80%;
@@ -22,7 +31,7 @@
         var zoom = 5;
         var map, select;
 
-        function init(){
+        function mapInit(){
             var options = {
                 projection: new OpenLayers.Projection("EPSG:900913"),
                 displayProjection: new OpenLayers.Projection("EPSG:4326"),
@@ -45,7 +54,7 @@
             );
             var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true});
 
-            var networkLines = new OpenLayers.Layer.Vector("KML", {
+            var networkLines = new OpenLayers.Layer.Vector("Testbed Roads", {
                 projection: map.displayProjection,
                 strategies: [new OpenLayers.Strategy.Fixed()],
                 protocol: new OpenLayers.Protocol.HTTP({
@@ -57,9 +66,21 @@
                 })
             });
 
+            var incidents = new OpenLayers.Layer.Vector("Incidents", {
+                projection: map.displayProjection,
+                strategies: [new OpenLayers.Strategy.Fixed()],
+                protocol: new OpenLayers.Protocol.HTTP({
+	            url: "/tmcpe/incident/listAllAsKml",
+                    format: new OpenLayers.Format.KML({
+                        extractStyles: true,
+                        extractAttributes: true
+                    })
+                })
+            });
+
 
 	    // FIXME: crindt: for later completion
-//             var vds = new OpenLayers.Layer.Vector("KML", {
+//             var vds = new OpenLayers.Layer.Vector("Testbed Roads", {
 //                 projection: map.displayProjection,
 //                 strategies: [new OpenLayers.Strategy.Fixed()],
 //                 protocol: new OpenLayers.Protocol.HTTP({
@@ -71,7 +92,7 @@
 //                 })
 //             });
 
-            map.addLayers([mapnik, gmap, networkLines
+            map.addLayers([mapnik, gmap, networkLines, incidents
 //			   , vds
 			  ]);
 
@@ -86,6 +107,18 @@
             map.addControl(selectNetwork);
             selectNetwork.activate();   
 
+
+            selectIncident = new OpenLayers.Control.SelectFeature(incidents);
+            
+            incidents.events.on({
+                "featureselected": onFeatureSelectIncident,
+                "featureunselected": onFeatureUnselectIncident
+            });
+  
+            map.addControl(selectIncident);
+            selectIncident.activate();   
+
+
             map.addControl(new OpenLayers.Control.LayerSwitcher());
 
             map.zoomToExtent(
@@ -94,7 +127,8 @@
                 ).transform(map.displayProjection, map.projection)
             );
         }
-        function onPopupClose(evt) {
+
+        function onPopupCloseNetwork(evt) {
             selectNetwork.unselectAll();
         }
         function onFeatureSelectNetwork(event) {
@@ -104,7 +138,7 @@
                 feature.geometry.getBounds().getCenterLonLat(),
                 new OpenLayers.Size(100,100),
                 "<h2>"+feature.attributes.name + "</h2>" + feature.attributes.description,
-                null, true, onPopupClose
+                null, true, onPopupCloseNetwork
             );
             feature.popup = popup;
             map.addPopup(popup);
@@ -117,6 +151,32 @@
                 delete feature.popup;
             }
         }
+
+
+        function onPopupCloseIncident(evt) {
+            selectIncident.unselectAll();
+        }
+        function onFeatureSelectIncident(event) {
+            var feature = event.feature;
+            var selectedFeature = feature;
+            var popup = new OpenLayers.Popup.FramedCloud("chicken", 
+                feature.geometry.getBounds().getCenterLonLat(),
+                new OpenLayers.Size(100,100),
+                "<h2>"+feature.attributes.name + "</h2>" + feature.attributes.description,
+                null, true, onPopupCloseIncident
+            );
+            feature.popup = popup;
+            map.addPopup(popup);
+        }
+        function onFeatureUnselectIncident(event) {
+            var feature = event.feature;
+            if(feature.popup) {
+                map.removePopup(feature.popup);
+                feature.popup.destroy();
+                delete feature.popup;
+            }
+        }
+
         function osm_getTileURL(bounds) {
             var res = this.map.getResolution();
             var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
@@ -133,13 +193,18 @@
         }
     </script>
   </head>
-  <body onload="init()">
-      <h1 id="title">Testbed Network OpenStreetMap Overlay</h1>
-
+  <body onload="mapInit()">
+    <div class="nav">
+      <span class="menuButton"><a class="home" href="${createLinkTo(dir:'')}">Home</a></span>
+      <span class="menuButton"><a class="" href="${createLinkTo(dir:'incident')}">List Incidents</a></span>
+      <span class="menuButton" style="float: right;"><a class="" href="${createLinkTo(dir:'controllers')}">Controllers</a></span>
+    </div>
+<!--    <div class="body" width="500px"> -->
       <div id="tags"></div>
-
-    <div id="map" class="smallmap"></div>
-
-    <div id="docs"></div>
+      <div id="map" class="smallmap" width="500px"></div>
+      <div id="docs"></div>
+<!--
+    </div>
+-->
   </body>
 </html>

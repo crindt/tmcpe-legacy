@@ -1,5 +1,5 @@
 
-<%@ page import="edu.uci.its.tmcpe.Vds" %>
+<%@ page import="edu.uci.its.testbed.Vds" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -29,9 +29,9 @@
                         
                    	        <g:sortableColumn property="district" title="District" />
                         
-                   	        <g:sortableColumn property="freewayDir" title="Freeway Dir" />
+                   	        <g:sortableColumn property="freeway" title="Freeway" />
                         
-                   	        <g:sortableColumn property="freewayId" title="Freeway Id" />
+                   	        <g:sortableColumn property="freewayDir" title="Freeway Dir" />
                         
                         </tr>
                     </thead>
@@ -47,9 +47,9 @@
                         
                             <td>${fieldValue(bean:vdsInstance, field:'district')}</td>
                         
-                            <td>${fieldValue(bean:vdsInstance, field:'freewayDir')}</td>
+                            <td>${fieldValue(bean:vdsInstance, field:'freeway')}</td>
                         
-                            <td>${fieldValue(bean:vdsInstance, field:'freewayId')}</td>
+                            <td>${fieldValue(bean:vdsInstance, field:'freewayDir')}</td>
                         
                         </tr>
                     </g:each>

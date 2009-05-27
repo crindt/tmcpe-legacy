@@ -106,4 +106,12 @@ class IncidentController {
             render(view:'create',model:[incidentInstance:wrapBean(incidentInstance)])
         }
     }
+
+    def listAllAsKml = {
+        //[ testbedLineInstanceList: TestbedLine.list( ), testbedLineInstanceTotal: TestbedLine.count() ]
+        render(contentType:"application/xml",
+               view:'listAllAsKml',
+               model:[ incidentInstanceList: Incident.list( ), incidentInstanceTotal: TestbedLine.count() ])
+    }
+
 }
