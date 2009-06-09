@@ -90,8 +90,33 @@ INSERT INTO testbed_facilities VALUES
        ( 'US:CA', '57', 'S' ),
        ( 'US:CA', '91', 'E' ),
        ( 'US:CA', '91', 'W' ),
+       ( 'US:CA', '71', 'N' ),
+       ( 'US:CA', '71', 'S' ),
        ( 'US:CA', '22', 'E' ),
-       ( 'US:CA', '22', 'W' );
+       ( 'US:CA', '22', 'W' ),
+       ( 'US:CA', '56', 'E' ),
+       ( 'US:CA', '56', 'W' ),
+       ( 'US:CA', '52', 'E' ),
+       ( 'US:CA', '52', 'W' ),
+       ( 'US:CA', '78', 'E' ),
+       ( 'US:CA', '78', 'W' ),
+       ( 'US:CA', '76', 'E' ),
+       ( 'US:CA', '76', 'W' ),
+       ( 'US:CA', '163', 'E' ),
+       ( 'US:CA', '163', 'W' ),
+       ( 'US:I', '805', 'N' ),
+       ( 'US:I', '805', 'S' ),
+       ( 'US:I', '15', 'N' ),
+       ( 'US:I', '15', 'S' ),
+       ( 'US:I', '215', 'N' ),
+       ( 'US:I', '215', 'S' ),
+       ( 'US:I', '10', 'E' ),
+       ( 'US:I', '10', 'W' ),
+       ( 'US:CA', '60', 'E' ),
+       ( 'US:CA', '60', 'W' ),
+       ( 'US:I', '8', 'E' ),
+       ( 'US:I', '8', 'W' )
+       ;
 
 DROP FUNCTION IF EXISTS get_testbed_relation( freeway INTEGER, dir TEXT );
 CREATE OR REPLACE FUNCTION get_testbed_relation( freeway INTEGER, dir TEXT ) RETURNS INTEGER AS
@@ -236,7 +261,8 @@ SELECT id,adj_pm,rel,multiline_locate_point_data( routeline, vdsgeom ) AS vdssna
        geom as vdsgeom,
        get_testbed_relation( t.freeway_id,t.freeway_dir ) as rel
        FROM temp_vds_data AS t
-       WHERE district=12 and vdstype='ML') q
+       WHERE --district in (7,8,11,12) and 
+       	     vdstype='ML') q
        join route_lines ON ( q.rel=route_lines.rteid )
        WHERE routeline IS NOT NULL AND npoints(routeline)>1 ) qq
        ORDER BY rel,adj_pm;
@@ -257,6 +283,7 @@ SELECT t.id,t.adj_pm,t.rel,t.line as rls,p.dist as pdist,CASE WHEN p.dist IS NOT
 --       WHERE geometrytype(routeline) <> 'MULTILINESTRING'
 --       AND t.id=1205012
        ORDER BY t.vds_sequence_id ) q
+       WHERE ptsec <= ntsec
        ;
 
 ALTER TABLE vds_segment_geometry ADD PRIMARY KEY (id);
