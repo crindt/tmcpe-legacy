@@ -52,19 +52,7 @@
                     attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>'
                 }
             );
-            var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true});
-
-            var networkLines = new OpenLayers.Layer.Vector("Testbed Roads", {
-                projection: map.displayProjection,
-                strategies: [new OpenLayers.Strategy.Fixed()],
-                protocol: new OpenLayers.Protocol.HTTP({
-	            url: "/tmcpe/testbedLine/listAllAsKml",
-                    format: new OpenLayers.Format.KML({
-                        extractStyles: true,
-                        extractAttributes: true
-                    })
-                })
-            });
+//            var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true});
 
             var incidents = new OpenLayers.Layer.Vector("Incidents", {
                 projection: map.displayProjection,
@@ -78,34 +66,22 @@
                 })
             });
 
-
-	    // FIXME: crindt: for later completion
-//             var vds = new OpenLayers.Layer.Vector("Testbed Roads", {
-//                 projection: map.displayProjection,
-//                 strategies: [new OpenLayers.Strategy.Fixed()],
-//                 protocol: new OpenLayers.Protocol.HTTP({
-// 	            url: "/tmcpe/vds/listAllAsKml",
-//                     format: new OpenLayers.Format.KML({
-//                         extractStyles: true,
-//                         extractAttributes: true
-//                     })
-//                 })
-//             });
-
-            map.addLayers([mapnik, gmap, networkLines, incidents
-//			   , vds
-			  ]);
+  	    var vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
+                  projection: map.displayProjection,
+                  strategies: [new OpenLayers.Strategy.Fixed()],
+                  protocol: new OpenLayers.Protocol.HTTP({
+  	              url: "/tmcpe/vds/listAllAsKml",
+                      format: new OpenLayers.Format.KML({
+                          extractStyles: true,
+                          extractAttributes: true
+  	              })
+		  })
+	    });
 
 
-            selectNetwork = new OpenLayers.Control.SelectFeature(networkLines);
-            
-            networkLines.events.on({
-                "featureselected": onFeatureSelectNetwork,
-                "featureunselected": onFeatureUnselectNetwork
-            });
-  
-            map.addControl(selectNetwork);
-            selectNetwork.activate();   
+            map.addLayers([mapnik, 
+			   //gmap, 
+			   incidents, vdsSegmentLines ]);
 
 
             selectIncident = new OpenLayers.Control.SelectFeature(incidents);
@@ -119,6 +95,19 @@
             selectIncident.activate();   
 
 
+
+            selectVds = new OpenLayers.Control.SelectFeature(vdsSegmentLines);
+            
+             vdsSegmentLines.events.on({
+                 "featureselected": onFeatureSelectVds,
+                 "featureunselected": onFeatureUnselectVds
+             });
+  
+            map.addControl(selectVds);
+            selectVds.activate();   
+
+
+
             map.addControl(new OpenLayers.Control.LayerSwitcher());
 
             map.zoomToExtent(
@@ -127,31 +116,6 @@
                 ).transform(map.displayProjection, map.projection)
             );
         }
-
-        function onPopupCloseNetwork(evt) {
-            selectNetwork.unselectAll();
-        }
-        function onFeatureSelectNetwork(event) {
-            var feature = event.feature;
-            var selectedFeature = feature;
-            var popup = new OpenLayers.Popup.FramedCloud("chicken", 
-                feature.geometry.getBounds().getCenterLonLat(),
-                new OpenLayers.Size(100,100),
-                "<h2>"+feature.attributes.name + "</h2>" + feature.attributes.description,
-                null, true, onPopupCloseNetwork
-            );
-            feature.popup = popup;
-            map.addPopup(popup);
-        }
-        function onFeatureUnselectNetwork(event) {
-            var feature = event.feature;
-            if(feature.popup) {
-                map.removePopup(feature.popup);
-                feature.popup.destroy();
-                delete feature.popup;
-            }
-        }
-
 
         function onPopupCloseIncident(evt) {
             selectIncident.unselectAll();
@@ -169,6 +133,32 @@
             map.addPopup(popup);
         }
         function onFeatureUnselectIncident(event) {
+            var feature = event.feature;
+            if(feature.popup) {
+                map.removePopup(feature.popup);
+                feature.popup.destroy();
+                delete feature.popup;
+            }
+        }
+
+        function onPopupCloseVds(evt) {
+            selectVds.unselectAll();
+        }
+        function onFeatureSelectVds(event) {
+            var feature = event.feature;
+            var selectedFeature = feature;
+	    var lonlats = feature.attributes.vdsLocation.split( ' ' );
+	    var lonlat = new OpenLayers.LonLat( lonlats[ 0 ], lonlats[ 1 ] ).transform(map.displayProjection, map.projection)
+            var popup = new OpenLayers.Popup.FramedCloud("chicken", 
+                lonlat,
+                new OpenLayers.Size(100,100),
+                "<h2>"+feature.attributes.name + "</h2>" + feature.attributes.description,
+                null, true, onPopupCloseVds
+            );
+            feature.popup = popup;
+            map.addPopup(popup);
+        }
+        function onFeatureUnselectVds(event) {
             var feature = event.feature;
             if(feature.popup) {
                 map.removePopup(feature.popup);

@@ -98,4 +98,10 @@ class VdsController {
             render(view:'create',model:[vdsInstance:vdsInstance])
         }
     }
+    def listAllAsKml = {
+        //[ testbedLineInstanceList: TestbedLine.list( ), testbedLineInstanceTotal: TestbedLine.count() ]
+        render(contentType:"text/xml",
+               view:'listAllAsKml',
+               model:[ vdsInstanceList: Vds.list(district: 12, type: "ML", freeway: 55 ), vdsInstanceTotal: Vds.count() ])
+    }
 }

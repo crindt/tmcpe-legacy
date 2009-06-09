@@ -1,6 +1,8 @@
 package edu.uci.its.testbed
 
 import org.postgis.Geometry
+import org.postgis.Point
+import org.postgis.LineString
 import org.postgis.hibernate.GeometryType
 
 class Vds {
@@ -37,6 +39,10 @@ class Vds {
 
     Geometry geom
 
+    Integer relation // this should link to Relation
+
+    Geometry segGeom
+
 
     //  --should be a field in the vds_freeway table really *
     //Route route
@@ -51,7 +57,7 @@ class Vds {
     }
 
     static mapping = {
-        table 'vds_current_view'
+        table 'vds_view'
         id column: 'id'
         name column: 'name'
         calPostmile column: 'cal_pm'
@@ -67,7 +73,45 @@ class Vds {
         geom column: 'geom'
         geom type:GeometryType
 
+        relation column: 'rel'
+
+        segGeom column: 'seg_geom'
+        segGeom type:GeometryType
+
         // turn off optimistic locking, i.e., versioning
         version false
     }
+
+    public String toKml()  {
+        // FIXME: should confirm its a linestring
+        // Assume we can just dump the points in order
+        String kml = "";
+
+        if ( geom != null && geom.getTypeString() == "POINT" )
+        {
+           Point p = geom
+           kml += "<Point><coordinates>" + p.getX() + "," + p.getY() + "</coordinates></Point>\n"
+        }
+        
+        if ( segGeom != null && segGeom.getTypeString() == "LINESTRING" ) 
+        {
+
+           LineString line = segGeom
+
+           String coords = ""
+           for ( i in 0..line.numPoints()-1 )
+           {
+              Point p = line.getPoint( i )
+              if ( p )
+                 coords = coords + " " + p.getX()  + "," + p.getY()
+           }
+
+           kml +=
+            [ "<LineString><coordinates>",
+              coords,
+              "</coordinates></LineString>" ].join("\n")
+        }
+        return kml
+    }
+
 }

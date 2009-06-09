@@ -109,6 +109,24 @@
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
+                                    <label for="relation">Relation:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'relation','errors')}">
+                                    <input type="text" id="relation" name="relation" value="${fieldValue(bean:vdsInstance,field:'relation')}" />
+                                </td>
+                            </tr> 
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="segGeom">Seg Geom:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'segGeom','errors')}">
+                                    <g:select optionKey="id" from="${org.postgis.Geometry.list()}" name="segGeom.id" value="${vdsInstance?.segGeom?.id}" ></g:select>
+                                </td>
+                            </tr> 
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
                                     <label for="segmentLength">Segment Length:</label>
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean:vdsInstance,field:'segmentLength','errors')}">

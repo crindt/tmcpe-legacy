@@ -67,7 +67,7 @@
                         <tr class="prop">
                             <td valign="top" class="name">Geom:</td>
                             
-                            <td valign="top" class="value"><g:link controller="null" action="show" id="${vdsInstance?.geom}">${vdsInstance?.geom?.encodeAsHTML()}</g:link></td>
+                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'geom')}</td>
                             
                         </tr>
                     
@@ -89,6 +89,20 @@
                             <td valign="top" class="name">Name:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'name')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Relation:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'relation')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Seg Geom:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'segGeom')}</td>
                             
                         </tr>
                     
