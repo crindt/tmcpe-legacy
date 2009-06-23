@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
-        <title>TmcLogEntry List</title>
+        <title>TmcLogEntry List: ${tmcLogEntryInstanceTotal}</title>
     </head>
     <body>
         <div class="nav">
@@ -23,6 +23,8 @@
                         
                    	        <g:sortableColumn property="id" title="Id" />
                         
+                   	        <g:sortableColumn property="stampdate" title="Date" />
+                   	        <g:sortableColumn property="stamptime" title="Time" />
                    	        <g:sortableColumn property="activitysubject" title="Activitysubject" />
                         
                    	        <g:sortableColumn property="cad" title="Cad" />
@@ -41,6 +43,8 @@
                         
                             <td><g:link action="show" id="${tmcLogEntryInstance.id}">${fieldValue(bean:tmcLogEntryInstance, field:'id')}</g:link></td>
                         
+                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'stampdate')}</td>
+                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'stamptime')}</td>
                             <td>${fieldValue(bean:tmcLogEntryInstance, field:'activitysubject')}</td>
                         
                             <td>${fieldValue(bean:tmcLogEntryInstance, field:'cad')}</td>
@@ -57,7 +61,7 @@
                 </table>
             </div>
             <div class="paginateButtons">
-                <g:paginate total="${tmcLogEntryInstanceTotal}" />
+                <g:paginate params="${params}" total="${tmcLogEntryInstanceTotal}" />
             </div>
         </div>
     </body>

@@ -58,7 +58,7 @@
                 projection: map.displayProjection,
                 strategies: [new OpenLayers.Strategy.Fixed()],
                 protocol: new OpenLayers.Protocol.HTTP({
-	            url: "/tmcpe/incident/listAllAsKml",
+	            url: "/tmcpe/incident/list.kml",
                     format: new OpenLayers.Format.KML({
                         extractStyles: true,
                         extractAttributes: true

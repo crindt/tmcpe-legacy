@@ -10,8 +10,31 @@ class TmcLogEntryController {
     static allowedMethods = [delete:'POST', save:'POST', update:'POST']
 
     def list = {
-        params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
-        [ tmcLogEntryInstanceList: TmcLogEntry.list( params ), tmcLogEntryInstanceTotal: TmcLogEntry.count() ]
+        params.max = Math.min( params.max ? params.max.toInteger() : 20,  100)
+        params.offset = params.offset ? params.offset.toInteger() : 0
+        def cc = TmcLogEntry.createCriteria()
+        def c = TmcLogEntry.createCriteria()
+        def rtot = cc.list {
+            and { 
+                isNotNull( "cad" )
+                ne( "cad", "" )
+                params.cad ? eq ( "cad", params.cad ) : true 
+            }
+        }
+        Integer abc = rtot.size()
+        def results = c.list {
+            and { 
+                isNotNull( "cad" )
+                ne( "cad", "" )
+                params.cad ? eq ( "cad", params.cad ) : true 
+            }
+            order( "cad", "asc" )
+            order( "stampdate", "asc" )
+            order( "stamptime", "asc" )
+            maxResults( params.max )
+            firstResult( params.offset ?:0 )
+        }
+        [ tmcLogEntryInstanceList: results, tmcLogEntryInstanceTotal: abc ]
     }
 
     def show = {

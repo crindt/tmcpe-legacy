@@ -7,26 +7,33 @@ import org.postgis.hibernate.GeometryType
 
 class Incident {
 
-    String cad
+    // cad
+    String id
 //    SortedSet tmcLogEntries
 
-    Geometry location
+    Integer vdsId
 
-    String facilityName
-    String facilityDirection
+    Geometry location=new Geometry()
 
     static hasMany = [ 
 //        tmcLogEntries: TmcLogEntry,
-        analyses: IncidentImpactAnalysis
+//        analyses: IncidentImpactAnalysis
     ]
 
     static constraints = {
         // Only allow one Incident object per cadid
-        cad(unique:true)
+//        cad(unique:true)
     }
 
     static mapping = {
+        table 'sigalert_locations_grails'
+        id column: 'cad'
+        location column: 'location'
         location type:GeometryType 
+        vdsId column: 'vdsid'
+//        cache usage:'read-only'
+        // turn off optimistic locking, i.e., versioning
+        version false
     }
 
     def afterLoad = {
@@ -41,11 +48,11 @@ class Incident {
 
     List getTmcLogEntries()
     {
-        return TmcLogEntry.findAllByCad( cad );
+        return TmcLogEntry.findAllByCad( id );
     }
 
     String toString() {
-        return "Incident '" + cad + "'"
+        return "Incident '" + id + "'"
     }
 
     def toKml( radius = 0.01 ) {

@@ -1,8 +1,6 @@
-
-
 package edu.uci.its.tmcpe
 
-import org.postgis.PGgeometry
+import grails.converters.* 
 
 class IncidentController {
     
@@ -12,8 +10,14 @@ class IncidentController {
     static allowedMethods = [delete:'POST', save:'POST', update:'POST']
 
     def list = {
-        params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
-        [ incidentInstanceList: Incident.list( params ), incidentInstanceTotal: Incident.count() ]
+//        params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
+//        [ incidentInstanceList: Incident.list( params ), incidentInstanceTotal: Incident.count() ]
+          params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
+          withFormat {
+             kml  incidentInstanceList: Incident.list()
+             json { render Incident.list( ) as JSON }
+             html incidentInstanceList: Incident.list( ), incidentInstanceTotal: Incident.list().count()
+          }
     }
 
     def show = {
@@ -30,7 +34,7 @@ class IncidentController {
         def incidentInstance = Incident.get( params.id )
         if(incidentInstance) {
             try {
-                incidentInstance.delete()
+                incidentInstance.delete(flush:true)
                 flash.message = "Incident ${params.id} deleted"
                 redirect(action:list)
             }
@@ -53,7 +57,7 @@ class IncidentController {
             redirect(action:list)
         }
         else {
-            return [ incidentInstance : wrapBean(incidentInstance) ]
+            return [ incidentInstance : incidentInstance ]
         }
     }
 
@@ -65,53 +69,52 @@ class IncidentController {
                 if(incidentInstance.version > version) {
                     
                     incidentInstance.errors.rejectValue("version", "incident.optimistic.locking.failure", "Another user has updated this Incident while you were editing.")
-                    render(view:'edit',model:[incidentInstance:wrapBean(incidentInstance)])
+                    render(view:'edit',model:[incidentInstance:incidentInstance])
                     return
                 }
             }
-//            incidentInstance.properties = params
-            // crindt: bind required for custom LocationEditor
-            bind( incidentInstance )
+            incidentInstance.properties = params
             if(!incidentInstance.hasErrors() && incidentInstance.save()) {
                 flash.message = "Incident ${params.id} updated"
                 redirect(action:show,id:incidentInstance.id)
             }
             else {
-                render(view:'edit',model:[incidentInstance:wrapBean(incidentInstance)])
+                render(view:'edit',model:[incidentInstance:incidentInstance])
             }
         }
         else {
             flash.message = "Incident not found with id ${params.id}"
-            redirect(action:edit,id:params.id)
+            redirect(action:list)
         }
     }
 
     def create = {
-        //def incidentInstance = new Incident()
-        //incidentInstance.properties = params
-        // crindt: bind required for custom LocationEditor
-        def incidentInstance = bind( new Incident() )
-        return ['incidentInstance':wrapBean(incidentInstance)]
+        def incidentInstance = new Incident()
+        incidentInstance.properties = params
+        return ['incidentInstance':incidentInstance]
     }
 
     def save = {
-        //def incidentInstance = new Incident(params)
-        // crindt: bind required for custom LocationEditor
-        def incidentInstance = bind(new Incident())
+        def incidentInstance = new Incident(params)
         if(!incidentInstance.hasErrors() && incidentInstance.save()) {
             flash.message = "Incident ${incidentInstance.id} created"
             redirect(action:show,id:incidentInstance.id)
         }
         else {
-            render(view:'create',model:[incidentInstance:wrapBean(incidentInstance)])
+            render(view:'create',model:[incidentInstance:incidentInstance])
         }
     }
 
     def listAllAsKml = {
-        //[ testbedLineInstanceList: TestbedLine.list( ), testbedLineInstanceTotal: TestbedLine.count() ]
-        render(contentType:"application/xml",
+        def incidentList = Incident.list()
+        render(contentType:"text/xml",
                view:'listAllAsKml',
-               model:[ incidentInstanceList: Incident.list( ), incidentInstanceTotal: TestbedLine.count() ])
+               model:[ incidentInstanceList: incidentList, incidentInstanceTotal: incidentList.count() ])
     }
 
+//     def listAllAsJSON = {
+//         def incidentList = Incident.list()
+//         render( contentType:"text/json",
+//                 incidentList as JSON )
+//     }
 }

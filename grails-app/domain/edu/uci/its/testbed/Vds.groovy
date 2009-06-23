@@ -58,6 +58,11 @@ class Vds {
 
     static mapping = {
         table 'vds_view'
+
+        // turn off optimistic locking, i.e., versioning
+        // this is a read-only table
+        version false
+
         id column: 'id'
         name column: 'name'
         calPostmile column: 'cal_pm'
@@ -77,9 +82,6 @@ class Vds {
 
         segGeom column: 'seg_geom'
         segGeom type:GeometryType
-
-        // turn off optimistic locking, i.e., versioning
-        version false
     }
 
     public String toKml()  {

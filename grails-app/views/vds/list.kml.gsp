@@ -24,7 +24,11 @@
 	       "<tr><td>lanes</td><td>",vdsInstance.lanes,"</td></tr>",
 	       "</table>"].join("").encodeAsHTML()}
 	   </description>
-	   <vdsLocation>${vdsInstance.geom.getX()} ${vdsInstance.geom.getY()}</vdsLocation>
+	   <vdsLocation>
+	     <g:if test="${vdsInstance.geom != null}">
+	       ${vdsInstance.geom.getX()} ${vdsInstance.geom.getY()}
+	     </g:if>
+	   </vdsLocation>
 	   <styleUrl>#style@${vdsInstance.id}</styleUrl>
 	   ${vdsInstance.toKml()}
       </Placemark>

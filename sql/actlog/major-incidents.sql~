@@ -1,0 +1,25 @@
+DROP VIEW IF EXISTS sigalerts CASCADE;
+CREATE VIEW sigalerts AS
+SELECT DISTINCT cad 
+       FROM ct_al_backup_2007 
+       WHERE activitysubject='SIGALERT BEGIN' AND cad <> '';
+
+
+CREATE LANGUAGE PLPERL;
+DROP FUNCTION IF EXISTS parse_al_memo( memo TEXT );
+CREATE FUNCTION parse_al_memo( memo TEXT ) RETURNS TEXT AS
+$$
+	$_ = $_[0];
+#	our @fwys = grep { $_ ne '' } ( $_ =~ /([NSEW]+)B*[- ]([^\d]*?)[- ]*(\d+)/ );
+	our @blocks = ( $_ =~ /(.*)(J[NSEW]O)(.*)/g );
+	our @fwy1 = ( $blocks[0] =~ /([NSEW]+)B*[- ]([^\d]*?)[- ]*(\d+)/ );
+	our @fwy2 = ( $blocks[2] =~ / ([NSEW]+)B*[- ]([^\d]*?)[- ]*(\d+)/ );
+	our @xs = ( $blocks[2] =~ /(.*?)[,\.]/ );
+	our $xxs = join( " ", @xs );
+	our @fwy3 = ( $xxs =~ / ([NSEW]+)B*[- ]([^\d]*?)[- ]*(\d+)/ );
+	return join( "---", join(":", @fwy1 ), $blocks[1], join(":", @fwy2 ), join( ":", @xs ), join(":", @fwy3 ) );
+$$ LANGUAGE plperl;
+
+
+DROP VIEW IF EXISTS 
+select cad,memo,parse_al_memo( memo ) from ct_al_backup_2007 where activitysubject='OPEN INCIDENT' AND cad IN ( );

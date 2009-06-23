@@ -8,7 +8,7 @@
     </head>
     <body>
         <div class="nav">
-            <span class="menuButton"><a class="home" href="${createLinkTo(dir:'')}">Home</a></span>
+            <span class="menuButton"><a class="home" href="${resource(dir:'')}">Home</a></span>
             <span class="menuButton"><g:link class="list" action="list">Incident List</g:link></span>
             <span class="menuButton"><g:link class="create" action="create">New Incident</g:link></span>
         </div>
@@ -31,51 +31,38 @@
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="cad">Cad:</label>
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean:incidentInstance,field:'cad','errors')}">
-                                    <input type="text" id="cad" name="cad" value="${fieldValue(bean:incidentInstance,field:'cad')}"/>
-                                </td>
-                            </tr> 
-                        
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="analyses">Analyses:</label>
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean:incidentInstance,field:'analyses','errors')}">
-                                    <g:select name="analyses"
-from="${edu.uci.its.tmcpe.IncidentImpactAnalysis.list()}"
-size="5" multiple="yes" optionKey="id"
-value="${incidentInstance?.analyses}" />
-
-                                </td>
-                            </tr> 
-                        
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="facilityDirection">Facility Direction:</label>
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean:incidentInstance,field:'facilityDirection','errors')}">
-                                    <input type="text" id="facilityDirection" name="facilityDirection" value="${fieldValue(bean:incidentInstance,field:'facilityDirection')}"/>
-                                </td>
-                            </tr> 
-                        
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="facilityName">Facility Name:</label>
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean:incidentInstance,field:'facilityName','errors')}">
-                                    <input type="text" id="facilityName" name="facilityName" value="${fieldValue(bean:incidentInstance,field:'facilityName')}"/>
-                                </td>
-                            </tr> 
-                        
-                            <tr class="prop">
-                                <td valign="top" class="name">
                                     <label for="location">Location:</label>
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean:incidentInstance,field:'location','errors')}">
-                                    <input type="text" id="location" name="location" value="${fieldValue(bean:incidentInstance,field:'location')}"/>                                    
-
+                                    <g:select optionKey="id" from="${org.postgis.Geometry.list()}" name="location.id" value="${incidentInstance?.location?.id}" ></g:select>
+                                </td>
+                            </tr> 
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="vdsId">Vds Id:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:incidentInstance,field:'vdsId','errors')}">
+                                    <input type="text" id="vdsId" name="vdsId" value="${fieldValue(bean:incidentInstance,field:'vdsId')}" />
+                                </td>
+                            </tr> 
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="afterLoad">After Load:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:incidentInstance,field:'afterLoad','errors')}">
+                                    
+                                </td>
+                            </tr> 
+                        
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="tmcLogEntries">Tmc Log Entries:</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean:incidentInstance,field:'tmcLogEntries','errors')}">
+                                    
+                                </td>
                             </tr> 
                         
                         </tbody>

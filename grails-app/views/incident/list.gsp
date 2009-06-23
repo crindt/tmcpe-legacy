@@ -8,7 +8,7 @@
     </head>
     <body>
         <div class="nav">
-            <span class="menuButton"><a class="home" href="${createLinkTo(dir:'')}">Home</a></span>
+            <span class="menuButton"><a class="home" href="${resource(dir:'')}">Home</a></span>
             <span class="menuButton"><g:link class="create" action="create">New Incident</g:link></span>
         </div>
         <div class="body">
@@ -23,15 +23,9 @@
                         
                    	        <g:sortableColumn property="id" title="Id" />
                         
-                   	        <g:sortableColumn property="cad" title="Cad" />
-                        
-                   	        <g:sortableColumn property="facilityDirection" title="Facility Direction" />
-                        
-                   	        <g:sortableColumn property="facilityName" title="Facility Name" />
-                        
-<!--
                    	        <th>Location</th>
--->
+                   	    
+                   	        <g:sortableColumn property="vdsId" title="Vds Id" />
                         
                         </tr>
                     </thead>
@@ -41,15 +35,9 @@
                         
                             <td><g:link action="show" id="${incidentInstance.id}">${fieldValue(bean:incidentInstance, field:'id')}</g:link></td>
                         
-                            <td>${fieldValue(bean:incidentInstance, field:'cad')}</td>
-                        
-                            <td>${fieldValue(bean:incidentInstance, field:'facilityDirection')}</td>
-                        
-                            <td>${fieldValue(bean:incidentInstance, field:'facilityName')}</td>
-                        
-<!--
                             <td>${fieldValue(bean:incidentInstance, field:'location')}</td>
--->
+                        
+                            <td>${fieldValue(bean:incidentInstance, field:'vdsId')}</td>
                         
                         </tr>
                     </g:each>

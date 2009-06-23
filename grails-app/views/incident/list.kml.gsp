@@ -17,7 +17,7 @@
     </Style>
     <g:each in="${incidentInstanceList}" status="i" var="incidentInstance">
        <Placemark>
-           <name>facility</name>
+           <name>incident</name>
            <styleUrl>#redLine</styleUrl>
 	   ${incidentInstance.toKml()}
       </Placemark>

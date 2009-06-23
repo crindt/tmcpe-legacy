@@ -26,7 +26,7 @@ BEGIN
    END IF;
    FOR route IN SELECT * 
        	     	       FROM route_relations
-		       WHERE network=net AND refnum=ref
+		       WHERE ( network=net OR 'US:'||network=net) AND refnum=ref
 	  	AND ( lower(direction) = ANY( cdirs ) ) LOOP
 	RETURN NEXT route.id;
    END LOOP;
@@ -53,7 +53,7 @@ BEGIN
    END IF;
    FOR route IN SELECT * 
        	     	       FROM route_relations
-		       WHERE network=net AND refnum=ref
+		       WHERE (network=net OR 'US:'||network=net ) AND refnum=ref
 	  	AND ( lower(direction) = ANY( cdirs ) ) LOOP
 	RETURN route.id;
    END LOOP;
@@ -61,62 +61,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+\i 'testbed-facilities.sql'
 
-DROP TABLE IF EXISTS testbed_facilities;
-CREATE TABLE testbed_facilities (
-       net TEXT,
-       ref TEXT,
-       dir TEXT
-);
 
-INSERT INTO testbed_facilities VALUES 
-       ( 'US:I', '5', 'N' ),
-       ( 'US:I', '5', 'S' ),
-       ( 'US:I', '405', 'N' ),
-       ( 'US:I', '405', 'S' ),
-       ( 'US:I', '605', 'N' ),
-       ( 'US:I', '605', 'S' ),
-       ( 'US:CA', '133', 'N' ),
-       ( 'US:CA', '133', 'S' ),
-       ( 'US:CA', '73', 'N' ),
-       ( 'US:CA', '73', 'S' ),
-       ( 'US:CA', '241', 'N' ),
-       ( 'US:CA', '241', 'S' ),
-       ( 'US:CA', '261', 'N' ),
-       ( 'US:CA', '261', 'S' ),
-       ( 'US:CA', '55', 'N' ),
-       ( 'US:CA', '55', 'S' ),
-       ( 'US:CA', '57', 'N' ),
-       ( 'US:CA', '57', 'S' ),
-       ( 'US:CA', '91', 'E' ),
-       ( 'US:CA', '91', 'W' ),
-       ( 'US:CA', '71', 'N' ),
-       ( 'US:CA', '71', 'S' ),
-       ( 'US:CA', '22', 'E' ),
-       ( 'US:CA', '22', 'W' ),
-       ( 'US:CA', '56', 'E' ),
-       ( 'US:CA', '56', 'W' ),
-       ( 'US:CA', '52', 'E' ),
-       ( 'US:CA', '52', 'W' ),
-       ( 'US:CA', '78', 'E' ),
-       ( 'US:CA', '78', 'W' ),
-       ( 'US:CA', '76', 'E' ),
-       ( 'US:CA', '76', 'W' ),
-       ( 'US:CA', '163', 'E' ),
-       ( 'US:CA', '163', 'W' ),
-       ( 'US:I', '805', 'N' ),
-       ( 'US:I', '805', 'S' ),
-       ( 'US:I', '15', 'N' ),
-       ( 'US:I', '15', 'S' ),
-       ( 'US:I', '215', 'N' ),
-       ( 'US:I', '215', 'S' ),
-       ( 'US:I', '10', 'E' ),
-       ( 'US:I', '10', 'W' ),
-       ( 'US:CA', '60', 'E' ),
-       ( 'US:CA', '60', 'W' ),
-       ( 'US:I', '8', 'E' ),
-       ( 'US:I', '8', 'W' )
-       ;
+--- this view grabs all testbed relations and the best guess at the osm relations that match them (if they exist)
+DROP VIEW IF EXISTS testbed_facilities_relation_match CASCADE;
+CREATE VIEW testbed_facilities_relation_match AS
+SELECT * 
+       FROM testbed_facilities tf 
+       LEFT JOIN route_relations rr 
+       	    ON ( ('^.*'::text || tf.net::text) ~ rr.network 
+	       	 AND rr.refnum = tf.ref 
+		 AND ( ( lower(substring( tf.dir from 1 for 1 ))||'^.*') ~ lower(substring( rr.direction from 1 for 1 )) ) 
+	        );
+
+--- HERE WE update the testbed_facilities rteid using the above view
+UPDATE testbed_facilities
+              SET rteid=q.id
+       FROM ( SELECT tfrm.tfid as otfid ,tfrm.id 
+       	      	     FROM testbed_facilities_relation_match tfrm ) q
+       WHERE tfid=q.otfid AND q.id IS NOT NULL;
 
 DROP FUNCTION IF EXISTS get_testbed_relation( freeway INTEGER, dir TEXT );
 CREATE OR REPLACE FUNCTION get_testbed_relation( freeway INTEGER, dir TEXT ) RETURNS INTEGER AS
@@ -140,7 +104,7 @@ BEGIN
    SELECT net INTO netrec from testbed_facilities tf WHERE freeway::text = tf.ref AND lower( tf.dir ) = ANY(cdirs);
    FOR route IN SELECT * 
        	     	       FROM route_relations
-		       WHERE network=netrec.net AND refnum=freeway::text
+		       WHERE ( network=netrec.net OR 'US:'||network = netrec.net ) AND refnum=freeway::text
 	  	AND ( lower(direction) = ANY( cdirs ) ) LOOP
 	RETURN route.id;
    END LOOP;
@@ -290,10 +254,10 @@ ALTER TABLE vds_segment_geometry ADD PRIMARY KEY (id);
 DELETE FROM vds_segment_geometry WHERE seggeom IS NULL;
 
 
---- OK, now create a grails view of vds with segment geometry
+--- OK, now create a grails view of vds with segment geometry--the version field is a hack
 DROP VIEW IF EXISTS vds_view CASCADE;
 CREATE VIEW vds_view AS 
-SELECT tvd.*,vsg.rel,vsg.seggeom as seg_geom
+SELECT tvd.*,vsg.rel,vsg.seggeom as seg_geom, now() AS version 
        FROM temp_vds_data AS tvd
        LEFT JOIN vds_segment_geometry AS vsg USING (id);
 
@@ -302,3 +266,42 @@ DROP VIEW IF EXISTS vds_view_qgis CASCADE;
 CREATE VIEW vds_view_qgis AS 
 SELECT * from vds_view 
        WHERE geometrytype( seg_geom )  = 'LINESTRING';
+
+
+---------------
+--- some direction stuff
+CREATE OR REPLACE FUNCTION compute_sensex ( ls geometry ) 
+       RETURNS CHAR AS 
+$$
+BEGIN
+	IF ( numpoints( ls ) < 2 ) THEN
+	   RETURN NULL;
+	END IF;
+	IF ( st_x(pointn(ls,1)) > st_x(pointn(ls,numpoints(ls))) ) THEN
+	   RETURN 'W';
+        ELSE
+	   RETURN 'E';
+        END IF;
+END;
+$$ 
+  LANGUAGE 'plpgsql' IMMUTABLE STRICT;
+
+---------------
+--- some direction stuff
+CREATE OR REPLACE FUNCTION compute_sensey ( ls geometry ) 
+       RETURNS CHAR AS 
+$$
+BEGIN
+	IF ( numpoints( ls ) < 2 ) THEN
+	   RETURN NULL;
+	END IF;
+	IF ( st_y(pointn(ls,1)) > st_y(pointn(ls,numpoints(ls))) ) THEN
+	   RETURN 'S';
+        ELSE
+	   RETURN 'N';
+        END IF;
+END;
+$$ 
+  LANGUAGE 'plpgsql' IMMUTABLE STRICT;
+
+

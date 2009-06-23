@@ -11,7 +11,11 @@ class VdsController {
 
     def list = {
         params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
-        [ vdsInstanceList: Vds.list( params ), vdsInstanceTotal: Vds.count() ]
+        //[ vdsInstanceList: Vds.list( params ), vdsInstanceTotal: Vds.count() ]
+        withFormat( params ) {
+            kml vdsInstanceList: Vds.withCriteria { eq( "district", 12 ) }
+            html vdsInstanceList: Vds.list( params ), vdsInstanceTotal: Vds.count()
+        }
     }
 
     def show = {
@@ -98,10 +102,11 @@ class VdsController {
             render(view:'create',model:[vdsInstance:vdsInstance])
         }
     }
-    def listAllAsKml = {
-        //[ testbedLineInstanceList: TestbedLine.list( ), testbedLineInstanceTotal: TestbedLine.count() ]
-        render(contentType:"text/xml",
-               view:'listAllAsKml',
-               model:[ vdsInstanceList: Vds.list(district: 12, type: "ML", freeway: 55 ), vdsInstanceTotal: Vds.count() ])
-    }
+//    def listAllAsKml = {
+//        //[ testbedLineInstanceList: TestbedLine.list( ), testbedLineInstanceTotal: TestbedLine.count() ]
+//        def vdsList = Vds.withCriteria { eq("district", 12 ) }
+//        render(contentType:"text/xml",
+//               view:'listAllAsKml',
+//               model:[ vdsInstanceList: vdsList, vdsInstanceTotal: vdsList.count() ])
+//    }
 }
