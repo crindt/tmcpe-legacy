@@ -70,7 +70,7 @@
                   projection: map.displayProjection,
                   strategies: [new OpenLayers.Strategy.Fixed()],
                   protocol: new OpenLayers.Protocol.HTTP({
-  	              url: "/tmcpe/vds/listAllAsKml",
+  	              url: "/tmcpe/vds/list.kml?district=12",
                       format: new OpenLayers.Format.KML({
                           extractStyles: true,
                           extractAttributes: true

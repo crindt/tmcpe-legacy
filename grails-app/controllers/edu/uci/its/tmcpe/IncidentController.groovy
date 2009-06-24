@@ -1,22 +1,26 @@
 package edu.uci.its.tmcpe
 
-import grails.converters.* 
+import grails.converters.*
 
 class IncidentController {
     
     def index = { redirect(action:list,params:params) }
 
     // the delete, save and update actions only accept POST requests
-    static allowedMethods = [delete:'POST', save:'POST', update:'POST']
+     static allowedMethods = [delete:'POST', save:'POST', update:'POST']
 
     def list = {
 //        params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
 //        [ incidentInstanceList: Incident.list( params ), incidentInstanceTotal: Incident.count() ]
-          params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
+          def maxl = Math.min( params.max ? params.max.toInteger() : 10,  100)
+          def _params = params
           withFormat {
-             kml  incidentInstanceList: Incident.list()
-             json { render Incident.list( ) as JSON }
-             html incidentInstanceList: Incident.list( ), incidentInstanceTotal: Incident.list().count()
+              kml  incidentInstanceList: Incident.list( _params )
+              json { 
+                  def theList = Incident.list( )
+                  render ( items: theList ) as JSON 
+              }
+              html incidentInstanceList: Incident.list( _params ), incidentInstanceTotal: Incident.list( _params ).count()
           }
     }
 
@@ -110,6 +114,12 @@ class IncidentController {
         render(contentType:"text/xml",
                view:'listAllAsKml',
                model:[ incidentInstanceList: incidentList, incidentInstanceTotal: incidentList.count() ])
+    }
+
+    def tmp = {
+        render(contentType:"text/html",
+               view:'incident-list',
+               model:[] )
     }
 
 //     def listAllAsJSON = {

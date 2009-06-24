@@ -57,8 +57,9 @@
                 </table>
             </div>
             <div class="paginateButtons">
-                <g:paginate total="${vdsInstanceTotal}" />
+                <g:paginate params="${params}" total="${vdsInstanceTotal}" />
             </div>
+	    <p>total is ${vdsInstanceTotal}</p>
         </div>
     </body>
 </html>

@@ -4,6 +4,7 @@ import java.sql.Time
 import org.postgis.Geometry
 import org.postgis.Point
 import org.postgis.hibernate.GeometryType
+import grails.converters.JSON
 
 class Incident {
 
@@ -13,7 +14,7 @@ class Incident {
 
     Integer vdsId
 
-    Geometry location=new Geometry()
+    Point location = new Point( x: 0, y: 0 )
 
     static hasMany = [ 
 //        tmcLogEntries: TmcLogEntry,
@@ -89,5 +90,4 @@ class Incident {
                 ].join("\n")
         }
     }
-
 }

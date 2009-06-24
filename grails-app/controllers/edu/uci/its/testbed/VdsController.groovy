@@ -6,15 +6,36 @@ class VdsController {
     
     def index = { redirect(action:list,params:params) }
 
-    // the delete, save and update actions only accept POST requests
+     // the delete, save and update actions only accept POST requests
     static allowedMethods = [delete:'POST', save:'POST', update:'POST']
 
     def list = {
-        params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
-        //[ vdsInstanceList: Vds.list( params ), vdsInstanceTotal: Vds.count() ]
-        withFormat( params ) {
-            kml vdsInstanceList: Vds.withCriteria { eq( "district", 12 ) }
-            html vdsInstanceList: Vds.list( params ), vdsInstanceTotal: Vds.count()
+        def myList = Vds.list( params );
+        def _params = params
+        withFormat {
+            kml { [ vdsInstanceList: Vds.list( _params ) ] }
+            html { def max = Math.min( _params.max ? _params.max.toInteger() : 10,  100)
+                   def c = Vds.createCriteria()
+                   def res = c.list {
+                       and {
+                           if ( _params.district && _params.district != '' ) {
+                               eq( "district", _params.district.toInteger() )
+                           }
+                           if ( _params.freeway && _params.freeway != '' ) {
+                               eq( "freeway", _params.freeway.toInteger() )
+                           }
+                           if ( _params.freewayDir && _params.freewayDir != '' ) {
+                               eq( "freewayDir", _params.freewayDir )
+                           }
+                           firstResult( _params.offset ? _params.offset.toInteger() : 0 )
+                           maxResults( max )
+                           order( "freeway" )
+                           order( "freewayDir" )
+                       }
+                   }
+                   [ vdsInstanceList: res, 
+                     vdsInstanceTotal: myList.size() ] 
+               }
         }
     }
 
