@@ -28,7 +28,7 @@ class FacilitySectionController {
         def facilitySectionInstance = FacilitySection.get( params.id )
         if(facilitySectionInstance) {
             try {
-                facilitySectionInstance.delete()
+                facilitySectionInstance.delete(flush:true)
                 flash.message = "FacilitySection ${params.id} deleted"
                 redirect(action:list)
             }
@@ -78,7 +78,7 @@ class FacilitySectionController {
         }
         else {
             flash.message = "FacilitySection not found with id ${params.id}"
-            redirect(action:edit,id:params.id)
+            redirect(action:list)
         }
     }
 

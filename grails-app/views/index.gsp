@@ -1,1 +1,1 @@
-<g:redirectMainPage/>
+<g:redirectMainPage />

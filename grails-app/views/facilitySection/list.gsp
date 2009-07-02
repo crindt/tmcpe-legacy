@@ -8,7 +8,7 @@
     </head>
     <body>
         <div class="nav">
-            <span class="menuButton"><a class="home" href="${createLinkTo(dir:'')}">Home</a></span>
+            <span class="menuButton"><a class="home" href="${resource(dir:'')}">Home</a></span>
             <span class="menuButton"><g:link class="create" action="create">New FacilitySection</g:link></span>
         </div>
         <div class="body">
@@ -23,15 +23,15 @@
                         
                    	        <g:sortableColumn property="id" title="Id" />
                         
-                   	        <g:sortableColumn property="endPostmile" title="End Postmile" />
+                   	        <g:sortableColumn property="absPostmile" title="Abs Postmile" />
                         
-                   	        <g:sortableColumn property="facilityDirection" title="Facility Direction" />
+                   	        <g:sortableColumn property="district" title="District" />
                         
-                   	        <g:sortableColumn property="facilityName" title="Facility Name" />
+                   	        <g:sortableColumn property="freewayDir" title="Freeway Dir" />
                         
-                   	        <g:sortableColumn property="startPostmile" title="Start Postmile" />
+                   	        <g:sortableColumn property="freewayId" title="Freeway Id" />
                         
-                   	        <g:sortableColumn property="vdsId" title="Vds Id" />
+                   	        <g:sortableColumn property="lanes" title="Lanes" />
                         
                         </tr>
                     </thead>
@@ -41,15 +41,15 @@
                         
                             <td><g:link action="show" id="${facilitySectionInstance.id}">${fieldValue(bean:facilitySectionInstance, field:'id')}</g:link></td>
                         
-                            <td>${fieldValue(bean:facilitySectionInstance, field:'endPostmile')}</td>
+                            <td>${fieldValue(bean:facilitySectionInstance, field:'absPostmile')}</td>
                         
-                            <td>${fieldValue(bean:facilitySectionInstance, field:'facilityDirection')}</td>
+                            <td>${fieldValue(bean:facilitySectionInstance, field:'district')}</td>
                         
-                            <td>${fieldValue(bean:facilitySectionInstance, field:'facilityName')}</td>
+                            <td>${fieldValue(bean:facilitySectionInstance, field:'freewayDir')}</td>
                         
-                            <td>${fieldValue(bean:facilitySectionInstance, field:'startPostmile')}</td>
+                            <td>${fieldValue(bean:facilitySectionInstance, field:'freewayId')}</td>
                         
-                            <td>${fieldValue(bean:facilitySectionInstance, field:'vdsId')}</td>
+                            <td>${fieldValue(bean:facilitySectionInstance, field:'lanes')}</td>
                         
                         </tr>
                     </g:each>

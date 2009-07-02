@@ -23,9 +23,14 @@
                         
                    	        <g:sortableColumn property="id" title="Id" />
                         
+                   	        <th>Timestamp</th>
+<!--
                    	        <th>Location</th>
+-->
                    	    
                    	        <g:sortableColumn property="vdsId" title="Vds Id" />
+                   	        <th> section </th>
+				<th> Memo </th>
                         
                         </tr>
                     </thead>
@@ -35,9 +40,16 @@
                         
                             <td><g:link action="show" id="${incidentInstance.id}">${fieldValue(bean:incidentInstance, field:'id')}</g:link></td>
                         
+			    <td>${
+			    new java.util.Date(incidentInstance.stampDate.getTime() + incidentInstance.stampTime.getTime()).toString()
+			    }</td>
+<!--
                             <td>${fieldValue(bean:incidentInstance, field:'location')}</td>
+-->
                         
-                            <td>${fieldValue(bean:incidentInstance, field:'vdsId')}</td>
+                            <td>${incidentInstance.section.id}</td>
+			    <td>${incidentInstance.section.toString()}</td>
+                            <td>${fieldValue(bean:incidentInstance, field:'memo')}</td>
                         
                         </tr>
                     </g:each>

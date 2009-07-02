@@ -37,16 +37,38 @@ class BootStrap {
          requestMap = new TmcpeRequestmap( url: '/tmcpeuser/**',
                                            configAttribute: 'ROLE_ADMIN' ).save()
 
-         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident){ inc, json ->
-             json.build{
-                 "class(Incident)"
-                 id(inc.id)
-                 vdsid(inc.vdsId)
-                 longitude( inc.location.x )
-                 latitude( inc.location.y )
-             }
-         }
+          grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident){ inc, json ->
+             def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+              json.build{
+                  "class(Incident)"
+                  id(inc.id)
+                  timestamp( df.format( inc.stampDateTime() ) )
+                  locString( inc.section.toString() )
+                  memo(inc.memo)
+                  section(inc.section)
+                  location( [ "type":"Point", coordinates: [inc.location.x, inc.location.y] ] )
+              }
+          }
+//           grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident){ inc, json ->
+//               json.build{
+//                   "class(Incident)"
+//                   id(inc.id)
+//                   vdsid(inc.vdsId)
+//                  location{ 
+//                      "type(Point)" 
+//                      coordinates( [inc.location.x, inc.location.y] ) 
+//                  }
+//               }
+//           }
 
+//         grails.converters.JSON.registerObjectMarshaller(org.postgis.Point){ json ->
+//              json.build{
+//                  "type(Point)"
+//                  id(inc.id)
+//                  vdsid(inc.vdsId)
+//                 coordinates( [ it?.x, it?.y ] )
+//              }
+//          }
      }
      def destroy = {
      }

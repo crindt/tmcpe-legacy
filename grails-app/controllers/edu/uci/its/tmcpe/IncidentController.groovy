@@ -14,13 +14,29 @@ class IncidentController {
 //        [ incidentInstanceList: Incident.list( params ), incidentInstanceTotal: Incident.count() ]
           def maxl = Math.min( params.max ? params.max.toInteger() : 10,  100)
           def _params = params
-          withFormat {
-              kml  incidentInstanceList: Incident.list( _params )
-              json { 
-                  def theList = Incident.list( )
-                  render ( items: theList ) as JSON 
+          def c = Incident.createCriteria()
+          def theList = c.list {
+              and {
+                  section {
+                      if ( params.freeway && params.freeway != '' ) {
+                          eq( "freewayId", params.freeway.toInteger() )
+                      }
+                      if ( params.direction && params.direction != '' ) {
+                          eq( "freewayDir", params.direction )
+                      }
+                  }
+                  order( 'stampDate', 'asc' )
+                  order( 'stampTime', 'asc' )
               }
-              html incidentInstanceList: Incident.list( _params ), incidentInstanceTotal: Incident.list( _params ).count()
+          }
+          withFormat {
+              kml  incidentInstanceList: theList
+              json { 
+                  // renders to json compatible with dojo::ItemFileReadStore 
+                  def json = [ items: theList ]
+                  render json as JSON 
+              }
+              html incidentInstanceList: theList, incidentInstanceTotal: theList.count()
           }
     }
 

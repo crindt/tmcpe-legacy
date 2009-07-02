@@ -65,12 +65,12 @@ $$ LANGUAGE plperl;
 
 DROP VIEW IF EXISTS locate_sigalerts CASCADE;
 CREATE VIEW locate_sigalerts AS
-SELECT cad,memo,parse_al_memo( memo ) as lp
+SELECT cad,stampdate,stamptime,memo,parse_al_memo( memo ) as lp
        FROM ct_al_backup_2007 
        WHERE activitysubject='OPEN INCIDENT' AND cad IN ( SELECT cad from sigalerts );
 
-DROP TABLE IF EXISTS sigalert_list;
-SELECT cad,(lp).f1dir as f1dir,(lp).f1fac as f1fac,(lp).relloc as relloc,(lp).xs as xs,(lp).f2dir as f2dir,(lp).f2fac as f2fac 
+DROP TABLE IF EXISTS sigalert_list CASCADE;
+SELECT cad,memo,stampdate,stamptime,(lp).f1dir as f1dir,(lp).f1fac as f1fac,(lp).relloc as relloc,(lp).xs as xs,(lp).f2dir as f2dir,(lp).f2fac as f2fac 
        INTO sigalert_list
        FROM locate_sigalerts 
        WHERE (lp).f1dir IS NOT NULL AND (lp).relloc IS NOT NULL 
@@ -132,9 +132,9 @@ CREATE VIEW linked_sigalerts AS
 
 DROP VIEW IF EXISTS matched_sigalerts CASCADE;
 CREATE VIEW matched_sigalerts AS
-       SELECT cad,id as vdsid,q.name as signame,rel_pm,xs,pxs
-       FROM ( SELECT *,CASE WHEN freeway_dir IN ( 'S', 'W' ) THEN -1 ELSE 1 END * abs_pm as rel_pm FROM linked_sigalerts ) q	
-       	      WHERE sct=1 GROUP BY cad,id,q.name,rel_pm,xs,pxs;
+       SELECT cad,memo,stampdate,stamptime,id as vdsid,q.name as signame,rel_pm,xs,pxs
+       FROM ( SELECT *,CASE WHEN freeway_dir IN ( 'S', 'W' ) THEN -1 ELSE 1 END * abs_pm as rel_pm FROM linked_sigalerts ) q
+       	      WHERE sct=1 GROUP BY cad,memo,stampdate,stamptime,id,q.name,rel_pm,xs,pxs;
 
 
 DROP VIEW IF EXISTS sigalert_locations CASCADE;

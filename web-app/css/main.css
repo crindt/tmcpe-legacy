@@ -1,3 +1,5 @@
+@import "/js/dojo-release-1.1.1/dojo/resources/dojo.css"
+
 html * {
     margin: 0;
     /*padding: 0; SELECT NOT DISPLAYED CORRECTLY IN FIREFOX */
@@ -65,7 +67,7 @@ input:focus, select:focus, textarea:focus {
     background: #fff url(../images/skin/shadow.jpg) bottom repeat-x;
     border: 1px solid #ccc;
     border-style: solid none solid none;	
-    margin-top: 5px;
+    /*margin-top: 5px; crindt: omit*/
     padding: 7px 12px;
 }
 

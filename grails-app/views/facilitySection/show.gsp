@@ -8,7 +8,7 @@
     </head>
     <body>
         <div class="nav">
-            <span class="menuButton"><a class="home" href="${createLinkTo(dir:'')}">Home</a></span>
+            <span class="menuButton"><a class="home" href="${resource(dir:'')}">Home</a></span>
             <span class="menuButton"><g:link class="list" action="list">FacilitySection List</g:link></span>
             <span class="menuButton"><g:link class="create" action="create">New FacilitySection</g:link></span>
         </div>
@@ -30,37 +30,51 @@
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">End Postmile:</td>
+                            <td valign="top" class="name">Abs Postmile:</td>
                             
-                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'endPostmile')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Facility Direction:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'facilityDirection')}</td>
+                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'absPostmile')}</td>
                             
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Facility Name:</td>
+                            <td valign="top" class="name">District:</td>
                             
-                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'facilityName')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Start Postmile:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'startPostmile')}</td>
+                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'district')}</td>
                             
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Vds Id:</td>
+                            <td valign="top" class="name">Freeway Dir:</td>
                             
-                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'vdsId')}</td>
+                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'freewayDir')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Freeway Id:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'freewayId')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Lanes:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'lanes')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Name:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'name')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Segment Length:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:facilitySectionInstance, field:'segmentLength')}</td>
                             
                         </tr>
                     

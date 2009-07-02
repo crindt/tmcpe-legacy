@@ -12,7 +12,12 @@ class Incident {
     String id
 //    SortedSet tmcLogEntries
 
-    Integer vdsId
+    Date stampDate
+    Time stampTime
+
+    FacilitySection section
+
+    String memo
 
     Point location = new Point( x: 0, y: 0 )
 
@@ -29,22 +34,15 @@ class Incident {
     static mapping = {
         table 'sigalert_locations_grails'
         id column: 'cad'
+        stampDate column: 'stampdate'
+        stampTime column: 'stamptime'
+        memo column: 'memo'
         location column: 'location'
         location type:GeometryType 
-        vdsId column: 'vdsid'
+        section column: 'vdsid'
 //        cache usage:'read-only'
         // turn off optimistic locking, i.e., versioning
         version false
-    }
-
-    def afterLoad = {
-        // fixme: this is a bit of a hack, but may be necessary if the
-        //        CAD database is live
-        // update tmcLogEntries
-//        for ( logEntry in TmcLogEntry.findAllByCad( cad ) )
-//        {
-//            addToTmcLogEntries( logEntry )
-//        }
     }
 
     List getTmcLogEntries()
@@ -52,8 +50,19 @@ class Incident {
         return TmcLogEntry.findAllByCad( id );
     }
 
-    String toString() {
-        return "Incident '" + id + "'"
+    def toJson() {
+              json.build{
+                  "class(Incident)"
+                  id(id)
+                  section(section)
+                  longitude( location.x )
+                  latitude( location.y )
+              }
+
+    }
+
+    def stampDateTime = {
+        new java.util.Date( stampDate.getTime() + stampTime.getTime() )
     }
 
     def toKml( radius = 0.01 ) {

@@ -13,29 +13,48 @@ class VdsController {
         def myList = Vds.list( params );
         def _params = params
         withFormat {
-            kml { [ vdsInstanceList: Vds.list( _params ) ] }
-            html { def max = Math.min( _params.max ? _params.max.toInteger() : 10,  100)
-                   def c = Vds.createCriteria()
-                   def res = c.list {
-                       and {
-                           if ( _params.district && _params.district != '' ) {
-                               eq( "district", _params.district.toInteger() )
-                           }
-                           if ( _params.freeway && _params.freeway != '' ) {
-                               eq( "freeway", _params.freeway.toInteger() )
-                           }
-                           if ( _params.freewayDir && _params.freewayDir != '' ) {
-                               eq( "freewayDir", _params.freewayDir )
-                           }
-                           firstResult( _params.offset ? _params.offset.toInteger() : 0 )
-                           maxResults( max )
-                           order( "freeway" )
-                           order( "freewayDir" )
-                       }
-                   }
-                   [ vdsInstanceList: res, 
-                     vdsInstanceTotal: myList.size() ] 
-               }
+            kml {
+                def c = Vds.createCriteria()
+                def res = c.list {
+                    and {
+                        if ( _params.district && _params.district != '' ) {
+                            eq( "district", _params.district.toInteger() )
+                        }
+                        if ( _params.freeway && _params.freeway != '' ) {
+                            eq( "freeway", _params.freeway.toInteger() )
+                        }
+                        if ( _params.freewayDir && _params.freewayDir != '' ) {
+                            eq( "freewayDir", _params.freewayDir )
+                        }
+                        order( "freeway" )
+                        order( "freewayDir" )
+                    }
+                }
+                [vdsInstanceList: res]
+            }
+            html { 
+                def max = Math.min( _params.max ? _params.max.toInteger() : 10,  100)
+                def c = Vds.createCriteria()
+                def res = c.list {
+                    and {
+                        if ( _params.district && _params.district != '' ) {
+                            eq( "district", _params.district.toInteger() )
+                        }
+                        if ( _params.freeway && _params.freeway != '' ) {
+                            eq( "freeway", _params.freeway.toInteger() )
+                        }
+                        if ( _params.freewayDir && _params.freewayDir != '' ) {
+                            eq( "freewayDir", _params.freewayDir )
+                        }
+                        firstResult( _params.offset ? _params.offset.toInteger() : 0 )
+                        maxResults( max )
+                        order( "freeway" )
+                        order( "freewayDir" )
+                    }
+                }
+                [ vdsInstanceList: res, 
+                  vdsInstanceTotal: myList.size() ] 
+            }
         }
     }
 
