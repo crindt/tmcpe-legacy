@@ -18,7 +18,7 @@ function mapInit(){
     map = new OpenLayers.Map('map', options);
     var mapnik = new OpenLayers.Layer.TMS(
         "OpenStreetMap (Mapnik)",
-        "http://tile.openstreetmap.org/",
+        "http://tah.openstreetmap.org/",
         {
             type: 'png', getURL: osm_getTileURL,
             displayOutsideMaxExtent: true,
@@ -100,7 +100,8 @@ function osm_getTileURL(bounds) {
         return OpenLayers.Util.getImagesLocation() + "404.png";
     } else {
         x = ((x % limit) + limit) % limit;
-        return this.url + z + "/" + x + "/" + y + "." + this.type;
+//        return this.url + z + "/" + x + "/" + y + "." + this.type;
+	return this.url + "Tiles/tile/" + z + "/" + x + "/" + y + "." + this.type;
     }
 }
 

@@ -1,0 +1,14 @@
+@import "/tmcpe/js/dojo/dojo-1.3.0/dojo/resources/dojo.css";
+
+/* Sets the window size correctly for dojo*/
+html, body, #main{	
+	width: 100%;	
+	height: 100%;
+	overflow: hidden;	
+	padding: 0 0 0 0;
+	margin: 0 0 0 0;
+	font: 10pt Arial,Myriad,Tahoma,Verdana,sans-serif;
+}
+
+
+ 

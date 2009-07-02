@@ -1,47 +1,60 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Testbed Network View Using Openlayers</title>
-<!--
-    <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjpkAC9ePGem0lIq5XcMiuhR_wWLPFku8Ix9i2SXYRVK3e45q1BQUd_beF8dtzKET_EteAjPdGDwqpQ'></script>
--->
-    <style>
-      html, body, #main{	
-	padding: 0 0 0 0;
-	margin: 0 0 0 0;
-	font: 10pt Arial,Myriad,Tahoma,Verdana,sans-serif;
-      height:97%;
-      }
-    </style>
-     
     <meta name="layout" content="main" />
-    <g:javascript library="tmcpe/tmcpe">
+    <link rel="stylesheet" href="${createLinkTo(dir:'js/dojo/dojo-1.3.0/dojox/grid/resources',file:'Grid.css')}" />
+    <link rel="stylesheet" href="${createLinkTo(dir:'js/dojo/dojo-1.3.0/dojox/grid/resources',file:'tundraGrid.css')}" />
+    <g:javascript library="tmcpe/tmcpe" />
+    <g:javascript>
+	 var myFormatDate = function(inDatum){
+            var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
+	    return ret;
+	 };
     </g:javascript>
-    <!-- defines the map -->
-    <tmcpe:testbedMap>
-    </tmcpe:testbedMap>
+    <tmcpe:testbedMap />
   </head>
   <body onload="mapInit();
 		incidentsLayerInit();
-		">
-    <div id="main" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
-      <div id="menu" dojoType="dijit.layout.ContentPane" region="top" style="height=100px;">
+		" 
+	class="tundra"
+	role="application">
+
+    <!-- Incident Data -->
+    <div dojoType="dojo.data.ItemFileReadStore" url="/tmcpe/incident/list.json" jsId="incidentStore" id="incidentStoreNode" />
+
+    <div dojoType="dijit.layout.BorderContainer" id="main" design="headline" gutters="false">
+      <div dojoType="dijit.layout.ContentPane" region="top">
 	<g:render template="/mainmenu" />
       </div>
-<!--
-      <div dojoType="dijit.layout.ContentPane" region="left"
-	   style="background-color:lightblue;width: 120px;">
-	Table of Contents
+      <div dojoType="dijit.layout.ContentPane" region="left" splitter="true" style="width: 200px;background:red;">
       </div>
--->
-      <div id="mapcont" dojoType="dijit.layout.ContentPane" region="center" >
-	<div id="map" style="display:block; border:1px black solid;height=90%;">
+      <div dojoType="dijit.layout.BorderContainer" id="mapView" region="center" design="headline" gutters="false">
+	<div dojoType="dijit.layout.BorderContainer" id="incidentList" region="top" 
+	     splitter="true"
+	     design="headline" 
+	     gutters="false"
+	     style="background:yellow;height:20%;">
+	  <div dojoType="dijit.layout.ContentPane" region="top" id="incidentSearch">
+	  </div>  
+	  <table id="incidentGridNode" 
+		 jsId="incidentGrid" 
+		 dojoType="dojox.grid.DataGrid" 
+		 store="incidentStore"
+		 region="center"
+		 rowSelector="20px"
+		 >
+	    <thead>
+	      <tr>
+		<th field="id" dataType="String" width="100px">CAD ID</th>
+		<th field="timestamp" dataType="Date" formatter="myFormatDate" width="150px">Timestamp</th>
+		<th field="locString" dataType="String" width="200px">Section</th>
+		<th field="memo" dataType="String" width="auto">Description</th>
+	      </tr>
+	    </thead>
+	  </table>
 	</div>
-      </div>
-
-      <div id="footer" dojoType="dijit.layout.ContentPane" region="bottom" 
-	   style="height=100px;">
-	The bottom.
-      </div>
-    </div>            
+	<div dojoType="dijit.layout.ContentPane" id="map" region="center" role="region" style="background:yellow;"></div>
+    </div>
+</div>
   </body>
 </html>
