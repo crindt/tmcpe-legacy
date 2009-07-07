@@ -42,7 +42,7 @@
 		 store="incidentStore"
 		 region="center"
 		 rowSelector="20px"
-		 onRowClick="highlightIncident"
+		 onRowClick="centerOnIncident"
 		 >
 	    <thead>
 	      <tr>

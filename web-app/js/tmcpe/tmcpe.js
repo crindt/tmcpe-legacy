@@ -21,9 +21,18 @@ function mapInit(){
     map = new OpenLayers.Map('map', options);
     var mapnik = new OpenLayers.Layer.TMS(
         "OpenStreetMap (Mapnik)",
-        "http://tah.openstreetmap.org/",
+        "http://tile.openstreetmap.org/",
         {
             type: 'png', getURL: osm_getTileURL,
+            displayOutsideMaxExtent: true,
+            attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>'
+        }
+    );
+    var osma = new OpenLayers.Layer.TMS(
+        "OpenStreetMap (Osmarender)",
+        "http://tah.openstreetmap.org/",
+        {
+            type: 'png', getURL: osm_getOsmaTileURL,
             displayOutsideMaxExtent: true,
             attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>'
         }
@@ -31,7 +40,7 @@ function mapInit(){
     //            var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true});
 
 
-    map.addLayers([mapnik]);
+    map.addLayers([mapnik, osma]);
 
     map.addControl(new OpenLayers.Control.LayerSwitcher());
 
@@ -103,6 +112,21 @@ function osm_getTileURL(bounds) {
         return OpenLayers.Util.getImagesLocation() + "404.png";
     } else {
         x = ((x % limit) + limit) % limit;
+        return this.url + z + "/" + x + "/" + y + "." + this.type;
+    }
+}
+
+function osm_getOsmaTileURL(bounds) {
+    var res = this.map.getResolution();
+    var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+    var y = Math.round((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
+    var z = this.map.getZoom();
+    var limit = Math.pow(2, z);
+
+    if (y < 0 || y >= limit) {
+        return OpenLayers.Util.getImagesLocation() + "404.png";
+    } else {
+        x = ((x % limit) + limit) % limit;
 //        return this.url + z + "/" + x + "/" + y + "." + this.type;
 	return this.url + "Tiles/tile/" + z + "/" + x + "/" + y + "." + this.type;
     }
@@ -124,7 +148,7 @@ function getIncidentFeature(inname) {
 }
 
 //function highlightFeatureByName( layer, name ) {
-function highlightIncident( event )
+function centerOnIncident( event )
 {
 //    var layers = map.getLayersByName( layer );
 //    assert( layers.length = 1 );
@@ -193,7 +217,7 @@ function incidentsLayerInit(theurl) {
             })
         })
     });
-    
+
     incidents.events.on({
         "featureselected": onFeatureSelectIncident,
         "featureunselected": onFeatureUnselectIncident
@@ -201,8 +225,33 @@ function incidentsLayerInit(theurl) {
 
     map.addLayers([incidents]);
 
-    selectIncident = new OpenLayers.Control.SelectFeature(incidents);
+
+    var report = function(e) {
+        OpenLayers.Console.log(e.type, e.feature.id);
+    };
     
+    
+    var selectStyle = OpenLayers.Util.applyDefaults({
+	fillColor: "yellow",
+	strokeColor: "yellow"}, OpenLayers.Feature.Vector.style["select"]);
+    
+    
+    var hoverIncident = new OpenLayers.Control.SelectFeature(incidents,{ 
+ 	hover: true,
+ 	highlightOnly: true,
+        renderIntent: "temporary",
+	selectStyle: selectStyle
+//        eventListeners: {
+//            beforefeaturehighlighted: report,
+//            featurehighlighted: report,
+//            featureunhighlighted: report
+//        }
+    });
+    map.addControl(hoverIncident);
+    hoverIncident.activate();
+
+
+    selectIncident = new OpenLayers.Control.SelectFeature(incidents)
     map.addControl(selectIncident);
     selectIncident.activate();
 }
