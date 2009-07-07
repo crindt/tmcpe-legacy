@@ -36,6 +36,10 @@ class TmcLogEntry implements Comparable {
         return DateFormat.getDateInstance().format(stampdate) + " " + stamptime.toString() + ": " + activitysubject + " | " + memo 
     }
 
+    def stampDateTime = {
+        new java.util.Date( stampdate.getTime() + stamptime.getTime() )
+    }
+
     // order by cad, stampdate, stamptime
     int compareTo( obj ) {
         int ret

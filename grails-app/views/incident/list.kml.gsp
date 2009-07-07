@@ -17,9 +17,15 @@
     </Style>
     <g:each in="${incidentInstanceList}" status="i" var="incidentInstance">
        <Placemark>
-           <name>incident</name>
+           <name>Incident ${incidentInstance.id}</name>
            <styleUrl>#redLine</styleUrl>
 	   ${incidentInstance.toKml()}
+	   <description>
+	     Location: ${incidentInstance.section.toString()}&lt;br/&gt;
+	     Start: ${incidentInstance.getTmcLogEntries().first().stampDateTime()}&lt;br/&gt;
+	     End: ${incidentInstance.getTmcLogEntries().last().stampDateTime()}&lt;br/&gt;
+	     Duration: ${incidentInstance.cadDurationString()}
+	   </description>
       </Placemark>
     </g:each>
   </Document>

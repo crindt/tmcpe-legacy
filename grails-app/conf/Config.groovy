@@ -65,8 +65,7 @@ log4j = {
     warn   'org.mortbay.log'
 }
 
-
-     
+grails.converters.json.pretty.print = true
 
 
 //log4j.logger.org.springframework.security='off,stdout'

@@ -37,8 +37,17 @@ class BootStrap {
          requestMap = new TmcpeRequestmap( url: '/tmcpeuser/**',
                                            configAttribute: 'ROLE_ADMIN' ).save()
 
+
+//         grails.converters.JSON.registerObjectMarshaller( org.postgis.Point ) { p, json -> 
+//             json.build{
+//                 "type(Point)"
+//                 coordinates: [p.x, p.y]
+//             }
+//         }
+
          grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident){ inc, json ->
              def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+//             def locjson = inc.location as JSON
              json.build{
                  "class(Incident)"
                  id(inc.id)
@@ -46,7 +55,7 @@ class BootStrap {
                  locString( inc.section.toString() )
                  memo(inc.memo)
                  section(inc.section)
-                 location( [ "type":"Point", coordinates: [inc.location.x, inc.location.y] ] )
+                 location( [ type: "Point", coordinates: [inc.location.x,inc.location.y] ] )
              }
          }
 //           grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident){ inc, json ->

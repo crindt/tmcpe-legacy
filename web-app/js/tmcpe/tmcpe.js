@@ -4,6 +4,9 @@ var lat = 40;
 var zoom = 5;
 var map, select;
 
+var incidentFeatureMap = new Object();
+var incidents;
+
 function mapInit(){
     var options = {
         projection: new OpenLayers.Projection("EPSG:900913"),
@@ -105,6 +108,51 @@ function osm_getTileURL(bounds) {
     }
 }
 
+function getIncidentFeature(inname) {
+    var ret = null;
+    for ( f in incidents.features )
+    {
+	if ( incidents.features[f].attributes.name == inname ) {
+	    ret = incidents.features[f];
+	    return incidents.features[f];
+	    break;
+	} else {
+	    continue;
+	}
+    }
+    return ret;
+}
+
+//function highlightFeatureByName( layer, name ) {
+function highlightIncident( event )
+{
+//    var layers = map.getLayersByName( layer );
+//    assert( layers.length = 1 );
+//    var layer = layers[ 0 ];
+    var item = event.grid.getItem( event.rowIndex );
+    var cad = item.id;
+    var incident = getIncidentFeature( "Incident " + cad );
+    if ( incident == null ) return;
+
+//    bbox = null;
+//    for (var i = 0; i < wfsLayer.features.length; i++) {
+//	var geometry = wfsLayer.features[i].geometry;
+//	if (bbox == null) {
+//            bbox = geometry.getBounds().clone();
+//	} else {
+//            bbox.extend(geometry.getBounds());
+//	}
+//    }
+
+    // raise it to the top
+    incidents.removeFeatures( incident );
+    incidents.addFeatures( incident );
+
+    bbox = incident.geometry.getBounds().clone();
+
+    map.zoomToExtent( bbox );
+}
+
 var layersLoading = 0;
 function loadStart(event) {
    if (layersLoading == 0) {
@@ -118,7 +166,7 @@ function loadStart(event) {
        } else {
 	   animnode = animnodes[ 0 ];
        }
-       var image = "<img id='loading_indicator' src='http://localhost:8080/tmcpe/images/ajax-loader.gif' alt='Loading...' />";
+       var image = "<img id='loading_indicator' src='images/ajax-loader.gif' alt='Loading...' />";
        animnode.addContent(image);
        animnode.display = '';
    }
@@ -133,12 +181,12 @@ function loadEnd(event) {
    }
 }
 
-function incidentsLayerInit() {
-    var incidents = new OpenLayers.Layer.Vector("Incidents", {
+function incidentsLayerInit(theurl) {
+    incidents = new OpenLayers.Layer.Vector("Incidents", {
         projection: map.displayProjection,
         strategies: [new OpenLayers.Strategy.Fixed()],
         protocol: new OpenLayers.Protocol.HTTP({
-	    url: "/tmcpe/incident/list.kml",
+	    url: theurl,
             format: new OpenLayers.Format.KML({
                 extractStyles: true,
                 extractAttributes: true
@@ -156,7 +204,7 @@ function incidentsLayerInit() {
     selectIncident = new OpenLayers.Control.SelectFeature(incidents);
     
     map.addControl(selectIncident);
-    selectIncident.activate();   
+    selectIncident.activate();
 }
 
 function segmentsLayerInit() {
@@ -165,7 +213,7 @@ function segmentsLayerInit() {
         projection: map.displayProjection,
         strategies: [new OpenLayers.Strategy.Fixed()],
         protocol: new OpenLayers.Protocol.HTTP({
-  	    url: "/tmcpe/vds/list.kml?district=12",
+  	    url: "vds/list.kml?district=12",
             format: new OpenLayers.Format.KML({
                 extractStyles: true,
                 extractAttributes: true

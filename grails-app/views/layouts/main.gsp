@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="${createLinkTo(dir:'js/dojo/dojo-1.3.0/dijit/themes/tundra',file:'/tundra.css')}" />
     
     <g:layoutHead />
-    <script src="/tmcpe/js/dojo/dojo-1.3.0/dojo/dojo.js"
+    <script src="${createLinkTo(dir:'js/dojo/dojo-1.3.0/dojo',file:'/dojo.js')}"
 	    djConfig="parseOnLoad: true"></script>
     <script>
       dojo.require( "dijit.layout.BorderContainer" );

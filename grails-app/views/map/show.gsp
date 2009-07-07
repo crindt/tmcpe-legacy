@@ -14,13 +14,13 @@
     <tmcpe:testbedMap />
   </head>
   <body onload="mapInit();
-		incidentsLayerInit();
+		incidentsLayerInit('${createLink(controller:'incident',action:'list.kml')}');
 		" 
 	class="tundra"
 	role="application">
 
     <!-- Incident Data -->
-    <div dojoType="dojo.data.ItemFileReadStore" url="/tmcpe/incident/list.json" jsId="incidentStore" id="incidentStoreNode" />
+    <div dojoType="dojo.data.ItemFileReadStore" url="${createLink(controller:'incident',action:'list.json')}" jsId="incidentStore" id="incidentStoreNode" />
 
     <div dojoType="dijit.layout.BorderContainer" id="main" design="headline" gutters="false">
       <div dojoType="dijit.layout.ContentPane" region="top">
@@ -42,6 +42,7 @@
 		 store="incidentStore"
 		 region="center"
 		 rowSelector="20px"
+		 onRowClick="highlightIncident"
 		 >
 	    <thead>
 	      <tr>

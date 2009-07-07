@@ -5,6 +5,8 @@ import org.postgis.Geometry
 import org.postgis.Point
 import org.postgis.hibernate.GeometryType
 import grails.converters.JSON
+import org.joda.time.DateTime
+import org.joda.time.Period
 
 class Incident {
 
@@ -50,15 +52,25 @@ class Incident {
         return TmcLogEntry.findAllByCad( id );
     }
 
-    def toJson() {
-              json.build{
-                  "class(Incident)"
-                  id(id)
-                  section(section)
-                  longitude( location.x )
-                  latitude( location.y )
-              }
+    public Period computeCadDuration()
+    {
+        List entries = getTmcLogEntries()
+        def start = entries.first().stampDateTime()
+        def startj = new DateTime( start )
+        def end = entries.last().stampDateTime()
+        def endj = new DateTime( end )
+        return new Period( startj, endj )
+    }
 
+    public String cadDurationString() {
+        org.joda.time.format.PeriodFormatter fmt = 
+            new org.joda.time.format.PeriodFormatterBuilder().
+                printZeroAlways().
+                appendHours().
+                appendSeparator(":").
+                printZeroAlways().
+                appendMinutes().toFormatter()
+        return fmt.print( computeCadDuration() )
     }
 
     def stampDateTime = {
