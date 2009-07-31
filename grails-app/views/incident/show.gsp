@@ -28,33 +28,29 @@
                             <td valign="top" class="value">${fieldValue(bean:incidentInstance, field:'id')}</td>
                             
                         </tr>
+   
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Location:</td>
+                            <td valign="top" class="name">Section:</td>
                             
-                            <td valign="top" class="value"><g:link controller="null" action="show" id="${incidentInstance?.location?.id}">${incidentInstance?.location?.encodeAsHTML()}</g:link></td>
+                            <td valign="top" class="value">${fieldValue(bean:incidentInstance, field:'section')}</td>
                             
                         </tr>
+			<tr class="prop">
+			  <td valign="top" class="name">CAD Duration:</td>
+			  <td valign="top" class="value">${incidentInstance.cadDurationString()}</td>
+			</tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Vds Id:</td>
+                            <td valign="top" class="name">Tmc Log Entries:</td>			    
                             
-                            <td valign="top" class="value">${fieldValue(bean:incidentInstance, field:'vdsId')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">After Load:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:incidentInstance, field:'afterLoad')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Tmc Log Entries:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:incidentInstance, field:'tmcLogEntries')}</td>
-                            
+                            <td valign="top" class="value">
+			      <ul>
+				<g:each in="${incidentInstance.getTmcLogEntries()}" status="l" var="logEntry">
+				  <li>${logEntry.stamptime} : ${logEntry.activitysubject} : ${logEntry.memo}</li>
+				</g:each>
+			      </ul>
+			    </td>
                         </tr>
                     
                     </tbody>
