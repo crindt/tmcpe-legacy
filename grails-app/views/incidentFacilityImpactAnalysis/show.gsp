@@ -26,58 +26,38 @@
                             <td valign="top" class="name">Id:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'id')}</td>
-                            
                         </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">End Section:</td>
-                            
-                            <td valign="top" class="value"><g:link controller="facilitySection" action="show" id="${incidentFacilityImpactAnalysisInstance?.endSection?.id}">${incidentFacilityImpactAnalysisInstance?.endSection?.encodeAsHTML()}</g:link></td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">End Time:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'endTime')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Facility Direction:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'facilityDirection')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Facility Name:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'facilityName')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
+			<tr class="prop">
+                            <td valign="top" class="name">Incident:</td>
+                            <td valign="top" class="value">
+			      <g:link controller="incident" action="show" id="${incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis.incident.id}">
+				${incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis.incident}
+			      </g:link>
+			    </td>
+			</tr>
+			<tr class="prop">
                             <td valign="top" class="name">Incident Impact Analysis:</td>
-                            
-                            <td valign="top" class="value"><g:link controller="incidentImpactAnalysis" action="show" id="${incidentFacilityImpactAnalysisInstance?.incidentImpactAnalysis?.id}">${incidentFacilityImpactAnalysisInstance?.incidentImpactAnalysis?.encodeAsHTML()}</g:link></td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Start Section:</td>
-                            
-                            <td valign="top" class="value"><g:link controller="facilitySection" action="show" id="${incidentFacilityImpactAnalysisInstance?.startSection?.id}">${incidentFacilityImpactAnalysisInstance?.startSection?.encodeAsHTML()}</g:link></td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Start Time:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'startTime')}</td>
-                            
-                        </tr>
-                    
+                            <td valign="top" class="value">
+			      <g:link controller="incidentImpactAnalysis" action="show" id="${incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis.id}">
+				${incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis}
+			      </g:link>
+			    </td>
+			</tr>
+
+			<tr class="prop">
+                          <td valign="top" class="name">Possibly Impacted Sections:</td>
+			  <td>
+                            <ul>
+                              <g:each var="f" in="${incidentFacilityImpactAnalysisInstance?.possibleFacilitySection}">
+                                <li>
+				  <g:link controller="facilitySection" action="show" id="${f.id}">
+				    ${f?.encodeAsHTML()}
+				  </g:link>
+				</li>
+                              </g:each>
+                            </ul>
+			  </td>
+			</tr>
                     </tbody>
                 </table>
             </div>

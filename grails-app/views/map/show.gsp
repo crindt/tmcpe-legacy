@@ -2,9 +2,10 @@
   <head>
     <title>Testbed Network View Using Openlayers</title>
     <meta name="layout" content="main" />
-    <link rel="stylesheet" href="${createLinkTo(dir:'js/dojo/dojo-1.3.0/dojox/grid/resources',file:'Grid.css')}" />
-    <link rel="stylesheet" href="${createLinkTo(dir:'js/dojo/dojo-1.3.0/dojox/grid/resources',file:'tundraGrid.css')}" />
-    <g:javascript library="tmcpe/tmcpe" />
+    <link rel="stylesheet" href="${createLinkTo(dir:'js/dojo/dojo-release-1.3.2/dojox/grid/resources',file:'Grid.css')}" />
+    <link rel="stylesheet" href="${createLinkTo(dir:'js/dojo/dojo-release-1.3.2/dojox/grid/resources',file:'tundraGrid.css')}" />
+    <!--    <g:javascript library="tmcpe/tmcpe" />  -->
+    <script src="${createLinkTo(dir:'js/tmcpe',file:'/tmcpe.js')}" djConfig="parseOnLoad: true"></script>
     <g:javascript>
 	 var myFormatDate = function(inDatum){
             var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
@@ -20,13 +21,14 @@
 	role="application">
 
     <!-- Incident Data -->
-    <div dojoType="dojo.data.ItemFileReadStore" url="${createLink(controller:'incident',action:'list.json')}" jsId="incidentStore" id="incidentStoreNode" />
+    <div dojoType="dojo.data.ItemFileReadStore" url="${createLink(controller:'incident',action:'list.json')}" jsId="incidentStore" id="incidentStoreNode" defaultTimeout="20000" />
 
     <div dojoType="dijit.layout.BorderContainer" id="main" design="headline" gutters="false">
       <div dojoType="dijit.layout.ContentPane" region="top">
 	<g:render template="/mainmenu" />
       </div>
       <div dojoType="dijit.layout.ContentPane" region="left" splitter="true" style="width: 200px;background:red;">
+	Available Analyses:<br>
       </div>
       <div dojoType="dijit.layout.BorderContainer" id="mapView" region="center" design="headline" gutters="false">
 	<div dojoType="dijit.layout.BorderContainer" id="incidentList" region="top" 

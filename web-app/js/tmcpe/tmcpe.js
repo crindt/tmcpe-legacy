@@ -7,6 +7,9 @@ var map, select;
 var incidentFeatureMap = new Object();
 var incidents;
 
+function initApp() {
+}
+
 function mapInit(){
     var options = {
         projection: new OpenLayers.Projection("EPSG:900913"),

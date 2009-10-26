@@ -63,6 +63,10 @@ log4j = {
                'LocationEditor'
 
     warn   'org.mortbay.log'
+
+    debug  'grails.app.service.edu.uci.its.tmcpe.IncidentImpactAnalysisService'
+
+
 }
 
 grails.converters.json.pretty.print = true

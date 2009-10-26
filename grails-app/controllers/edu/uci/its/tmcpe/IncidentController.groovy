@@ -15,6 +15,7 @@ class IncidentController {
           def maxl = Math.min( params.max ? params.max.toInteger() : 10,  100)
           def _params = params
           def c = Incident.createCriteria()
+          def now = new java.util.Date();
           def theList = c.list {
               and {
                   section {
@@ -25,18 +26,27 @@ class IncidentController {
                           eq( "freewayDir", params.direction )
                       }
                   }
+                  if ( params.fromDate || params.toDate ) {
+                      def from = Date.parse( "yyyy-MM-dd", params.fromDate ? params.fromDate : '0000-00-00' )
+                      def to = params.toDate ? Date.parse( "yyyy-MM-dd", params.toDate ) : new Date()
+                      between( 'stampDate', from, to )
+                  }
+                  maxResults(maxl)
                   order( 'stampDate', 'asc' )
                   order( 'stampTime', 'asc' )
               }
           }
           withFormat {
+              html {
+                  def html = [ incidentInstanceList: theList, incidentInstanceTotal: theList.count() ]
+                  return html
+              }
               kml  incidentInstanceList: theList
               json { 
                   // renders to json compatible with dojo::ItemFileReadStore 
                   def json = [ items: theList ]
                   render json as JSON 
               }
-              html incidentInstanceList: theList, incidentInstanceTotal: theList.count()
           }
     }
 
@@ -47,7 +57,47 @@ class IncidentController {
             flash.message = "Incident not found with id ${params.id}"
             redirect(action:list)
         }
-        else { return [ incidentInstance : incidentInstance ] }
+        withFormat {
+            html {
+                def html = [ incidentInstance : incidentInstance ] 
+                return html
+            }
+            json {
+                render incidentInstance as JSON
+            }
+//            json {
+//                render incidentInstance as grails.converters.deep.JSON
+//            }
+        }
+    }
+    
+    // injected from Spring
+    def incidentImpactAnalysisService
+
+    def analyze = {
+        log.debug "*** In incidentController.analyze"
+
+        def incidentInstance = Incident.get( params.id )
+
+        if ( incidentInstance ) 
+        {
+            if ( incidentImpactAnalysisService )
+            {
+                flash.message = "Analyzing incident ${incidentInstance.id}..."
+                incidentImpactAnalysisService.analyzeIncidentImpact( incidentInstance, "test" )
+                redirect(action:show,id:incidentInstance.id)
+            }
+            else
+            {
+                flash.message = "The incident analysis service is not active"
+                redirect(action:show,id:incidentInstance.id)
+            }
+        }
+        else
+        {
+            flash.message = "Failed to find incident ${incidentInstance} to analyze!?!?!"
+            redirect(action:list)
+        }
     }
 
     def delete = {

@@ -224,7 +224,7 @@ SELECT id,adj_pm,rel,multiline_locate_point_data( routeline, vdsgeom ) AS vdssna
        (CASE WHEN t.freeway_dir in ('N','E') THEN abs_pm ELSE -1*abs_pm END) as adj_pm,
        geom as vdsgeom,
        get_testbed_relation( t.freeway_id,t.freeway_dir ) as rel
-       FROM temp_vds_data AS t
+       FROM tvd AS t
        WHERE --district in (7,8,11,12) and 
        	     vdstype='ML') q
        join route_lines ON ( q.rel=route_lines.rteid )
@@ -258,7 +258,7 @@ DELETE FROM vds_segment_geometry WHERE seggeom IS NULL;
 DROP VIEW IF EXISTS vds_view CASCADE;
 CREATE VIEW vds_view AS 
 SELECT tvd.*,vsg.rel,vsg.seggeom as seg_geom, now() AS version 
-       FROM temp_vds_data AS tvd
+       FROM tvd
        LEFT JOIN vds_segment_geometry AS vsg USING (id);
 
 --- OH, and a qgis view

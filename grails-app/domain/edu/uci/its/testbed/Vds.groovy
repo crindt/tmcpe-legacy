@@ -57,7 +57,7 @@ class Vds {
     }
 
     static mapping = {
-        table 'vds_view'
+        table name: 'vds_view', schema: 'tbmap'
 
         // turn off optimistic locking, i.e., versioning
         // this is a read-only table

@@ -4,6 +4,7 @@ import org.apache.commons.codec.digest.DigestUtils as DU
 /* registering custom marshallers in Bootstrap.groovy */
 import grails.converters.JSON
 import org.postgis.Point
+import org.postgis.LineString
 
 
 
@@ -44,10 +45,38 @@ class BootStrap {
 //                 coordinates: [p.x, p.y]
 //             }
 //         }
+         grails.converters.JSON.registerObjectMarshaller(org.postgis.LineString, 1){ ls, json ->
+             def ptlist = []
+             ls?.getPoints()?.each() { ptlist.add( [ it?.x, it?.y ] ) }
+             json.build{
+                 "type(LineString)"
+                 type("LineString")
+                 coordinates( ptlist )
+              }
+          }
 
-         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident){ inc, json ->
+         grails.converters.JSON.registerObjectMarshaller(org.postgis.Point, 2 ){ p, json ->
+              json.build{
+                 "type(Point)"
+                 type("Point")
+                 coordinates( [ p?.x, p?.y ] )
+              }
+          }
+         
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.FacilitySection, 3 ){ s, json ->
+              json.build {
+                 "class(FacilitySection)"
+                 id(s.id)
+                 name(s.name)
+                 geom(s.geom)
+                 segGeom(s.segGeom)
+                 geometry(s.segGeom)
+              }
+         }
+
+
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident, 4 ){ inc, json ->
              def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
-//             def locjson = inc.location as JSON
              json.build{
                  "class(Incident)"
                  id(inc.id)
@@ -55,29 +84,10 @@ class BootStrap {
                  locString( inc.section.toString() )
                  memo(inc.memo)
                  section(inc.section)
-                 location( [ type: "Point", coordinates: [inc.location.x,inc.location.y] ] )
+                 location( inc.location )
+                 geometry(inc.section?.segGeom)
              }
          }
-//           grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident){ inc, json ->
-//               json.build{
-//                   "class(Incident)"
-//                   id(inc.id)
-//                   vdsid(inc.vdsId)
-//                  location{ 
-//                      "type(Point)" 
-//                      coordinates( [inc.location.x, inc.location.y] ) 
-//                  }
-//               }
-//           }
-
-//         grails.converters.JSON.registerObjectMarshaller(org.postgis.Point){ json ->
-//              json.build{
-//                  "type(Point)"
-//                  id(inc.id)
-//                  vdsid(inc.vdsId)
-//                 coordinates( [ it?.x, it?.y ] )
-//              }
-//          }
      }
      def destroy = {
      }

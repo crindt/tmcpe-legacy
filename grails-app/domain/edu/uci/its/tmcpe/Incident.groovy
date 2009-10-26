@@ -23,10 +23,7 @@ class Incident {
 
     Point location = new Point( x: 0, y: 0 )
 
-    static hasMany = [ 
-//        tmcLogEntries: TmcLogEntry,
-//        analyses: IncidentImpactAnalysis
-    ]
+    static hasMany = [analyses:IncidentImpactAnalysis]
 
     static constraints = {
         // Only allow one Incident object per cadid
@@ -34,7 +31,8 @@ class Incident {
     }
 
     static mapping = {
-        table 'sigalert_locations_grails'
+        //table 'sigalert_locations_grails'
+        table name: 'sigalert_locations_grails_table', schema: 'tmcpe'
         id column: 'cad'
         stampDate column: 'stampdate'
         stampTime column: 'stamptime'
@@ -43,6 +41,9 @@ class Incident {
         location type:GeometryType 
         section column: 'vdsid'
 //        cache usage:'read-only'
+        analyses joinTable:[name: 'Incident_IncidentImpactAnalyses', key:'Incident_Id', column:'IncidentImpactAnalysis_Id']
+
+
         // turn off optimistic locking, i.e., versioning
         version false
     }
@@ -51,6 +52,7 @@ class Incident {
     {
         return TmcLogEntry.findAllByCad( id );
     }
+
 
     public Period computeCadDuration()
     {
@@ -110,5 +112,9 @@ class Incident {
                 "</Point>"
                 ].join("\n")
         }
+    }
+
+    String toString() {
+        return "CAD:${id} @ ${stampDateTime} AT ${section}"
     }
 }

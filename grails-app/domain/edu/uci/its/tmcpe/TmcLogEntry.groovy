@@ -22,7 +22,8 @@ class TmcLogEntry implements Comparable {
     String memo
 
     static mapping = {
-        table 'ct_al_backup_2007'
+//        table 'ct_al_backup_2007'
+        table name: 'd12_activity_log', schema: 'actlog'
         id column: 'keyfield'
 //        cache usage:'read-only'
         // turn off optimistic locking, i.e., versioning
@@ -36,7 +37,7 @@ class TmcLogEntry implements Comparable {
         return DateFormat.getDateInstance().format(stampdate) + " " + stamptime.toString() + ": " + activitysubject + " | " + memo 
     }
 
-    def stampDateTime = {
+    java.util.Date stampDateTime() {
         new java.util.Date( stampdate.getTime() + stamptime.getTime() )
     }
 

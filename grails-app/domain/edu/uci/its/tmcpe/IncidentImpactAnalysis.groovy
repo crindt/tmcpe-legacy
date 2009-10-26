@@ -1,9 +1,9 @@
 package edu.uci.its.tmcpe
 
 class IncidentImpactAnalysis {
+    Integer id
 
     String analysisName
-    static belongsTo = Incident
 
     // should have core parameters that define the analysis so we can
     // cache results
@@ -15,16 +15,18 @@ class IncidentImpactAnalysis {
     static hasMany = [
         incidentFacilityImpactAnalyses: IncidentFacilityImpactAnalysis
     ]
+    static belongsTo = [incident:Incident]
 
-
-    static constraints = {
-    }
 
     String toString() {
         if ( analysisName != null && analysisName != "" ) {
-            return analysisName
+            return "analysis " + analysisName
         } else {
             return super.toString()
         }
+    }
+
+    static mapping = {
+        table name: 'incident_impact_analysis', schema: 'tmcpe'
     }
 }

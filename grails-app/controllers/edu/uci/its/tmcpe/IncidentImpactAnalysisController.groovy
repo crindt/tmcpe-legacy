@@ -1,6 +1,6 @@
-
-
 package edu.uci.its.tmcpe
+
+import grails.converters.*
 
 class IncidentImpactAnalysisController {
     
@@ -21,7 +21,16 @@ class IncidentImpactAnalysisController {
             flash.message = "IncidentImpactAnalysis not found with id ${params.id}"
             redirect(action:list)
         }
-        else { return [ incidentImpactAnalysisInstance : incidentImpactAnalysisInstance ] }
+        else { 
+            withFormat {
+                html {
+                    return [ incidentImpactAnalysisInstance : incidentImpactAnalysisInstance ] 
+                }
+                json {
+                    render incidentImpactAnalysisInstance as JSON
+                }
+            }
+        }
     }
 
     def delete = {

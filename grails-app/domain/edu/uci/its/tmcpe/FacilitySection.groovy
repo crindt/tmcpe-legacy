@@ -2,6 +2,7 @@ package edu.uci.its.tmcpe
 
 import org.postgis.Geometry
 import org.postgis.Point
+import org.postgis.LineString
 import org.postgis.hibernate.GeometryType
 
 
@@ -19,7 +20,11 @@ class FacilitySection {
     Integer district
     String  vdsType
 
-    Float   absPostmile
+//    Float   absPostmile
+    Double   absPostmile
+
+    Point geom
+    LineString segGeom
 
     static constraints = {
     }
@@ -29,7 +34,9 @@ class FacilitySection {
     }
 
     static mapping = {
-        table 'temp_vds_data'
+//        table 'temp_vds_data'
+        table name: 'vds_view', schema: 'tbmap'
+
         id column: 'id'
         name column: 'name'
         lanes column: 'lanes'
@@ -39,6 +46,12 @@ class FacilitySection {
         district column: 'district'
         vdsType column: 'vdstype'
         absPostmile column: 'abs_pm'
+        geom column: 'geom'
+        geom type:GeometryType 
+        segGeom column: 'seg_geom'
+        segGeom type:GeometryType 
+
         version false
     }
+    
 }

@@ -29,11 +29,18 @@
                             
                         </tr>
                     
+			<tr class="prop">
+                            <td valign="top" class="name">Incident:</td>
+                            <td valign="top" class="value">
+			      <g:link controller="incident" action="show" id="${incidentImpactAnalysisInstance.incident.id}">
+				${incidentImpactAnalysisInstance.incident}
+			      </g:link>
+			    </td>
+			</tr>
                         <tr class="prop">
                             <td valign="top" class="name">Analysis Name:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:incidentImpactAnalysisInstance, field:'analysisName')}</td>
-                            
                         </tr>
                     
                         <tr class="prop">
@@ -41,8 +48,12 @@
                             
                             <td  valign="top" style="text-align:left;" class="value">
                                 <ul>
-                                <g:each var="i" in="${incidentImpactAnalysisInstance.incidentFacilityImpactAnalyses}">
-                                    <li><g:link controller="incidentFacilityImpactAnalysis" action="show" id="${i.id}">${i?.encodeAsHTML()}</g:link></li>
+                                <g:each var="f" in="${incidentImpactAnalysisInstance.incidentFacilityImpactAnalyses}">
+                                    <li>
+				      <g:link controller="incidentFacilityImpactAnalysis" action="show" id="${f.id}">
+					${f?.shortAnalysisSummary().encodeAsHTML()}
+				      </g:link>
+				    </li>
                                 </g:each>
                                 </ul>
                             </td>

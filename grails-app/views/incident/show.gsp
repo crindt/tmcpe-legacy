@@ -52,6 +52,20 @@
 			      </ul>
 			    </td>
                         </tr>
+
+                        <tr class="prop">
+                            <td valign="top" class="name">Incident Analyses: 
+			      (<g:link class="analyze" action="analyze" id="${incidentInstance.id}">Reanalyze</g:link>)
+			    </td>			    
+                            
+                            <td valign="top" class="value">
+			      <ul>
+				<g:each in="${incidentInstance.analyses}" status="l" var="analysis">
+				  <li><g:link controller="incidentImpactAnalysis" action="show" id="${analysis.id}">${analysis.analysisName}</g:link></li>
+				</g:each>
+			      </ul>
+			    </td>
+                        </tr>
                     
                     </tbody>
                 </table>
