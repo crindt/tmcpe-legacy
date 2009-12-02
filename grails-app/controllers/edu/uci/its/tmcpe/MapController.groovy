@@ -1,8 +1,12 @@
-
-
 package edu.uci.its.tmcpe
 
 class MapController {
+
+    static navigation = [
+        group:'tabs',
+        order:1,
+        title:'Home'
+        ]
     
     def index = { redirect(action:show,params:params) }
 

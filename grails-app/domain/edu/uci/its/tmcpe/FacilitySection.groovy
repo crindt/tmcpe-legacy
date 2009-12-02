@@ -6,6 +6,7 @@ import org.postgis.LineString
 import org.postgis.hibernate.GeometryType
 
 
+
 // This needs to map into spatialvds
 class FacilitySection {
     

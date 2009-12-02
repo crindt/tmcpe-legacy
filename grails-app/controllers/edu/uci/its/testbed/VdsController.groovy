@@ -1,5 +1,3 @@
-
-
 package edu.uci.its.testbed
 
 class VdsController {
@@ -35,6 +33,24 @@ class VdsController {
             html { 
                 def max = Math.min( _params.max ? _params.max.toInteger() : 10,  100)
                 def c = Vds.createCriteria()
+                def resCnt = c.list {
+                    and {
+                        if ( _params.district && _params.district != '' ) {
+                            eq( "district", _params.district.toInteger() )
+                        }
+                        if ( _params.freeway && _params.freeway != '' ) {
+                            eq( "freeway", _params.freeway.toInteger() )
+                        }
+                        if ( _params.freewayDir && _params.freewayDir != '' ) {
+                            eq( "freewayDir", _params.freewayDir )
+                        }
+                        firstResult( _params.offset ? _params.offset.toInteger() : 0 )
+                        order( "freeway" )
+                        order( "freewayDir" )
+                    }
+                }
+                def fullTot = resCnt.size()
+                c = Vds.createCriteria()
                 def res = c.list {
                     and {
                         if ( _params.district && _params.district != '' ) {
@@ -53,7 +69,7 @@ class VdsController {
                     }
                 }
                 [ vdsInstanceList: res, 
-                  vdsInstanceTotal: myList.size() ] 
+                  vdsInstanceTotal: fullTot ] 
             }
         }
     }

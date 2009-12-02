@@ -21,6 +21,10 @@ class TmcLogEntry implements Comparable {
     String activitysubject
     String memo
 
+
+    Date stampDateTime
+    static transients = [ "stampDateTime" ]
+
     static mapping = {
 //        table 'ct_al_backup_2007'
         table name: 'd12_activity_log', schema: 'actlog'
@@ -37,8 +41,19 @@ class TmcLogEntry implements Comparable {
         return DateFormat.getDateInstance().format(stampdate) + " " + stamptime.toString() + ": " + activitysubject + " | " + memo 
     }
 
-    java.util.Date stampDateTime() {
-        new java.util.Date( stampdate.getTime() + stamptime.getTime() )
+    public java.util.Date getStampDateTime() {
+//        new java.util.Date( stampdate.getTime() + stamptime.getTime() )
+        // Do a locale convertion to our time zone---FIXME: should do based upon incident location...
+        def cal = Calendar.getInstance( )
+        cal.clear()
+        cal.setTimeZone( java.util.TimeZone.getTimeZone( "America/Los_Angeles" ) )
+        cal.set( Calendar.YEAR, stampdate.getYear() + 1900)
+        cal.set( Calendar.MONTH, stampdate.getMonth() )
+        cal.set( Calendar.DAY_OF_MONTH, stampdate.getDay() )
+        cal.set( Calendar.HOUR_OF_DAY, stamptime.getHours() )
+        cal.set( Calendar.MINUTE, stamptime.getMinutes() )
+        return cal.getTime();
+
     }
 
     // order by cad, stampdate, stamptime

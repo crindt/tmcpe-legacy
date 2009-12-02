@@ -18,12 +18,14 @@
     <g:each in="${incidentInstanceList}" status="i" var="incidentInstance">
        <Placemark>
            <name>Incident ${incidentInstance.id}</name>
-           <styleUrl>#redLine</styleUrl>
-	   ${incidentInstance.toKml()}
+	   <g:if test="${0}">
+             <styleUrl>#redLine</styleUrl>
+	   </g:if>
+	   ${incidentInstance.toKml(0)}
 	   <description>
 	     Location: ${incidentInstance.section.toString()}&lt;br/&gt;
-	     Start: ${incidentInstance.getTmcLogEntries().first().stampDateTime()}&lt;br/&gt;
-	     End: ${incidentInstance.getTmcLogEntries().last().stampDateTime()}&lt;br/&gt;
+	     Start: ${incidentInstance.getTmcLogEntries().first().getStampDateTime()}&lt;br/&gt;
+	     End: ${incidentInstance.getTmcLogEntries().last().getStampDateTime()}&lt;br/&gt;
 	     Duration: ${incidentInstance.cadDurationString()}
 	   </description>
       </Placemark>

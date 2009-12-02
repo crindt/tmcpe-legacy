@@ -8,6 +8,9 @@ var incidentFeatureMap = new Object();
 var incidents;
 
 function initApp() {
+    mapInit();
+    incidentsLayerInit();
+    incidentsTableInit();
 }
 
 function mapInit(){
@@ -17,6 +20,9 @@ function mapInit(){
         units: "m",
 	//	        minZoomLevel: 3,
 	//	        numZoomLevels: 17
+	minZoomLevel: 1,
+	maxZoomLevel: 17,
+	numZoomLevels: 17,
         maxResolution: 156543.0339,
         maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34,
                                          20037508.34, 20037508.34)
@@ -47,6 +53,14 @@ function mapInit(){
 
     map.addControl(new OpenLayers.Control.LayerSwitcher());
 
+/*
+    map.addControl(new OpenLayers.Control.Navigation({
+	zoomWheelEnabled: true, 
+	dragPan: new OpenLayers.Control.DragPan(),
+	zoomBox: new OpenLayers.Control.ZoomBox()
+    }));
+*/
+
     map.zoomToExtent(
         new OpenLayers.Bounds(
 	        -117.9784, 33.594, -117.6832, 33.7768
@@ -60,14 +74,48 @@ function onPopupCloseIncident(evt) {
 function onFeatureSelectIncident(event) {
     var feature = event.feature;
     var selectedFeature = feature;
-    var popup = new OpenLayers.Popup.FramedCloud("chicken", 
-        feature.geometry.getBounds().getCenterLonLat(),
-        new OpenLayers.Size(100,100),
-        "<h2>"+feature.attributes.name + "</h2>" + feature.attributes.description,
-        null, true, onPopupCloseIncident
-						);
-    feature.popup = popup;
-    map.addPopup(popup);
+
+    var cad = feature.attributes.name.replace(/ *Incident *(.*)$/i,"$1");
+//    alert( "item " + feature.attributes.name + " == '" + cad + "'" );	
+
+    var theStore = incidentGrid.store;
+//    alert( "QUERYING INCIDENT STORE: " + theStore.URL ); 
+    theStore.fetch({query:{id:cad}, 
+			 onComplete: function(items, request) {
+			     if ( items.length === 0 ) {
+				 alert( "NO matches found for cad: " + cad );
+			     } else if ( items.length === 1 ) {
+				 var item = items [ 0 ];
+				 var gn = dijit.byId( "incidentGridNode" );
+//				 alert( "ITEM["+cad+"] IS " + item.id );
+				 if ( !gn.store.isItemLoaded( item ) )
+				 {
+				     gn.store.loadItem( item );
+				 }
+				 var idx = gn.getItemIndex( item );
+				 if ( idx == -1 ) {
+				     idx = item._0;
+				     // load the missing page
+				     // some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
+				     var pageIndex = gn._rowToPage( idx );
+				     gn._requestPage( pageIndex );
+				 }
+				 if ( idx >= 0 ) {
+				     gn.selection.clear();
+				     gn.selection.addToSelection( idx );
+				     gn.scrollToRow( idx );
+//				     alert( "item " + cad + "found @ idx:" + idx );	
+				 } else {
+				     alert( "Strangely, item " + cad + " wasn't found in the grid!" );
+				 }
+			     } else {
+				 alert( "too many matches found for cad: " + cad );
+			     }
+			 }});
+    
+    dojo.byId( "incdet" ).innerHTML = 
+	"<h3>" + feature.attributes.name + "</h3>" + feature.attributes.description + 
+	'<p><A href="/tmcpe/incident/show?id='+cad+'">Show Incident</a></p>'
 }
 function onFeatureUnselectIncident(event) {
     var feature = event.feature;
@@ -130,7 +178,7 @@ function osm_getOsmaTileURL(bounds) {
         return OpenLayers.Util.getImagesLocation() + "404.png";
     } else {
         x = ((x % limit) + limit) % limit;
-//        return this.url + z + "/" + x + "/" + y + "." + this.type;
+	//        return this.url + z + "/" + x + "/" + y + "." + this.type;
 	return this.url + "Tiles/tile/" + z + "/" + x + "/" + y + "." + this.type;
     }
 }
@@ -150,26 +198,42 @@ function getIncidentFeature(inname) {
     return ret;
 }
 
-//function highlightFeatureByName( layer, name ) {
-function centerOnIncident( event )
-{
-//    var layers = map.getLayersByName( layer );
-//    assert( layers.length = 1 );
-//    var layer = layers[ 0 ];
+function simpleSelectIncident( event ) {
     var item = event.grid.getItem( event.rowIndex );
     var cad = item.id;
     var incident = getIncidentFeature( "Incident " + cad );
     if ( incident == null ) return;
 
-//    bbox = null;
-//    for (var i = 0; i < wfsLayer.features.length; i++) {
-//	var geometry = wfsLayer.features[i].geometry;
-//	if (bbox == null) {
-//            bbox = geometry.getBounds().clone();
-//	} else {
-//            bbox.extend(geometry.getBounds());
-//	}
-//    }
+    // raise it to the top
+    incidents.removeFeatures( incident );
+    incidents.addFeatures( incident );
+
+    selectIncident.unselectAll();
+    selectIncident.select( incident );
+}
+
+//function highlightFeatureByName( layer, name ) {
+function centerOnIncident( event )
+{
+    alert( 'simple select' ); 
+
+    //    var layers = map.getLayersByName( layer );
+    //    assert( layers.length = 1 );
+    //    var layer = layers[ 0 ];
+    var item = event.grid.getItem( event.rowIndex );
+    var cad = item.id;
+    var incident = getIncidentFeature( "Incident " + cad );
+    if ( incident == null ) return;
+
+    //    bbox = null;
+    //    for (var i = 0; i < wfsLayer.features.length; i++) {
+    //	var geometry = wfsLayer.features[i].geometry;
+    //	if (bbox == null) {
+    //            bbox = geometry.getBounds().clone();
+    //	} else {
+    //            bbox.extend(geometry.getBounds());
+    //	}
+    //    }
 
     // raise it to the top
     incidents.removeFeatures( incident );
@@ -182,38 +246,143 @@ function centerOnIncident( event )
 
 var layersLoading = 0;
 function loadStart(event) {
-   if (layersLoading == 0) {
-       //showLoadingImage();
-       //var animnode = dojo.query('animation');
-       var animnodes = dojo.query( '#animation' );
-       var animnode = null;
-       if ( animnodes[0] == null ) {
-	   var map = dojo.query( '#map' );
-	   animnode = map.addContent('<div id="animation" style="position:absolute;top:50%;left:50%"/>');
-       } else {
-	   animnode = animnodes[ 0 ];
-       }
-       var image = "<img id='loading_indicator' src='images/ajax-loader.gif' alt='Loading...' />";
-       animnode.addContent(image);
-       animnode.display = '';
-   }
-   layersLoading++;
+    if (layersLoading == 0) {
+	//showLoadingImage();
+	//var animnode = dojo.query('animation');
+	var animnodes = dojo.query( '#animation' );
+	var animnode = null;
+	if ( animnodes[0] == null ) {
+	    var map = dojo.query( '#map' );
+	    animnode = map.addContent('<div id="animation" style="position:absolute;top:50%;left:50%"/>');
+	} else {
+	    animnode = animnodes[ 0 ];
+	}
+	var image = "<img id='loading_indicator' src='images/ajax-loader.gif' alt='Loading...' />";
+	animnode.addContent(image);
+	animnode.display = '';
+    }
+    layersLoading++;
 }
 
 function loadEnd(event) {
-   layersLoading--;
-   if (layersLoading == 0) {
-       var li = dojo.query('#loading_indicator');
-       li.parentNode.removeChild( li );
-   }
+    layersLoading--;
+    if (layersLoading == 0) {
+	var li = dojo.query('#loading_indicator');
+	li.parentNode.removeChild( li );
+    }
 }
+
+
+function updateIncidentsQuery( theParams ) {
+
+    var myParams = constructIncidentsParams( theParams );
+
+    updateIncidentsLayer( myParams );
+    updateIncidentsTable( myParams );
+}
+
+function incidentsTableInit() {
+    updateIncidentsTable( constructIncidentsParams() );
+}
+
+function updateIncidentsLayer( theParams ) {
+
+    if ( incidents.protocol.url == "" ) {
+	// update the url
+	incidents.protocol = 
+	    new OpenLayers.Protocol.HTTP({
+  		url: "/tmcpe/incident/list.kml",
+		params: theParams,
+		format: new OpenLayers.Format.KML({
+                    extractStyles: true,
+                    extractAttributes: true
+  		})
+	    });
+    }
+    incidents.refresh({force: true, params:theParams});
+}
+
+function updateIncidentsTable( theParams ) {
+//    alert( "openlayer " + incidents.protocol.url + "?" + OpenLayers.Util.getParameterString(incidents.protocol.params));
+
+    var myURL = incidents.protocol.url.replace( /\.kml\??.*/gi, ".json" );
+    if( theParams ) {
+	var paramString = OpenLayers.Util.getParameterString(theParams);
+	if(paramString.length > 0) {
+            var separator = (myURL.indexOf('?') > -1) ? '&' : '?';
+            myURL += separator + paramString;
+	}
+    }
+//    alert( "grid " + myURL );
+    incidentGrid.setStore( new dojo.data.ItemFileReadStore( { url: myURL } ) );
+}
+
+function constructIncidentsParams( theParams ) {
+    var w = 0;
+    if ( !theParams || theParams == undefined ) {
+	theParams = {};
+    }
+    theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
+    theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
+
+    // get params from the search form...
+    if ( dijit.byId( 'startDate' ).getValue() ) {
+	var value = dijit.byId( 'startDate' ).getValue();
+	theParams[ 'fromDate' ] = dijit.byId( 'startDate' ).serialize( value );//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'endDate' ).getValue() ) {
+	var value = dijit.byId( 'endDate' ).getValue();
+	theParams['toDate'] = dijit.byId( 'endDate' ).serialize( value );//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'earliestTime' ).getValue() ) {
+	var value = dijit.byId( 'earliestTime' ).getValue();
+	theParams['earliestTime'] = dijit.byId( 'earliestTime' ).serialize( value );//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'latestTime' ).getValue() ) {
+	var value = dijit.byId( 'latestTime' ).getValue();
+	theParams['latestTime'] = dijit.byId( 'latestTime' ).serialize( value );//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'fwy' ).getValue() ) {
+	var value = dijit.byId( 'fwy' ).getValue();
+	theParams['freeway'] = value;//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'dir' ).getValue() ) {
+	var value = dijit.byId( 'dir' ).getValue();
+	theParams['direction'] = value;//myFormatDateOnly( value );
+    };
+    var days = [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ];
+    for ( dow in days ) {
+	var dowWid = dijit.byId( days[dow] );
+//	alert( "DOW " + days[dow] + ": " + dowWid );
+	if ( dowWid && dowWid.checked ) {
+//	    alert( "DOW " + days[dow] + " CHECKED" );
+	    if ( theParams['dow'] == undefined ) {
+		theParams['dow'] = dowWid.attr('value');
+	    } else {
+		theParams['dow'] += "," + dowWid.attr('value');
+	    }
+	}
+    }
+//    alert( "PARAMS: " + theParams['dow'] );
+
+//    alert( "THE PARAMS MAX" + theParams['max'] );
+    if ( theParams['max'] == undefined ) 
+    {
+	theParams['max'] = 100;
+    }
+//    alert( "THE PARAMS MAX" + theParams[ 'max' ] );
+
+    return theParams;
+}
+
 
 function incidentsLayerInit(theurl) {
     incidents = new OpenLayers.Layer.Vector("Incidents", {
         projection: map.displayProjection,
         strategies: [new OpenLayers.Strategy.Fixed()],
         protocol: new OpenLayers.Protocol.HTTP({
-	    url: theurl,
+	    url: "/tmcpe/incident/list.kml",//theurl,
+	    params: constructIncidentsParams(),
             format: new OpenLayers.Format.KML({
                 extractStyles: true,
                 extractAttributes: true
@@ -227,45 +396,54 @@ function incidentsLayerInit(theurl) {
     });
 
     map.addLayers([incidents]);
-
+    map.events.on({
+	"moveend": function() {	
+	    updateIncidentsQuery();
+	}
+    });
 
     var report = function(e) {
         OpenLayers.Console.log(e.type, e.feature.id);
     };
-    
-    
+
     var selectStyle = OpenLayers.Util.applyDefaults({
 	fillColor: "yellow",
 	strokeColor: "yellow"}, OpenLayers.Feature.Vector.style["select"]);
-    
-    
+
+
     var hoverIncident = new OpenLayers.Control.SelectFeature(incidents,{ 
  	hover: true,
  	highlightOnly: true,
         renderIntent: "temporary",
 	selectStyle: selectStyle
-//        eventListeners: {
-//            beforefeaturehighlighted: report,
-//            featurehighlighted: report,
-//            featureunhighlighted: report
-//        }
+	//        eventListeners: {
+	//            beforefeaturehighlighted: report,
+	//            featurehighlighted: report,
+	//            featureunhighlighted: report
+	//        }
     });
     map.addControl(hoverIncident);
     hoverIncident.activate();
 
-
-    selectIncident = new OpenLayers.Control.SelectFeature(incidents)
+    selectIncident = new OpenLayers.Control.SelectFeature(incidents);
     map.addControl(selectIncident);
     selectIncident.activate();
 }
 
 function segmentsLayerInit() {
 
+    var theParams = {};
+    // FIXME: shouldn't be incidents
+    theParams[ 'bbox' ] = [incidents.getExtent().toBBOX()];
+    theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
+    theParams[ 'district' ] = 12;
+
     var vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
         projection: map.displayProjection,
         strategies: [new OpenLayers.Strategy.Fixed()],
         protocol: new OpenLayers.Protocol.HTTP({
-  	    url: "vds/list.kml?district=12",
+  	    url: "vds/list.kml",
+	    params: theParams,
             format: new OpenLayers.Format.KML({
                 extractStyles: true,
                 extractAttributes: true

@@ -1,6 +1,7 @@
-
-
 package edu.uci.its.tmcpe
+
+import grails.converters.*
+
 
 class TmcLogEntryController {
     
@@ -34,7 +35,13 @@ class TmcLogEntryController {
             maxResults( params.max )
             firstResult( params.offset ?:0 )
         }
-        [ tmcLogEntryInstanceList: results, tmcLogEntryInstanceTotal: abc ]
+        withFormat {
+           html { return [ tmcLogEntryInstanceList: results, tmcLogEntryInstanceTotal: abc ] }
+           json { 
+              def json = [ items: results ]
+              render json  as JSON 
+           }
+        }
     }
 
     def show = {
@@ -122,3 +129,4 @@ class TmcLogEntryController {
         }
     }
 }
+

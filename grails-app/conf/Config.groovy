@@ -21,9 +21,9 @@ grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
                       csv: 'text/csv',
                       all: '*/*',
                       json: ['application/json','text/json'],
-                      kml: ['application/vnd.google-earth.kml+xml'],
                       form: 'application/x-www-form-urlencoded',
-                      multipartForm: 'multipart/form-data'
+                      multipartForm: 'multipart/form-data',
+                      kml: 'application/vnd.google-earth.kml+xml .kml'
                     ]
 // The default codec used to encode data with ${}
 grails.views.default.codec="none" // none, html, base64
@@ -36,8 +36,15 @@ grails.enable.native2ascii = true
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
-        grails.serverURL = "http://parsons.its.uci.edu/"
+        grails.serverURL = "http://www.changeme.com"
     }
+    development {
+        grails.serverURL = "http://localhost:8080/${appName}"
+    }
+    test {
+        grails.serverURL = "http://localhost:8080/${appName}"
+    }
+
 }
 
 // log4j configuration
@@ -45,39 +52,33 @@ log4j = {
     // Example of changing the log pattern for the default console
     // appender:
     //
-    appenders {
-        console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
-    }
+    //appenders {
+    //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
+    //}
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
 	       'org.codehaus.groovy.grails.web.pages', //  GSP
 	       'org.codehaus.groovy.grails.web.sitemesh', //  layouts
-	       'org.codehaus.groovy.grails."web.mapping.filter', // URL mapping
-	       'org.codehaus.groovy.grails."web.mapping', // URL mapping
+	       'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+	       'org.codehaus.groovy.grails.web.mapping', // URL mapping
 	       'org.codehaus.groovy.grails.commons', // core / classloading
 	       'org.codehaus.groovy.grails.plugins', // plugins
 	       'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
 	       'org.springframework',
-	       'org.hibernate',
-               'GlobalPropertyEditorConfig',
-               'LocationEditor'
+	       'org.hibernate'
+
+    debug 'org.jcouchdb',
+          'org.codehaus.groovy.grails.plugins.starksecurity',
+          'edu.uci.its'
+
+          //,'org.svenson.JSONParser'
 
     warn   'org.mortbay.log'
-
-    debug  'grails.app.service.edu.uci.its.tmcpe.IncidentImpactAnalysisService'
-
-
 }
 
-grails.converters.json.pretty.print = true
-
-
-//log4j.logger.org.springframework.security='off,stdout'
-
-//log4j.logger.org.springframework.security='off,stdout'
-
-//log4j.logger.org.springframework.security='off,stdout'
-
-//log4j.logger.org.springframework.security='off,stdout'
-
-//log4j.logger.org.springframework.security='off,stdout'
+vdsdata {
+couchdb {
+      host = "localhost"
+      db_suffix = "morehash"
+}      
+}

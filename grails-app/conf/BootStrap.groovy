@@ -1,12 +1,7 @@
-import edu.uci.its.auth.*
-import org.apache.commons.codec.digest.DigestUtils as DU
+//import org.codehaus.groovy.grails.plugins.starksecurity.PasswordEncoder
 
-/* registering custom marshallers in Bootstrap.groovy */
-import grails.converters.JSON
-import org.postgis.Point
-import org.postgis.LineString
-
-
+//import edu.uci.its.auth.Role
+//import edu.uci.its.auth.User
 
 class BootStrap {
 
@@ -16,28 +11,22 @@ class BootStrap {
          servletContext.setAttribute("newDataBinder", GlobalPropertyEditorConfig.&newDataBinder)
          servletContext.setAttribute("newBeanWrapper", GlobalPropertyEditorConfig.&newBeanWrapper)
 
-         def encodedPassword = authenticateService.encodePassword("d0996e")
-         def adminUser = new TmcpeUser( username: 'crindt',
-                                        userRealname: 'Craig Rindt',
-                                        passwd: encodedPassword,
-                                        email: 'crindt@uci.edu',
-                                        emailShow: false, 
-                                        description: 'none')
-         adminUser.save()
+/*
+         // Create some roles 
+         new Role(authority: 'ROLE_SUPER_USER', description: 'Super user').save()
+         new Role(authority: 'IS_AUTHENTICATED_ANONYMOUSLY', description: 'Anonymous').save()
 
-         def adminRole = new TmcpeRole( authority: 'ROLE_ADMIN',
-                                        description: 'Administrator' )
-         adminRole.addToPeople( adminUser ).save()
+         System.err.println( "Added roles " + (Role.findAll().join(", ")) )
 
-         def requestMap = new TmcpeRequestmap( url: '/secure/**',
-                                               configAttribute: 'ROLE_ADMIN' ).save()
-         requestMap = new TmcpeRequestmap( url: '/tmcperequestmap/**',
-                                           configAttribute: 'ROLE_ADMIN' ).save()
-         requestMap = new TmcpeRequestmap( url: '/tmcperole/**',
-                                           configAttribute: 'ROLE_ADMIN' ).save()
-         requestMap = new TmcpeRequestmap( url: '/tmcpeuser/**',
-                                           configAttribute: 'ROLE_ADMIN' ).save()
+         // Create a user, and add the super user role 
+         // You do this only if you're using the DAO implementation, for LDAP users don't live in your DB. 
+         def user = new User(username: 'crindt', password: PasswordEncoder.encode('d0996e', 'SHA-256', true)) 
+         user.save() 
+         user.addToRoles(Role.findByAuthority('ROLE_SUPER_USER')) 
+         user.save() 
 
+         System.err.println( "USER: " + user )
+*/
 
 //         grails.converters.JSON.registerObjectMarshaller( org.postgis.Point ) { p, json -> 
 //             json.build{
@@ -80,6 +69,7 @@ class BootStrap {
              json.build{
                  "class(Incident)"
                  id(inc.id)
+                 //timestamp( df.format( inc.stampDateTime() ) )
                  timestamp( inc.stampDateTime() )
                  locString( inc.section.toString() )
                  memo(inc.memo)
@@ -88,7 +78,25 @@ class BootStrap {
                  geometry(inc.section?.segGeom)
              }
          }
+
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.TmcLogEntry, 5 ){ le, json ->
+             def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+             json.build{
+                 "class(Incident)"
+                 id(le.id)
+                 cad(le.cad)
+                 deviceNumber(le.device_number)
+                 deviceFwy(le.device_fwy)
+                 deviceName(le.device_name)
+                 stampDateTime( le.getStampDateTime() )
+                 status(le.status)
+                 activitySubject( le.activitysubject )
+                 memo(le.memo)
+             }
+         }
      }
+
+
      def destroy = {
      }
 } 

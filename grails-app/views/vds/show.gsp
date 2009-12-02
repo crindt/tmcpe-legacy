@@ -126,6 +126,12 @@
                             <td valign="top" class="value">${fieldValue(bean:vdsInstance, field:'versionTs')}</td>
                             
                         </tr>
+
+			<tr class="prop">
+                            <td valign="top" class="name">Summary:</td>
+                            
+                            <td valign="top" class="value">${vdsInstance.getSummaryData(2007,'08:00:00','08:05:00').toString()}</td>
+
                     
                     </tbody>
                 </table>

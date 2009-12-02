@@ -1,8 +1,19 @@
 package edu.uci.its.tmcpe
 
 import grails.converters.*
+import org.hibernate.criterion.*
+import org.apache.commons.logging.LogFactory
+
 
 class IncidentController {
+    static navigation = [
+        group:'tabs',
+        order:1000,
+        title:'Incidents'
+        ]
+
+    static log = LogFactory.getLog("edu.uci.its.tmcpe.IncidentController")
+
     
     def index = { redirect(action:list,params:params) }
 
@@ -12,6 +23,7 @@ class IncidentController {
     def list = {
 //        params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
 //        [ incidentInstanceList: Incident.list( params ), incidentInstanceTotal: Incident.count() ]
+          System.err.println("=============LISTING")
           def maxl = Math.min( params.max ? params.max.toInteger() : 10,  100)
           def _params = params
           def c = Incident.createCriteria()
@@ -31,17 +43,50 @@ class IncidentController {
                       def to = params.toDate ? Date.parse( "yyyy-MM-dd", params.toDate ) : new Date()
                       between( 'stampDate', from, to )
                   }
+                  if ( params.earliestTime || params.latestTime ) {
+                      def from = java.sql.Time.parse( "HH:mm", params.earliestTime ? params.earliestTime : '00:00' )
+                      def to = java.sql.Time.parse( "HH:mm", params.latestTime ? params.latestTime : '23:59' )
+                      System.err.println("============TIMES: " + from + " <<>> "  + to )
+                      log.debug("============TIMES: " + from + " <<>> "  + to )
+                      between( 'stampTime', from, to )
+                  }
+                  if ( params.bbox ) {
+                      def bbox = params.bbox.split(",")
+                      def valid = 0;
+                      log.debug("============BBOX: " + bbox.join(","))
+                      def proj = ( params.proj =~ /^EPSG\:(\d+)/ )
+                      addToCriteria(Restrictions.sqlRestriction( "st_transform(location,"+proj[0][1]+") && st_setsrid( ST_MAKEBOX2D(ST_MAKEPOINT(" + bbox[0] + ", " + bbox[1] + "),ST_MAKEPOINT( "  + bbox[2] + ", " + bbox[3] + ")), "+proj[0][1]+")" ))
+                  }
+                  if ( params.dow ) {
+                      // validate
+                      def dow = params.dow.split(",").grep{ 
+                          try {
+                              def val = it.toInteger(); 
+                              if ( val >= 0 && val <= 6 ) return true
+                          } catch ( java.lang.NumberFormatException e ) {
+                              log.warn( "Invalid DayOfWeek '${it}' passed as query argument" )
+                              return false
+                          }
+                          return false
+                      }
+                      if ( dow.size() > 0 ) {
+                          addToCriteria(Restrictions.sqlRestriction( "extract( dow from stampDate ) IN (" + dow.join(",") + ")" ) )
+                      }
+                  }
                   maxResults(maxl)
                   order( 'stampDate', 'asc' )
                   order( 'stampTime', 'asc' )
               }
           }
+          System.err.println( "============COUNT: " + theList.count() )
           withFormat {
               html {
                   def html = [ incidentInstanceList: theList, incidentInstanceTotal: theList.count() ]
                   return html
               }
-              kml  incidentInstanceList: theList
+              kml  {
+                  return [ incidentInstanceList: theList, incidentInstanceTotal: theList.count() ]
+              }
               json { 
                   // renders to json compatible with dojo::ItemFileReadStore 
                   def json = [ items: theList ]
@@ -59,7 +104,9 @@ class IncidentController {
         }
         withFormat {
             html {
-                def html = [ incidentInstance : incidentInstance ] 
+                def html = [ incidentInstance : incidentInstance, 
+                    logEntries : [ items: incidentInstance.getTmcLogEntries() ] as JSON
+                ] 
                 return html
             }
             json {
@@ -71,6 +118,7 @@ class IncidentController {
         }
     }
     
+/*
     // injected from Spring
     def incidentImpactAnalysisService
 
@@ -99,6 +147,7 @@ class IncidentController {
             redirect(action:list)
         }
     }
+*/
 
     def delete = {
         def incidentInstance = Incident.get( params.id )

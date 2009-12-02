@@ -1,9 +1,11 @@
 package edu.uci.its.tmcpe
 
+import org.postgis.hibernate.GeometryType
+
 import org.postgis.Geometry
 import org.postgis.LineString
 import org.postgis.Point
-import org.postgis.hibernate.GeometryType
+
 
 class TestbedLine {
     Geometry geom
