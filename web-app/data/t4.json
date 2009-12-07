@@ -1,0 +1,21 @@
+{
+	"opts" : {
+		"mintimeofday" : "8:00:00",
+		"prewindow"    : 10.0,
+		"postwindow"   : 5.0,
+		"fwy"	       : "5-S"
+	},
+	"segments" : [
+	{ "pmstart": 0, "pmend": 1 },
+	{ "pmstart": 1, "pmend": 2 },
+	{ "pmstart": 2, "pmend": 3 },
+	],
+	"incspd" : [
+	[ 45, 50, 60 ],
+	[ 15, 25, 60 ],
+	[ 45, 50, 60 ]
+	],
+	"events" : {
+		 "incident_start" : { "pm" : 0.3, "tod" : 6 }
+	}
+}
