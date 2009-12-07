@@ -24,7 +24,7 @@ class IncidentController {
 //        params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
 //        [ incidentInstanceList: Incident.list( params ), incidentInstanceTotal: Incident.count() ]
           System.err.println("=============LISTING")
-          def maxl = Math.min( params.max ? params.max.toInteger() : 10,  100)
+          def maxl = Math.min( params.max ? params.max.toInteger() : 10,  1000)
           def _params = params
           def c = Incident.createCriteria()
           def now = new java.util.Date();

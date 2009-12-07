@@ -11,9 +11,11 @@ var hoverVds;
 
 function initApp() {
     mapInit();
-    incidentsLayerInit();
-//    incidentsTableInit();
     segmentsLayerInit();
+    incidentsLayerInit();
+
+    vdsSegmentLines.raiseLayer(-100);
+//    incidentsTableInit();
 }
 
 function mapInit(){
@@ -149,7 +151,6 @@ function onPopupCloseVds(evt) {
     selectVds.unselectAll();
 }
 function onFeatureSelectVds(event) {
-/*
     var feature = event.feature;
     var selectedFeature = feature;
     var lonlats = feature.attributes.vdsLocation.split( ' ' );
@@ -162,7 +163,6 @@ function onFeatureSelectVds(event) {
 						);
     feature.popup = popup;
     map.addPopup(popup);
-*/
 }
 function onFeatureUnselectVds(event) {
     var feature = event.feature;
