@@ -24,4 +24,4 @@ html, body, #main{
 }
 
 
- 
+#incidentSummaryGridNode .dojoxGridHeader { display:none; }

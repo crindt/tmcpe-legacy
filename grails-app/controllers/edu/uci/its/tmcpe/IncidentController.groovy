@@ -69,6 +69,9 @@ class IncidentController {
                           }
                           return false
                       }
+                      if ( _params.idIn && _params.type != '' ) {
+                          'in'( "id", _params.idIn.split(',')*.toInteger() )
+                      }
                       if ( dow.size() > 0 ) {
                           addToCriteria(Restrictions.sqlRestriction( "extract( dow from stampDate ) IN (" + dow.join(",") + ")" ) )
                       }
@@ -92,6 +95,12 @@ class IncidentController {
                   def json = [ items: theList ]
                   render json as JSON 
               }
+              geojson {
+                  def json = [];
+                  theList.each() { json.add( [ id: it.id, geometry: it.location, properties: it ] ) }
+                  def fjson = [ type: "FeatureCollection", features: json ]
+                  render fjson as JSON;
+              }
           }
     }
 
@@ -105,7 +114,9 @@ class IncidentController {
         withFormat {
             html {
                 def html = [ incidentInstance : incidentInstance, 
-                    logEntries : [ items: incidentInstance.getTmcLogEntries() ] as JSON
+                             logEntries : [ items: incidentInstance.getTmcLogEntries(),
+                             jsonString : incidentInstance.hackToJSON()
+                    ] as JSON
                 ] 
                 return html
             }

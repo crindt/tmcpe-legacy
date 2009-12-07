@@ -1,5 +1,8 @@
 package edu.uci.its.testbed
 
+import grails.converters.*
+import org.hibernate.criterion.*
+
 class VdsController {
     
     def index = { redirect(action:list,params:params) }
@@ -8,67 +11,68 @@ class VdsController {
     static allowedMethods = [delete:'POST', save:'POST', update:'POST']
 
     def list = {
-        def myList = Vds.list( params );
+        //def myList = Vds.list( params );
         def _params = params
+        def c = Vds.createCriteria()
+        def max = Math.min( _params.max ? _params.max.toInteger() : 10,  100)
+        def theList = c.list {
+            and {
+                if ( _params.district && _params.district != '' ) {
+                    eq( "district", _params.district.toInteger() )
+                }
+                if ( _params.freeway && _params.freeway != '' ) {
+                    eq( "freeway", _params.freeway.toInteger() )
+                }
+                if ( _params.freewayDir && _params.freewayDir != '' ) {
+                    eq( "freewayDir", _params.freewayDir )
+                }
+                if ( _params.type && _params.type != '' ) {
+                    eq( "vdsType", _params.type )
+                }
+                if ( _params.idIn && _params.type != '' ) {
+                    'in'( "id", _params.idIn.split(',')*.toInteger() )
+                }
+                firstResult( _params.offset ? _params.offset.toInteger() : 0 )
+                maxResults( max )
+                order( "freeway" )
+                order( "freewayDir" )
+                    }
+                }
+        c = Vds.createCriteria()
+        def theFullList = c.list {
+            and {
+                if ( _params.district && _params.district != '' ) {
+                    eq( "district", _params.district.toInteger() )
+                }
+                if ( _params.freeway && _params.freeway != '' ) {
+                    eq( "freeway", _params.freeway.toInteger() )
+                }
+                if ( _params.freewayDir && _params.freewayDir != '' ) {
+                    eq( "freewayDir", _params.freewayDir )
+                }
+                if ( _params.type && _params.type != '' ) {
+                    eq( "vdsType", _params.type )
+                }
+                if ( _params.idIn && _params.type != '' ) {
+                    'in'( "id", _params.idIn.split(',')*.toInteger() )
+                }
+                order( "freeway" )
+                order( "freewayDir" )
+                    }
+                }
+        def fullTot = theFullList.size()
         withFormat {
             kml {
-                def c = Vds.createCriteria()
-                def res = c.list {
-                    and {
-                        if ( _params.district && _params.district != '' ) {
-                            eq( "district", _params.district.toInteger() )
-                        }
-                        if ( _params.freeway && _params.freeway != '' ) {
-                            eq( "freeway", _params.freeway.toInteger() )
-                        }
-                        if ( _params.freewayDir && _params.freewayDir != '' ) {
-                            eq( "freewayDir", _params.freewayDir )
-                        }
-                        order( "freeway" )
-                        order( "freewayDir" )
-                    }
-                }
-                [vdsInstanceList: res]
+                [vdsInstanceList: theFullList]
+            }
+            geojson {
+                def json = []
+                theFullList.each() { json.add( [ id: it.id, geometry: it.segGeom, properties: it ] ) }
+                def fjson = [ type: "FeatureCollection", features: json ]
+                render fjson as JSON;
             }
             html { 
-                def max = Math.min( _params.max ? _params.max.toInteger() : 10,  100)
-                def c = Vds.createCriteria()
-                def resCnt = c.list {
-                    and {
-                        if ( _params.district && _params.district != '' ) {
-                            eq( "district", _params.district.toInteger() )
-                        }
-                        if ( _params.freeway && _params.freeway != '' ) {
-                            eq( "freeway", _params.freeway.toInteger() )
-                        }
-                        if ( _params.freewayDir && _params.freewayDir != '' ) {
-                            eq( "freewayDir", _params.freewayDir )
-                        }
-                        firstResult( _params.offset ? _params.offset.toInteger() : 0 )
-                        order( "freeway" )
-                        order( "freewayDir" )
-                    }
-                }
-                def fullTot = resCnt.size()
-                c = Vds.createCriteria()
-                def res = c.list {
-                    and {
-                        if ( _params.district && _params.district != '' ) {
-                            eq( "district", _params.district.toInteger() )
-                        }
-                        if ( _params.freeway && _params.freeway != '' ) {
-                            eq( "freeway", _params.freeway.toInteger() )
-                        }
-                        if ( _params.freewayDir && _params.freewayDir != '' ) {
-                            eq( "freewayDir", _params.freewayDir )
-                        }
-                        firstResult( _params.offset ? _params.offset.toInteger() : 0 )
-                        maxResults( max )
-                        order( "freeway" )
-                        order( "freewayDir" )
-                    }
-                }
-                [ vdsInstanceList: res, 
+                [ vdsInstanceList: theList, 
                   vdsInstanceTotal: fullTot ] 
             }
         }

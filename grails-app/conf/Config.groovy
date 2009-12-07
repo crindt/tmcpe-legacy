@@ -21,6 +21,7 @@ grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
                       csv: 'text/csv',
                       all: '*/*',
                       json: ['application/json','text/json'],
+                      geojson: ['application/json','text/json'],
                       form: 'application/x-www-form-urlencoded',
                       multipartForm: 'multipart/form-data',
                       kml: 'application/vnd.google-earth.kml+xml .kml'

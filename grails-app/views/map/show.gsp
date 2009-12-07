@@ -11,6 +11,7 @@
     <script type="text/javascript" djConfig="parseOnLoad: true"
 	    src="${createLinkTo(dir:'js/dojo/dojo-1.4/dojo',file:'dojo.js')}"></script> 
     <!--    <g:javascript library="tmcpe/tmcpe" />  -->
+    <script src="${createLinkTo(dir:'js/tmcpe',file:'/ItemVectorLayerReadStore.js')}" djConfig="parseOnLoad: true"></script>
     <script src="${createLinkTo(dir:'js/tmcpe',file:'/tmcpe.js')}" djConfig="parseOnLoad: true"></script>
     <g:javascript>
       dojo.require("dojo.data.ItemFileReadStore");
@@ -21,6 +22,7 @@
       dojo.require("dijit.form.NumberTextBox");
       dojo.require("dijit.form.Form");
       dojo.require("dijit.form.CheckBox");
+      dojo.require("dojo._base.json");
 
       var myFormatDate = function(inDatum){
         var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
@@ -72,6 +74,41 @@
                 return dojo.date.locale.format(dateObject, this.myFormat).toUpperCase();
             }
         });
+
+      dojo.declare("DefaultSortableGrid", dojox.grid.DataGrid, {
+         sortInfo: 1 // the index (1-based) of the column 
+                     // to sort, + => asc, - => desc
+      });
+
+      var incidentSummaryData = {
+      items: [
+      { id: "min",
+        timestamp: "",
+        locString: "",
+        memo: "",
+        delay: "12.4"
+      },
+      { id: "mean",
+        timestamp: "",
+        locString: "",
+        memo: "",
+        delay: "12.4"
+      },
+      { id: "max",
+        timestamp: "",
+        locString: "",
+        memo: "",
+        delay: "12.4"
+      }
+      ]};
+
+      var incidentSummaryLayout = [
+      {field:'id',width:'10%'},
+      {field:'timestamp',width:'10%'},
+      {field:'locString',width:'20%'},
+      {field:'memo',width:'50%'},
+      {field:'delay',dataType:'Float', width:'10%'}
+      ];
 
       dojo.addOnLoad(function(){});
     </g:javascript>
@@ -133,25 +170,47 @@
           Reset
 	</button>
       </div>
-      <div dojoType="dijit.layout.BorderContainer" design="sidebars" region="center" splitter="false" liveSplitters="false">
-	<div dojoType="dijit.layout.ContentPane" id="map" region="center" style="background:yellow;" splitter="false" liveSplitters="false"></div>
-	<div dojoType="dijit.layout.ContentPane" region="bottom" id="incidentSearch" splitter="true" liveSplitters="false" style="height:200px;">
-	  <table id="incidentGridNode" 
-		 jsId="incidentGrid" 
-		 dojoType="dojox.grid.DataGrid" 
-		 region="center"
-		 rowSelector="20px"
-		 onRowClick="simpleSelectIncident"
-		 >
-	    <thead>
-	      <tr>
-		<th field="id" dataType="String" width="100px">CAD ID</th>
-		<th field="timestamp" dataType="Date" formatter="myFormatDate" width="150px">Timestamp</th>
-		<th field="locString" dataType="String" width="300px">Section</th>
-		<th field="memo" dataType="String" width="auto">Description</th>
-	      </tr>
-	    </thead>
-	  </table>
+      <div dojoType="dijit.layout.BorderContainer" id="mapgrid" region="center" design="sidebar" style="background:green;" splitter="false" liveSplitters="false">
+	<div dojoType="dijit.layout.ContentPane" id="map" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
+	</div>
+	<div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
+	  <div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%">
+	    <table id="incidentGridNode" 
+		   jsId="incidentGrid" 
+		   dojoType="dojox.grid.DataGrid" 
+		   sortInfo=2
+		   region="center"
+		   rowSelector="20px"
+		   onRowClick="simpleSelectIncident"
+		   style="width:100%;height:5em;"
+		   >
+	      <thead>
+		<tr>
+		  <th field="id" dataType="String" width="10%">CAD ID</th>
+		  <th field="timestamp" dataType="Date" formatter="myFormatDate" width="10%">Timestamp</th>
+		  <th field="locString" dataType="String" width="20%">Section</th>
+		  <th field="memo" dataType="String" width="50%">Description</th>
+		  <th field="delay" dataType="Float" width="10%">Delay</th>
+		</tr>
+	      </thead>
+	    </table>
+	  </div>
+<!--
+	  <div dojoType="dijit.layout.ContentPane" id="gridSummaryContainer" region="bottom" style="background:yellow;" splitter="false" liveSplitters="false">
+	    <div dojoType="dojo.data.ItemFileReadStore" data="incidentSummaryData" jsId="incidentSummaryStore" id="incidentSummaryNode" defaultTimeout="20000"></div>
+	    <table id="incidentSummaryGridNode" 
+		   jsId="incidentSummaryGrid" 
+		   dojoType="dojox.grid.DataGrid" 
+		   sortInfo=2
+		   region="center"
+		   rowSelector="20px"
+		   store="incidentSummaryStore"
+		   style="width:100%;height:100%;"
+		   structure="incidentSummaryLayout"
+		   >
+	    </table>
+	  </div>
+-->
 	</div>
       </div>
       <div dojoType="dijit.layout.ContentPane" gutters="true" region="right" style="width: 300px">
@@ -171,7 +230,7 @@
 	    -->
       </div>
     </div>
-
+    
     <!-- Incident Data -->
     <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" jsId="incidentStore" id="incidentStoreNode" defaultTimeout="20000"></div>
   </body>

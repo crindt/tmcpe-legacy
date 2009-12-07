@@ -6,11 +6,14 @@ var map, select;
 
 var incidentFeatureMap = new Object();
 var incidents;
+var vdsSegmentLines;
+var hoverVds;
 
 function initApp() {
     mapInit();
     incidentsLayerInit();
-    incidentsTableInit();
+//    incidentsTableInit();
+    segmentsLayerInit();
 }
 
 function mapInit(){
@@ -71,52 +74,68 @@ function mapInit(){
 function onPopupCloseIncident(evt) {
     selectIncident.unselectAll();
 }
+
+function scrollIncidentsToItem( item ) {
+    var cad = item.attributes.id;
+    var gn = dijit.byId( "incidentGridNode" );
+    //				 alert( "ITEM["+cad+"] IS " + item.id );
+    if ( !gn.store.isItemLoaded( item ) )
+    {
+	gn.store.loadItem( item );
+    }
+    var idx = gn.getItemIndex( item );
+    if ( idx == -1 ) {
+	// hmm, the grid hasn't materialized this item, 
+/*
+	idx = item._0;
+	// load the missing page
+	// some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
+	var pageIndex = gn._rowToPage( idx );
+	gn._requestPage( pageIndex );
+*/
+	// the above hack only works for itemfilereadstore.  Here,
+	// we'll scan the features until we find the correct item.
+	// This will be slow, but should work
+	var i = 0;
+	var items = incidents.features;
+	for ( i = 0; i < items.length && items[ i ] != item; ++ i )
+	{}
+	// If found, set idx
+	if ( i <= items.length ) idx = i;
+    }
+    if ( idx >= 0 ) {
+	gn.selection.clear();
+	gn.selection.addToSelection( idx );
+	gn.scrollToRow( idx );
+	//				     alert( "item " + cad + "found @ idx:" + idx );	
+    } else {
+	alert( "Strangely, item " + cad + " wasn't found in the grid!" );
+    }
+
+//    alert( "Selected " + cad )
+}
+
+function updateIncidentDetails( feature ) {
+    var cad = feature.attributes.id
+    dojo.byId( "incdet" ).innerHTML = 
+	"<h3>INCIDENT " + cad + "</h3><dl>" 
+	+ "<dt>loc</dt><dd>" + feature.attributes.locString + "</dd>"
+	+ "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
+        + "</dl>"
+    
+	+ '<p><A href="/tmcpe/incident/show?id='+cad+'">Show Incident</a></p>';
+}
+
 function onFeatureSelectIncident(event) {
     var feature = event.feature;
     var selectedFeature = feature;
 
-    var cad = feature.attributes.name.replace(/ *Incident *(.*)$/i,"$1");
-//    alert( "item " + feature.attributes.name + " == '" + cad + "'" );	
-
-    var theStore = incidentGrid.store;
-//    alert( "QUERYING INCIDENT STORE: " + theStore.URL ); 
-    theStore.fetch({query:{id:cad}, 
-			 onComplete: function(items, request) {
-			     if ( items.length === 0 ) {
-				 alert( "NO matches found for cad: " + cad );
-			     } else if ( items.length === 1 ) {
-				 var item = items [ 0 ];
-				 var gn = dijit.byId( "incidentGridNode" );
-//				 alert( "ITEM["+cad+"] IS " + item.id );
-				 if ( !gn.store.isItemLoaded( item ) )
-				 {
-				     gn.store.loadItem( item );
-				 }
-				 var idx = gn.getItemIndex( item );
-				 if ( idx == -1 ) {
-				     idx = item._0;
-				     // load the missing page
-				     // some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
-				     var pageIndex = gn._rowToPage( idx );
-				     gn._requestPage( pageIndex );
-				 }
-				 if ( idx >= 0 ) {
-				     gn.selection.clear();
-				     gn.selection.addToSelection( idx );
-				     gn.scrollToRow( idx );
-//				     alert( "item " + cad + "found @ idx:" + idx );	
-				 } else {
-				     alert( "Strangely, item " + cad + " wasn't found in the grid!" );
-				 }
-			     } else {
-				 alert( "too many matches found for cad: " + cad );
-			     }
-			 }});
-    
-    dojo.byId( "incdet" ).innerHTML = 
-	"<h3>" + feature.attributes.name + "</h3>" + feature.attributes.description + 
-	'<p><A href="/tmcpe/incident/show?id='+cad+'">Show Incident</a></p>'
+    scrollIncidentsToItem( feature );
+    updateIncidentDetails( feature );
 }
+
+
+
 function onFeatureUnselectIncident(event) {
     var feature = event.feature;
     if(feature.popup) {
@@ -130,6 +149,7 @@ function onPopupCloseVds(evt) {
     selectVds.unselectAll();
 }
 function onFeatureSelectVds(event) {
+/*
     var feature = event.feature;
     var selectedFeature = feature;
     var lonlats = feature.attributes.vdsLocation.split( ' ' );
@@ -137,11 +157,12 @@ function onFeatureSelectVds(event) {
     var popup = new OpenLayers.Popup.FramedCloud("chicken", 
         lonlat,
         new OpenLayers.Size(100,100),
-        "<h2>"+feature.attributes.name + "</h2>" + feature.attributes.description,
+        "<h2>"+feature.attributes.name + "</h2>",// + feature.attributes.description,
         null, true, onPopupCloseVds
 						);
     feature.popup = popup;
     map.addPopup(popup);
+*/
 }
 function onFeatureUnselectVds(event) {
     var feature = event.feature;
@@ -183,6 +204,14 @@ function osm_getOsmaTileURL(bounds) {
     }
 }
 
+function getVdsSegmentLines() {
+    return vdsSegmentLines;
+}
+
+function getHoverVds() {
+    return hoverVds;
+}
+
 function getIncidentFeature(inname) {
     var ret = null;
     for ( f in incidents.features )
@@ -199,14 +228,17 @@ function getIncidentFeature(inname) {
 }
 
 function simpleSelectIncident( event ) {
-    var item = event.grid.getItem( event.rowIndex );
+    var incident = event.grid.getItem( event.rowIndex );
+
+/*
     var cad = item.id;
     var incident = getIncidentFeature( "Incident " + cad );
     if ( incident == null ) return;
+*/
 
     // raise it to the top
-    incidents.removeFeatures( incident );
-    incidents.addFeatures( incident );
+    incidents.removeFeatures( incident, { silent:true } );
+    incidents.addFeatures( incident, { silent:true } );
 
     selectIncident.unselectAll();
     selectIncident.select( incident );
@@ -221,7 +253,7 @@ function centerOnIncident( event )
     //    assert( layers.length = 1 );
     //    var layer = layers[ 0 ];
     var item = event.grid.getItem( event.rowIndex );
-    var cad = item.id;
+    var cad = item.attributes.id;
     var incident = getIncidentFeature( "Incident " + cad );
     if ( incident == null ) return;
 
@@ -252,12 +284,14 @@ function loadStart(event) {
 	var animnodes = dojo.query( '#animation' );
 	var animnode = null;
 	if ( animnodes[0] == null ) {
-	    var map = dojo.query( '#map' );
-	    animnode = map.addContent('<div id="animation" style="position:absolute;top:50%;left:50%"/>');
+	    var map = dojo.query( '.olMapViewport' );
+	    animnode = map.addContent('<div id="animation" style="position:relative;top:50%;left:50%;visible:true;"/>');
 	} else {
 	    animnode = animnodes[ 0 ];
 	}
-	var image = "<img id='loading_indicator' src='images/ajax-loader.gif' alt='Loading...' />";
+//	var image = "<img id='loading_indicator' src='images/ajax-loader.gif' alt='Loading...' />";
+	var image = '<p style="visible:true;>BOGGS</p>';
+	
 	animnode.addContent(image);
 	animnode.display = '';
     }
@@ -267,7 +301,7 @@ function loadStart(event) {
 function loadEnd(event) {
     layersLoading--;
     if (layersLoading == 0) {
-	var li = dojo.query('#loading_indicator');
+	var li = dojo.byId('#loading_indicator');
 	li.parentNode.removeChild( li );
     }
 }
@@ -275,14 +309,27 @@ function loadEnd(event) {
 
 function updateIncidentsQuery( theParams ) {
 
+    // clear any existing selections...
+    selectIncident.unselectAll();
+
     var myParams = constructIncidentsParams( theParams );
+
+//    loadStart();
 
     updateIncidentsLayer( myParams );
     updateIncidentsTable( myParams );
+
+//    loadEnd();
+}
+
+function updateVdsSegmentsQuery( theParams ) {
+    selectVds.unselectAll();
+    var myParams = constructVdsSegmentsParams( theParams );
+
+    updateVdsSegmentsLayer( myParams );
 }
 
 function incidentsTableInit() {
-    updateIncidentsTable( constructIncidentsParams() );
 }
 
 function updateIncidentsLayer( theParams ) {
@@ -291,15 +338,25 @@ function updateIncidentsLayer( theParams ) {
 	// update the url
 	incidents.protocol = 
 	    new OpenLayers.Protocol.HTTP({
-  		url: "/tmcpe/incident/list.kml",
+  		url: "/tmcpe/incident/list.geojson",
 		params: theParams,
-		format: new OpenLayers.Format.KML({
-                    extractStyles: true,
-                    extractAttributes: true
-  		})
+		format: new OpenLayers.Format.GeoJSON({})
 	    });
     }
     incidents.refresh({force: true, params:theParams});
+}
+
+function updateVdsSegmentsLayer( theParams ) {
+    if ( vdsSegmentLines.protocol.url == "" ) {
+	// update the url
+	vdsSegmentLines.protocol = 
+	    new OpenLayers.Protocol.HTTP({
+  		url: "/tmcpe/vds/list.geojson",
+		params: theParams,
+		format: new OpenLayers.Format.GeoJSON({})
+	    });
+    }
+    vdsSegmentLines.refresh({force: true, params:theParams});    
 }
 
 function updateIncidentsTable( theParams ) {
@@ -314,7 +371,19 @@ function updateIncidentsTable( theParams ) {
 	}
     }
 //    alert( "grid " + myURL );
-    incidentGrid.setStore( new dojo.data.ItemFileReadStore( { url: myURL } ) );
+//    incidentGrid.setStore( new dojo.data.ItemFileReadStore( { url: myURL } ) );
+    var store = new tmcpe.ItemVectorLayerReadStore( {vectorLayer: incidents} );
+    incidentGrid.setStore( store );
+}
+
+function constructVdsSegmentsParams( theParams ) {
+    if ( !theParams || theParams == undefined ) {
+	theParams = {};
+    }
+
+    theParams['idIn'] = sectionParams['idIn'];
+
+    return theParams;
 }
 
 function constructIncidentsParams( theParams ) {
@@ -380,6 +449,7 @@ function incidentsLayerInit(theurl) {
     incidents = new OpenLayers.Layer.Vector("Incidents", {
         projection: map.displayProjection,
         strategies: [new OpenLayers.Strategy.Fixed()],
+/*
         protocol: new OpenLayers.Protocol.HTTP({
 	    url: "/tmcpe/incident/list.kml",//theurl,
 	    params: constructIncidentsParams(),
@@ -388,19 +458,23 @@ function incidentsLayerInit(theurl) {
                 extractAttributes: true
             })
         })
+*/
+        protocol: new OpenLayers.Protocol.HTTP({
+	    url: "/tmcpe/incident/list.geojson",//theurl,
+	    params: constructIncidentsParams(),
+	    format: new OpenLayers.Format.GeoJSON({})
+        })
     });
 
     incidents.events.on({
         "featureselected": onFeatureSelectIncident,
-        "featureunselected": onFeatureUnselectIncident
+        "featureunselected": onFeatureUnselectIncident,
+	"featuresadded": function() { updateIncidentsTable() },
+	"featuresremoved": function() { updateIncidentsTable() }
     });
 
     map.addLayers([incidents]);
-    map.events.on({
-	"moveend": function() {	
-	    updateIncidentsQuery();
-	}
-    });
+    map.events.register("moveend", null, function() { updateIncidentsQuery(); } )
 
     var report = function(e) {
         OpenLayers.Console.log(e.type, e.feature.id);
@@ -430,35 +504,65 @@ function incidentsLayerInit(theurl) {
     selectIncident.activate();
 }
 
-function segmentsLayerInit() {
+function segmentsLayerInit( theParams ) {
 
-    var theParams = {};
-    // FIXME: shouldn't be incidents
-    theParams[ 'bbox' ] = [incidents.getExtent().toBBOX()];
+    if ( !theParams )
+    {
+	theParams = {};
+	theParams[ 'district' ] = 12;
+    }
+    theParams[ 'type' ] = 'ML';
+    theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
     theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
-    theParams[ 'district' ] = 12;
 
-    var vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
+    vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
         projection: map.displayProjection,
         strategies: [new OpenLayers.Strategy.Fixed()],
+	style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
         protocol: new OpenLayers.Protocol.HTTP({
-  	    url: "vds/list.kml",
+  	    url: "/tmcpe/vds/list.geojson",
 	    params: theParams,
-            format: new OpenLayers.Format.KML({
-                extractStyles: true,
-                extractAttributes: true
-  	    })
+            format: new OpenLayers.Format.GeoJSON({})
 	})
     });
     
-    vdsSegmentLines.events.on({
-        "featureselected": onFeatureSelectVds,
-        "featureunselected": onFeatureUnselectVds
-    });
+    vdsSegmentLines.events.register("featureselected", null, onFeatureSelectVds )
+    vdsSegmentLines.events.register("featureunselected", null, onFeatureUnselectVds )
+
+    map.events.register("moveend", null, function() { updateVdsSegmentsQuery(); } )
+
 
     map.addLayers([vdsSegmentLines]);
 
-    selectVds = new OpenLayers.Control.SelectFeature(vdsSegmentLines);
+
+    var hoverSelectStyle = OpenLayers.Util.applyDefaults({
+	fillColor: "yellow",
+	strokeColor: "yellow"}, OpenLayers.Feature.Vector.style["select"]);
+
+    hoverVds = new OpenLayers.Control.SelectFeature(vdsSegmentLines,{ 
+ 	hover: true,
+ 	highlightOnly: true,
+        renderIntent: "temporary",
+	selectStyle: hoverSelectStyle
+	//        eventListeners: {
+	//            beforefeaturehighlighted: report,
+	//            featurehighlighted: report,
+	//            featureunhighlighted: report
+	//        }
+    });
+    map.addControl(hoverVds);
+    hoverVds.activate();
+
+
+    var selectStyle = OpenLayers.Util.applyDefaults({
+	fillColor: "blue",
+	strokeColor: "blue"}, OpenLayers.Feature.Vector.style["select"]);
+
+    selectVds = new OpenLayers.Control.SelectFeature(vdsSegmentLines,{
+	highlightOnly: true,
+	renderIntent: "temporary",
+	selectStyle: selectStyle
+    });
     
     map.addControl(selectVds);
     selectVds.activate();   

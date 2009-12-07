@@ -34,7 +34,9 @@ class BootStrap {
 //                 coordinates: [p.x, p.y]
 //             }
 //         }
-         grails.converters.JSON.registerObjectMarshaller(org.postgis.LineString, 1){ ls, json ->
+
+         def cc = 1;
+         grails.converters.JSON.registerObjectMarshaller(org.postgis.LineString, cc++){ ls, json ->
              def ptlist = []
              ls?.getPoints()?.each() { ptlist.add( [ it?.x, it?.y ] ) }
              json.build{
@@ -44,7 +46,7 @@ class BootStrap {
               }
           }
 
-         grails.converters.JSON.registerObjectMarshaller(org.postgis.Point, 2 ){ p, json ->
+         grails.converters.JSON.registerObjectMarshaller(org.postgis.Point, cc++ ){ p, json ->
               json.build{
                  "type(Point)"
                  type("Point")
@@ -52,11 +54,13 @@ class BootStrap {
               }
           }
          
-         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.FacilitySection, 3 ){ s, json ->
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.FacilitySection, cc++ ){ s, json ->
               json.build {
                  "class(FacilitySection)"
                  id(s.id)
                  name(s.name)
+                 freewayId(s.freewayId)
+                 freewayDir(s.freewayDir)
                  geom(s.geom)
                  segGeom(s.segGeom)
                  geometry(s.segGeom)
@@ -64,7 +68,7 @@ class BootStrap {
          }
 
 
-         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident, 4 ){ inc, json ->
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident, cc++ ){ inc, json ->
              def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
              json.build{
                  "class(Incident)"
@@ -79,7 +83,7 @@ class BootStrap {
              }
          }
 
-         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.TmcLogEntry, 5 ){ le, json ->
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.TmcLogEntry, cc++ ){ le, json ->
              def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
              json.build{
                  "class(Incident)"
@@ -94,6 +98,28 @@ class BootStrap {
                  memo(le.memo)
              }
          }
+
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.testbed.Vds, cc++ ){ vds, json ->
+             def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+             json.build{
+                 "class(Vds)"
+                 id(vds.id)
+                 //timestamp( df.format( inc.stampDateTime() ) )
+                 name(vds.name)
+                 calPostmile(vds.calPostmile)
+                 absPostmile(vds.absPostmile)
+                 lanes(vds.lanes)
+                 segmentLength(vds.segmentLength)
+                 versionTs(vds.versionTs)
+                 freeway(vds.freeway)
+                 freewayDir(vds.freewayDir)
+                 vdsType(vds.vdsType)
+                 district(vds.district)
+                 osmRelation(vds.relation)
+             }
+         }
+
+
      }
 
 

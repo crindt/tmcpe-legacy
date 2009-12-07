@@ -8,7 +8,7 @@ import grails.converters.JSON
 import org.joda.time.DateTime
 import org.joda.time.Period
 import java.util.Calendar
-
+import grails.converters.JSON
 
 /**
  * A Incident that has impacted the capacity of the roadway
@@ -171,5 +171,9 @@ class Incident {
 
     String toString() {
         return "CAD:${id} @ ${stampDateTime} AT ${section}"
+    }
+
+    String hackToJSON() {
+        return new grails.converters.JSON( this ).toString()
     }
 }
