@@ -8,14 +8,15 @@ var incidentFeatureMap = new Object();
 var incidents;
 var vdsSegmentLines;
 var hoverVds;
+var selectVds;
+var selectIncident;
 
 function initApp() {
     mapInit();
     segmentsLayerInit();
     incidentsLayerInit();
 
-    vdsSegmentLines.raiseLayer(-100);
-//    incidentsTableInit();
+//    vdsSegmentLines.raiseLayer(-100);
 }
 
 function mapInit(){
@@ -58,14 +59,6 @@ function mapInit(){
 
     map.addControl(new OpenLayers.Control.LayerSwitcher());
 
-/*
-    map.addControl(new OpenLayers.Control.Navigation({
-	zoomWheelEnabled: true, 
-	dragPan: new OpenLayers.Control.DragPan(),
-	zoomBox: new OpenLayers.Control.ZoomBox()
-    }));
-*/
-
     map.zoomToExtent(
         new OpenLayers.Bounds(
 	        -117.9784, 33.594, -117.6832, 33.7768
@@ -73,9 +66,184 @@ function mapInit(){
     );
 }
 
-function onPopupCloseIncident(evt) {
-    selectIncident.unselectAll();
+
+function osm_getTileURL(bounds) {
+    var res = this.map.getResolution();
+    var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+    var y = Math.round((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
+    var z = this.map.getZoom();
+    var limit = Math.pow(2, z);
+
+    if (y < 0 || y >= limit) {
+        return OpenLayers.Util.getImagesLocation() + "404.png";
+    } else {
+        x = ((x % limit) + limit) % limit;
+        return this.url + z + "/" + x + "/" + y + "." + this.type;
+    }
 }
+
+function osm_getOsmaTileURL(bounds) {
+    var res = this.map.getResolution();
+    var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+    var y = Math.round((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
+    var z = this.map.getZoom();
+    var limit = Math.pow(2, z);
+
+    if (y < 0 || y >= limit) {
+        return OpenLayers.Util.getImagesLocation() + "404.png";
+    } else {
+        x = ((x % limit) + limit) % limit;
+	//        return this.url + z + "/" + x + "/" + y + "." + this.type;
+	return this.url + "Tiles/tile/" + z + "/" + x + "/" + y + "." + this.type;
+    }
+}
+
+
+
+function updateIncidentDetails( feature ) {
+    var cad = feature.attributes.id
+    dojo.byId( "incdet" ).innerHTML = 
+	"<h3>INCIDENT " + cad + "</h3><dl>" 
+	+ "<dt>loc</dt><dd>" + feature.attributes.locString + "</dd>"
+	+ "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
+        + "</dl>"
+    
+	+ '<p><A href="/tmcpe/incident/show?id='+cad+'">Show Incident</a></p>';
+}
+
+function onFeatureSelectIncident(event) {
+    var feature = event.feature;
+
+    scrollIncidentsToItem( feature );
+    updateIncidentDetails( feature );
+}
+
+
+function onFeatureUnselectIncident(event) {
+    var feature = event.feature;
+    if(feature.popup) {
+        map.removePopup(feature.popup);
+        feature.popup.destroy();
+        delete feature.popup;
+    }
+}
+
+function onPopupCloseVds(evt) {
+    selectVds.unselectAll();
+}
+function onFeatureSelectVds(event) {
+    var feature = event.feature;
+    var selectedFeature = feature;
+    var lonlats = feature.attributes.vdsLocation.split( ' ' );
+    var lonlat = new OpenLayers.LonLat( lonlats[ 0 ], lonlats[ 1 ] ).transform(map.displayProjection, map.projection)
+    var popup = new OpenLayers.Popup.FramedCloud("chicken", 
+        lonlat,
+        new OpenLayers.Size(100,100),
+        "<h2>"+feature.attributes.name + "</h2>",// + feature.attributes.description,
+        null, true, onPopupCloseVds
+						);
+    feature.popup = popup;
+    map.addPopup(popup);
+}
+function onFeatureUnselectVds(event) {
+    var feature = event.feature;
+    if(feature.popup) {
+        map.removePopup(feature.popup);
+        feature.popup.destroy();
+        delete feature.popup;
+    }
+}
+
+function getVdsSegmentLines() {
+    return vdsSegmentLines;
+}
+
+function getHoverVds() {
+    return hoverVds;
+}
+
+function getIncidentFeature(inname) {
+    var ret = null;
+    for ( f in incidents.features )
+    {
+	if ( incidents.features[f].attributes.name == inname ) {
+	    ret = incidents.features[f];
+	    return incidents.features[f];
+	    break;
+	} else {
+	    continue;
+	}
+    }
+    return ret;
+}
+
+function simpleSelectIncident( event ) {
+    var incident = event.grid.getItem( event.rowIndex );
+
+    // raise it to the top
+    incidents.removeFeatures( incident, { silent:true } );
+    incidents.addFeatures( incident, { silent:true } );
+
+    selectIncident.unselectAll();
+    selectIncident.select( incident );
+}
+
+
+function updateIncidentsQuery( theParams ) {
+
+    // clear any existing selections...
+    if ( selectIncident )
+	selectIncident.unselectAll();
+
+    var myParams = constructIncidentsParams( theParams );
+
+//    loadStart();
+
+    updateIncidentsLayer( myParams );
+//    updateIncidentsTable( myParams );
+
+//    loadEnd();
+}
+
+function updateVdsSegmentsQuery( theParams ) {
+    if ( selectVds )
+	selectVds.unselectAll();
+    var myParams = constructVdsSegmentsParams( theParams );
+
+    updateVdsSegmentsLayer( myParams );
+}
+
+function updateIncidentsLayer( theParams ) {
+
+    if ( incidents.protocol.url == "" ) {
+	// update the url
+	incidents.protocol = 
+	    new OpenLayers.Protocol.HTTP({
+  		url: "/tmcpe/incident/list.geojson",
+		params: theParams,
+		format: new OpenLayers.Format.GeoJSON({})
+	    });
+    }
+    incidents.refresh({force: true, params:theParams});
+}
+
+function updateVdsSegmentsLayer( theParams ) {
+    if ( vdsSegmentLines.protocol.url == "" ) {
+	// update the url
+	vdsSegmentLines.protocol = 
+	    new OpenLayers.Protocol.HTTP({
+  		url: "/tmcpe/vds/list.geojson",
+		params: theParams,
+		format: new OpenLayers.Format.GeoJSON({})
+	    });
+    }
+    vdsSegmentLines.refresh({force: true, params:theParams});    
+}
+
+
+
+
+////////// TABLE FUNCTIONS
 
 function scrollIncidentsToItem( item ) {
     var cad = item.attributes.id;
@@ -117,134 +285,238 @@ function scrollIncidentsToItem( item ) {
 //    alert( "Selected " + cad )
 }
 
-function updateIncidentDetails( feature ) {
-    var cad = feature.attributes.id
-    dojo.byId( "incdet" ).innerHTML = 
-	"<h3>INCIDENT " + cad + "</h3><dl>" 
-	+ "<dt>loc</dt><dd>" + feature.attributes.locString + "</dd>"
-	+ "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
-        + "</dl>"
-    
-	+ '<p><A href="/tmcpe/incident/show?id='+cad+'">Show Incident</a></p>';
-}
-
-function onFeatureSelectIncident(event) {
-    var feature = event.feature;
-    var selectedFeature = feature;
-
-    scrollIncidentsToItem( feature );
-    updateIncidentDetails( feature );
+function updateIncidentsTable( theParams ) {
+    // Point the store to the incidents layer
+    var store = new tmcpe.ItemVectorLayerReadStore( {vectorLayer: incidents} );
+    incidentGrid.setStore( store );
 }
 
 
 
-function onFeatureUnselectIncident(event) {
-    var feature = event.feature;
-    if(feature.popup) {
-        map.removePopup(feature.popup);
-        feature.popup.destroy();
-        delete feature.popup;
+
+
+
+function constructVdsSegmentsParams( theParams ) {
+    if ( !theParams || theParams == undefined ) {
+	// some defaults to prevent runaways
+	theParams = {};
+
+	theParams = {};
+	theParams[ 'district' ] = 12;
     }
+    theParams[ 'type' ] = 'ML';
+    theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
+    theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
+
+    return theParams;
 }
 
-function onPopupCloseVds(evt) {
-    selectVds.unselectAll();
-}
-function onFeatureSelectVds(event) {
-    var feature = event.feature;
-    var selectedFeature = feature;
-    var lonlats = feature.attributes.vdsLocation.split( ' ' );
-    var lonlat = new OpenLayers.LonLat( lonlats[ 0 ], lonlats[ 1 ] ).transform(map.displayProjection, map.projection)
-    var popup = new OpenLayers.Popup.FramedCloud("chicken", 
-        lonlat,
-        new OpenLayers.Size(100,100),
-        "<h2>"+feature.attributes.name + "</h2>",// + feature.attributes.description,
-        null, true, onPopupCloseVds
-						);
-    feature.popup = popup;
-    map.addPopup(popup);
-}
-function onFeatureUnselectVds(event) {
-    var feature = event.feature;
-    if(feature.popup) {
-        map.removePopup(feature.popup);
-        feature.popup.destroy();
-        delete feature.popup;
+function constructIncidentsParams( theParams ) {
+    var w = 0;
+    if ( !theParams || theParams == undefined ) {
+	theParams = {};
     }
-}
+    theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
+    theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
 
-function osm_getTileURL(bounds) {
-    var res = this.map.getResolution();
-    var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
-    var y = Math.round((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
-    var z = this.map.getZoom();
-    var limit = Math.pow(2, z);
-
-    if (y < 0 || y >= limit) {
-        return OpenLayers.Util.getImagesLocation() + "404.png";
-    } else {
-        x = ((x % limit) + limit) % limit;
-        return this.url + z + "/" + x + "/" + y + "." + this.type;
-    }
-}
-
-function osm_getOsmaTileURL(bounds) {
-    var res = this.map.getResolution();
-    var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
-    var y = Math.round((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
-    var z = this.map.getZoom();
-    var limit = Math.pow(2, z);
-
-    if (y < 0 || y >= limit) {
-        return OpenLayers.Util.getImagesLocation() + "404.png";
-    } else {
-        x = ((x % limit) + limit) % limit;
-	//        return this.url + z + "/" + x + "/" + y + "." + this.type;
-	return this.url + "Tiles/tile/" + z + "/" + x + "/" + y + "." + this.type;
-    }
-}
-
-function getVdsSegmentLines() {
-    return vdsSegmentLines;
-}
-
-function getHoverVds() {
-    return hoverVds;
-}
-
-function getIncidentFeature(inname) {
-    var ret = null;
-    for ( f in incidents.features )
-    {
-	if ( incidents.features[f].attributes.name == inname ) {
-	    ret = incidents.features[f];
-	    return incidents.features[f];
-	    break;
-	} else {
-	    continue;
+    // get params from the search form...
+    if ( dijit.byId( 'startDate' ).getValue() ) {
+	var value = dijit.byId( 'startDate' ).getValue();
+	theParams[ 'fromDate' ] = dijit.byId( 'startDate' ).serialize( value );//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'endDate' ).getValue() ) {
+	var value = dijit.byId( 'endDate' ).getValue();
+	theParams['toDate'] = dijit.byId( 'endDate' ).serialize( value );//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'earliestTime' ).getValue() ) {
+	var value = dijit.byId( 'earliestTime' ).getValue();
+	theParams['earliestTime'] = dijit.byId( 'earliestTime' ).serialize( value );//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'latestTime' ).getValue() ) {
+	var value = dijit.byId( 'latestTime' ).getValue();
+	theParams['latestTime'] = dijit.byId( 'latestTime' ).serialize( value );//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'fwy' ).getValue() ) {
+	var value = dijit.byId( 'fwy' ).getValue();
+	theParams['freeway'] = value;//myFormatDateOnly( value );
+    };
+    if ( dijit.byId( 'dir' ).getValue() ) {
+	var value = dijit.byId( 'dir' ).getValue();
+	theParams['direction'] = value;//myFormatDateOnly( value );
+    };
+    var days = [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ];
+    for ( dow in days ) {
+	var dowWid = dijit.byId( days[dow] );
+//	alert( "DOW " + days[dow] + ": " + dowWid );
+	if ( dowWid && dowWid.checked ) {
+//	    alert( "DOW " + days[dow] + " CHECKED" );
+	    if ( theParams['dow'] == undefined ) {
+		theParams['dow'] = dowWid.attr('value');
+	    } else {
+		theParams['dow'] += "," + dowWid.attr('value');
+	    }
 	}
     }
-    return ret;
+//    alert( "PARAMS: " + theParams['dow'] );
+
+//    alert( "THE PARAMS MAX" + theParams['max'] );
+    if ( theParams['max'] == undefined ) 
+    {
+	theParams['max'] = 1000;
+    }
+//    alert( "THE PARAMS MAX" + theParams[ 'max' ] );
+
+    return theParams;
 }
 
-function simpleSelectIncident( event ) {
-    var incident = event.grid.getItem( event.rowIndex );
+
+function incidentsLayerInit(theurl) {
+    incidents = new OpenLayers.Layer.Vector("Incidents", {
+        projection: map.displayProjection,
+        strategies: [new OpenLayers.Strategy.Fixed()],
+/*
+        protocol: new OpenLayers.Protocol.HTTP({
+	    url: "/tmcpe/incident/list.kml",//theurl,
+	    params: constructIncidentsParams(),
+            format: new OpenLayers.Format.KML({
+                extractStyles: true,
+                extractAttributes: true
+            })
+        })
+*/
+        protocol: new OpenLayers.Protocol.HTTP({
+	    url: "/tmcpe/incident/list.geojson",//theurl,
+	    params: constructIncidentsParams(),
+	    format: new OpenLayers.Format.GeoJSON({})
+        })
+    });
+
+    incidents.events.on({
+        "featureselected": onFeatureSelectIncident,
+        "featureunselected": onFeatureUnselectIncident,
+	"featuresadded": function() { updateIncidentsTable() },
+	"featuresremoved": function() { updateIncidentsTable() },
+	"moveend": function() { updateIncidentsQuery(); }
+    });
+
+//    map.events.register("moveend", null, function() { alert("updating query"); updateIncidentsQuery(); } )
+    map.addLayers([incidents]);
+
+    var report = function(e) {
+        OpenLayers.Console.log(e.type, e.feature.id);
+    };
+
+    var selectStyle = OpenLayers.Util.applyDefaults({
+	fillColor: "yellow",
+	strokeColor: "yellow"}, OpenLayers.Feature.Vector.style["select"]);
+
+
+    var hoverIncident = new OpenLayers.Control.SelectFeature(incidents,{ 
+ 	hover: true,
+ 	highlightOnly: true,
+        renderIntent: "temporary",
+	selectStyle: selectStyle
+	//        eventListeners: {
+	//            beforefeaturehighlighted: report,
+	//            featurehighlighted: report,
+	//            featureunhighlighted: report
+	//        }
+    });
+    map.addControl(hoverIncident);
+    hoverIncident.activate();
+
+    selectIncident = new OpenLayers.Control.SelectFeature(incidents);
+    map.addControl(selectIncident);
+    selectIncident.activate();
+}
+
+function segmentsLayerInit( theParams ) {
+
+    var myParams = constructVdsSegmentsParams( theParams );
+
+    vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
+        projection: map.displayProjection,
+        strategies: [new OpenLayers.Strategy.Fixed()],
+	style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
+        protocol: new OpenLayers.Protocol.HTTP({
+  	    url: "/tmcpe/vds/list.geojson",
+	    params: myParams,
+            format: new OpenLayers.Format.GeoJSON({})
+	})
+    });
+    
+    vdsSegmentLines.events.on({
+	"featureselected": onFeatureSelectVds,
+	"featureunselected": onFeatureUnselectVds,
+	"moveend": function() { updateVdsSegmentsQuery( {} ); }
+    });
 
 /*
-    var cad = item.id;
-    var incident = getIncidentFeature( "Incident " + cad );
-    if ( incident == null ) return;
+    vdsSegmentLines.events.register("featureselected", null, onFeatureSelectVds )
+    vdsSegmentLines.events.register("featureunselected", null, onFeatureUnselectVds )
+
+    map.events.register("moveend", null, function() { updateVdsSegmentsQuery(); } )
 */
 
-    // raise it to the top
-    incidents.removeFeatures( incident, { silent:true } );
-    incidents.addFeatures( incident, { silent:true } );
+    map.addLayers([vdsSegmentLines]);
 
-    selectIncident.unselectAll();
-    selectIncident.select( incident );
+
+    var hoverSelectStyle = OpenLayers.Util.applyDefaults({
+	fillColor: "yellow",
+	strokeColor: "yellow"}, OpenLayers.Feature.Vector.style["select"]);
+
+    hoverVds = new OpenLayers.Control.SelectFeature(vdsSegmentLines,{ 
+ 	hover: true,
+ 	highlightOnly: true,
+        renderIntent: "temporary",
+	selectStyle: hoverSelectStyle
+	//        eventListeners: {
+	//            beforefeaturehighlighted: report,
+	//            featurehighlighted: report,
+	//            featureunhighlighted: report
+	//        }
+    });
+    map.addControl(hoverVds);
+    hoverVds.activate();
+
+
+    var selectStyle = OpenLayers.Util.applyDefaults({
+	fillColor: "blue",
+	strokeColor: "blue"}, OpenLayers.Feature.Vector.style["select"]);
+
+    selectVds = new OpenLayers.Control.SelectFeature(vdsSegmentLines,{
+	highlightOnly: true,
+	renderIntent: "temporary",
+	selectStyle: selectStyle
+    });
+    
+    map.addControl(selectVds);
+    selectVds.activate();   
+
+
+
 }
 
-//function highlightFeatureByName( layer, name ) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function centerOnIncident( event )
 {
     alert( 'simple select' ); 
@@ -306,267 +578,3 @@ function loadEnd(event) {
     }
 }
 
-
-function updateIncidentsQuery( theParams ) {
-
-    // clear any existing selections...
-    selectIncident.unselectAll();
-
-    var myParams = constructIncidentsParams( theParams );
-
-//    loadStart();
-
-    updateIncidentsLayer( myParams );
-    updateIncidentsTable( myParams );
-
-//    loadEnd();
-}
-
-function updateVdsSegmentsQuery( theParams ) {
-    selectVds.unselectAll();
-    var myParams = constructVdsSegmentsParams( theParams );
-
-    updateVdsSegmentsLayer( myParams );
-}
-
-function incidentsTableInit() {
-}
-
-function updateIncidentsLayer( theParams ) {
-
-    if ( incidents.protocol.url == "" ) {
-	// update the url
-	incidents.protocol = 
-	    new OpenLayers.Protocol.HTTP({
-  		url: "/tmcpe/incident/list.geojson",
-		params: theParams,
-		format: new OpenLayers.Format.GeoJSON({})
-	    });
-    }
-    incidents.refresh({force: true, params:theParams});
-}
-
-function updateVdsSegmentsLayer( theParams ) {
-    if ( vdsSegmentLines.protocol.url == "" ) {
-	// update the url
-	vdsSegmentLines.protocol = 
-	    new OpenLayers.Protocol.HTTP({
-  		url: "/tmcpe/vds/list.geojson",
-		params: theParams,
-		format: new OpenLayers.Format.GeoJSON({})
-	    });
-    }
-    vdsSegmentLines.refresh({force: true, params:theParams});    
-}
-
-function updateIncidentsTable( theParams ) {
-//    alert( "openlayer " + incidents.protocol.url + "?" + OpenLayers.Util.getParameterString(incidents.protocol.params));
-
-    var myURL = incidents.protocol.url.replace( /\.kml\??.*/gi, ".json" );
-    if( theParams ) {
-	var paramString = OpenLayers.Util.getParameterString(theParams);
-	if(paramString.length > 0) {
-            var separator = (myURL.indexOf('?') > -1) ? '&' : '?';
-            myURL += separator + paramString;
-	}
-    }
-//    alert( "grid " + myURL );
-//    incidentGrid.setStore( new dojo.data.ItemFileReadStore( { url: myURL } ) );
-    var store = new tmcpe.ItemVectorLayerReadStore( {vectorLayer: incidents} );
-    incidentGrid.setStore( store );
-}
-
-function constructVdsSegmentsParams( theParams ) {
-    if ( !theParams || theParams == undefined ) {
-	theParams = {};
-    }
-
-    theParams['idIn'] = sectionParams['idIn'];
-
-    return theParams;
-}
-
-function constructIncidentsParams( theParams ) {
-    var w = 0;
-    if ( !theParams || theParams == undefined ) {
-	theParams = {};
-    }
-    theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
-    theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
-
-    // get params from the search form...
-    if ( dijit.byId( 'startDate' ).getValue() ) {
-	var value = dijit.byId( 'startDate' ).getValue();
-	theParams[ 'fromDate' ] = dijit.byId( 'startDate' ).serialize( value );//myFormatDateOnly( value );
-    };
-    if ( dijit.byId( 'endDate' ).getValue() ) {
-	var value = dijit.byId( 'endDate' ).getValue();
-	theParams['toDate'] = dijit.byId( 'endDate' ).serialize( value );//myFormatDateOnly( value );
-    };
-    if ( dijit.byId( 'earliestTime' ).getValue() ) {
-	var value = dijit.byId( 'earliestTime' ).getValue();
-	theParams['earliestTime'] = dijit.byId( 'earliestTime' ).serialize( value );//myFormatDateOnly( value );
-    };
-    if ( dijit.byId( 'latestTime' ).getValue() ) {
-	var value = dijit.byId( 'latestTime' ).getValue();
-	theParams['latestTime'] = dijit.byId( 'latestTime' ).serialize( value );//myFormatDateOnly( value );
-    };
-    if ( dijit.byId( 'fwy' ).getValue() ) {
-	var value = dijit.byId( 'fwy' ).getValue();
-	theParams['freeway'] = value;//myFormatDateOnly( value );
-    };
-    if ( dijit.byId( 'dir' ).getValue() ) {
-	var value = dijit.byId( 'dir' ).getValue();
-	theParams['direction'] = value;//myFormatDateOnly( value );
-    };
-    var days = [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ];
-    for ( dow in days ) {
-	var dowWid = dijit.byId( days[dow] );
-//	alert( "DOW " + days[dow] + ": " + dowWid );
-	if ( dowWid && dowWid.checked ) {
-//	    alert( "DOW " + days[dow] + " CHECKED" );
-	    if ( theParams['dow'] == undefined ) {
-		theParams['dow'] = dowWid.attr('value');
-	    } else {
-		theParams['dow'] += "," + dowWid.attr('value');
-	    }
-	}
-    }
-//    alert( "PARAMS: " + theParams['dow'] );
-
-//    alert( "THE PARAMS MAX" + theParams['max'] );
-    if ( theParams['max'] == undefined ) 
-    {
-	theParams['max'] = 100;
-    }
-//    alert( "THE PARAMS MAX" + theParams[ 'max' ] );
-
-    return theParams;
-}
-
-
-function incidentsLayerInit(theurl) {
-    incidents = new OpenLayers.Layer.Vector("Incidents", {
-        projection: map.displayProjection,
-        strategies: [new OpenLayers.Strategy.Fixed()],
-/*
-        protocol: new OpenLayers.Protocol.HTTP({
-	    url: "/tmcpe/incident/list.kml",//theurl,
-	    params: constructIncidentsParams(),
-            format: new OpenLayers.Format.KML({
-                extractStyles: true,
-                extractAttributes: true
-            })
-        })
-*/
-        protocol: new OpenLayers.Protocol.HTTP({
-	    url: "/tmcpe/incident/list.geojson",//theurl,
-	    params: constructIncidentsParams(),
-	    format: new OpenLayers.Format.GeoJSON({})
-        })
-    });
-
-    incidents.events.on({
-        "featureselected": onFeatureSelectIncident,
-        "featureunselected": onFeatureUnselectIncident,
-	"featuresadded": function() { updateIncidentsTable() },
-	"featuresremoved": function() { updateIncidentsTable() }
-    });
-
-    map.addLayers([incidents]);
-    map.events.register("moveend", null, function() { updateIncidentsQuery(); } )
-
-    var report = function(e) {
-        OpenLayers.Console.log(e.type, e.feature.id);
-    };
-
-    var selectStyle = OpenLayers.Util.applyDefaults({
-	fillColor: "yellow",
-	strokeColor: "yellow"}, OpenLayers.Feature.Vector.style["select"]);
-
-
-    var hoverIncident = new OpenLayers.Control.SelectFeature(incidents,{ 
- 	hover: true,
- 	highlightOnly: true,
-        renderIntent: "temporary",
-	selectStyle: selectStyle
-	//        eventListeners: {
-	//            beforefeaturehighlighted: report,
-	//            featurehighlighted: report,
-	//            featureunhighlighted: report
-	//        }
-    });
-    map.addControl(hoverIncident);
-    hoverIncident.activate();
-
-    selectIncident = new OpenLayers.Control.SelectFeature(incidents);
-    map.addControl(selectIncident);
-    selectIncident.activate();
-}
-
-function segmentsLayerInit( theParams ) {
-
-    if ( !theParams )
-    {
-	theParams = {};
-	theParams[ 'district' ] = 12;
-    }
-    theParams[ 'type' ] = 'ML';
-    theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
-    theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
-
-    vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
-        projection: map.displayProjection,
-        strategies: [new OpenLayers.Strategy.Fixed()],
-	style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
-        protocol: new OpenLayers.Protocol.HTTP({
-  	    url: "/tmcpe/vds/list.geojson",
-	    params: theParams,
-            format: new OpenLayers.Format.GeoJSON({})
-	})
-    });
-    
-    vdsSegmentLines.events.register("featureselected", null, onFeatureSelectVds )
-    vdsSegmentLines.events.register("featureunselected", null, onFeatureUnselectVds )
-
-    map.events.register("moveend", null, function() { updateVdsSegmentsQuery(); } )
-
-
-    map.addLayers([vdsSegmentLines]);
-
-
-    var hoverSelectStyle = OpenLayers.Util.applyDefaults({
-	fillColor: "yellow",
-	strokeColor: "yellow"}, OpenLayers.Feature.Vector.style["select"]);
-
-    hoverVds = new OpenLayers.Control.SelectFeature(vdsSegmentLines,{ 
- 	hover: true,
- 	highlightOnly: true,
-        renderIntent: "temporary",
-	selectStyle: hoverSelectStyle
-	//        eventListeners: {
-	//            beforefeaturehighlighted: report,
-	//            featurehighlighted: report,
-	//            featureunhighlighted: report
-	//        }
-    });
-    map.addControl(hoverVds);
-    hoverVds.activate();
-
-
-    var selectStyle = OpenLayers.Util.applyDefaults({
-	fillColor: "blue",
-	strokeColor: "blue"}, OpenLayers.Feature.Vector.style["select"]);
-
-    selectVds = new OpenLayers.Control.SelectFeature(vdsSegmentLines,{
-	highlightOnly: true,
-	renderIntent: "temporary",
-	selectStyle: selectStyle
-    });
-    
-    map.addControl(selectVds);
-    selectVds.activate();   
-
-
-
-}

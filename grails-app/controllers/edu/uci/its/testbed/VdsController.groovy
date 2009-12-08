@@ -32,6 +32,13 @@ class VdsController {
                 if ( _params.idIn && _params.type != '' ) {
                     'in'( "id", _params.idIn.split(',')*.toInteger() )
                 }
+                if ( _params.bbox && _params.bbox != '' ) {
+                    def bbox = params.bbox.split(",")
+                    def valid = 0;
+                    log.debug("============BBOX: " + bbox.join(","))
+                    def proj = ( params.proj =~ /^EPSG\:(\d+)/ )
+                    addToCriteria(Restrictions.sqlRestriction( "st_transform(seg_geom,"+proj[0][1]+") && st_setsrid( ST_MAKEBOX2D(ST_MAKEPOINT(" + bbox[0] + ", " + bbox[1] + "),ST_MAKEPOINT( "  + bbox[2] + ", " + bbox[3] + ")), "+proj[0][1]+")" ))
+                }
                 firstResult( _params.offset ? _params.offset.toInteger() : 0 )
                 maxResults( max )
                 order( "freeway" )
@@ -55,6 +62,13 @@ class VdsController {
                 }
                 if ( _params.idIn && _params.type != '' ) {
                     'in'( "id", _params.idIn.split(',')*.toInteger() )
+                }
+                if ( _params.bbox && _params.bbox != '' ) {
+                    def bbox = params.bbox.split(",")
+                    def valid = 0;
+                    log.debug("============BBOX: " + bbox.join(","))
+                    def proj = ( params.proj =~ /^EPSG\:(\d+)/ )
+                    addToCriteria(Restrictions.sqlRestriction( "st_transform(seg_geom,"+proj[0][1]+") && st_setsrid( ST_MAKEBOX2D(ST_MAKEPOINT(" + bbox[0] + ", " + bbox[1] + "),ST_MAKEPOINT( "  + bbox[2] + ", " + bbox[3] + ")), "+proj[0][1]+")" ))
                 }
                 order( "freeway" )
                 order( "freewayDir" )
