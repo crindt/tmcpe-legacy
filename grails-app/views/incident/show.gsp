@@ -79,7 +79,22 @@
 		  <option>5-N</option>
 	      <option>5-S</option>
 	      -->
-	      
+	      <div dojoType="dojo.data.ItemFileReadStore" url="${resource(dir:'incident', file:'listAnalyses?id='+incidentInstance.id)}" jsId="facilityStore"></div>
+	      <label class="firstLabel" for="facility" style="float:left">Facility</label>
+	      <select id="facility"
+		      dojoType="dijit.form.ComboBox"
+		      store="facilityStore"
+		      searchAttr="facility"
+		      value="${incidentInstance.section.freewayId}-${incidentInstance.section.freewayDir}"
+		      autocomplete="true"
+		      hasDownArrow="true"
+		      onChange="updateData();
+				myUpdateVdsSegmentsLayer();
+				"
+		      style="float:left;"
+		      >
+	      </select>
+
 	      <label class="secondLabel" for="theme" style="float:left">Theme</label>
 	      <select id="mapTheme"
 		      dojoType="dijit.form.ComboBox"

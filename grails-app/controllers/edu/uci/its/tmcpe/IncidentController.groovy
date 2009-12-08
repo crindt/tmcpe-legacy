@@ -242,10 +242,16 @@ class IncidentController {
                model:[ incidentInstanceList: incidentList, incidentInstanceTotal: incidentList.count() ])
     }
 
-    def tmp = {
-        render(contentType:"text/html",
-               view:'incident-list',
-               model:[] )
+    def listAnalyses = {
+        def incident = Incident.get( params.id )
+
+        if ( !incident ) {
+            flash.message = "Incident not found with id ${params.id}"
+            redirect(action:list)
+        } else {
+            def tt = [items: incident.listAnalyses() ]
+            render tt  as JSON
+        }
     }
 
 //     def listAllAsJSON = {

@@ -80,13 +80,15 @@ class BootStrap {
                  section(inc.section)
                  location( inc.location )
                  geometry(inc.section?.segGeom)
+                 analyses( inc.listAnalyses() )
+                 analysesCount( inc.listAnalyses()?.size() )
              }
          }
 
          grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.TmcLogEntry, cc++ ){ le, json ->
              def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
              json.build{
-                 "class(Incident)"
+                 "class(TmcLogEntry)"
                  id(le.id)
                  cad(le.cad)
                  deviceNumber(le.device_number)

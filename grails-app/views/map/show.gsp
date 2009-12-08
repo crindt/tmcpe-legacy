@@ -189,8 +189,9 @@
 		  <th field="id" dataType="String" width="10%">CAD ID</th>
 		  <th field="timestamp" dataType="Date" formatter="myFormatDate" width="10%">Timestamp</th>
 		  <th field="locString" dataType="String" width="20%">Section</th>
-		  <th field="memo" dataType="String" width="50%">Description</th>
+		  <th field="memo" dataType="String" width="45%">Description</th>
 		  <th field="delay" dataType="Float" width="10%">Delay</th>
+		  <th field="analysesCount" dataType="Float" width="5%">Analyses</th>
 		</tr>
 	      </thead>
 	    </table>

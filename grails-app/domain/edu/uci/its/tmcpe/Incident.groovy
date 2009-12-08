@@ -176,4 +176,20 @@ class Incident {
     String hackToJSON() {
         return new grails.converters.JSON( this ).toString()
     }
+
+    List listAnalyses() {
+        def fname = [ id, section.freewayId, section.freewayDir ].join( "-" )
+        def p = ~/^${id}-\d+-[NSEW].json/
+        System.out.println( p )
+        def ret = []
+        new File( 'web-app/data' ).eachFileMatch( p ) {
+            f ->
+            System.out.println( f )
+            def vals = f.name.split( /[\.-]/ )
+            def data = [ id: f.name, cad: this.id, fwy: vals[ vals.size()-3 ], dir: vals[ vals.size()-2 ], facility: [ vals[ vals.size()-3 ], vals[ vals.size()-2 ] ].join( "-" ) ]
+            System.out.println( data )
+            ret.add ( data )
+        }
+        return ret
+    }
 }

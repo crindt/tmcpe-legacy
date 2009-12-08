@@ -265,9 +265,8 @@ var loadData = function( inc ){
 	console.debug( "Bad incfacdir " + inc );
 	return;
     }
-    var theUrl = "/tmcpe/data/" + inc.id + "-" + inc.section.freewayId + "-" + inc.section.freewayDir + ".json";
-
-    
+    var fwydir = inc.split( '-' );
+    var theUrl = "/tmcpe/data/" + incidentData.id + "-" + fwydir[0] + "-" + fwydir[1] + ".json";
 
 //    jsProgress.update( {indeterminate: true} );
     dojo.xhrGet({
@@ -509,7 +508,8 @@ var setFacility = function( value ) {
 }
 
 var updateData = function() {
-    loadData(incidentData);      // grabs data for the given incident (incidentData must be json defined in the page)
+    var v = dojo.byId( 'facility' ).value;
+    loadData( v ) ;      // grabs data for the given incident (incidentData must be json defined in the page)
     redraw();        // redraws polygons
     syncInterface(); // sets interface paramters to match
 }
@@ -843,10 +843,11 @@ var makeEvents = function()
 }
 
 var stationObjs;
-var sectionParams = {idIn:[]};
+var sectionParams;
 var makeStations = function()
 {
     stationObjs = new Array();
+    sectionParams = {idIn:[]};
     for ( i = 0; i < stations.length; i = i + 1 )
     {
 	var station = stations[i];
@@ -873,6 +874,12 @@ var makeStations = function()
 	    stationObjs.push( text );
 	}
     }
+}
+
+var myUpdateVdsSegmentsLayer = function( theParams ) {
+    if ( sectionParams && sectionParams['idIn'] && sectionParams['idIn'].length > 0 )
+	updateVdsSegmentsLayer( sectionParams );
+    map.zoomToExtent( getVdsSegmentLines().getExtent().toBBOX() );
 }
 
 var mySegmentsLayerInit = function() {
