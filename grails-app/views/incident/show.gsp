@@ -2,22 +2,25 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main" />
-    <title>Show Incident</title>
-    <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'tmcpe.css')}" />
-    <script type="text/javascript" djConfig="parseOnLoad: true"
-	    src="${createLinkTo(dir:'js/dojo/dojo-1.4/dojo',file:'dojo.js.uncompressed.js')}"></script> 
-    <script src="${createLinkTo(dir:'js/tmcpe',file:'/tmcpe.js')}" djConfig="parseOnLoad: true"></script>
-    <script src="${createLinkTo(dir:'js/tmcpe',file:'/TimeSpaceDiagram.js')}" djConfig="parseOnLoad: true"></script>
-    <script src="${createLinkTo(dir:'js/tmcpe',file:'/IncidentView.js')}" djConfig="parseOnLoad: true"></script>
+    <title>Incident ${incidentInstance.id} Detail</title>
 
+    <!-- This layout adds the menu and inserts the body defined below into a content pane -->
     <meta name="layout" content="main" />
 
-    <!-- Load the map javascript -->
+    <!-- Load the dojo stuff -->
+    <tmcpe:dojo_1_4 />
+
+    <!-- Load the map javascript and css -->
     <tmcpe:testbedMap />
 
+    <!-- Load the TSD widget stuff -->
+    <tmcpe:timeSpaceDiagram />
+
+    <!-- Load the application javascript -->
+    <script src="${createLinkTo(dir:'js/tmcpe',file:'/IncidentView.js')}" djConfig="parseOnLoad: true"></script> 
 
     <g:javascript>
+      <!-- Here are all the dojo widgets we use -->
       dojo.require("dojo.data.ItemFileReadStore");
       dojo.require("dijit.form.ComboBox");
       dojo.require("dijit.form.HorizontalSlider");
@@ -28,6 +31,7 @@
       dojo.require("dojo.date.locale");
 
 
+      <!-- A function to format a javascript date object into short-format date/time string -->
       var myFormatDate = function(inDatum){
         var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
         return ret;
@@ -36,7 +40,9 @@
     </g:javascript>
 
   </head>
-    <body class="tundra" onload="incidentView.initApp();">
+
+
+  <body class="tundra" onload="incidentView.initApp();">
     <div dojoType="tmcpe.IncidentView" jsId="incidentView" id="incidentView"></div>
     <div dojoType="dijit.layout.BorderContainer" region="center" design="headline" splitter="false" >
 
@@ -50,7 +56,7 @@
 
       <!-- MAP PANE -->
       <div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" splitter="false" style="width:50%;">
-	<div id="map" jsId="map"></div>
+	<div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
       </div>
 
       <!-- TIME SPACE DIAGRAM PANE -->
@@ -97,8 +103,8 @@
 		 showButtons="false"
 		 discreteValues="41"
 		 style="width:200px; height: 40px; float:left;"
-		 onLoad="changeThemeScale( dojo.byId( 'scaleValue' ) );"
-		 onChange="dojo.byId( 'scaleValue' ).textContent=arguments[0]; changeThemeScale( arguments[ 0 ] );"
+		 onLoad="tsd.setThemeScale( dojo.byId( 'scaleValue' ) );"
+		 onChange="dojo.byId( 'scaleValue' ).textContent=arguments[0]; tsd.setThemeScale( arguments[ 0 ] );"
 		 >
 	      <div dojoType="dijit.form.HorizontalRule" container="bottomDecoration"
 		   count=11 style="height:5px;">

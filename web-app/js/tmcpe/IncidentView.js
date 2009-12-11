@@ -21,12 +21,23 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     constructor: function() {
     },
 
+
     initApp: function() {
-	mapInit();
 	this.initVdsSegmentsLayer( {} );
     },
 
+    getMap: function() {
+	if ( this._map )
+	    return this._map._map;
+	else {
+	    this._map = dijit.byId( 'map' );
+	    return this._map._map;
+	}
+    },
+
     _constructVdsSegmentsParams: function( theParams ) {
+
+	if ( this._map == null ) 
 
 	this._tsd = dijit.byId( 'tsd' );
 	var tsd = this._tsd;
@@ -38,7 +49,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	}
 
 	theParams[ 'type' ] = 'ML';
-	theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
+	theParams[ 'bbox' ] = [this.getMap().getExtent().toBBOX()];
 	theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
 
 	var sectionParams = {idIn:[]};
@@ -76,8 +87,6 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		});
 	}
 	vdsSegmentLines.refresh({force: true, params:theParams});    
-
-	this._linkFeaturesToCells();
     },
 
     _linkFeaturesToCells: function() {
@@ -91,17 +100,34 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		dojo.connect( td[i][j], "onmouseover", this, "_hoverStation" );
 	    }
 	}
+
+	// Loop over the stations to connect them to features
+	var vsl = this._vdsSegmentLines;
+	for ( var j = 0; j < tsd._data.segments.length; ++j ) {
+	    var station = tsd._stations[ tsd._data.segments[ j ].stnidx ];
+	    var feature = null;
+	    // Loop over the lines until we find the correct station
+	    for ( var k = 0; k < vsl.features.length && !feature; ++k )
+	    {
+		var ff = vsl.features[ k ];
+		console.log( [station.vdsid,' =?= ', ff.attributes[ 'id' ] ].join( '') );
+		if ( station.vdsid == ff.attributes[ 'id' ] ) {
+		    feature = ff;
+		}
+	    }
+	    if ( feature && feature.layer ) {
+		station.feature = feature;
+	    }
+	}
     },
 
     initVdsSegmentsLayer: function( theParams ) {
 
 	var myParams = this._constructVdsSegmentsParams( theParams );
-	this._map = dijit.byId( 'map' );
-	//var map = this._map;
 
 
 	this._vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
-            projection: map.displayProjection,
+            projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
 	    style: {strokeWidth: 4, strokeColor: "#00ff00", strokeOpacity: 0.75 },
             protocol: new OpenLayers.Protocol.HTTP({
@@ -113,13 +139,13 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	
 	var obj = this;
 	this._vdsSegmentLines.events.on({
-//	    "featureselected": onFeatureSelectVds,
-//	    "featureunselected": onFeatureUnselectVds,
+	    "featuresadded": function() { obj._linkFeaturesToCells(); },
+	    "featuresremoved": function() { obj._linkFeaturesToCells(); },
 	    "moveend": function() { obj.updateVdsSegmentsQuery( {} ); }
 	});
 
 
-	map.addLayers([this._vdsSegmentLines]);
+	this.getMap().addLayers([this._vdsSegmentLines]);
 
 
 	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
@@ -140,7 +166,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    //            featureunhighlighted: report
 	    //        }
 	});
-	map.addControl(this._hoverVds);
+	this.getMap().addControl(this._hoverVds);
 	this._hoverVds.activate();
 
 
@@ -154,13 +180,17 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    selectStyle: selectStyle
 	});
 	
-	map.addControl(this._selectVds);
+	this.getMap().addControl(this._selectVds);
 	this._selectVds.activate();   
 
+	this.getMap().zoomToExtent( this._vdsSegmentLines.getExtent() );
 
-	this._linkFeaturesToCells();
-
-	map.zoomToExtent( this._vdsSegmentLines.getExtent() );
+	// OK, call linkfeaturestocells when features change on the layer
+/*
+	dojo.connect( this._vdsSegmentLines, "moveend", this.updateVdsSegmentsQuery );
+	dojo.connect( this._vdsSegmentLines, "featuresadded", this._linkFeaturesToCells );
+	dojo.connect( this._vdsSegmentLines, "featuresremoved", this._linkFeaturesToCells );
+*/
 
     },
 
@@ -173,6 +203,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	// HACK: highlight the corresponding station in the map
 	var vsl = this._vdsSegmentLines;
 	if ( vsl ) {
+	    var feature = station.feature;
+	    /*
 	    // Loop over the lines until we find the correct station
 	    var feature = null;
 	    for ( var j = 0; j < vsl.features.length && !feature; ++j )
@@ -182,6 +214,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		    feature = ff;
 		}
 	    }
+*/
 /*
 	    if ( feature ) {
 		feature.style.strokeColor = tdc.style.backgroundColor;
@@ -192,8 +225,10 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 */
 
 	    // OK, found the feature.  Highlight it?  select it
-	    this._hoverVds.unselectAll();
-	    this._hoverVds.select( feature );
+	    if ( feature ) {
+		this._hoverVds.unselectAll();
+		this._hoverVds.select( feature );
+	    }
 	}
     },
 
@@ -212,6 +247,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		var tdc = this._tsd._td[timeidx][j];
 		var station = this._tsd._stations[ tdc.getAttribute('station') ];
 		
+/*
 		// Loop over the lines until we find the correct station
 		var feature = null;
 		for ( var k = 0; k < vsl.features.length && !feature; ++k )
@@ -222,6 +258,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 			feature = ff;
 		    }
 		}
+*/
+		var feature = station.feature;
 		// OK, found the feature.  alter the style
 		if ( feature ) {
 		    feature.style.strokeColor = tdc.style.backgroundColor;

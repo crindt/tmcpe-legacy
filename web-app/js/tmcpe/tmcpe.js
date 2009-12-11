@@ -1,10 +1,5 @@
 //////// HERE'S A BUNCH OF MAP CRAP
-var lon = 5;
-var lat = 40;
-var zoom = 5;
-var map, select;
 
-var incidentFeatureMap = new Object();
 var incidents;
 var vdsSegmentLines;
 var hoverVds;
@@ -12,92 +7,12 @@ var selectVds;
 var selectIncident;
 
 function initApp() {
-    mapInit();
-    segmentsLayerInit();
+//    mapInit();
+//    segmentsLayerInit();
     incidentsLayerInit();
 
 //    vdsSegmentLines.raiseLayer(-100);
 }
-
-function mapInit(){
-    var options = {
-        projection: new OpenLayers.Projection("EPSG:900913"),
-        displayProjection: new OpenLayers.Projection("EPSG:4326"),
-        units: "m",
-	//	        minZoomLevel: 3,
-	//	        numZoomLevels: 17
-	minZoomLevel: 1,
-	maxZoomLevel: 17,
-	numZoomLevels: 17,
-        maxResolution: 156543.0339,
-        maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34,
-                                         20037508.34, 20037508.34)
-    };
-    map = new OpenLayers.Map('map', options);
-    var mapnik = new OpenLayers.Layer.TMS(
-        "OpenStreetMap (Mapnik)",
-        "http://tile.openstreetmap.org/",
-        {
-            type: 'png', getURL: osm_getTileURL,
-            displayOutsideMaxExtent: true,
-            attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>'
-        }
-    );
-    var osma = new OpenLayers.Layer.TMS(
-        "OpenStreetMap (Osmarender)",
-        "http://tah.openstreetmap.org/",
-        {
-            type: 'png', getURL: osm_getOsmaTileURL,
-            displayOutsideMaxExtent: true,
-            attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>'
-        }
-    );
-    //            var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true});
-
-
-    map.addLayers([mapnik, osma]);
-
-    map.addControl(new OpenLayers.Control.LayerSwitcher());
-
-    map.zoomToExtent(
-        new OpenLayers.Bounds(
-	        -117.9784, 33.594, -117.6832, 33.7768
-        ).transform(map.displayProjection, map.projection)
-    );
-}
-
-
-function osm_getTileURL(bounds) {
-    var res = this.map.getResolution();
-    var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
-    var y = Math.round((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
-    var z = this.map.getZoom();
-    var limit = Math.pow(2, z);
-
-    if (y < 0 || y >= limit) {
-        return OpenLayers.Util.getImagesLocation() + "404.png";
-    } else {
-        x = ((x % limit) + limit) % limit;
-        return this.url + z + "/" + x + "/" + y + "." + this.type;
-    }
-}
-
-function osm_getOsmaTileURL(bounds) {
-    var res = this.map.getResolution();
-    var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
-    var y = Math.round((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
-    var z = this.map.getZoom();
-    var limit = Math.pow(2, z);
-
-    if (y < 0 || y >= limit) {
-        return OpenLayers.Util.getImagesLocation() + "404.png";
-    } else {
-        x = ((x % limit) + limit) % limit;
-	//        return this.url + z + "/" + x + "/" + y + "." + this.type;
-	return this.url + "Tiles/tile/" + z + "/" + x + "/" + y + "." + this.type;
-    }
-}
-
 
 
 function updateIncidentDetails( feature ) {
@@ -122,7 +37,7 @@ function onFeatureSelectIncident(event) {
 function onFeatureUnselectIncident(event) {
     var feature = event.feature;
     if(feature.popup) {
-        map.removePopup(feature.popup);
+        map._map.removePopup(feature.popup);
         feature.popup.destroy();
         delete feature.popup;
     }
@@ -135,7 +50,7 @@ function onFeatureSelectVds(event) {
     var feature = event.feature;
     var selectedFeature = feature;
     var lonlats = feature.attributes.vdsLocation.split( ' ' );
-    var lonlat = new OpenLayers.LonLat( lonlats[ 0 ], lonlats[ 1 ] ).transform(map.displayProjection, map.projection)
+    var lonlat = new OpenLayers.LonLat( lonlats[ 0 ], lonlats[ 1 ] ).transform(map._map.displayProjection, map._map.projection)
     var popup = new OpenLayers.Popup.FramedCloud("chicken", 
         lonlat,
         new OpenLayers.Size(100,100),
@@ -143,12 +58,12 @@ function onFeatureSelectVds(event) {
         null, true, onPopupCloseVds
 						);
     feature.popup = popup;
-    map.addPopup(popup);
+    map._map.addPopup(popup);
 }
 function onFeatureUnselectVds(event) {
     var feature = event.feature;
     if(feature.popup) {
-        map.removePopup(feature.popup);
+        map._map.removePopup(feature.popup);
         feature.popup.destroy();
         delete feature.popup;
     }
@@ -305,7 +220,7 @@ function constructVdsSegmentsParams( theParams ) {
 	theParams[ 'district' ] = 12;
     }
     theParams[ 'type' ] = 'ML';
-    theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
+    theParams[ 'bbox' ] = [map._map.getExtent().toBBOX()];
     theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
 
     return theParams;
@@ -316,7 +231,7 @@ function constructIncidentsParams( theParams ) {
     if ( !theParams || theParams == undefined ) {
 	theParams = {};
     }
-    theParams[ 'bbox' ] = [map.getExtent().toBBOX()];
+    theParams[ 'bbox' ] = [map._map.getExtent().toBBOX()];
     theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
 
     // get params from the search form...
@@ -372,7 +287,7 @@ function constructIncidentsParams( theParams ) {
 
 function incidentsLayerInit(theurl) {
     incidents = new OpenLayers.Layer.Vector("Incidents", {
-        projection: map.displayProjection,
+        projection: map._map.displayProjection,
         strategies: [new OpenLayers.Strategy.Fixed()],
 /*
         protocol: new OpenLayers.Protocol.HTTP({
@@ -400,7 +315,7 @@ function incidentsLayerInit(theurl) {
     });
 
 //    map.events.register("moveend", null, function() { alert("updating query"); updateIncidentsQuery(); } )
-    map.addLayers([incidents]);
+    map._map.addLayers([incidents]);
 
     var report = function(e) {
         OpenLayers.Console.log(e.type, e.feature.id);
@@ -422,11 +337,11 @@ function incidentsLayerInit(theurl) {
 	//            featureunhighlighted: report
 	//        }
     });
-    map.addControl(hoverIncident);
+    map._map.addControl(hoverIncident);
     hoverIncident.activate();
 
     selectIncident = new OpenLayers.Control.SelectFeature(incidents);
-    map.addControl(selectIncident);
+    map._map.addControl(selectIncident);
     selectIncident.activate();
 }
 
@@ -435,7 +350,7 @@ function segmentsLayerInit( theParams ) {
     var myParams = constructVdsSegmentsParams( theParams );
 
     vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
-        projection: map.displayProjection,
+        projection: map._map.displayProjection,
         strategies: [new OpenLayers.Strategy.Fixed()],
 	style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
         protocol: new OpenLayers.Protocol.HTTP({
@@ -455,10 +370,10 @@ function segmentsLayerInit( theParams ) {
     vdsSegmentLines.events.register("featureselected", null, onFeatureSelectVds )
     vdsSegmentLines.events.register("featureunselected", null, onFeatureUnselectVds )
 
-    map.events.register("moveend", null, function() { updateVdsSegmentsQuery(); } )
+    map._map.events.register("moveend", null, function() { updateVdsSegmentsQuery(); } )
 */
 
-    map.addLayers([vdsSegmentLines]);
+    map._map.addLayers([vdsSegmentLines]);
 
 
     var hoverSelectStyle = OpenLayers.Util.applyDefaults({
@@ -476,7 +391,7 @@ function segmentsLayerInit( theParams ) {
 	//            featureunhighlighted: report
 	//        }
     });
-    map.addControl(hoverVds);
+    map._map.addControl(hoverVds);
     hoverVds.activate();
 
 
@@ -490,7 +405,7 @@ function segmentsLayerInit( theParams ) {
 	selectStyle: selectStyle
     });
     
-    map.addControl(selectVds);
+    map._map.addControl(selectVds);
     selectVds.activate();   
 
 
@@ -504,24 +419,11 @@ function segmentsLayerInit( theParams ) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 function centerOnIncident( event )
 {
     alert( 'simple select' ); 
 
-    //    var layers = map.getLayersByName( layer );
+    //    var layers = map._map.getLayersByName( layer );
     //    assert( layers.length = 1 );
     //    var layer = layers[ 0 ];
     var item = event.grid.getItem( event.rowIndex );
@@ -545,10 +447,11 @@ function centerOnIncident( event )
 
     bbox = incident.geometry.getBounds().clone();
 
-    map.zoomToExtent( bbox );
+    map._map.zoomToExtent( bbox );
 }
 
 var layersLoading = 0;
+<!--
 function loadStart(event) {
     if (layersLoading == 0) {
 	//showLoadingImage();
@@ -556,7 +459,7 @@ function loadStart(event) {
 	var animnodes = dojo.query( '#animation' );
 	var animnode = null;
 	if ( animnodes[0] == null ) {
-	    var map = dojo.query( '.olMapViewport' );
+	    var map = dojo.query( '.olMap._mapViewport' );
 	    animnode = map.addContent('<div id="animation" style="position:relative;top:50%;left:50%;visible:true;"/>');
 	} else {
 	    animnode = animnodes[ 0 ];
@@ -570,6 +473,7 @@ function loadStart(event) {
     layersLoading++;
 }
 
+
 function loadEnd(event) {
     layersLoading--;
     if (layersLoading == 0) {
@@ -578,3 +482,13 @@ function loadEnd(event) {
     }
 }
 
+function filterChange( arguments ) {
+    if ( arguments[ 0 ] ) {
+//	incidentGrid.filter( function (item) {
+//	    return item.analysisCount>0;
+//	});
+	incidentGrid.filter( { id: '61*' } );
+    } else {
+	incidentGrid.filter( { id: '*' } );
+    }
+}

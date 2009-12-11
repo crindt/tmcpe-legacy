@@ -87,6 +87,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this.updateTheme();
     },
 
+    setThemeScale: function( ths ) {
+	this._themeScale = ths;
+	this.updateTheme();
+    },
+
     updateTheme: function() {
 	console.log( "UPDATING THEME" );
 	var numrows = ((this._data.opts.prewindow/1) + (this._data.opts.postwindow/1))/5;

@@ -3,17 +3,15 @@
     <title>Testbed Network View Using Openlayers</title>
     <meta name="layout" content="main" />
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
-    <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'tmcpe.css')}" />
-<!--
-    <script type="text/javascript" djConfig="parseOnLoad: true"
-	    src="${createLinkTo(dir:'js/dojo/dojo-release-1.3.2/dojo',file:'dojo.js')}"></script>
--->
-    <script type="text/javascript" djConfig="parseOnLoad: true"
-	    src="${createLinkTo(dir:'js/dojo/dojo-1.4/dojo',file:'dojo.js')}"></script> 
-    <!--    <g:javascript library="tmcpe/tmcpe" />  -->
-    <script src="${createLinkTo(dir:'js/tmcpe',file:'/ItemVectorLayerReadStore.js')}" djConfig="parseOnLoad: true"></script>
-    <script src="${createLinkTo(dir:'js/tmcpe',file:'/tmcpe.js')}" djConfig="parseOnLoad: true"></script>
+
+    <!-- Load the dojo stuff -->
+    <tmcpe:dojo_1_4 />
+
+    <!-- Load the map javascript and css -->
+    <tmcpe:testbedMap />
+
     <g:javascript>
+      <!-- Here are all the dojo widgets we use -->
       dojo.require("dojo.data.ItemFileReadStore");
       dojo.require("dojox.grid.DataGrid");
       dojo.require("dijit.InlineEditBox");
@@ -113,9 +111,6 @@
       dojo.addOnLoad(function(){});
     </g:javascript>
 
-    <!-- Load the map javascript -->
-    <tmcpe:testbedMap />
-
   </head>
   <body onload="initApp();" 
 	class="tundra"><!--pees-->
@@ -158,6 +153,15 @@
 	<input id="sat" name="sat" dojoType="dijit.form.CheckBox" value="6" checked="checked"/>
 	<label for="sun">Sun</label>	
 	<input id="sun" name="sun" dojoType="dijit.form.CheckBox" value="0" checked="checked"/>
+<!--
+	<label for="onlyAnalyzed">Limit to Analyzed</label>	
+	<input id="onlyAnalyzed" name="Analyzed" 
+	       dojoType="dijit.form.CheckBox" 
+	       value="analyzed" 
+	       checked="checked"
+	       onChange="incidentGrid.filter( { id: '61*' } )"
+	       />
+-->
 	<button dojoType="dijit.form.Button" type="submit" name="submitButton"
 		value="Submit">
           Submit
@@ -171,8 +175,10 @@
 	</button>
       </div>
       <div dojoType="dijit.layout.BorderContainer" id="mapgrid" region="center" design="sidebar" style="background:green;" splitter="false" liveSplitters="false">
-	<div dojoType="dijit.layout.ContentPane" id="map" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
+	<div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
+	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
 	</div>
+
 	<div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
 	  <div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%">
 	    <table id="incidentGridNode" 
@@ -196,39 +202,10 @@
 	      </thead>
 	    </table>
 	  </div>
-<!--
-	  <div dojoType="dijit.layout.ContentPane" id="gridSummaryContainer" region="bottom" style="background:yellow;" splitter="false" liveSplitters="false">
-	    <div dojoType="dojo.data.ItemFileReadStore" data="incidentSummaryData" jsId="incidentSummaryStore" id="incidentSummaryNode" defaultTimeout="20000"></div>
-	    <table id="incidentSummaryGridNode" 
-		   jsId="incidentSummaryGrid" 
-		   dojoType="dojox.grid.DataGrid" 
-		   sortInfo=2
-		   region="center"
-		   rowSelector="20px"
-		   store="incidentSummaryStore"
-		   style="width:100%;height:100%;"
-		   structure="incidentSummaryLayout"
-		   >
-	    </table>
-	  </div>
--->
 	</div>
       </div>
       <div dojoType="dijit.layout.ContentPane" gutters="true" region="right" style="width: 300px">
-	<!--Select an incident on the map to view its details here.-->
 	<p id="incdet">Select an incident on the map to view its details here.</p>
-	<!--
-	    <div dojoType="dojox.layout.TableContainer" cols="1" id="tc1">
-	      <div dojoType="dijit.form.TextBox" id="incdet.Cad" title="CAD:" value="">
-	      </div>
-	      <div dojoType="dijit.form.TextBox" id="incdet.DateTime" title="Timestamp:" value="">
-	      </div>
-	      <div dojoType="dijit.form.TextBox" id="incdet.Section" title="Section" value="">
-	      </div>
-	      <div dojoType="dijit.form.TextBox" id="incdet.Description" title="Description" value="">
-	      </div>
-	    </div>
-	    -->
       </div>
     </div>
     
