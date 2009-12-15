@@ -118,6 +118,7 @@ class BootStrap {
                  vdsType(vds.vdsType)
                  district(vds.district)
                  osmRelation(vds.relation)
+                 vdsLocation(vds.geom)
              }
          }
 

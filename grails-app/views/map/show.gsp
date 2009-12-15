@@ -4,11 +4,9 @@
     <meta name="layout" content="main" />
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 
-    <!-- Load the dojo stuff -->
-    <tmcpe:dojo_1_4 />
-
     <!-- Load the map javascript and css -->
-    <tmcpe:testbedMap />
+    <tmcpe:openlayers />  <!-- brings in the openlayers stuff -->
+    <tmcpe:tmcpe />       <!-- This adds tmcpe to the dojo path so we can "require" our widgets -->
 
     <g:javascript>
       <!-- Here are all the dojo widgets we use -->
@@ -21,6 +19,7 @@
       dojo.require("dijit.form.Form");
       dojo.require("dijit.form.CheckBox");
       dojo.require("dojo._base.json");
+      dojo.require("tmcpe.IncidentList");
 
       var myFormatDate = function(inDatum){
         var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
@@ -108,12 +107,13 @@
       {field:'delay',dataType:'Float', width:'10%'}
       ];
 
-      dojo.addOnLoad(function(){});
+      dojo.addOnLoad(function(){ incidentList ? incidentList.initApp() : alert( "NO INCIDENT LIST!" );});
     </g:javascript>
 
   </head>
-  <body onload="initApp();" 
-	class="tundra"><!--pees-->
+  <body onload="" 
+	class="tundra">
+    <div dojoType="tmcpe.IncidentList" jsId="incidentList" id="incidentList"></div>
 
     <div dojoType="dijit.layout.BorderContainer" id="mapView" design="headline" region="center" gutters="true" liveSplitters="false">
       <div dojoType="dijit.layout.ContentPane" id="queryspec" region="top">
@@ -167,7 +167,8 @@
           Submit
 	  <script type="dojo/method" event="onClick" args="evt">
 	    // It's valid, update the map query
-	    updateIncidentsQuery();
+	    var il = dijit.byId( 'incidentList' );
+	    il.updateIncidentsQuery();
 	  </script>
 	</button>
 	<button dojoType="dijit.form.Button" type="reset">
@@ -181,13 +182,13 @@
 
 	<div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
 	  <div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%">
-	    <table id="incidentGridNode" 
+	    <table id="incidentGrid" 
 		   jsId="incidentGrid" 
 		   dojoType="dojox.grid.DataGrid" 
 		   sortInfo=2
 		   region="center"
 		   rowSelector="20px"
-		   onRowClick="simpleSelectIncident"
+		   onRowClick="incidentList.simpleSelectIncident"
 		   style="width:100%;height:5em;"
 		   >
 	      <thead>
@@ -205,7 +206,7 @@
 	</div>
       </div>
       <div dojoType="dijit.layout.ContentPane" gutters="true" region="right" style="width: 300px">
-	<p id="incdet">Select an incident on the map to view its details here.</p>
+	<p id="incidentDetails">Select an incident on the map to view its details here.</p>
       </div>
     </div>
     

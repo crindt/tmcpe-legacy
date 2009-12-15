@@ -7,19 +7,16 @@
     <!-- This layout adds the menu and inserts the body defined below into a content pane -->
     <meta name="layout" content="main" />
 
-    <!-- Load the dojo stuff -->
-    <tmcpe:dojo_1_4 />
-
     <!-- Load the map javascript and css -->
-    <tmcpe:testbedMap />
-
-    <!-- Load the TSD widget stuff -->
-    <tmcpe:timeSpaceDiagram />
-
-    <!-- Load the application javascript -->
-    <script src="${createLinkTo(dir:'js/tmcpe',file:'/IncidentView.js')}" djConfig="parseOnLoad: true"></script> 
+    <tmcpe:openlayers />
+    <tmcpe:tmcpe />
 
     <g:javascript>
+      <!-- Here are the custom widgets -->
+      dojo.require("tmcpe.IncidentView"); <!-- This is the application (behavioral) widget -->
+      dojo.require("tmcpe.TestbedMap");
+      dojo.require("tmcpe.TimeSpaceDiagram");
+
       <!-- Here are all the dojo widgets we use -->
       dojo.require("dojo.data.ItemFileReadStore");
       dojo.require("dijit.form.ComboBox");
@@ -30,19 +27,21 @@
       dojo.require("dojox.grid.DataGrid");
       dojo.require("dojo.date.locale");
 
-
       <!-- A function to format a javascript date object into short-format date/time string -->
       var myFormatDate = function(inDatum){
         var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
         return ret;
       };
 
+      <!-- Fire up the application -->
+      dojo.addOnLoad(function(){ incidentView ? incidentView.initApp() : alert( "NO INCIDENT LIST!" );});
+
     </g:javascript>
 
   </head>
 
 
-  <body class="tundra" onload="incidentView.initApp();">
+  <body class="tundra" onload="">
     <div dojoType="tmcpe.IncidentView" jsId="incidentView" id="incidentView"></div>
     <div dojoType="dijit.layout.BorderContainer" region="center" design="headline" splitter="false" >
 
