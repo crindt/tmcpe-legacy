@@ -1,2 +1,5 @@
 grails-app/conf/Datasources.groovy
 grails-app/conf/DataSource.groovy
+*~
+#*#
+*#

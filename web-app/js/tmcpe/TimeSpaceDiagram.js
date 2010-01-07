@@ -1,41 +1,97 @@
 // all packages need to dojo.provide() _something_, and only one thing
 dojo.provide("tmcpe.TimeSpaceDiagram");
 
-// 
+// TimeSpaceDiagram is a dojo widget...
 dojo.require("dijit._Widget");
-dojo.require("dijit._Templated");
+
+// We assume the TSD data comes from a URI returning the json data to plot
 dojo.require("dojox.json.ref");
 
-//dojo.require("dojox.gfx.Surface");
 
-// our declared class
 dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
+    // summary: 
+    //        A TimeSpaceDiagram widget rendered as a colored HTML table
+    // description:
+    //        This widget renders a TimeSpaceDiagram (in the traffic flow sense) 
+    //        based upon json data obtained from a provided URI.  Currently, it
+    //        can display data for each cell using a variety of themes mostly 
+    //        trending from green to red as congestion gets worse.
 
-    // private vars
+    // _data: Object
+    //        A variable for holding the JSON data read from the URI
     _data: null,
-    _stations: null,
-    _minStation: null,
-    _maxStation: null,
-    incident: null,
-    facility: null,
-    direction: null,
-    colorDataAccessor: "stdspd",
-    _colorDataAccessor: null,
-    _numTimeRows: null,
-    _themeScale: 0.75,   // by default
-    _td: null,        // for holding the td cells
-    _tr: null,        // for holding the td cells
 
-    // methods
+    // _stations: Object
+    //        A variable for holding VDS station data (NOTE: this will soon be deprecated)
+    _stations: null,
+
+    // _colorDataAccessor: function(int i, int j)
+    //        A variable holding the function to use to compute the color for time-space 
+    //        cell (i,j).  This is a feature used to theme the TSD (e.g., display absolute 
+    //        speeds instead of deviations from the mean)
+    _colorDataAccessor: null,
+
+    // _themeScale: Float
+    //        A scaling parameter used by the colorDataAccessor.  This is generally controlled by the user interface
+    _themeScale: 0.75,
+
+    // colorDataAccessor: String
+    //        The name of the standard accessor to use.  This should be set by the user interface.
+    //        In the current implementation (which is a bit application specific), standard color 
+    //        accessors are available to compute color as follows:
+    //           "stdspd" --- Scale the color from green to red based upon the number of standard deviations below the mean speed
+    //           "avgspd" --- Scale the color from green to red based upon how far below the average speed it is
+    //           "spd"    --- Scale the color from green to red where pure green is 75mph or greater and red is 10mph or below
+    //           "inc"    --- Set the color red if an incident is affecting the cell and green if not
+    //           "pjm"    --- Set the color red if evidence suggests an incident affects the cell and green otherwise.
+    colorDataAccessor: "stdspd",
+
+    // _numTimeRows: Integer
+    //        Internal variable holding the number of timesteps to display.  This determines the number of rows in the table
+    _numTimeRows: null,
+
+
+    // _tr: Array of tr elements
+    //        internal variable to hold a reference to the table rows so we can update them as necessary
+    _tr: null,
+
+    // _td: Array of td elements
+    //        internal variable to hold a reference to the table data (cells) so we can update them as necessary
+    _td: null,
+
+    // incident: String
+    //        The incident number to display in the TSD.  Note that this is implementation specific 
+    //        and is used in the interface.  A more general version of this widget would not know 
+    //        anything about incidents and the like
+    incident: null,
+
+    // facility: String
+    //        The facility for which the traffic data is being displayed.  Again, this
+    //        is an application detail that needs to be taken out of this widget
+    facility: null,
+
+    // direction: String
+    //        The direction of the facility for which the traffic data is being displayed.  Again, this
+    //        is an application detail that needs to be taken out of this widget
+    direction: null,
+
+
     buildRendering: function() {
+	// summary:
+	// 		method called to draw the widget, overridden from _Widget
+
+	// Let the superclass do most of the work
 	this.inherited( arguments );
-	// create the objects
-	// create the DOM for this widget
+
+	// Now do our thing...
 	this.updateData();
-	
     },
     
-    changeIncident: function( inc, fac, dir ) {
+    changeIncident: function( /* String */ inc, /* String */ fac, /* String */ dir ) {
+	// summary:
+	// 		method to be called by the user interface to change the data source
+	// description:
+	//		This should really be in the application code, not the widget code
 	this.incident = inc;
 	this.facility = fac;
 	this.direction = dir;
@@ -43,19 +99,26 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     },
 
     updateData: function() {
-	var v = [this.incident, this.facility, this.direction].join( "-" );
+	// summary:
+	// 		function to change (or create) the time space digram
+	// description:
+	//		
 
-	this._loadData( v ) ;      // grabs data for the given incident (incidentData must be json defined in the page)
-	this._redraw();        // redraws polygons
+	// grabs data for the given incident
+	var v = [this.incident, this.facility, this.direction].join( "-" );
+	this._loadData( v ) ;      
+
+	// Call our method to render the timespacedigram table
+	this._redraw();
 	
 	//syncInterface(); // sets interface paramters to match
     },
 
-    getTimeForIndex: function( i ) {
-	var dd = dojo.date.locale.parse( this._data.opts.mintimestamp, {datePattern:"yyyy/MM/dd", timePattern:"HH:mm:ss"} );
-	var dd2 = dojo.date.add( dd, 'minute', i*5 );
-	return dd2;
-    },
+//    getTimeForIndex: function( i ) {
+//	var dd = dojo.date.locale.parse( this._data.opts.mintimestamp, {datePattern:"yyyy/MM/dd", timePattern:"HH:mm:ss"} );
+//	var dd2 = dojo.date.add( dd, 'minute', i*5 );
+//	return dd2;
+//    },
 
     _colorAccessors: {
 	stdspd: function( i,j ) { return this._getColor( (this._data.incspd[i][j]-this._data.avgspd[i][j])/this._data.stdspd[i][j], -this._themeScale, 0, '#ff0000','#00ff00' ) },
@@ -108,18 +171,27 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
     _redraw: function()
     {
+	// summary:
+	//		method to actually create the TimeSpaceDiagram table in the widget's div
+	// description:
+	//		
+	
+	// Get the accessor we'll use to theme the table
 	this._colorDataAccessor = this._colorAccessors[ this.colorDataAccessor ];
 
-
 	//    dojo.byId( "statusText" ).textContent = "Drawing plot...";
+
+	// Remove any existing table in the widget's dom node
 	this.domNode.removeChild( this.domNode.firstChild );
+
+	// Now create the table element  
+	// FIXME: Some of the styling is hardcoded here.  Really should move it into a css file
 	this.domNode.appendChild( dojo.create( "table", { ref: [this.incident, this.facility, this.direction].join('-'), style: "border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;"
 							}) );
-
+	// tt is a local shorthand variable for working with the table node (makes the code cleaner)
 	var tt = this.domNode.firstChild;
-	
 
-	// delete all rows (if they exist)
+	// delete all rows (if they exist---I think this might not be necessary but it's inexpensive)
 	if ( tt.rows != null ) {
 	    for(var i = tt.rows.length; i > 0;i--)
 	    {
@@ -127,12 +199,20 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    }
 	}
 
+	// d is a local shorthand variable for accessing the traffic data
 	var d = this._data;
 
 
+	// FIXME: This is hacky and hardcoded.  Basically, I'm
+	// computing the number of rows (timesteps) from data passed
+	// in the JSON object.  The JSON data format needs to be
+	// standardized
 	var numrows = ((d.opts.prewindow/1) + (d.opts.postwindow/1))/5;
 	this._numTimeRows = numrows;
 
+	// FIXME: Similarly here, I'm getting the number of freeway
+	// segments (columns) to plot and computing the total length
+	// of the section.  Standardization required
 	var totlen = 0;
 	for ( j = 0; j < d.segments.length; ++j )
 	{
@@ -141,28 +221,36 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	if ( totlen < 0 ) totlen = -totlen;
 	
 
+	// I size the rows and columns using percentages in the CSS
+	// styling.  Here we compute the height of the rows (all
+	// assumed to be the same because we assume a single time
+	// step) as a percentage of the total height of the TSD widget
 	var height = 100.0/numrows;
-	var width = 100.0/d.segments.length;
 
+	// Create the arrays for holding the row and cell data
 	this._tr = new Array(numrows);
 	this._td = new Array(numrows);
+
 	for ( i = 0; i < numrows; ++i )
 	{
 	    // iind is used to flip the diagram so time increases going up
 	    var iind = numrows-1-i;
 
+	    // add the next row to the table
 	    var tr = tt.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;" } ) );
 	    this._tr[i] = tr;
+
+	    // Now loop and create the table cells
 	    this._td[i] = new Array( d.segments.length );
 	    for ( j = 0; j < d.segments.length; ++j )
 	    {
 //		console.log( i + " < " + numrows + ", " + j + " < " + d.segments.length );
-		// min/max for stdspd theme
+
+		// The width of the cell is proportional to its actual length in the real world
 		var width = 100 * (d.segments[j].pmend - d.segments[j].pmstart)/totlen;
 		if ( width < 0 ) width = -width;
 
-		// compute borders
-		// left
+		// compute borders---This is specific to display the extent of an incident
 		var borders = "";
 		if ( j > 0 && this._data.inc[iind][j] != this._data.inc[iind][j-1] )
 		{
@@ -184,7 +272,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    borders += "border-top-width:3px;border-top-style:solid;border-top-color:blue;";
 		}
 
-
+		// Actually create the cell in the appropriate table row
 		this._td[i][j] = tr.appendChild( dojo.create( "td", { 
 		    id:["tsd",iind,j].join("_"), 
 		    time: iind,
@@ -194,25 +282,15 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		} ) );
 	    }
 	}
-
-/*
-	resizeSurface();
-	getParameters();       // get critical parameters from the file
-	makeShapes( );         // draw the polygons
-	makePostmileLabels();  // draw the labels
-	makeEvents();          // overlay events
-	makeActivityLog();     // overlay activity log
-	displayActivityLog( dojo.byId( 'activityCheck' ).checked ? 'visible' : 'hidden' ); // hack using the interface
-	makeStations();        // overlay stations
-	displayStations( dojo.byId( 'stationCheck' ).checked ? 'visible' : 'hidden' ); // hack using the interface
-	
-	updateView();          // update the polygon colors
-*/
-	
-	//dojo.connect( dojo.byId( "title" ), 'onclick', function() { console.debug( "Clicked the title" ); } );
     },
 
     _loadData: function( inc ){
+	// summary:
+	//		Grab the data from the network using an ajax call
+	// description:
+	//		This is currently too implementation specific.  
+	//              Probably best to obtain the JSON outside the widget and simply
+	//              pass it as an argument...
 	if ( !inc ) {
 	    console.debug( "Bad incfacdir " + inc );
 	    return;
@@ -223,6 +301,9 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	var caller = this;
 	
 	//    jsProgress.update( {indeterminate: true} );
+
+	// Make a synchronous call to get the incident data (which
+	// contains the speed/etc data that this widget will plot
 	dojo.xhrGet({
 	    url:			theUrl,
 	    preventCache:	true,
@@ -233,6 +314,10 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    },
 	    error:			function(r){ alert("Error: " + r); }
 	});
+
+	// Make a synchronous call to get the station data FIXME: I
+	// plan to remove this call and consolidate things into a
+	// single call
 	dojo.xhrGet({
 	    url: "/tmcpe/data/stations.json",
 	    preventCache: true,
@@ -245,8 +330,10 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	});
 
 
-
-	// Do some processing
+	// Do some processing on the data we obtained above.
+	// Specifically: compute some information about the stretch of
+	// freeway being plotted.  FIXME: the station data should
+	// probably come in the same JSON call as the speed data.
 	var data = this._data;
 	var stations = this._stations;
 	for ( j = 0; j < data.segments.length; ++j )
@@ -268,13 +355,14 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    data.segments[j].stnidx = k;
 		}
 	    }
-
 	}
-	
-
     },
 
     _loadObjects: function(r){
+	// summary:
+	//		processes the JSON obtained from an AJAX call into a JS object
+	// description:
+	//		The object is the freeway data (should validate)
 	console.debug( "Loading objects" );
 	//    dojo.byId( "statusText" ).textContent = "Parsing objects...";
 	
@@ -288,6 +376,10 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     },
 
     _processStations: function( r ) {
+	// summary:
+	//		processes the JSON obtained from an AJAX call into a JS object
+	// description:
+	//		The object is the station data (should validate)
 	console.debug( "Processing stations" );
 	if(!r){
 	    alert("Wrong JSON object. Did you type the file name correctly?");
@@ -297,8 +389,13 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this._stations = dojox.json.ref.fromJson( r );
     },
     
-    _getColor: function( val, min, max, minval, maxval ) {
-	// plot rectangle w/appropriate color
+    _getColor: function( /*float*/ val, /*float*/ min, /*float*/ max, /*float*/ minval, /*float*/ maxval ) {
+	// summary:
+	//		Computes a color between green and red based upon the given value and limits
+	// description:
+	//		If val >= max, the color is green.  If val <=
+	//		min, the color is red.  If it's in between,
+	//		the color is trends from green->yellow->orange->red
 	var spdfrac = (val-min)/(max-min);
 	if ( spdfrac < 0 )
 	{
@@ -326,12 +423,24 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	return ret;
     },
 
-    _toColorHex: function( v ) {
+    _toColorHex: function( /* integer */ v ) {
+	// summary:
+	//		helper function to convert a decimal integer to a hexidecimal value
 	var val = parseInt( v ).toString( 16 );
 	if ( val.length < 2 ) val = '0' + val;
 	return val;
     },
 
-
-    _dummyLastFunction: function() {}
+    
+    _dummyLastFunction: function() {
+	// summary:
+	// 		A dummy function
+	// description:
+	//		I stick this at the bottom of javascript
+	//		objects so I can just put a comma after every
+	//		function instead of worrying about whether the
+	//		function I added is the last one or not (it
+	//		never will be because *this* function is
+	//		always the last one)
+    }
 });
