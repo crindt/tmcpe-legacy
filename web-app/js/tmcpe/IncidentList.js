@@ -14,7 +14,7 @@ dojo.require("tmcpe.ItemVectorLayerReadStore");
 //dojo.require("dojox.gfx.Surface");
 
 // our declared class
-dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
+dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     
     _map: null,
     _incidentsLayer: null,
@@ -141,7 +141,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
             "featureselected": obj.onFeatureSelectIncident,
             "featureunselected": obj.onFeatureUnselectIncident,
 	    "beforefeaturesadded": function (feat) { 
-//		obj._loadStart();
+		obj._loadStart();
 		obj._progressTot = feat.features.length; 
 		if ( obj._progressTot == 0 ) 
 		    obj._loadEnd();
@@ -150,13 +150,13 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 		    console.log( feat.features.length );
 		    obj._progressCount = 0; 
 		    obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
-		    console.log( "Downloaded " +obj._progressCount + " of " + obj._progressTot );
+//		    console.log( "Downloaded " +obj._progressCount + " of " + obj._progressTot );
 		}
 	    },
 	    "featureadded": function( feat ) { 
 		obj._progressCount++ 
 		obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
-		console.log( "Downloaded " +obj._progressCount + " of " + obj._progressTot );
+//		console.log( "Downloaded " +obj._progressCount + " of " + obj._progressTot );
 	    },
 	    "featuresadded": function() { obj.updateIncidentsTable(); obj._loadEnd(); },
 	    "featuresremoved": function() { obj.updateIncidentsTable() },
@@ -420,6 +420,20 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	// Sleep so we don't destroy the dialog too soon.
 	var obj = this;
 	setTimeout( function() { obj._loadEnd();} , 1000 );
+    },
+
+    filter: function() {
+	console.log("OK, YEAH, IN THE FILTER: " + dijit.byId( 'onlyAnalyzed' ).checked);
+	if ( dijit.byId( 'onlyAnalyzed' ).checked ) 
+	{
+	    this.getIncidentGrid().filter( { analysisCount: "6" } );
+	    console.log("CHECKED");
+	}
+	else
+	{
+	    this.getIncidentGrid().filter( { } );
+	    console.log("UNCHECKED");
+	}
     },
 
     _loadStart: function() {

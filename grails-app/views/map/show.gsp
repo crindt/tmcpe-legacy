@@ -153,15 +153,13 @@
 	<input id="sat" name="sat" dojoType="dijit.form.CheckBox" value="6" checked="checked"/>
 	<label for="sun">Sun</label>	
 	<input id="sun" name="sun" dojoType="dijit.form.CheckBox" value="0" checked="checked"/>
-<!--
 	<label for="onlyAnalyzed">Limit to Analyzed</label>	
 	<input id="onlyAnalyzed" name="Analyzed" 
 	       dojoType="dijit.form.CheckBox" 
 	       value="analyzed" 
 	       checked="checked"
-	       onChange="incidentGrid.filter( { id: '61*' } )"
+	       onChange="incidentList.filter();"
 	       />
--->
 	<button dojoType="dijit.form.Button" type="submit" name="submitButton"
 		value="Submit">
           Submit
