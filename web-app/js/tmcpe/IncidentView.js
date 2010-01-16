@@ -81,7 +81,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    // update the url
 	    vdsSegmentLines.protocol = 
 		new OpenLayers.Protocol.HTTP({
-  		    url: "/tmcpe/vds/list.geojson",
+  		    url: "vds/list.geojson",
 		    params: theParams,
 		    format: new OpenLayers.Format.GeoJSON({})
 		});
@@ -131,7 +131,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
             strategies: [new OpenLayers.Strategy.Fixed()],
 	    style: {strokeWidth: 4, strokeColor: "#00ff00", strokeOpacity: 0.75 },
             protocol: new OpenLayers.Protocol.HTTP({
-  		url: "/tmcpe/vds/list.geojson",
+  		url: "vds/list.geojson",
 		params: myParams,
 		format: new OpenLayers.Format.GeoJSON({})
 	    })

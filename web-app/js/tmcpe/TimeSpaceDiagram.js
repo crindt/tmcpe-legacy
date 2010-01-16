@@ -296,7 +296,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    return;
 	}
 //	var fwydir = inc.split( '-' );
-	var theUrl = "/tmcpe/data/" + inc + ".json";
+	var theUrl = "data/" + inc + ".json";
 
 	var caller = this;
 	
@@ -319,7 +319,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// plan to remove this call and consolidate things into a
 	// single call
 	dojo.xhrGet({
-	    url: "/tmcpe/data/stations.json",
+	    url: "data/stations.json",
 	    preventCache: true,
 	    handleAs: "text",
 	    sync: true,

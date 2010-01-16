@@ -130,9 +130,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
             protocol: new OpenLayers.Protocol.HTTP({
-		url: "/tmcpe/incident/list.geojson",//theurl,
+		url: "incident/list.geojson",//theurl,
 		params: this._constructIncidentsParams(),
-		format: new OpenLayers.Format.GeoJSON({})
+		format: new OpenLayers.Format.GeoJSON({}),
+		callback: function() { console.log( "GOT CALLBACK!" ); }
             })
 	});
 
@@ -141,6 +142,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             "featureselected": obj.onFeatureSelectIncident,
             "featureunselected": obj.onFeatureUnselectIncident,
 	    "beforefeaturesadded": function (feat) { 
+		console.log( "before features added" );
 		obj._loadStart();
 		obj._progressTot = feat.features.length; 
 		if ( obj._progressTot == 0 ) 
@@ -150,16 +152,23 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    console.log( feat.features.length );
 		    obj._progressCount = 0; 
 		    obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
-//		    console.log( "Downloaded " +obj._progressCount + " of " + obj._progressTot );
+		    console.log( "before feature added: Downloaded " +obj._progressCount + " of " + obj._progressTot );
 		}
 	    },
 	    "featureadded": function( feat ) { 
 		obj._progressCount++ 
 		obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
-//		console.log( "Downloaded " +obj._progressCount + " of " + obj._progressTot );
+		console.log( "feature added: Downloaded " +obj._progressCount + " of " + obj._progressTot );
 	    },
-	    "featuresadded": function() { obj.updateIncidentsTable(); obj._loadEnd(); },
-	    "featuresremoved": function() { obj.updateIncidentsTable() },
+	    "featuresadded": function() { 
+		console.log( "features added" );
+		obj.updateIncidentsTable(); 
+		obj._loadEnd(); 
+	    },
+	    "featuresremoved": function() { 
+		console.log( "features removed" );
+		obj.updateIncidentsTable() 
+	    },
 	    "moveend": function() { obj.updateIncidentsQuery(); }
 	});
 
@@ -217,7 +226,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             strategies: [new OpenLayers.Strategy.Fixed()],
 	    style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
             protocol: new OpenLayers.Protocol.HTTP({
-  		url: "/tmcpe/vds/list.geojson",
+  		url: "vds/list.geojson",
 		params: myParams,
 		format: new OpenLayers.Format.GeoJSON({})
 	    })
@@ -336,7 +345,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    + "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
             + "</dl>"
 	
-	    + '<p><A href="/tmcpe/incident/show?id='+cad+'">Show Incident</a></p>';
+	    + '<p><A href="incident/show?id='+cad+'">Show Incident</a></p>';
     },
 
 
@@ -419,7 +428,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	// Sleep so we don't destroy the dialog too soon.
 	var obj = this;
-	setTimeout( function() { obj._loadEnd();} , 1000 );
+	setTimeout( function() { obj._loadEnd();} , 2000 );
     },
 
     filter: function() {
@@ -438,6 +447,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
     _loadStart: function() {
 	this._jobs++;
+	console.log( "LOAD START: " + this._jobs );
 	if ( !this._progressDialog ) {
 	    this._progressDialog = new dijit.Dialog({//dojox.widget.Dialog({
 //		title: "Loading",
@@ -460,6 +470,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _loadEnd: function() {
 	this._jobs--;
 //	this._progressDialog.attr( "content", "finished" ); 
+	console.log( "LOAD END: " + this._jobs );
 	if ( this._jobs <= 0 ) { this._progressDialog.hide(); }
     },
 
@@ -477,9 +488,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	// update the url
 	    this._incidentsLayer.protocol = 
 		new OpenLayers.Protocol.HTTP({
-  		    url: "/tmcpe/incident/list.geojson",
+  		    url: "incident/list.geojson",
 		    params: theParams,
-		    format: new OpenLayers.Format.GeoJSON({})
+		    format: new OpenLayers.Format.GeoJSON({}),
+		    callback: function() { console.log( "GOT CALLBACK!" ); }
 		});
 	}
 	this._incidentsLayer.refresh({force: true, params:theParams});
@@ -490,7 +502,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    // update the url
 	    this._vdsLayer.protocol = 
 		new OpenLayers.Protocol.HTTP({
-  		    url: "/tmcpe/vds/list.geojson",
+  		    url: "vds/list.geojson",
 		    params: theParams,
 		    format: new OpenLayers.Format.GeoJSON({})
 		});
