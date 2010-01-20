@@ -1,0 +1,1 @@
+select distinct A.cad,B.stampdate,B.stamptime,B.unitin,B.unitout,B.device_number,B.status,B.activitysubject,B.memo from ct_al_transaction as A left join ct_al_transaction as B on A.cad=B.cad where A.cad~'^[^1234567890].*' order by B.stampdate,B.stamptime

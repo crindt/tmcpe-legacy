@@ -1,0 +1,63 @@
+--
+-- PostgreSQL database dump
+--
+
+SET client_encoding = 'SQL_ASCII';
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = true;
+
+--
+-- Name: incloc; Type: TABLE; Schema: public; Owner: crindt; Tablespace: 
+--
+
+CREATE TABLE incloc (
+    cad character varying(20) NOT NULL,
+    inc_geom geometry,
+    CONSTRAINT enforce_dims_inc_geom CHECK ((ndims(inc_geom) = 2)),
+    CONSTRAINT enforce_geotype_inc_geom CHECK (((geometrytype(inc_geom) = 'POINT'::text) OR (inc_geom IS NULL))),
+    CONSTRAINT enforce_srid_inc_geom CHECK ((srid(inc_geom) = 32711))
+);
+
+
+ALTER TABLE public.incloc OWNER TO crindt;
+
+--
+-- Data for Name: incloc; Type: TABLE DATA; Schema: public; Owner: crindt
+--
+
+COPY incloc (cad, inc_geom) FROM stdin;
+114-092107	0101000020C77F0000EE5009CF4A6319417E565931142F6A41
+177-092307	0101000020C77F000088DC049357DA194152EBCE7ABE316A41
+202-102507	0101000020C77F0000689B094F71CE1941B02431AEE5316A41
+61-110207	0101000020C77F000058FCD68A60B21A416D3E41080D2A6A41
+247-110707	0101000020C77F000069EF29506FA41941AC49E57CF8326A41
+27-112007	0101000020C77F000042144150D67E194181F595CD4D2E6A41
+180-112007	0101000020C77F0000D4B6BD7471E41841F9D32FB341386A41
+178-112707	0101000020C77F0000EF1B773E8ECD194184673630F7316A41
+138-112807	0101000020C77F0000543E7ABFF7AF1941FEF7F475BE326A41
+83-113007	0101000020C77F0000BD32FAC20ECE1941698C3B30E7316A41
+101-113007	0101000020C77F00003E2AF47189F91A41A08B763591216A41
+169-113007	0101000020C77F00000C6333625CB41A413085630777276A41
+\.
+
+
+--
+-- Name: incloc_pkey; Type: CONSTRAINT; Schema: public; Owner: crindt; Tablespace: 
+--
+
+ALTER TABLE ONLY incloc
+    ADD CONSTRAINT incloc_pkey PRIMARY KEY (cad);
+
+
+ALTER INDEX public.incloc_pkey OWNER TO crindt;
+
+--
+-- PostgreSQL database dump complete
+--
+

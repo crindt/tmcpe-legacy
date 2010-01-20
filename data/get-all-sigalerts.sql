@@ -1,0 +1,1 @@
+select distinct A.cad,B.stampdate,B.stamptime,B.unitin,B.unitout,B.device_number,B.status,B.activitysubject,B.memo from ct_al_transaction as A left join ct_al_transaction as B on A.cad=B.cad where A.activitysubject='SIGALERT BEGIN' order by cad,B.stampdate,B.stamptime
