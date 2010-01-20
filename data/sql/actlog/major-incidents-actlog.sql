@@ -164,3 +164,6 @@ CREATE VIEW tmcpe.sigalert_locations_grails AS
        SELECT slt.*,tvd.geom as location
        	      from tmcpe.sigalert_locations_tmcpe slt
        	      LEFT JOIN tbmap.tvd tvd ON ( tvd.id = slt.vdsid );
+
+SELECT * INTO tmcpe.sigalert_locations_grails_table from tmcpe.sigalert_locations_grails;
+ALTER TABLE tmcpe.sigalert_locations_grails_table ADD PRIMARY KEY( cad );
