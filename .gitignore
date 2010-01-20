@@ -3,3 +3,4 @@ grails-app/conf/DataSource.groovy
 *~
 #*#
 *#
+activity-log-data
