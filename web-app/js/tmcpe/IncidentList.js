@@ -226,7 +226,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             strategies: [new OpenLayers.Strategy.Fixed()],
 	    style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
             protocol: new OpenLayers.Protocol.HTTP({
-  		url: "vds/list.geojson",
+  		url: "/vds/list.geojson",
 		params: myParams,
 		format: new OpenLayers.Format.GeoJSON({})
 	    })
@@ -488,7 +488,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	// update the url
 	    this._incidentsLayer.protocol = 
 		new OpenLayers.Protocol.HTTP({
-  		    url: "incident/list.geojson",
+  		    url: "/incident/list.geojson",
 		    params: theParams,
 		    format: new OpenLayers.Format.GeoJSON({}),
 		    callback: function() { console.log( "GOT CALLBACK!" ); }
