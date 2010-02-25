@@ -1,1 +1,0 @@
-({"set":"Definer","text":"Beskrivelse:","insertImageTitle":"Bildeegenskaper","url":"URL:","createLinkTitle":"Koblingsegenskaper","cancel":"Cancel","newWindow":"New Window ( _blank )","topWindow":"Topmost Window ( _top )","target":"Target:","parentWindow":"Parent Window ( _parent )","currentWindow":"Current Window ( _self )"})

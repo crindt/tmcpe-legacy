@@ -5,21 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 
     <!-- Load the map javascript and css -->
-    <tmcpe:openlayers />  <!-- brings in the openlayers stuff -->
-    <tmcpe:tmcpe />       <!-- This adds tmcpe to the dojo path so we can "require" our widgets -->
+    <tmcpe:openlayers_latest />  <!-- brings in the openlayers stuff -->
+    <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
 
     <g:javascript>
       <!-- Here are all the dojo widgets we use -->
       dojo.require("dojo.data.ItemFileReadStore");
       dojo.require("dojox.grid.DataGrid");
       dojo.require("dijit.InlineEditBox");
-      dojo.require("dijit.form.DateTextBox");
-      dojo.require("dijit.form.TimeTextBox");
       dojo.require("dijit.form.NumberTextBox");
       dojo.require("dijit.form.Form");
       dojo.require("dijit.form.CheckBox");
       dojo.require("dojo._base.json");
       dojo.require("tmcpe.IncidentList");
+      dojo.require("tmcpe.MyDateTextBox");
+      dojo.require("tmcpe.MyTimeTextBox");
 
       var myFormatDate = function(inDatum){
         var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
@@ -33,49 +33,6 @@
         alert( "DATE IS: " + ret );
         return ret;
       }
-
-      dojo.declare("MyDateTextBox", dijit.form.DateTextBox, {
-            myFormat: {
-                selector: 'date',
-                datePattern: 'yyyy-MM-dd',
-                locale: 'en-us'
-            },
-            value: "",
-            // prevent parser from trying to convert to Date object
-            postMixInProperties: function() { // change value string to Date object
-                this.inherited(arguments);
-                // convert value to Date object
-                this.value = dojo.date.locale.parse(this.value, this.myFormat);
-            },
-            // To write back to the server in Oracle format, override the serialize method:
-            serialize: function(dateObject, options) {
-                return dojo.date.locale.format(dateObject, this.myFormat).toUpperCase();
-            }
-        });
-
-      dojo.declare("MyTimeTextBox", dijit.form.TimeTextBox, {
-            myFormat: {
-                selector: 'time',
-                timePattern: 'HH:mm',
-                locale: 'en-us'
-            },
-            value: "",
-            // prevent parser from trying to convert to Date object
-            postMixInProperties: function() { // change value string to Date object
-                this.inherited(arguments);
-                // convert value to Date object
-                this.value = dojo.date.locale.parse(this.value, this.myFormat);
-            },
-            // To write back to the server in Oracle format, override the serialize method:
-            serialize: function(dateObject, options) {
-                return dojo.date.locale.format(dateObject, this.myFormat).toUpperCase();
-            }
-        });
-
-      dojo.declare("DefaultSortableGrid", dojox.grid.DataGrid, {
-         sortInfo: 1 // the index (1-based) of the column 
-                     // to sort, + => asc, - => desc
-      });
 
       var incidentSummaryData = {
       items: [
@@ -118,16 +75,16 @@
     <div dojoType="dijit.layout.BorderContainer" id="mapView" design="headline" region="center" gutters="true" liveSplitters="false">
       <div dojoType="dijit.layout.ContentPane" id="queryspec" region="top">
 	From: 
-	<input type="text" style="width:8em;" name="startDate" id="startDate" value="" dojoType="MyDateTextBox"
+	<input type="text" style="width:8em;" name="startDate" id="startDate" value="" dojoType="tmcpe.MyDateTextBox"
 	       required="false" />
 	To: 
-	<input type="text" style="width:8em;" name="endDate" id="endDate" value="" dojoType="MyDateTextBox"
+	<input type="text" style="width:8em;" name="endDate" id="endDate" value="" dojoType="tmcpe.MyDateTextBox"
 	       required="false" />
 	Start Time:
-	<input type="text" style="width:7em;" name="earliestTime" id="earliestTime" value="" dojoType="MyTimeTextBox"
+	<input type="text" style="width:7em;" name="earliestTime" id="earliestTime" value="" dojoType="tmcpe.MyTimeTextBox"
 	       required="false" />
 	End Time:
-	<input type="text" style="width:7em;" name="latestTime" id="latestTime" value="" dojoType="MyTimeTextBox"
+	<input type="text" style="width:7em;" name="latestTime" id="latestTime" value="" dojoType="tmcpe.MyTimeTextBox"
 	       required="false" />
 	<label for="freeway">
 	  Facility

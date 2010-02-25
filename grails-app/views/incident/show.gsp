@@ -8,7 +8,7 @@
     <meta name="layout" content="main" />
 
     <!-- Load the map javascript and css -->
-    <tmcpe:openlayers />
+    <tmcpe:openlayers_latest />
     <tmcpe:tmcpe />
 
     <g:javascript>
