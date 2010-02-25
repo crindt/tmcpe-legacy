@@ -8,9 +8,11 @@ class TmcpeTagLib {
   def dojoUncompressed_1_4 = {
       out << "    <script type=\"text/javascript\">var djConfig = {parseOnLoad: true,isDebug: true};</script>"
       out << '<script src="' << createLinkTo(dir:'js/dojo/dojo-1.4/dojo',file:'dojo.js.uncompressed.js') << '"></script>'
+//      out << '<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojo/dojo.xd.js"></script>'
   }
   def dojo_1_4 = {
       out << '<script src="' << createLinkTo(dir:'js/dojo/dojo-1.4/dojo',file:'dojo.js') << '" djConfig="parseOnLoad: true,isDebug:true"></script>'
+//      out << '<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojo/dojo.xd.js" djConfig="parseOnLoad: true,isDebug:true"></script>'
   }
 
   def openlayers = {

@@ -122,6 +122,12 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this._incidentsLayerInit();
     },
 
+    // called to indicate that the layer update is complete...
+    _demoCallback: function() {
+	console.log( "GOT DEMO CALLBACK!" );
+//	this._loadEnd(); 
+    },
+
     _incidentsLayerInit: function() {
 	// should validate
 
@@ -133,7 +139,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		url: "incident/list.geojson",//theurl,
 		params: this._constructIncidentsParams(),
 		format: new OpenLayers.Format.GeoJSON({}),
-		callback: function() { console.log( "GOT CALLBACK!" ); }
+		callback: OpenLayers.Function.bind( function( response, options) { this._demoCallback.apply( this, [ response, options ] ) }, this )
             })
 	});
 
@@ -157,13 +163,15 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    },
 	    "featureadded": function( feat ) { 
 		obj._progressCount++ 
-		obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
+		//obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
 		console.log( "feature added: Downloaded " +obj._progressCount + " of " + obj._progressTot );
 	    },
 	    "featuresadded": function() { 
 		console.log( "features added" );
 		obj.updateIncidentsTable(); 
 		obj._loadEnd(); 
+		obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
+		setTimeout( function() { obj._loadEnd();} , 1000 );
 	    },
 	    "featuresremoved": function() { 
 		console.log( "features removed" );
@@ -428,7 +436,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	// Sleep so we don't destroy the dialog too soon.
 	var obj = this;
-	setTimeout( function() { obj._loadEnd();} , 2000 );
+//	setTimeout( function() { obj._loadEnd();} , 1000 );
     },
 
     filter: function() {
@@ -471,7 +479,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this._jobs--;
 //	this._progressDialog.attr( "content", "finished" ); 
 	console.log( "LOAD END: " + this._jobs );
-	if ( this._jobs <= 0 ) { this._progressDialog.hide(); }
+	if ( this._jobs <= 0 && this._progressDialog != null ) { this._progressDialog.hide(); }
     },
 
     updateVdsSegmentsQuery: function( theParams ) {
@@ -485,6 +493,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _updateIncidentsLayer: function( theParams ) {
 
 	if ( this._incidentsLayer.protocol.url == "" ) {
+
 	// update the url
 	    this._incidentsLayer.protocol = 
 		new OpenLayers.Protocol.HTTP({
@@ -494,7 +503,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    callback: function() { console.log( "GOT CALLBACK!" ); }
 		});
 	}
+	this._loadStart();
 	this._incidentsLayer.refresh({force: true, params:theParams});
+	this._loadEnd();
     },
 
     _updateVdsSegmentsLayer: function( theParams ) {
