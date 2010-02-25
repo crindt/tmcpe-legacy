@@ -182,6 +182,7 @@ class Incident {
         def p = ~/^${id}-\d+-[NSEW].json/
         System.out.println( p )
         def ret = []
+
 /*
         new File( 'web-app/data' ).eachFileMatch( p ) {
             f ->
@@ -192,6 +193,7 @@ class Incident {
             ret.add ( data )
         }
 */
+
         return ret
     }
 }
