@@ -100,6 +100,9 @@ if ( not $skip_query )
 
     goto TEST if $test;
 
+    # Here we run the query for the given incident.  The result has
+    # data for all affected freeways.  Except it's imperfect and needs
+    # to be revamped
     print STDERR "QUERYING $i...";
     $sth->execute( $band, $i, $distance, "$prewindow minutes", "$postwindow minutes" );
     print STDERR "(done)\n";
