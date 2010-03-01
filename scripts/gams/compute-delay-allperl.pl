@@ -8,6 +8,7 @@ use JSON;
 use Geo::WKT;
 
 #use TMCPE::Schema;
+use SpatialVds::Schema;
 
 use warnings;
 use English qw(-no_match_vars);
@@ -55,9 +56,9 @@ GetOptions ("band=f" => \$band,    # numeric
 	    ) || die "usage: compute-delay.pl [--band=<stddev multiplier>] [--test=<case>] <incident> [<facility regexp>]\n";
 
 if ( !$test ) {
-    $schema = TMCPE::Schema->connect(
-	"dbi:Pg:dbname=fwydata;host=localhost;port=5431",
-	undef, undef,
+    $schema = SpatialVds::Schema->connect(
+	"dbi:Pg:dbname=spatialvds;host=localhost;user=VDSUSER;password=VDSPASSWORD",
+	slash, undef,
 	{ AutoCommit => 1 },
 	);
 } else {
@@ -78,10 +79,16 @@ my $mintimeofday = undef;
 my $mindate = undef;
 
 
+# Here we perform the query to pull the data for each affected facility for a given incident
 if ( not $skip_query )
 {
+    # Read in the query to pull all data upstream from an incident location given:
+    # * a band (for computing p_j_m
+    # * the incident CAD id
+    # * the upstream distance to pull
+    # * the pre window in minutes
+    # * the post window in minutes
     my $sqlf = io( "select-incident-region.sql" );
-
     my $sql < $sqlf;
 
     print STDERR "CONNECTING TO DATABASE...";
