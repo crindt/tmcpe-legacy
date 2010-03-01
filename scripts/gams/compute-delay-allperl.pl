@@ -122,6 +122,7 @@ if ( not $skip_query )
 	my $shockspd = $row->{incflw}/($kj-$incden);
 	die "bad shockspd: $shockspd" if $shockspd < 0;
 
+	# This is what we really need to fill!
 	push @{$data->{$i}->{$facilkey}->{stations}->{$st}->{data}}, { 
 	    timeofday => $row->{timeofday},
 	    avg_spd => $row->{avg_spd},
