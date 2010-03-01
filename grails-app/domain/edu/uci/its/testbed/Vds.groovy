@@ -126,7 +126,10 @@ class Vds {
         return kml
     }
     
-    public SummaryData getSummaryData( Integer year, String startTime, String endTime )
+/// curl -d 'startkey=[1214081,"Mon",11]&endkey=[1214081,"Mon",14.2]&group_level=3' -G  http://127.0.0.1:5984/pems_agg_d12_2007_10/_design/summary_dow_five/_view/dow_fivemin
+
+
+    public SummaryData getSummaryData( Integer year, Integer month, String dow, String startTime, String endTime )
     {
         // create a database object pointing to the database "mycouchdb" on the local host    
         def conf = ApplicationHolder.application.config.vdsdata;
@@ -134,7 +137,7 @@ class Vds {
         SummaryData sd = new SummaryData()
         
         for ( int i = 0; i < 12; ++i ) {
-            Database db = new Database(conf.couchdb.host, [ "d12", year, String.format( "%02d", (i+1) ) ].join("_") + conf.couchdb.db_suffix );
+            Database db = new Database(conf.couchdb.host, [ "pems_agg_d12_", year, String.format( "%02d", (i+1) ) ].join("_") + conf.couchdb.db_suffix );
             Options o = new Options();
             o.putUnencoded("startkey","[\""+id+"\",\""+startTime+"\"]")
             o.putUnencoded("endkey","[\""+id+"\",\""+endTime+"\"]")
@@ -149,7 +152,7 @@ class Vds {
 */
 
             ViewResult<Object,SummaryData> result = 
-        		db.queryView ("summary/fivemin", 
+        		db.queryView ("summary_dow_five/_view/dow_fivemin"
                                       SummaryData.class, 
                                       o, null )
 
