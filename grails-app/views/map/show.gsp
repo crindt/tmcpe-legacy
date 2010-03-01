@@ -2,7 +2,9 @@
   <head>
     <title>Testbed Network View Using Openlayers</title>
     <meta name="layout" content="main" />
+<!--
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+-->
 
     <!-- Load the map javascript and css -->
     <tmcpe:openlayers_latest />  <!-- brings in the openlayers stuff -->

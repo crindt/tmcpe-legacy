@@ -265,6 +265,20 @@ class IncidentController {
 
     }
 
+    def testData = {
+        def incident = Incident.get( params.id )
+        if ( !incident ) {
+            flash.message = "Incident not found with id ${params.id}"
+            redirect(action:list)
+        } else {
+            
+
+            return tt as JSON
+        }
+    }
+
+    
+
 //     def listAllAsJSON = {
 //         def incidentList = Incident.list()
 //         render( contentType:"text/json",
