@@ -7,14 +7,16 @@ use Getopt::Long;
 use JSON;
 use Geo::WKT;
 
-#use TMCPE::Schema;
+use TMCPE::Schema;
 use SpatialVds::Schema;
 
 use warnings;
 use English qw(-no_match_vars);
 use Readonly;
 
-my $schema;
+my $spatialvds;
+my $tmcpe;
+my $actlog;
 
 # turn off line buffering
 select((select(STDOUT), $|=1)[0]);
@@ -56,7 +58,7 @@ GetOptions ("band=f" => \$band,    # numeric
 	    ) || die "usage: compute-delay.pl [--band=<stddev multiplier>] [--test=<case>] <incident> [<facility regexp>]\n";
 
 if ( !$test ) {
-    $schema = SpatialVds::Schema->connect(
+    $spatialvds = SpatialVds::Schema->connect(
 	"dbi:Pg:dbname=spatialvds;host=localhost;user=VDSUSER;password=VDSPASSWORD",
 	slash, undef,
 	{ AutoCommit => 1 },
@@ -818,14 +820,14 @@ DISPLAY D.l;
     my @incstart = ();
     my @actlog = ();
     if ( ! $test ) {
-	my @incstart = $schema->resultset( 'CtAlTransaction' )->search(
+	my @incstart = $spatialvds->resultset( 'CtAlTransaction' )->search(
 	    { cad => $i, activitysubject => 'OPEN INCIDENT' },
 	    {
 		order_by => [ 'stampdate asc', 'stamptime asc' ]
 	    }
 	    );
 	
-	my @actlog = $schema->resultset( 'CtAlTransaction' )->search(
+	my @actlog = $spatialvds->resultset( 'CtAlTransaction' )->search(
 	    { cad => $i },
 	    {
 		order_by => [ 'stampdate asc', 'stamptime asc' ]
