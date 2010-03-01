@@ -82,6 +82,14 @@ my $mindate = undef;
 # Here we perform the query to pull the data for each affected facility for a given incident
 if ( not $skip_query )
 {
+    # First step: pull metadata for incident.  This has to come from
+    # the tmcpe tables derived from the activity log---currently stored in 
+    # tmcpe:sigalert_locations_grails_table
+
+
+
+
+
     # Read in the query to pull all data upstream from an incident location given:
     # * a band (for computing p_j_m
     # * the incident CAD id
