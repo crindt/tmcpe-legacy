@@ -7,41 +7,60 @@ class TmcpeTagLib {
 
   def dojoUncompressed_1_4 = {
       out << "    <script type=\"text/javascript\">var djConfig = {parseOnLoad: true,isDebug: true};</script>"
-      out << '<script src="' << createLinkTo(dir:'js/dojo/dojo-1.4/dojo',file:'dojo.js.uncompressed.js') << '"></script>'
+      out << '<script src="' << createLinkTo(dir:'js/dojo/dojo',file:'dojo.js.uncompressed.js') << '"></script>'
+
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dijit/themes/tundra/layout',file:'BorderContainer.css') << '"/>'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dojox/grid/resources',file:'Grid.css') << '"/>'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dojox/grid/resources',file:'tundraGrid.css') << '"/>'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dijit/themes/tundra',file:'tundra.css') << '"/>'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dojo/resources',file:'dojo.css') << '" />'
   }
   def dojoUncompressed_1_4_google = {
       out << '    <script type="text/javascript">var djConfig = {parseOnLoad: true,isDebug: true,baseUrl:"./",modulePaths:{my:"js/tmcpe"}};</script>'
       out << '<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojo/dojo.xd.js.uncompressed.js"></script>'
-  }
-  def dojo_1_4 = {
-      out << "    <script type=\"text/javascript\">var djConfig = {parseOnLoad: true,isDebug: true};</script>"
-      out << '<script src="' << createLinkTo(dir:'js/dojo/dojo-1.4/dojo',file:'dojo.js') << '" djConfig="parseOnLoad: true,isDebug:true"></script>'
-  }
-  def dojo_1_4_google = {
-      out << "    <script type=\"text/javascript\">var djConfig = {parseOnLoad: true,isDebug: true};</script>"
-      out << '<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojo/dojo.xd.js" djConfig="parseOnLoad: true,isDebug:true"></script>'
-      
-  }
-
-  def openlayers = {
-      out << '<script src="' << createLinkTo(dir:'js/OpenLayers-2.8/lib/',file:'OpenLayers.js') << '"></script>'
-  }
-
-  def openlayers_latest = {
-      out << '<script src="http://www.openlayers.org/api/OpenLayers.js"></script>'
-  }
-
-  def tmcpe = {
-      out << tmcpe.dojoUncompressed_1_4_google()
-      //out << tmcpe.dojo_1_4()
-      out << '<link rel="stylesheet" href="' << createLinkTo( dir:'css',file:'tmcpe.css' ) << '" />'
 
       out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dijit/themes/tundra/layout/BorderContainer.css"/>'
       out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojox/grid/resources/Grid.css"/>'
       out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojox/grid/resources/tundraGrid.css"/>'
       out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dijit/themes/tundra/tundra.css"/>'
       out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/resources/dojo.css" />'
+  }
+  def dojo_1_4 = {
+      out << "    <script type=\"text/javascript\">var djConfig = {parseOnLoad: true,isDebug: true};</script>"
+      out << '<script src="' << createLinkTo(dir:'js/dojo/dojo',file:'dojo.js') << '" djConfig="parseOnLoad: true,isDebug:true"></script>'
 
-      out << '<script>dojo.registerModulePath("tmcpe","js/tmcpe");</script>'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dijit/themes/tundra/layout',file:'BorderContainer.css') << '"/>\n'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dojox/grid/resources',file:'Grid.css') << '"/>\n'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dojox/grid/resources',file:'tundraGrid.css') << '"/>\n'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dijit/themes/tundra',file:'tundra.css') << '"/>\n'
+      out << '<link rel="stylesheet" href="'<< createLinkTo(dir:'js/dojo/dojo/resources',file:'dojo.css') << '" />\n'
+  }
+  def dojo_1_4_google = {
+      out << "    <script type=\"text/javascript\">var djConfig = {parseOnLoad: true,isDebug: true};</script>"
+      out << '<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojo/dojo.xd.js" djConfig="parseOnLoad: true,isDebug:true"></script>'
+      
+      out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dijit/themes/tundra/layout/BorderContainer.css" />'
+      out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojox/grid/resources/Grid.css" />'
+      out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dojox/grid/resources/tundraGrid.css" />'
+      out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/dijit/themes/tundra/tundra.css" />'
+      out << '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.1/resources/dojo.css" />'
+  }
+
+  def openlayers = {
+      out << '<script src="' << createLinkTo(dir:'js/openlayers/lib/',file:'OpenLayers.js') << '"></script>'
+//      out << '<script src="http://maps.google.com/maps?file=api&amp;v=2&sensor=false&key=ABQIAAAAyBYmSWPVcV0YpoIbSHToHRR7e8w5iNj4_L2k9sczPbHcJZYRIhRedyRq4_pqB4yZdKrJiL7e0ipZQQ" type="text/javascript"></script>'
+  }
+
+  def openlayers_latest = {
+      out << '<script src="http://www.openlayers.org/api/OpenLayers.js"></script>\n'
+  }
+
+  def tmcpe = {
+      //out << tmcpe.dojoUncompressed_1_4_google()
+      out << tmcpe.dojo_1_4()
+      out << '<link rel="stylesheet" href="' << createLinkTo( dir:'css',file:'tmcpe.css' ) << '" />\n'
+
+//      out << '<script>dojo.registerModulePath("tmcpe","js/tmcpe");</script>\n'
+      out << '<script>dojo.registerModulePath("tmcpe","' << createLinkTo( dir:'js/tmcpe',file:'' ) << '");</script>\n'
   }
 }
