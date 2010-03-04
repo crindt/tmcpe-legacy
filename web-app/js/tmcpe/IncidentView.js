@@ -17,6 +17,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     _vdsSegmentLines: null,
     _selectVds: null,
     _hoverVds: null,
+
+    _activityLogGrid: null, // The dom node holding the activity log grid dojo widget
     
     constructor: function() {
     },
@@ -76,12 +78,14 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     },
 
     _updateVdsSegmentsLayer: function( theParams ) {
+	var base = document.getElementById("htmldom").href;
+
 	var vdsSegmentLines = this._vdsSegmentLines;
 	if ( vdsSegmentLines.protocol.url == "" ) {
 	    // update the url
 	    vdsSegmentLines.protocol = 
 		new OpenLayers.Protocol.HTTP({
-  		    url: "vds/list.geojson",
+  		    url: base + "vds/list.geojson",
 		    params: theParams,
 		    format: new OpenLayers.Format.GeoJSON({})
 		});
@@ -98,6 +102,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    dojo.connect( tsd._tr[ i ], "onmouseover", this, "_hoverTime" );
 	    for ( var j = 0; j < td[i].length; ++j ) {
 		dojo.connect( td[i][j], "onmouseover", this, "_hoverStation" );
+		dojo.connect( td[i][j], "onclick", this, "_clickTimeSpaceCell" );
 	    }
 	}
 
@@ -125,21 +130,26 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	var myParams = this._constructVdsSegmentsParams( theParams );
 
+	var base = document.getElementById("htmldom").href;
 
 	this._vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
 	    style: {strokeWidth: 4, strokeColor: "#00ff00", strokeOpacity: 0.75 },
             protocol: new OpenLayers.Protocol.HTTP({
-  		url: "vds/list.geojson",
+  		url: base + "vds/list.geojson",
 		params: myParams,
 		format: new OpenLayers.Format.GeoJSON({})
 	    })
 	});
 	
 	var obj = this;
+	var first_vds_render = true;
 	this._vdsSegmentLines.events.on({
-	    "featuresadded": function() { obj._linkFeaturesToCells(); },
+	    "featuresadded": function() { 
+		// OK, call linkfeaturestocells when features change on the layer
+		obj._linkFeaturesToCells(); 
+	    },
 	    "featuresremoved": function() { obj._linkFeaturesToCells(); },
 	    "moveend": function() { obj.updateVdsSegmentsQuery( {} ); }
 	});
@@ -159,7 +169,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
  	    hover: true,
  	    highlightOnly: true,
             renderIntent: "temporary",
-	    selectStyle: hoverSelectStyle
+	    selectStyle: hoverSelectStyle,
 	    //        eventListeners: {
 	    //            beforefeaturehighlighted: report,
 	    //            featurehighlighted: report,
@@ -171,8 +181,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 
 	var selectStyle = OpenLayers.Util.applyDefaults({
-	    fillColor: "blue",
-	    strokeColor: "blue"}, OpenLayers.Feature.Vector.style["select"]);
+	//    fillColor: "blue",
+//	    strokeColor: "blue"
+	}, OpenLayers.Feature.Vector.style["select"]);
 
 	this._selectVds = new OpenLayers.Control.SelectFeature(this._vdsSegmentLines,{
 	    highlightOnly: true,
@@ -183,9 +194,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this.getMap().addControl(this._selectVds);
 	this._selectVds.activate();   
 
-	this.getMap().zoomToExtent( this._vdsSegmentLines.getExtent() );
 
-	// OK, call linkfeaturestocells when features change on the layer
+	obj.getMap().zoomToExtent( obj._vdsSegmentLines.getDataExtent() );
+
 /*
 	dojo.connect( this._vdsSegmentLines, "moveend", this.updateVdsSegmentsQuery );
 	dojo.connect( this._vdsSegmentLines, "featuresadded", this._linkFeaturesToCells );
@@ -194,6 +205,23 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     },
 
+    _clickTimeSpaceCell: function( e ) {
+	var stationnm = e.target.getAttribute( 'station' );
+	var timeidx = e.currentTarget.getAttribute( 'timeidx' );
+	var timeind = e.currentTarget.getAttribute( 'time' );
+	var station = this._tsd._stations[ stationnm ];
+
+	// CENTER THE MAP ON THE VDS SECTION WE CLICKED ON
+	console.log( "Centering on feature" );
+	var feature = station.feature;
+	if ( feature ) 
+	    this.getMap().zoomToExtent( feature.geometry.getBounds() );
+	else
+	    alert( "Unable to find feature in layer" );
+
+	// SCROLL THE ACTIVITY LOG TO THE NEAREST ENTRY
+	
+    },
 
     _hoverStation: function( e ) {
 	var stationnm = e.target.getAttribute( 'station' );
@@ -214,15 +242,15 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		    feature = ff;
 		}
 	    }
-*/
-/*
+            */
+            /*
 	    if ( feature ) {
 		feature.style.strokeColor = tdc.style.backgroundColor;
 		feature.style.strokeWidth = 8;
 		feature.style.strokeOpacity = 1;
 		this._vdsSegmentLines.drawFeature( feature );
 	    }
-*/
+            */
 
 	    // OK, found the feature.  Highlight it?  select it
 	    if ( feature ) {
@@ -267,9 +295,42 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		}
 	    }
 	}
-	this._hoverStation( e ); // highlight the station we're hovering over
-	console.log( 'TIME: ' + this._tsd.getTimeForIndex( timeind ) );
+//	this._hoverStation( e ); // highlight the station we're hovering over
+	var stationnm = e.target.getAttribute( 'station' );
+	var station = this._tsd._stations[ stationnm ];
+	document.getElementById('tmcpe_tsd_cellinfo').innerHTML = 
+	    station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd.getTimeForIndex( timeind ) ;
     },
+
+    ////////// TABLE FUNCTIONS
+    getActivityLogGrid: function() {
+	if ( !this._activityLogGrid ) {
+	    this._activityLogGrid = dijit.byId( 'logGridNode' );
+	}
+	return this._activityLogGrid;
+    }
+
+    scrollActivityLogToItem: function ( item ) {
+	var gn = getActivityLogGrid();
+	
+	var idx = gn.getItemIndex( item );
+	if ( idx = -1 ) {
+	    // hmm, the grid hasn't materialized this item, 
+	    idx = item._0;
+	    // load the missing page
+	    // some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
+	    var pageIndex = gn._rowToPage( idx );
+	    gn._requestPage( pageIndex );
+	}
+	if ( idx >= 0 ) {
+	    gn.selection.clear();
+	    gn.selection.addToSelection( idx );
+	    gn.scrollToRow( idx );
+	} else {
+	    alert( "Strangely, item " + cad + " wasn't found in the grid!" );
+	}
+
+    }
 
     __dummyFunc: function () {}
 });
