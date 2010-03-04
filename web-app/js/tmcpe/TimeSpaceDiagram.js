@@ -114,11 +114,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	//syncInterface(); // sets interface paramters to match
     },
 
-//    getTimeForIndex: function( i ) {
-//	var dd = dojo.date.locale.parse( this._data.opts.mintimestamp, {datePattern:"yyyy/MM/dd", timePattern:"HH:mm:ss"} );
-//	var dd2 = dojo.date.add( dd, 'minute', i*5 );
-//	return dd2;
-//    },
+    getTimeForIndex: function( i ) {
+	var dd = dojo.date.locale.parse( this._data.opts.mintimestamp, {datePattern:"yyyy/MM/dd", timePattern:"HH:mm:ss"} );
+	var dd2 = dojo.date.add( dd, 'minute', i*5 );
+	return dd2;
+    },
 
     _colorAccessors: {
 	stdspd: function( i,j ) { return this._getColor( (this._data.incspd[i][j]-this._data.avgspd[i][j])/this._data.stdspd[i][j], -this._themeScale, 0, '#ff0000','#00ff00' ) },
@@ -157,7 +157,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
     updateTheme: function() {
 	console.log( "UPDATING THEME" );
-	var numrows = ((this._data.opts.prewindow/1) + (this._data.opts.postwindow/1))/5;
+	var numrows = Math.round(((this._data.opts.prewindow/1) + (this._data.opts.postwindow/1))/5);
 	this._colorDataAccessor = this._colorAccessors[ this.colorDataAccessor ];
 	
 	for ( i = 0; i < numrows; ++i ) {
@@ -207,7 +207,8 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// computing the number of rows (timesteps) from data passed
 	// in the JSON object.  The JSON data format needs to be
 	// standardized
-	var numrows = ((d.opts.prewindow/1) + (d.opts.postwindow/1))/5;
+	var numrows = Math.round(((d.opts.prewindow/1) + (d.opts.postwindow/1))/5);
+	console.log( "NUMROWS IS" + numrows );
 	this._numTimeRows = numrows;
 
 	// FIXME: Similarly here, I'm getting the number of freeway
@@ -296,7 +297,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    return;
 	}
 //	var fwydir = inc.split( '-' );
-	var theUrl = "data/" + inc + ".json";
+	var theUrl = "/tmcpe/data/" + inc + ".json";
 
 	var caller = this;
 	
@@ -319,7 +320,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// plan to remove this call and consolidate things into a
 	// single call
 	dojo.xhrGet({
-	    url: "data/stations.json",
+	    url: "/tmcpe/data/stations.json",
 	    preventCache: true,
 	    handleAs: "text",
 	    sync: true,
