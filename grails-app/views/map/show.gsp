@@ -7,7 +7,8 @@
 -->
 
     <!-- Load the map javascript and css -->
-    <tmcpe:openlayers_latest />  <!-- brings in the openlayers stuff -->
+    <!-- <tmcpe:openlayers_latest /> --> <!--  brings in the openlayers stuff -->
+    <tmcpe:openlayers />  
     <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
 
     <g:javascript>
@@ -116,7 +117,7 @@
 	<input id="onlyAnalyzed" name="Analyzed" 
 	       dojoType="dijit.form.CheckBox" 
 	       value="analyzed" 
-	       checked="checked"
+	       checked=""
 	       onChange="incidentList.filter();"
 	       />
 	<button dojoType="dijit.form.Button" type="submit" name="submitButton"
