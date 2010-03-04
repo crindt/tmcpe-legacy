@@ -81,6 +81,22 @@ class IncidentController {
                   order( 'stampTime', 'asc' )
               }
           }
+          // FIXME: HACK.  Filter out the unanalyzed
+/*
+          System.err.println( "ANALYZED IS: " +_params.onlyAnalyzed )
+          if ( _params.onlyAnalyzed == "analyzed" ) {
+              def filterList = []
+              System.err.println( "FILTERING" )
+              theList.each() { 
+                  def listAnal = it.listAnalyses(); 
+                  System.err.println( "INCIDENT " + it.id + ": " + listAnal + " : " + listAnal.count() );
+                  System.err.println( "INCIDENT " + it.id + " has " + ( listAnal ? listAnal.count() : 0 ) + " analyses" );
+                  if ( listAnal != null && listAnal.count() > 0 ) { filterList.add( it ) } 
+              }
+              theList = filterList
+          }
+*/
+          
           System.err.println( "============COUNT: " + theList.count() )
           withFormat {
               html {
@@ -249,7 +265,7 @@ class IncidentController {
             flash.message = "Incident not found with id ${params.id}"
             redirect(action:list)
         } else {
-            def tt = [items: incident.listAnalyses() ]
+            def tt = [items: [ incident.listAnalyses() ] ]
             render tt  as JSON
         }
     }
