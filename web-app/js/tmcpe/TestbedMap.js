@@ -21,8 +21,8 @@ dojo.declare("tmcpe.TestbedMap", [ dijit._Widget ], {
 	    //	        minZoomLevel: 3,
 	    //	        numZoomLevels: 17
 	    minZoomLevel: 1,
-	    maxZoomLevel: 17,
-	    numZoomLevels: 17,
+	    maxZoomLevel: 20,
+	    numZoomLevels: 20,
             maxResolution: 156543.0339,
             maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34,
                                              20037508.34, 20037508.34)
@@ -48,10 +48,11 @@ dojo.declare("tmcpe.TestbedMap", [ dijit._Widget ], {
 		attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>'
             }
 	);
-	//            var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true});
+
+//	var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true, numZoomLevels:20});
 
 
-	this._map.addLayers([mapnik, osma]);
+	this._map.addLayers([ mapnik, osma /*, gmap */]);
 
 	this._map.addControl(new OpenLayers.Control.LayerSwitcher());
 
