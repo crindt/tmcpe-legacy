@@ -5,7 +5,7 @@ dojo.provide("tmcpe.IncidentList");
 dojo.require("dijit._Widget");
 dojo.require("dijit._Templated");
 dojo.require("dijit.Dialog");
-dojo.require("dojox.widget.Dialog");
+dojo.require("dijit.ProgressBar");
 dojo.require("dojox.json.ref");
 
 dojo.require("tmcpe.TestbedMap");
@@ -32,6 +32,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _progressCount: null,
     _progressTot: null,
     _progressDialog: null,
+    _progressBar: null,
 
     _jobs: 0,
 
@@ -91,6 +92,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	if ( dijit.byId( 'dir' ).getValue() ) {
 	    var value = dijit.byId( 'dir' ).getValue();
 	    theParams['direction'] = value;//myFormatDateOnly( value );
+	};
+	if ( dijit.byId( 'onlyAnalyzed' ).getValue() ) {
+	    var value = dijit.byId( 'onlyAnalyzed' ).getValue();
+	    theParams['onlyAnalyzed'] = value;
 	};
 	var days = [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ];
 	for ( dow in days ) {
@@ -157,20 +162,24 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		{
 		    console.log( feat.features.length );
 		    obj._progressCount = 0; 
-		    obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
+		    //obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
+		    obj._progressBar.update( { maximum: obj._progressTot, progress: 0 } );
+		    
 		    console.log( "before feature added: Downloaded " +obj._progressCount + " of " + obj._progressTot );
 		}
 	    },
 	    "featureadded": function( feat ) { 
-		obj._progressCount++ 
+		obj._progressCount++;
 		//obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
+		obj._progressBar.update( { progress: obj._progressCount } );
 		console.log( "feature added: Downloaded " +obj._progressCount + " of " + obj._progressTot );
 	    },
 	    "featuresadded": function() { 
 		console.log( "features added" );
 		obj.updateIncidentsTable(); 
 		obj._loadEnd(); 
-		obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
+
+		// Here, we delay 1 second before formally ending the load dialog (so the user can read it)
 		setTimeout( function() { obj._loadEnd();} , 1000 );
 	    },
 	    "featuresremoved": function() { 
@@ -277,8 +286,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 
 	var selectStyle = OpenLayers.Util.applyDefaults({
-	    fillColor: "blue",
-	    strokeColor: "blue"}, OpenLayers.Feature.Vector.style["select"]);
+//	    fillColor: "blue",
+//	    strokeColor: "blue"
+	}, OpenLayers.Feature.Vector.style["select"]);
 
 	this._selectVds = new OpenLayers.Control.SelectFeature(
 	    this._vdsLayer,{
@@ -436,7 +446,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	// Sleep so we don't destroy the dialog too soon.
 	var obj = this;
-//	setTimeout( function() { obj._loadEnd();} , 1000 );
+	// crindt: TIMEOUT HACK
+	setTimeout( function() { if ( this.jobs > 0 ) { obj._loadEnd(); this._jobs=0 } } , 10000 );
     },
 
     filter: function() {
@@ -464,12 +475,19 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		style: "width: 300px",
 		modal: true
             });
+
 	    // this hides the title bar of the dialog...
 	    dojo.query( '#progressDialog > .dijitDialogTitleBar' ).style( { "display": "none" } ) ;
-	    //.style( { display: none } ); 
-//	    dojo.byId('mapPane').appendChild( this._progressDialog );
+
+
+	    this._progressBar = new dijit.ProgressBar( { id:"downloadProgress", 
+							 jsId:"jsProgress", 
+							 style: "width:250px" } );
+	    this._progressDialog.attr( 'content', this._progressBar ); 
 	}
-	this._progressDialog.attr( 'content', "Querying for incidents..." ); 
+
+	this._progressBar.update( { progress: 0 } );
+
 	if ( !this._progressDialog.open ) {
 	    this._progressDialog.show();
 	}
@@ -520,9 +538,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	}
 	this._vdsLayer.refresh({force: true, params:theParams});    
     },
-
-
-
 
     __dummyFunction: function() {}
 });
