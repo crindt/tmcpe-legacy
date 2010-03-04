@@ -8,7 +8,7 @@
     <meta name="layout" content="main" />
 
     <!-- Load the map javascript and css -->
-    <tmcpe:openlayers_latest />
+    <tmcpe:openlayers />
     <tmcpe:tmcpe />
 
     <g:javascript>
@@ -73,7 +73,7 @@
 		  autocomplete="true"
 		  hasDownArrow="true"
                   onChange="tsd.changeIncident( '${incidentInstance.id}', dojo.byId('facility').value.split('-')[0],dojo.byId('facility').value.split('-')[1] );incidentView.updateVdsSegmentsQuery();"
-		  style="float:left;"
+		  style="float:left;width:5em;"
 		  >
 	  </select>
 	  
@@ -84,7 +84,7 @@
 		  autocomplete="true"
 		  hasDownArrow="true"
 		  onChange="tsd.setTheme( dojo.byId( 'mapTheme' ).value );"
-		  style="float:left;"
+		  style="float:left;width:5em;"
 		  >
 	    <option>stdspd</option>
 	    <option>spd</option>
@@ -95,14 +95,14 @@
 	  
 	  <div id="scaleSlider" style="float:left" visibility="true">
 	    <label class="secondLabel" for="school" style="float:left">Scale</label>
-	    <div dojoType="dijit.form.HorizontalSlider" id="bandSlider" name="school"
+	    <div dojoType="dijit.form.HorizontalSlider" jsid="bandSlider" id="bandSlider" name="school"
 		 minimum="0"
-		 value="0.25"
+		 value="0.75"
 		 maximum="10"
 		 showButtons="false"
 		 discreteValues="41"
 		 style="width:200px; height: 40px; float:left;"
-		 onLoad="tsd.setThemeScale( dojo.byId( 'scaleValue' ) );"
+		 onLoad="bandSlider.setValue( dojo.byId( 'scaleValue' ) ); tsd.setThemeScale( dojo.byId( 'scaleValue' ) );"
 		 onChange="dojo.byId( 'scaleValue' ).textContent=arguments[0]; tsd.setThemeScale( arguments[ 0 ] );"
 		 >
 	      <div dojoType="dijit.form.HorizontalRule" container="bottomDecoration"
@@ -126,6 +126,7 @@
 	    <label id="scaleValue" style="vertical-align:top;float:left;">0.25</label>
 	  </div>
 	  
+<!--
 	  <input id="activityCheck" dojotype="dijit.form.CheckBox"
 		 name="activityLogCheckBox" checked="false"
 		 type="checkbox"
@@ -136,6 +137,7 @@
 		 type="checkbox"
 		 onClick="displayStations( dojo.byId( 'stationCheck' ).checked ? 'visible' : 'hidden' );" />
 	  <label for="stationCheck"> Show stations? </label> 	    
+-->
 	</div>
 
 	<div dojoType="dijit.layout.ContentPane" region="center" splitter="false">
@@ -149,6 +151,9 @@
 	       colorDataAccessor="stdspd"
 	       >
 	  </div>
+	</div>
+	<div dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+	  <div class="tmcpe_tsd_cellinfo" id="tmcpe_tsd_cellinfo">Mouseover time-space diagram for location/time information.</div>
 	</div>
       </div>
 
