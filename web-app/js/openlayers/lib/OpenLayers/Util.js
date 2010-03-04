@@ -32,10 +32,10 @@ OpenLayers.Util.getElement = function() {
 };
 
 /** 
- * Maintain $() from prototype
+ * Maintain existing definition of $.
  */
-if ($ == null) {
-    var $ = OpenLayers.Util.getElement;
+if(typeof window.$  === "undefined") {
+    window.$ = OpenLayers.Util.getElement;
 }
 
 /**
@@ -1282,36 +1282,13 @@ OpenLayers.Util.isEquivalentUrl = function(url1, url2, options) {
     var urlObj1 = OpenLayers.Util.createUrlObject(url1, options);
     var urlObj2 = OpenLayers.Util.createUrlObject(url2, options);
 
-    //compare all keys (host, port, etc)
+    //compare all keys except for "args" (treated below)
     for(var key in urlObj1) {
-        if (options.test) {
-            OpenLayers.Console.userError(key + "\n1:" + urlObj1[key] + "\n2:" + urlObj2[key]);
+        if(key !== "args") {
+            if(urlObj1[key] != urlObj2[key]) {
+                return false;
+            }
         }
-        var val1 = urlObj1[key];
-        var val2 = urlObj2[key];
-        
-        switch(key) {
-            case "args":
-                //do nothing, they'll be treated below
-                break;
-            case "host":
-            case "port":
-            case "protocol":
-                if ((val1 == "") || (val2 == "")) {
-                    //these will be blank for relative urls, so no need to 
-                    // compare them here -- call break. 
-                    // 
-                    break;
-                } 
-                // otherwise continue with default compare
-                //
-            default: 
-                if ( (key != "args") && (urlObj1[key] != urlObj2[key]) ) {
-                    return false;
-                }
-                break;
-        }
-        
     }
 
     // compare search args - irrespective of order
@@ -1346,7 +1323,21 @@ OpenLayers.Util.isEquivalentUrl = function(url1, url2, options) {
 OpenLayers.Util.createUrlObject = function(url, options) {
     options = options || {};
 
-    var urlObject = {};
+    // deal with relative urls first
+    if(!(/^\w+:\/\//).test(url)) {
+        var loc = window.location;
+        var port = loc.port ? ":" + loc.port : "";
+        var fullUrl = loc.protocol + "//" + loc.host.split(":").shift() + port;
+        if(url.indexOf("/") === 0) {
+            // full pathname
+            url = fullUrl + url;
+        } else {
+            // relative to current path
+            var parts = loc.pathname.split("/");
+            parts.pop();
+            url = fullUrl + parts.join("/") + "/" + url;
+        }
+    }
   
     if (options.ignoreCase) {
         url = url.toLowerCase(); 
@@ -1355,27 +1346,25 @@ OpenLayers.Util.createUrlObject = function(url, options) {
     var a = document.createElement('a');
     a.href = url;
     
-  //host (without port)
-    // if we don't have a host (which is the case with URLs starting with "/"
-    // in IE), take the window location's host to match other browsers that
-    // fill in the window's location host automatically
-    urlObject.host = a.host || window.location.host;
-    var port = a.port;
-    if (port.length <= 0) {
-        var newHostLength = urlObject.host.length - (port.length);
-        urlObject.host = urlObject.host.substring(0, newHostLength); 
-    }
+    var urlObject = {};
+    
+    //host (without port)
+    urlObject.host = a.host.split(":").shift();
 
-  //protocol
+    //protocol
     urlObject.protocol = a.protocol;  
 
-  //port
-    urlObject.port = ((port == "80") && (options.ignorePort80)) ? "" : port;
-                                                                     
-  //hash
-    urlObject.hash = (options.ignoreHash) ? "" : a.hash;  
+    //port (get uniform browser behavior with port 80 here)
+    if(options.ignorePort80) {
+        urlObject.port = (a.port == "80" || a.port == "0") ? "" : a.port;
+    } else {
+        urlObject.port = (a.port == "" || a.port == "0") ? "80" : a.port;
+    }
+
+    //hash
+    urlObject.hash = (options.ignoreHash || a.hash === "#") ? "" : a.hash;  
     
-  //args
+    //args
     var queryString = a.search;
     if (!queryString) {
         var qMark = url.indexOf("?");
@@ -1383,65 +1372,9 @@ OpenLayers.Util.createUrlObject = function(url, options) {
     }
     urlObject.args = OpenLayers.Util.getParameters(queryString);
 
-  //pathname (this part allows for relative <-> absolute comparison)
-    if ( ((urlObject.protocol == "file:") && (url.indexOf("file:") != -1)) || 
-         ((urlObject.protocol != "file:") && (urlObject.host != "")) ) {
-
-        urlObject.pathname = a.pathname;  
-
-        //Test to see if the pathname includes the arguments (Opera)
-        var qIndex = urlObject.pathname.indexOf("?");
-        if (qIndex != -1) {
-            urlObject.pathname = urlObject.pathname.substring(0, qIndex);
-        }
-
-    } else {
-        var relStr = OpenLayers.Util.removeTail(url);
-
-        var backs = 0;
-        do {
-            var index = relStr.indexOf("../");
-
-            if (index == 0) {
-                backs++;
-                relStr = relStr.substr(3);
-            } else if (index >= 0) {
-                var prevChunk = relStr.substr(0,index - 1);
-                
-                var slash = prevChunk.indexOf("/");
-                prevChunk = (slash != -1) ? prevChunk.substr(0, slash +1)
-                                          : "";
-                
-                var postChunk = relStr.substr(index + 3);                
-                relStr = prevChunk + postChunk;
-            }
-        } while(index != -1);
-
-        var windowAnchor = document.createElement("a");
-        var windowUrl = window.location.href;
-        if (options.ignoreCase) {
-            windowUrl = windowUrl.toLowerCase();
-        }
-        windowAnchor.href = windowUrl;
-
-      //set protocol of window
-        urlObject.protocol = windowAnchor.protocol;
-
-        var splitter = (windowAnchor.pathname.indexOf("/") != -1) ? "/" : "\\";
-        var dirs = windowAnchor.pathname.split(splitter);
-        dirs.pop(); //remove filename
-        while ((backs > 0) && (dirs.length > 0)) {
-            dirs.pop();
-            backs--;
-        }
-        relStr = dirs.join("/") + "/"+ relStr;
-        urlObject.pathname = relStr;
-    }
+    //pathname (uniform browser behavior with leading "/")
+    urlObject.pathname = (a.pathname.charAt(0) == "/") ? a.pathname : "/" + a.pathname;
     
-    if ((urlObject.protocol == "file:") || (urlObject.protocol == "")) {
-        urlObject.host = "localhost";
-    }
-
     return urlObject; 
 };
  
@@ -1540,9 +1473,7 @@ OpenLayers.Util.getRenderedDimensions = function(contentHTML, size, options) {
     
     // create temp container div with restricted size
     var container = document.createElement("div");
-    container.style.overflow= "";
-    container.style.position = "absolute";
-    container.style.left = "-9999px";
+    container.style.visibility = "hidden";
         
     var containerElement = (options && options.containerElement) 
     	? options.containerElement : document.body;
@@ -1567,11 +1498,39 @@ OpenLayers.Util.getRenderedDimensions = function(contentHTML, size, options) {
     var content = document.createElement("div");
     content.innerHTML = contentHTML;
     
+    // we need overflow visible when calculating the size
+    content.style.overflow = "visible";
+    if (content.childNodes) {
+        for (var i=0, l=content.childNodes.length; i<l; i++) {
+            if (!content.childNodes[i].style) continue;
+            content.childNodes[i].style.overflow = "visible";
+        }
+    }
+    
     // add content to restricted container 
     container.appendChild(content);
     
     // append container to body for rendering
     containerElement.appendChild(container);
+    
+    // Opera and IE7 can't handle a node with position:aboslute if it inherits
+    // position:absolute from a parent.
+    var parentHasPositionAbsolute = false;
+    var parent = container.parentNode;
+    while (parent && parent.tagName.toLowerCase()!="body") {
+        var parentPosition = OpenLayers.Element.getStyle(parent, "position");
+        if(parentPosition == "absolute") {
+            parentHasPositionAbsolute = true;
+            break;
+        } else if (parentPosition && parentPosition != "static") {
+            break;
+        }
+        parent = parent.parentNode;
+    }
+
+    if(!parentHasPositionAbsolute) {
+        container.style.position = "absolute";
+    }
     
     // calculate scroll width of content and add corners and shadow width
     if (!w) {
