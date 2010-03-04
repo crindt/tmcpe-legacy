@@ -2,12 +2,13 @@ package edu.uci.its.testbed
 
 class VdsRawData implements Serializable {
 
+
     Integer vdsid
     Date    fivemin
     Integer intervals
     Integer volume
     Float occ
-    Time    fivemin_tod
+//    Time    fivemin_tod
 /*
     Integer laneVolumes[]
     Integer laneOccs[]
