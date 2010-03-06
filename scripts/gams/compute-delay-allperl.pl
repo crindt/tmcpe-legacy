@@ -368,6 +368,8 @@ foreach my $vds ( @avds ) {
     }
 }
 
+$dbh->close();
+
 
 # write program;
 
