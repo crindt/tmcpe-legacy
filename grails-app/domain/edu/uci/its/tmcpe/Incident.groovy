@@ -181,7 +181,8 @@ class Incident {
         def fname = [ id, section.freewayId, section.freewayDir ].join( "-" )
         def p = ~/^${id}-\d+-[NSEW].json/
         System.out.println( p )
-        def ret = ()
+
+        def ret = []
 
         new File( 'web-app/data' ).eachFileMatch( p ) {
             f ->

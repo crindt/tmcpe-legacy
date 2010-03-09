@@ -61,7 +61,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	{
 	    var stnidx = tsd._data.segments[i].stnidx;
 	    var station = tsd._stations[ stnidx ];
-	    sectionParams[ 'idIn' ].push( station.vdsid );
+	    if ( station ) 
+		sectionParams[ 'idIn' ].push( station.vdsid );
 	}
 	theParams['idIn'] = sectionParams[ 'idIn' ];
 
@@ -115,12 +116,14 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    for ( var k = 0; k < vsl.features.length && !feature; ++k )
 	    {
 		var ff = vsl.features[ k ];
-		console.log( [station.vdsid,' =?= ', ff.attributes[ 'id' ] ].join( '') );
-		if ( station.vdsid == ff.attributes[ 'id' ] ) {
-		    feature = ff;
+		if ( station ) {
+		    console.log( [station.vdsid,' =?= ', ff.attributes[ 'id' ] ].join( '') );
+		    if ( station && station.vdsid == ff.attributes[ 'id' ] ) {
+			feature = ff;
+		    }
 		}
 	    }
-	    if ( feature && feature.layer ) {
+	    if ( feature && feature.layer && station ) {
 		station.feature = feature;
 	    }
 	}
@@ -195,7 +198,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this._selectVds.activate();   
 
 
-	obj.getMap().zoomToExtent( obj._vdsSegmentLines.getDataExtent() );
+//	obj.getMap().zoomToExtent( obj._vdsSegmentLines.getDataExtent() );
 
 /*
 	dojo.connect( this._vdsSegmentLines, "moveend", this.updateVdsSegmentsQuery );
@@ -213,10 +216,12 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	// CENTER THE MAP ON THE VDS SECTION WE CLICKED ON
 	console.log( "Centering on feature" );
-	var feature = station.feature;
-	if ( feature ) 
-	    this.getMap().zoomToExtent( feature.geometry.getBounds() );
-	else
+	if ( station ) {
+	    var feature = station.feature;
+	    if ( feature ) {
+		this.getMap().zoomToExtent( feature.geometry.getBounds() );
+	    }
+	} else
 	    alert( "Unable to find feature in layer" );
 
 	// SCROLL THE ACTIVITY LOG TO THE NEAREST ENTRY
@@ -226,11 +231,11 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     _hoverStation: function( e ) {
 	var stationnm = e.target.getAttribute( 'station' );
 	var station = this._tsd._stations[ stationnm ];
-	console.debug( "station:" + station.vdsid );
+//	console.debug( "station:" + station.vdsid );
 
 	// HACK: highlight the corresponding station in the map
 	var vsl = this._vdsSegmentLines;
-	if ( vsl ) {
+	if ( vsl && station ) {
 	    var feature = station.feature;
 	    /*
 	    // Loop over the lines until we find the correct station
@@ -287,17 +292,27 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		    }
 		}
 */
-		var feature = station.feature;
-		// OK, found the feature.  alter the style
-		if ( feature ) {
-		    feature.style.strokeColor = tdc.style.backgroundColor;
-		    this._vdsSegmentLines.drawFeature( feature );
+		if ( station ) {
+		    var feature = station.feature;
+		    // OK, found the feature.  alter the style
+		    if ( feature ) {
+			feature.style.strokeColor = tdc.style.backgroundColor;
+			this._vdsSegmentLines.drawFeature( feature );
+		    }
 		}
 	    }
 	}
 //	this._hoverStation( e ); // highlight the station we're hovering over
 	var stationnm = e.target.getAttribute( 'station' );
 	var station = this._tsd._stations[ stationnm ];
+	if ( ! station ) {
+	    station = {
+		fwy: "?",
+		dir: "?",
+		pm: "?",
+		name: "?stationnm?"
+	    };
+	}
 	document.getElementById('tmcpe_tsd_cellinfo').innerHTML = 
 	    station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd.getTimeForIndex( timeind ) ;
     },
@@ -308,7 +323,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    this._activityLogGrid = dijit.byId( 'logGridNode' );
 	}
 	return this._activityLogGrid;
-    }
+    },
 
     scrollActivityLogToItem: function ( item ) {
 	var gn = getActivityLogGrid();
@@ -330,7 +345,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    alert( "Strangely, item " + cad + " wasn't found in the grid!" );
 	}
 
-    }
+    },
 
     __dummyFunc: function () {}
 });
