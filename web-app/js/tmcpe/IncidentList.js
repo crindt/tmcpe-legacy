@@ -136,6 +136,29 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _incidentsLayerInit: function() {
 	// should validate
 
+	if ( !this._progressDialog ) {
+	    this._progressDialog = new dijit.Dialog({//dojox.widget.Dialog({
+//		title: "Loading",
+		id: "progressDialog",
+		showTitle: false,
+		style: "width: 300px",
+		modal: true
+            });
+
+	    // this hides the title bar of the dialog...
+	    dojo.query( '#progressDialog > .dijitDialogTitleBar' ).style( { "display": "none" } ) ;
+
+
+	    this._progressBar = new dijit.ProgressBar( { id:"downloadProgress", 
+							 jsId:"jsProgress", 
+							 style: "width:250px",
+							 indeterminate: false
+						       } );
+	    this._progressDialog.attr( 'content', this._progressBar ); 
+	}
+
+	var obj = this;
+
 	// Create the incidents layer.  The URL is hardcoded here...
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
             projection: this.getMap().displayProjection,
@@ -152,39 +175,34 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this._incidentsLayer.events.on({
             "featureselected": obj.onFeatureSelectIncident,
             "featureunselected": obj.onFeatureUnselectIncident,
+
+	    "loadstart": function() {
+		// notify IncidentList "app" that we're starting to load
+		obj._loadStart();
+		obj._progressBar.update( { 'maximum': 100, 'progress': 0 } );
+	    },
+	    "loadend": function() {
+		// notify IncidentList "app" that we've finished loading
+		obj._loadEnd();
+	    },
+	    "loadcancel": function() {
+		// force IncidentList "app" to recognize that we've finished loading
+		obj._loadCancel();
+	    },
+
 	    "beforefeaturesadded": function (feat) { 
 		console.log( "before features added" );
-		obj._loadStart();
-		obj._progressTot = feat.features.length; 
-		if ( obj._progressTot == 0 ) 
-		    obj._loadEnd();
-		else
-		{
-		    console.log( feat.features.length );
-		    obj._progressCount = 0; 
-		    //obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
-		    obj._progressBar.update( { maximum: obj._progressTot, progress: 0 } );
-		    
-		    console.log( "before feature added: Downloaded " +obj._progressCount + " of " + obj._progressTot );
-		}
+		console.log( "ADDING " + feat.features.length + " FEATURES" );
 	    },
 	    "featureadded": function( feat ) { 
-		obj._progressCount++;
-		//obj._progressDialog.attr( 'content', "Downloaded " +obj._progressCount + " of " + obj._progressTot ); 
-		obj._progressBar.update( { progress: obj._progressCount } );
-		console.log( "feature added: Downloaded " +obj._progressCount + " of " + obj._progressTot );
 	    },
 	    "featuresadded": function() { 
 		console.log( "features added" );
 		obj.updateIncidentsTable(); 
-		obj._loadEnd(); 
-
-		// Here, we delay 1 second before formally ending the load dialog (so the user can read it)
-		setTimeout( function() { obj._loadEnd();} , 1000 );
 	    },
 	    "featuresremoved": function() { 
 		console.log( "features removed" );
-		obj.updateIncidentsTable() 
+		obj.updateIncidentsTable();
 	    },
 	    "moveend": function() { obj.updateIncidentsQuery(); }
 	});
@@ -237,6 +255,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _vdsLayerInit: function( theParams ) {
 
 	var myParams = this._constructVdsSegmentsParams( theParams );
+
+	var obj = this;
 
 	this._vdsLayer = new OpenLayers.Layer.Vector("Vds Segments", {
             projection: this.getMap().displayProjection,
@@ -367,9 +387,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     },
 
 
-
-
-
     // EVENT HANDLERS: FIXME: This technically aren't members of this class; js quirks...
     onFeatureSelectIncident: function(event) {
 	var il = dijit.byId( 'incidentList' );
@@ -439,15 +456,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	
 	var myParams = this._constructIncidentsParams( theParams );
 
-	this._loadStart();
-
 	this._updateIncidentsLayer( myParams );
 	//    updateIncidentsTable( myParams );
 
-	// Sleep so we don't destroy the dialog too soon.
-	var obj = this;
-	// crindt: TIMEOUT HACK
-	setTimeout( function() { if ( this.jobs > 0 ) { obj._loadEnd(); this._jobs=0 } } , 10000 );
     },
 
     filter: function() {
@@ -467,24 +478,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _loadStart: function() {
 	this._jobs++;
 	console.log( "LOAD START: " + this._jobs );
-	if ( !this._progressDialog ) {
-	    this._progressDialog = new dijit.Dialog({//dojox.widget.Dialog({
-//		title: "Loading",
-		id: "progressDialog",
-		showTitle: false,
-		style: "width: 300px",
-		modal: true
-            });
-
-	    // this hides the title bar of the dialog...
-	    dojo.query( '#progressDialog > .dijitDialogTitleBar' ).style( { "display": "none" } ) ;
-
-
-	    this._progressBar = new dijit.ProgressBar( { id:"downloadProgress", 
-							 jsId:"jsProgress", 
-							 style: "width:250px" } );
-	    this._progressDialog.attr( 'content', this._progressBar ); 
-	}
 
 	this._progressBar.update( { progress: 0 } );
 
@@ -498,6 +491,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 //	this._progressDialog.attr( "content", "finished" ); 
 	console.log( "LOAD END: " + this._jobs );
 	if ( this._jobs <= 0 && this._progressDialog != null ) { this._progressDialog.hide(); }
+    },
+
+    _loadCancel: function() {
+	// repeatedly end until the number of open jobs is 0
+	while ( obj._jobs > 0 ) { obj._loadEnd(); };
     },
 
     updateVdsSegmentsQuery: function( theParams ) {
@@ -521,9 +519,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    callback: function() { console.log( "GOT CALLBACK!" ); }
 		});
 	}
-	this._loadStart();
 	this._incidentsLayer.refresh({force: true, params:theParams});
-	this._loadEnd();
     },
 
     _updateVdsSegmentsLayer: function( theParams ) {
@@ -537,6 +533,23 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		});
 	}
 	this._vdsLayer.refresh({force: true, params:theParams});    
+    },
+
+
+
+    sleep: function (naptime){
+        naptime = naptime * 1000;
+        var sleeping = true;
+        var now = new Date();
+        var alarm;
+        var startingMSeconds = now.getTime();
+        //alert("starting nap at timestamp: " + startingMSeconds + "\nWill sleep for: " + naptime + " ms");
+        while(sleeping){
+            alarm = new Date();
+            alarmMSeconds = alarm.getTime();
+            if(alarmMSeconds - startingMSeconds > naptime){ sleeping = false; }
+        }        
+        //alert("Wakeup!");
     },
 
     __dummyFunction: function() {}
