@@ -1,0 +1,21 @@
+<div>
+  <div dojoType="dijit.layout.BorderContainer" id="mapgrid" region="center" design="sidebar" style="background:green;" splitter="false" liveSplitters="false">
+    <div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
+      <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
+    </div>
+  </div>
+  <div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
+    <div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%">
+      <table id="incidentGrid" 
+	     jsId="incidentGrid" 
+	     dojoType="dojox.grid.DataGrid" 
+	     sortInfo=2
+	     region="center"
+	     rowSelector="20px"
+	     onRowClick="incidentList.simpleSelectIncident"
+	     style="width:100%;height:5em;"
+	     >
+      </table>
+    </div>
+  </div>
+</div>
