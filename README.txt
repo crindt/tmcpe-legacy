@@ -8,5 +8,5 @@ Initially, we'll focus on incidents only...
 
 SECURITY
 
-We're looking to integrate the TMCPE app with some sort of single sign-on system.
+We're looking to integrate the TMCPE app with some sort of single sign-on system..
 
