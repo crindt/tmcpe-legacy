@@ -83,3 +83,6 @@ couchdb {
       db_suffix = "morehash"
 }      
 }
+
+
+//log4j.logger.org.springframework.security='off,stdout'
