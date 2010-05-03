@@ -16,6 +16,7 @@ class IncidentImpactAnalysis {
         incidentFacilityImpactAnalyses: IncidentFacilityImpactAnalysis
     ]
 
+    Incident incident;
     static belongsTo = [incident:Incident]
 
 

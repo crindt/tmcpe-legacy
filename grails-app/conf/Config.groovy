@@ -70,7 +70,8 @@ log4j = {
 
     debug 'org.jcouchdb',
           'org.codehaus.groovy.grails.plugins.starksecurity',
-          'edu.uci.its'
+          'edu.uci.its',
+          'org.codehaus.groovy'
 
           //,'org.svenson.JSONParser'
 

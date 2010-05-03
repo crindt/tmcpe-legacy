@@ -4,20 +4,26 @@ import edu.uci.its.testbed.Vds
 
 class IncidentFacilityImpactAnalysis {
 
-    // owner
+    ///////// INPUTS ////////
 
-    //FacilitySection startSection
-    //FacilitySection endSection
+    // This is the expected location of the onset of disruption to THIS facility
+    FacilitySection location
 
-    Integer facility
-    String direction
+    // This defines the time bounds of this analysis
+    Date            startTime
+    Date            endTime
 
-    List possibleFacilitySection
+    // Treat this as a sorted set.  IncidentSectionData has an induced ordering upstream to downstream by absolute postmile
+    SortedSet       analyzedSections
 
+    static hasMany = [ analyzedSections: AnalyzedSection ]
+
+    IncidentFacilityImpactAnalysis incidentImpactAnalysis
+    static belongsTo = [incidentImpactAnalysis: IncidentFacilityImpactAnalysis]
+
+
+    ///////// OUTPUTS ////////
     Double totalDelay
-
-    static hasMany = [ possibleFacilitySection: FacilitySection ]
-    static belongsTo = [incidentImpactAnalysis:IncidentImpactAnalysis]
 
 
     // time discontinuities

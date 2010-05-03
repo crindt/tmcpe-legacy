@@ -339,21 +339,6 @@ foreach my $vds ( @avds ) {
 	    
 	    my $st=$vdsid;
 	    
-	    # # This is what we really need to fill!
-	    # push @{$data->{$i}->{$facilkey}->{stations}->{$st}->{data}}, { 
-	    #     timeofday => $row->{timeofday},
-	    #     avg_spd => $row->{avg_spd},
-	    #     stddev_spd => $row->{stddev_spd},
-	    #     avg_pctobs => $row->{avg_pctobs},
-	    #     incspd => $row->{incspd},
-	    #     incpctobs => $row->{incpctobs},
-	    #     avg_flw => $row->{avg_flw},
-	    #     incflw => $row->{incflw},
-	    #     p_j_m => $row->{p_j_m},
-	    #     incden => $row->{incflw}/$row->{incspd},  # inferred
-	    #     shockspd => $shockspd
-	    # };
-	    
 	    $mintimeofday = $row->{timeofday} if ( not defined( $mintimeofday ) );
 	    $mindate = $row->{date} if ( not defined( $mindate ) );
 	    

@@ -23,15 +23,15 @@
                         
                    	        <g:sortableColumn property="id" title="Id" />
                         
-                   	        <th>End Section</th>
+                   	        <g:sortableColumn property="totalDelay" title="Total Delay" />
+                        
+                   	        <g:sortableColumn property="startTime" title="Start Time" />
+                        
+                   	        <th>Location</th>
                    	    
                    	        <g:sortableColumn property="endTime" title="End Time" />
                         
-                   	        <g:sortableColumn property="facilityDirection" title="Facility Direction" />
-                        
-                   	        <g:sortableColumn property="facilityName" title="Facility Name" />
-                        
-                   	        <th>Incident Impact Analysis</th>
+                   	        <th>Analyzed Sections</th>
                    	    
                         </tr>
                     </thead>
@@ -41,15 +41,15 @@
                         
                             <td><g:link action="show" id="${incidentFacilityImpactAnalysisInstance.id}">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'id')}</g:link></td>
                         
-                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'endSection')}</td>
+                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'totalDelay')}</td>
+                        
+                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'startTime')}</td>
+                        
+                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'location')}</td>
                         
                             <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'endTime')}</td>
                         
-                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'facilityDirection')}</td>
-                        
-                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'facilityName')}</td>
-                        
-                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'incidentImpactAnalysis')}</td>
+                            <td></td>
                         
                         </tr>
                     </g:each>

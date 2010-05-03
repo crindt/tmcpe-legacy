@@ -26,38 +26,51 @@
                             <td valign="top" class="name">Id:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'id')}</td>
+                            
                         </tr>
-			<tr class="prop">
-                            <td valign="top" class="name">Incident:</td>
-                            <td valign="top" class="value">
-			      <g:link controller="incident" action="show" id="${incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis.incident.id}">
-				${incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis.incident}
-			      </g:link>
-			    </td>
-			</tr>
-			<tr class="prop">
-                            <td valign="top" class="name">Incident Impact Analysis:</td>
-                            <td valign="top" class="value">
-			      <g:link controller="incidentImpactAnalysis" action="show" id="${incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis.id}">
-				${incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis}
-			      </g:link>
-			    </td>
-			</tr>
-
-			<tr class="prop">
-                          <td valign="top" class="name">Possibly Impacted Sections:</td>
-			  <td>
-                            <ul>
-                              <g:each var="f" in="${incidentFacilityImpactAnalysisInstance?.possibleFacilitySection}">
-                                <li>
-				  <g:link controller="facilitySection" action="show" id="${f.id}">
-				    ${f?.encodeAsHTML()}
-				  </g:link>
-				</li>
-                              </g:each>
-                            </ul>
-			  </td>
-			</tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Total Delay:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'totalDelay')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Start Time:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'startTime')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Location:</td>
+                            
+                            <td valign="top" class="value"><g:link controller="facilitySection" action="show" id="${incidentFacilityImpactAnalysisInstance?.location?.id}">${incidentFacilityImpactAnalysisInstance?.location?.encodeAsHTML()}</g:link></td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">End Time:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'endTime')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Analyzed Sections:</td>
+                            
+                            <td  valign="top" style="text-align:left;" class="value">
+                                <ul>
+                                <g:each var="a" in="${incidentFacilityImpactAnalysisInstance.analyzedSections}">
+                                    <li><g:link controller="analyzedSection" action="show" id="${a.id}">${a?.encodeAsHTML()}</g:link></li>
+                                </g:each>
+                                </ul>
+                            </td>
+                            
+                        </tr>
+                    
+                    
                     </tbody>
                 </table>
             </div>

@@ -76,6 +76,8 @@ SELECT cad,stampdate,stamptime,memo,parse_al_memo( memo ) as lp
        FROM actlog.d12_activity_log
        WHERE activitysubject='OPEN INCIDENT' AND cad IN ( SELECT cad from tmcpe.sigalerts );
 
+
+
 DROP TABLE IF EXISTS tmcpe.sigalert_list CASCADE;
 SELECT cad,memo,stampdate,stamptime,(lp).f1dir as f1dir,(lp).f1fac as f1fac,(lp).relloc as relloc,(lp).xs as xs,(lp).f2dir as f2dir,(lp).f2fac as f2fac 
        INTO tmcpe.sigalert_list
@@ -83,7 +85,6 @@ SELECT cad,memo,stampdate,stamptime,(lp).f1dir as f1dir,(lp).f1fac as f1fac,(lp)
        WHERE (lp).f1dir IS NOT NULL AND (lp).relloc IS NOT NULL 
        	     AND (((lp).xs IS NOT NULL AND (lp).xs <> '' ) 
        	     	  OR ( (lp).f2dir IS NOT NULL AND (lp).f2fac IS NOT NULL ) );
-
 
 
 DROP FUNCTION IF EXISTS actlog.process_xs( TEXT ) CASCADE;
@@ -137,11 +138,14 @@ CREATE VIEW tmcpe.linked_sigalerts AS
        	    LEFT JOIN tbmap.tvd tvd ON ( f1dir=freeway_dir AND f1fac::int4=freeway_id AND vdstype='ML' 
 	    	      		    	     AND actlog.str_compare_trim( name, (actlog.process_xs(xs))[1] ) > 0 );
 
+
+
 DROP VIEW IF EXISTS tmcpe.matched_sigalerts CASCADE;
 CREATE VIEW tmcpe.matched_sigalerts AS
        SELECT cad,memo,stampdate,stamptime,id as vdsid,q.name as signame,rel_pm,xs,pxs
        FROM ( SELECT *,CASE WHEN freeway_dir IN ( 'S', 'W' ) THEN -1 ELSE 1 END * abs_pm as rel_pm FROM tmcpe.linked_sigalerts ) q
        	      WHERE sct=1 GROUP BY cad,memo,stampdate,stamptime,id,q.name,rel_pm,xs,pxs;
+
 
 
 DROP VIEW IF EXISTS tmcpe.sigalert_locations CASCADE;
@@ -153,6 +157,9 @@ CREATE VIEW tmcpe.sigalert_locations AS
 	       GROUP BY cad
        ) q 
        	 JOIN tmcpe.matched_sigalerts ms ON ( ms.cad=q.cad AND q.mrp=ms.rel_pm );
+
+
+
 
 DROP TABLE IF EXISTS tmcpe.sigalert_locations_tmcpe CASCADE;
 SELECT * into tmcpe.sigalert_locations_tmcpe from tmcpe.sigalert_locations;
@@ -167,3 +174,64 @@ CREATE VIEW tmcpe.sigalert_locations_grails AS
 
 SELECT * INTO tmcpe.sigalert_locations_grails_table from tmcpe.sigalert_locations_grails;
 ALTER TABLE tmcpe.sigalert_locations_grails_table ADD PRIMARY KEY( cad );
+
+
+
+
+
+---------------- DO IT FOR ALL INCIDENTS
+
+DROP VIEW IF EXISTS tmcpe.locate_incidents CASCADE;
+CREATE VIEW tmcpe.locate_incidents AS
+SELECT cad,stampdate,stamptime,memo,parse_al_memo( memo ) as lp
+       FROM actlog.d12_activity_log
+       WHERE activitysubject='OPEN INCIDENT' AND cad IN ( SELECT cad from actlog.incidents );
+
+DROP TABLE IF EXISTS tmcpe.incident_list CASCADE;
+SELECT cad,memo,stampdate,stamptime,(lp).f1dir as f1dir,(lp).f1fac as f1fac,(lp).relloc as relloc,(lp).xs as xs,(lp).f2dir as f2dir,(lp).f2fac as f2fac 
+       INTO tmcpe.incident_list
+       FROM tmcpe.locate_incidents 
+       WHERE (lp).f1dir IS NOT NULL AND (lp).relloc IS NOT NULL 
+       	     AND (((lp).xs IS NOT NULL AND (lp).xs <> '' ) 
+       	     	  OR ( (lp).f2dir IS NOT NULL AND (lp).f2fac IS NOT NULL ) );
+
+
+
+DROP VIEW IF EXISTS tmcpe.linked_incidents CASCADE;
+CREATE VIEW tmcpe.linked_incidents AS
+       SELECT sla.*,tvd.id,tvd.name,tvd.abs_pm,tvd.freeway_dir,actlog.process_xs(xs) as pxs,actlog.str_compare_trim( name, (actlog.process_xs(xs))[1] ) AS sct 
+       FROM tmcpe.incident_list AS sla
+       	    LEFT JOIN tbmap.tvd tvd ON ( f1dir=freeway_dir AND f1fac::int4=freeway_id AND vdstype='ML' 
+	    	      		    	     AND actlog.str_compare_trim( name, (actlog.process_xs(xs))[1] ) > 0 );
+DROP VIEW IF EXISTS tmcpe.matched_incidents CASCADE;
+CREATE VIEW tmcpe.matched_incidents AS
+       SELECT cad,memo,stampdate,stamptime,id as vdsid,q.name as signame,rel_pm,xs,pxs
+       FROM ( SELECT *,CASE WHEN freeway_dir IN ( 'S', 'W' ) THEN -1 ELSE 1 END * abs_pm as rel_pm FROM tmcpe.linked_incidents ) q
+       	      WHERE sct=1 GROUP BY cad,memo,stampdate,stamptime,id,q.name,rel_pm,xs,pxs;
+
+
+DROP VIEW IF EXISTS tmcpe.incident_locations CASCADE;
+CREATE VIEW tmcpe.incident_locations AS
+       SELECT ms.* FROM 
+       (
+	SELECT cad,min(rel_pm) AS mrp 
+	       FROM tmcpe.matched_incidents 
+	       GROUP BY cad
+       ) q 
+       	 JOIN tmcpe.matched_incidents ms ON ( ms.cad=q.cad AND q.mrp=ms.rel_pm );
+
+
+
+DROP TABLE IF EXISTS tmcpe.incident_locations_tmcpe CASCADE;
+SELECT * into tmcpe.incident_locations_tmcpe from tmcpe.incident_locations;
+ALTER TABLE tmcpe.incident_locations_tmcpe ADD PRIMARY KEY ( cad );
+CREATE INDEX idx_incident_locations_tmcpe_vdsid ON tmcpe.incident_locations_tmcpe( vdsid );
+
+DROP VIEW IF EXISTS tmcpe.incident_locations_grails CASCADE;
+CREATE VIEW tmcpe.incident_locations_grails AS
+       SELECT slt.*,tvd.geom as location
+       	      from tmcpe.incident_locations_tmcpe slt
+       	      LEFT JOIN tbmap.tvd tvd ON ( tvd.id = slt.vdsid );
+
+SELECT * INTO tmcpe.incident_locations_grails_table from tmcpe.incident_locations_grails;
+ALTER TABLE tmcpe.incident_locations_grails_table ADD PRIMARY KEY( cad );
