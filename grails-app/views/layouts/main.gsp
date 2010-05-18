@@ -1,7 +1,7 @@
 <html>
     <head>
       <!-- layouts/main.gsp head -->
-      <title><g:layoutTitle default="Grails" /></title>
+      <title>TMCPE (Version 0.1.2)<g:layoutTitle default="Grails" /></title>
       <base id="htmldom" href="${createLinkTo(dir:'/')}"/>
       <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'main.css')}" />
       <link rel="shortcut icon" href="${createLinkTo(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
