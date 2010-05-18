@@ -37,13 +37,21 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	}
     },
 
+    getTsd: function() {
+	if ( ! this._tsd ) 
+	    this._tsd = dijit.byId( 'tsd' );
+	return this._tsd;
+    },
+
+    updateFacilityImpactAnalysis: function( fiaId ) {
+	var base = document.getElementById("htmldom").href;
+	this.getTsd().updateData( base + 'incidentFacilityImpactAnalysis/show.json?id='+fiaId );
+	this.updateVdsSegmentsQuery(); 	
+    },
+
     _constructVdsSegmentsParams: function( theParams ) {
 
-	if ( this._map == null ) 
-
-	this._tsd = dijit.byId( 'tsd' );
-	var tsd = this._tsd;
-
+	var tsd = this.getTsd();
 	if ( !theParams || theParams == undefined ) {
 	    // some defaults to prevent runaways
 	    theParams = {};
@@ -57,10 +65,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var sectionParams = {idIn:[]};
 
 	// Get the station indexes of all segments
-	for ( i = 0; i < tsd._data.segments.length; ++i )
+	for ( i = 0; i < tsd._data.sections.length; ++i )
 	{
-	    var stnidx = tsd._data.segments[i].stnidx;
-	    var station = tsd._stations[ stnidx ];
+	    var station = tsd._data.sections[i];
 	    if ( station ) 
 		sectionParams[ 'idIn' ].push( station.vdsid );
 	}
@@ -79,6 +86,11 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     },
 
     _updateVdsSegmentsLayer: function( theParams ) {
+	if ( ! this._vdsSegmentLines ) {
+	    this.initVdsSegmentsLayer( {} );
+	    return;
+	}
+
 	var base = document.getElementById("htmldom").href;
 
 	var vdsSegmentLines = this._vdsSegmentLines;
@@ -97,7 +109,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     _linkFeaturesToCells: function() {
 	// Now wire up the table data to highlight the 
 	var tsd = this._tsd;
-	var segments = tsd._data.segments;
+	var sections = tsd._data.sections;
 	var td = tsd._td;
 	for ( var i = 0; i < td.length; ++i ) {
 	    dojo.connect( tsd._tr[ i ], "onmouseover", this, "_hoverTime" );
@@ -109,15 +121,15 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	// Loop over the stations to connect them to features
 	var vsl = this._vdsSegmentLines;
-	for ( var j = 0; j < tsd._data.segments.length; ++j ) {
-	    var station = tsd._stations[ tsd._data.segments[ j ].stnidx ];
+	for ( var j = 0; j < tsd._data.sections.length; ++j ) {
+	    var station = tsd._data.sections[ tsd._data.sections[ j ].stnidx ];
 	    var feature = null;
 	    // Loop over the lines until we find the correct station
 	    for ( var k = 0; k < vsl.features.length && !feature; ++k )
 	    {
 		var ff = vsl.features[ k ];
 		if ( station ) {
-		    console.log( [station.vdsid,' =?= ', ff.attributes[ 'id' ] ].join( '') );
+		    //console.log( [station.vdsid,' =?= ', ff.attributes[ 'id' ] ].join( '') );
 		    if ( station && station.vdsid == ff.attributes[ 'id' ] ) {
 			feature = ff;
 		    }
@@ -212,7 +224,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var stationnm = e.target.getAttribute( 'station' );
 	var timeidx = e.currentTarget.getAttribute( 'timeidx' );
 	var timeind = e.currentTarget.getAttribute( 'time' );
-	var station = this._tsd._stations[ stationnm ];
+	var station = this._tsd._data.sections[ stationnm ];
 
 	// CENTER THE MAP ON THE VDS SECTION WE CLICKED ON
 	console.log( "Centering on feature" );
@@ -230,8 +242,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     _hoverStation: function( e ) {
 	var stationnm = e.target.getAttribute( 'station' );
-	var station = this._tsd._stations[ stationnm ];
-//	console.debug( "station:" + station.vdsid );
+	var station = this._tsd._data.sections[ stationnm ];
+	/*console.debug( "station:" + station.vdsid );*/
 
 	// HACK: highlight the corresponding station in the map
 	var vsl = this._vdsSegmentLines;
@@ -278,9 +290,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    for ( var j = 0; j < tt; ++j )
 	    {
 		var tdc = this._tsd._td[timeidx][j];
-		var station = this._tsd._stations[ tdc.getAttribute('station') ];
+		var si = tdc.getAttribute('station');
+		var station = this._tsd._data.sections[ si ];
 		
-/*
 		// Loop over the lines until we find the correct station
 		var feature = null;
 		for ( var k = 0; k < vsl.features.length && !feature; ++k )
@@ -291,7 +303,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 			feature = ff;
 		    }
 		}
-*/
+
 		if ( station ) {
 		    var feature = station.feature;
 		    // OK, found the feature.  alter the style
@@ -304,7 +316,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	}
 //	this._hoverStation( e ); // highlight the station we're hovering over
 	var stationnm = e.target.getAttribute( 'station' );
-	var station = this._tsd._stations[ stationnm ];
+	var station = this._tsd._data.sections[ stationnm ];
 	if ( ! station ) {
 	    station = {
 		fwy: "?",
@@ -313,8 +325,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		name: "?stationnm?"
 	    };
 	}
-	document.getElementById('tmcpe_tsd_cellinfo').innerHTML = 
-	    station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd.getTimeForIndex( timeind ) ;
+	var el = document.getElementById('tmcpe_tsd_cellinfo');
+	el.innerHTML = station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd._data.timesteps[timeind];/*.getTimeForIndex( timeind )*/;
     },
 
     ////////// TABLE FUNCTIONS

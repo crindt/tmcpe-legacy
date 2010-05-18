@@ -5,8 +5,7 @@ import java.text.DateFormat
 
 class TmcLogEntry implements Comparable {
 
-    Date   stampdate
-    Time   stamptime
+    Integer id
     String cad
     String unitin
     String unitout
@@ -20,7 +19,9 @@ class TmcLogEntry implements Comparable {
     String status
     String activitysubject
     String memo
+    Date   stamp
 
+    static hasMany = [ pMeas: TmcPerformanceMeasures ]
 
     Date stampDateTime
     static transients = [ "stampDateTime" ]
@@ -38,7 +39,7 @@ class TmcLogEntry implements Comparable {
     }
 
     String toString() {
-        return DateFormat.getDateInstance().format(stampdate) + " " + stamptime.toString() + ": " + activitysubject + " | " + memo 
+        return DateFormat.getDateTimeInstance().format(stamp) + ": " + activitysubject + " | " + memo 
     }
 
     public java.util.Date getStampDateTime() {
@@ -47,21 +48,26 @@ class TmcLogEntry implements Comparable {
         def cal = Calendar.getInstance( )
         cal.clear()
         cal.setTimeZone( java.util.TimeZone.getTimeZone( "America/Los_Angeles" ) )
-        cal.set( Calendar.YEAR, stampdate.getYear() + 1900)
-        cal.set( Calendar.MONTH, stampdate.getMonth() )
-        cal.set( Calendar.DAY_OF_MONTH, stampdate.getDay() )
-        cal.set( Calendar.HOUR_OF_DAY, stamptime.getHours() )
-        cal.set( Calendar.MINUTE, stamptime.getMinutes() )
+        cal.set( Calendar.YEAR, stamp.getYear() + 1900)
+        cal.set( Calendar.MONTH, stamp.getMonth() )
+        cal.set( Calendar.DAY_OF_MONTH, stamp.getDay() )
+        cal.set( Calendar.HOUR_OF_DAY, stamp.getHours() )
+        cal.set( Calendar.MINUTE, stamp.getMinutes() )
         return cal.getTime();
 
+    }
+
+    Incident computeIncident( ) {
+        List is = Incident.findAllByCad( cad )
+        return is?.first();
     }
 
     // order by cad, stampdate, stamptime
     int compareTo( obj ) {
         int ret
         if ( ( ret = cad.compareTo( obj.cad ) ) != 0 ) return ret
-        if ( ( ret = stampdate.compareTo( obj.stampdate ) ) != 0 ) return ret
-        if ( ( ret = stamptime.compareTo( obj.stamptime ) ) != 0 ) return ret
+        if ( ( ret = stamp.compareTo( obj.stamp ) ) != 0 ) return ret
+        if ( ( ret = id.compareTo( obj.id ) ) != 0 ) return ret
         // more?
 
         return ret

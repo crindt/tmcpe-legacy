@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
-        <title>TmcLogEntry List: ${tmcLogEntryInstanceTotal}</title>
+        <title>TmcLogEntry List</title>
     </head>
     <body>
         <div class="nav">
@@ -23,17 +23,15 @@
                         
                    	        <g:sortableColumn property="id" title="Id" />
                         
-                   	        <g:sortableColumn property="stampdate" title="Date" />
-                   	        <g:sortableColumn property="stamptime" title="Time" />
-                   	        <g:sortableColumn property="activitysubject" title="Activitysubject" />
+                   	        <g:sortableColumn property="device_number" title="Devicenumber" />
                         
-                   	        <g:sortableColumn property="cad" title="Cad" />
+                   	        <g:sortableColumn property="unitin" title="Unitin" />
                         
-                   	        <g:sortableColumn property="device_direction" title="Devicedirection" />
+                   	        <g:sortableColumn property="stamp" title="Stamp" />
                         
-                   	        <g:sortableColumn property="device_extra" title="Deviceextra" />
+                   	        <g:sortableColumn property="via" title="Via" />
                         
-                   	        <g:sortableColumn property="device_fwy" title="Devicefwy" />
+                   	        <g:sortableColumn property="memo" title="Memo" />
                         
                         </tr>
                     </thead>
@@ -43,17 +41,15 @@
                         
                             <td><g:link action="show" id="${tmcLogEntryInstance.id}">${fieldValue(bean:tmcLogEntryInstance, field:'id')}</g:link></td>
                         
-                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'stampdate')}</td>
-                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'stamptime')}</td>
-                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'activitysubject')}</td>
+                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'device_number')}</td>
                         
-                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'cad')}</td>
+                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'unitin')}</td>
                         
-                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'device_direction')}</td>
+                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'stamp')}</td>
                         
-                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'device_extra')}</td>
+                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'via')}</td>
                         
-                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'device_fwy')}</td>
+                            <td>${fieldValue(bean:tmcLogEntryInstance, field:'memo')}</td>
                         
                         </tr>
                     </g:each>
@@ -61,7 +57,7 @@
                 </table>
             </div>
             <div class="paginateButtons">
-                <g:paginate params="${params}" total="${tmcLogEntryInstanceTotal}" />
+                <g:paginate total="${tmcLogEntryInstanceTotal}" />
             </div>
         </div>
     </body>

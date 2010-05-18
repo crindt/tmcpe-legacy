@@ -23,14 +23,14 @@
                         
                    	        <g:sortableColumn property="id" title="Id" />
                         
-                   	        <g:sortableColumn property="totalDelay" title="Total Delay" />
+                   	        <th>Location</th>
                         
                    	        <g:sortableColumn property="startTime" title="Start Time" />
                         
-                   	        <th>Location</th>
-                   	    
                    	        <g:sortableColumn property="endTime" title="End Time" />
                         
+                   	        <g:sortableColumn property="netDelay" title="Net Delay" />
+
                    	        <th>Analyzed Sections</th>
                    	    
                         </tr>
@@ -41,13 +41,14 @@
                         
                             <td><g:link action="show" id="${incidentFacilityImpactAnalysisInstance.id}">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'id')}</g:link></td>
                         
-                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'totalDelay')}</td>
-                        
-                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'startTime')}</td>
                         
                             <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'location')}</td>
+
+                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'startTime')}</td>
                         
                             <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'endTime')}</td>
+
+                            <td>${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'netDelay')}</td>
                         
                             <td></td>
                         

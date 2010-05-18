@@ -160,12 +160,15 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var obj = this;
 
 	// Create the incidents layer.  The URL is hardcoded here...
+	var base = document.getElementById("htmldom").href;
+	
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
             protocol: new OpenLayers.Protocol.HTTP({
-		url: "incident/list.geojson",//theurl,
+		url: base + "incident/list.geojson",//theurl,
 		params: this._constructIncidentsParams(),
+		style: {strokeWidth: 2, strokeColor: "#0000ff", strokeOpacity: 0.25 },
 		format: new OpenLayers.Format.GeoJSON({}),
 		callback: OpenLayers.Function.bind( function( response, options) { this._demoCallback.apply( this, [ response, options ] ) }, this )
             })
@@ -258,12 +261,14 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	var obj = this;
 
+	var base = document.getElementById("htmldom").href;
+
 	this._vdsLayer = new OpenLayers.Layer.Vector("Vds Segments", {
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
 	    style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
             protocol: new OpenLayers.Protocol.HTTP({
-  		url: "vds/list.geojson",
+  		url: base + "vds/list.geojson",
 		params: myParams,
 		format: new OpenLayers.Format.GeoJSON({})
 	    })
@@ -376,14 +381,15 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 
     updateIncidentDetails: function( feature ) {
-	var cad = feature.attributes.id
+	var id = feature.attributes.id
+	var cad = feature.attributes.cad
 	this.getIncidentDetails().innerHTML = 
 	    "<h3>INCIDENT " + cad + "</h3><dl>" 
 	    + "<dt>loc</dt><dd>" + feature.attributes.locString + "</dd>"
 	    + "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
             + "</dl>"
 	
-	    + '<p><A href="incident/show?id='+cad+'">Show Incident</a></p>';
+	    + '<p><A href="incident/showCustom?id='+id+'">Show Incident</a></p>';
     },
 
 
@@ -510,10 +516,12 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	if ( this._incidentsLayer.protocol.url == "" ) {
 
+	    var base = document.getElementById("htmldom").href;
+
 	// update the url
 	    this._incidentsLayer.protocol = 
 		new OpenLayers.Protocol.HTTP({
-  		    url: "incident/list.geojson",
+  		    url: base + "incident/list.geojson",
 		    params: theParams,
 		    format: new OpenLayers.Format.GeoJSON({}),
 		    callback: function() { console.log( "GOT CALLBACK!" ); }
@@ -525,9 +533,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _updateVdsSegmentsLayer: function( theParams ) {
 	if ( this._vdsLayer.protocol.url == "" ) {
 	    // update the url
+	    var base = document.getElementById("htmldom").href;
+
 	    this._vdsLayer.protocol = 
 		new OpenLayers.Protocol.HTTP({
-  		    url: "vds/list.geojson",
+  		    url: base + "vds/list.geojson",
 		    params: theParams,
 		    format: new OpenLayers.Format.GeoJSON({})
 		});

@@ -13,16 +13,24 @@ class AnalyzedSection implements Comparable {
 
     static mapping = {
         table name: 'analyzed_section', schema: 'tmcpe'
+        version false
     }
 
     static constraints = {
     }
 
+    String toString() {
+        return section?.toString()
+          +": ["+analyzedTimestep?.size()+" timesteps}"
+
+    }
+
     // This induces an ordering on section lists.  Upstream sections come first
     int compareTo( obj ) {
         int dir = 1;
-        if ( section.freewayDir == 'S' || section.freewayDir == 'E' ) dir = -1;
-        return dir * ( section.absPostmile - obj.section.absPostmile );
+        if ( section.freewayDir == 'N' || section.freewayDir == 'E' ) dir = -1;
+        float tmp = dir * ( section.absPostmile - obj.section.absPostmile );
+        return tmp < 0 ? -1 : ( float == 0 ? 0 : 1 )
     } 
 
 }

@@ -26,14 +26,30 @@
                             <td valign="top" class="name">Id:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'id')}</td>
-                            
                         </tr>
-                    
+
+                        <tr class="prop">
+                            <td valign="top" class="name">Incident Impact Analysis:</td>
+                            
+                            <td valign="top" class="value"><g:link controller="incidentImpactAnalysis" action="show" id="${incidentFacilityImpactAnalysisInstance?.incidentImpactAnalysis?.id}">${incidentFacilityImpactAnalysisInstance?.incidentImpactAnalysis?.encodeAsHTML()}</g:link></td>
+                        </tr>
+
                         <tr class="prop">
                             <td valign="top" class="name">Total Delay:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'totalDelay')}</td>
+                        </tr>
+
+                        <tr class="prop">
+                            <td valign="top" class="name">Avg Delay:</td>
                             
+                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'avgDelay')}</td>
+                        </tr>
+
+                        <tr class="prop">
+                            <td valign="top" class="name">Net Delay:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:incidentFacilityImpactAnalysisInstance, field:'netDelay')}</td>
                         </tr>
                     
                         <tr class="prop">

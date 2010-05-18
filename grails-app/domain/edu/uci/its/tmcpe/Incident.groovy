@@ -23,53 +23,59 @@ import grails.converters.JSON
 class Incident {
 
     // cad
-    String id
+    Integer id
+
+    String cad
 //    SortedSet tmcLogEntries
 
-    Date stampDate
-    Time stampTime
+    Date startTime
 
+
+    TmcLogEntry firstCall
+    TmcLogEntry sigalertBegin
+    TmcLogEntry sigalertEnd
+    
+    
     /**
      * The estimated freeway section where the incident occurred (the location of the capacity reduction)
      */
     FacilitySection section
 
-    /**
-     * The main description of the incident, as pulled from the TMC activity log 
-     */
-    String memo
+    Point locationGeom = new Point( x: 0, y: 0 )
+    Point bestGeom     = new Point( x: 0, y: 0 )
 
-    Point location = new Point( x: 0, y: 0 )
-
-    IncidentImpactAnalysis analyses;
+    SortedSet analyses
     static hasMany = [analyses:IncidentImpactAnalysis]
 
     static constraints = {
         // Only allow one Incident object per cadid
-//        cad(unique:true)
+        cad(unique:true)
     }
 
     static mapping = {
         //table 'sigalert_locations_grails'
-        table name: 'sigalert_locations_grails_table', schema: 'tmcpe'
-        id column: 'cad'
-        stampDate column: 'stampdate'
-        stampTime column: 'stamptime'
-        memo column: 'memo'
-        location column: 'location'
-        location type:GeometryType 
-        section column: 'vdsid'
-//        cache usage:'read-only'
-        analyses joinTable:[name: 'Incident_IncidentImpactAnalyses', key:'Incident_Id', column:'IncidentImpactAnalysis_Id']
+        table name: 'full_incidents', schema: 'actlog'
+        id column: 'id'
+        cad column: 'cad'
+        startTime column: 'start_time'
+        firstCall column: 'first_call'
+        sigalertBegin column: 'sigalert_begin'
+        sigalertEnd column: 'sigalert_end'
+        locationGeom column: 'location_geom'
+        locationGeom type:GeometryType 
+        bestGeom column: 'best_geom'
+        bestGeom type:GeometryType 
+        section column: 'location_vdsid'
+        eventType column: 'event_type'
 
-
-        // turn off optimistic locking, i.e., versioning.  This class is mapped to a DB view
+        // turn off optimistic locking, i.e., versioning.  This class is mapped to an externally generated table
         version false
+//        cache usage:'read-only' 
     }
 
     List getTmcLogEntries()
     {
-        return TmcLogEntry.findAllByCad( id );
+        return TmcLogEntry.findAllByCad( cad );
     }
 
 
@@ -127,27 +133,27 @@ class Incident {
         def cal = Calendar.getInstance( )
         cal.clear()
         cal.setTimeZone( java.util.TimeZone.getTimeZone( "America/Los_Angeles" ) )
-        cal.set( Calendar.YEAR, stampDate.getYear() + 1900)
-        cal.set( Calendar.MONTH, stampDate.getMonth() )
-        cal.set( Calendar.DAY_OF_MONTH, stampDate.getDay() )
-        cal.set( Calendar.HOUR_OF_DAY, stampTime.getHours() )
-        cal.set( Calendar.MINUTE, stampTime.getMinutes() )
+        cal.set( Calendar.YEAR, startTime.getYear() + 1900)
+        cal.set( Calendar.MONTH, startTime.getMonth() )
+        cal.set( Calendar.DAY_OF_MONTH, startTime.getDay() )
+        cal.set( Calendar.HOUR_OF_DAY, startTime.getHours() )
+        cal.set( Calendar.MINUTE, startTime.getMinutes() )
         return cal.getTime();
     }
 
     def toKml( radius = 0.01 ) {
-        if ( ! location ) return
+        if ( ! bestGeom ) return
 
         if ( radius == 0 ) {
             return [ "<Point><coordinates>",
-                location.getX()+","+location.getY(),
+                bestGeom.getX()+","+bestGeom.getY(),
                 "</coordinates></Point>"
             ].join("\n")
 
         } else {
             // We want a circle
             String coords = ""
-            Point p = location
+            Point p = bestGeom
             Float x = p.getX()
             Float y = p.getY()
             for ( i in 0..20 )
@@ -170,8 +176,26 @@ class Incident {
         }
     }
 
+    def toJSON( json ) {
+        def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+        return json.build{
+            "class(Incident)"
+            id(id)
+            cad(cad)
+            //timestamp( df.format( stampDateTime() ) )
+            timestamp( stampDateTime() )
+            locString( section.toString() )
+            memo(firstCall?firstCall.memo:sigalertBegin?sigalertBegin.memo:"<NO MEMO>")
+            section(section)
+            location( bestGeom )
+            geometry( section?.segGeom )
+            delay( analyses.size() ? analyses.first().netDelay() : null )
+            analysesCount( analyses?.size() )
+        }
+    }
+
     String toString() {
-        return "CAD:${id} @ ${stampDateTime} AT ${section}"
+        return "CAD:${cad} @ ${stampDateTime} AT ${section}"
     }
 
     String hackToJSON() {
@@ -179,6 +203,8 @@ class Incident {
     }
 
     List listAnalyses() {
+        return [];
+        /*
         def fname = [ id, section.freewayId, section.freewayDir ].join( "-" )
         def p = ~/^${id}-\d+-[NSEW].json/
         System.out.println( p )
@@ -195,5 +221,6 @@ class Incident {
         }
 
         return ret
+        */
     }
 }

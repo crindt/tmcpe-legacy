@@ -30,51 +30,30 @@
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Activitysubject:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'activitysubject')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Cad:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'cad')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Devicedirection:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_direction')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Deviceextra:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_extra')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Devicefwy:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_fwy')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Devicename:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_name')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
                             <td valign="top" class="name">Devicenumber:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_number')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Unitin:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'unitin')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Stamp:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'stamp')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Via:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'via')}</td>
                             
                         </tr>
                     
@@ -93,20 +72,6 @@
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Stampdate:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'stampdate')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name">Stamptime:</td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'stamptime')}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
                             <td valign="top" class="name">Status:</td>
                             
                             <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'status')}</td>
@@ -114,9 +79,56 @@
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Unitin:</td>
+                            <td valign="top" class="name">Deviceextra:</td>
                             
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'unitin')}</td>
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_extra')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Devicedirection:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_direction')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Devicefwy:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_fwy')}</td>
+                            
+                        </tr>
+
+                        <tr class="prop">
+                            <td valign="top" class="name">Cad:</td>
+                            <td valign="top" class="value"><g:link controller="incident" action="show" id="${tmcLogEntryInstance?.computeIncident()?.id}">${fieldValue(bean:tmcLogEntryInstance, field:'cad')}</g:link></td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Devicename:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'device_name')}</td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Perf Meas:</td>
+                            
+                            <td valign="top" class="value">
+			    	<ul>
+				    <g:each in="${tmcLogEntryInstance?.pMeas}" status="i" var="pmEntry">
+			              <li><g:link controller="tmcPerformanceMeasures" action="show" id="${pmEntry.id}">${pmEntry?.encodeAsHTML()}</g:link> </li>
+				    </g:each>
+			    	</ul>
+			    </td>
+                            
+                        </tr>
+                    
+                        <tr class="prop">
+                            <td valign="top" class="name">Activitysubject:</td>
+                            
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'activitysubject')}</td>
                             
                         </tr>
                     
@@ -128,9 +140,9 @@
                         </tr>
                     
                         <tr class="prop">
-                            <td valign="top" class="name">Via:</td>
+                            <td valign="top" class="name">Stamp Date Time:</td>
                             
-                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'via')}</td>
+                            <td valign="top" class="value">${fieldValue(bean:tmcLogEntryInstance, field:'stampDateTime')}</td>
                             
                         </tr>
                     

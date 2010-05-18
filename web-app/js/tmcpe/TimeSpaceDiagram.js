@@ -65,6 +65,9 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     //        anything about incidents and the like
     incident: null,
 
+    // analysisId: Integer
+    analysisId: null,
+
     // facility: String
     //        The facility for which the traffic data is being displayed.  Again, this
     //        is an application detail that needs to be taken out of this widget
@@ -84,29 +87,23 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this.inherited( arguments );
 
 	// Now do our thing...
-	this.updateData();
-    },
-    
-    changeIncident: function( /* String */ inc, /* String */ fac, /* String */ dir ) {
-	// summary:
-	// 		method to be called by the user interface to change the data source
-	// description:
-	//		This should really be in the application code, not the widget code
-	this.incident = inc;
-	this.facility = fac;
-	this.direction = dir;
-	this.updateData();
+	var what = this;
+	facilityStore.fetch({
+	    onComplete: function( items, findResult ) {
+		what.updateData( '/tmcpe/incidentFacilityImpactAnalysis/show.json?id='+items[0].id );
+	    }
+	});
+	
     },
 
-    updateData: function() {
+    updateData: function( /* String */ url) {
 	// summary:
 	// 		function to change (or create) the time space digram
 	// description:
 	//		
-
-	// grabs data for the given incident
-	var v = [this.incident, this.facility, this.direction].join( "-" );
-	this._loadData( v ) ;      
+	console.debug( "BOGS!" );
+	console.debug( "UPDATING TO " + url );
+	this._loadData( url ) ;      
 
 	// Call our method to render the timespacedigram table
 	this._redraw();
@@ -121,28 +118,60 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     },
 
     _colorAccessors: {
-	stdspd: function( i,j ) { return this._getColor( (this._data.incspd[i][j]-this._data.avgspd[i][j])/this._data.stdspd[i][j], -this._themeScale, 0, '#ff0000','#00ff00' ) },
-	avgspd: function( i,j ) { return this._getColor( (this._data.incspd[i][j]-this._data.avgspd[i][j]), -this._themeScale, 0, '#ff0000','#00ff00' ) },
-	inc: function( i,j ) { var color = '#00ff00'; if ( this._data.inc[i][j] == 1 ) color = '#ff0000'; return color; },
-	pjm: function( i,j ) { 
-	    var color = '#00ff00';
-	    var stdlev = (this._data.incspd[i][j] - this._data.avgspd[i][j])/this._data.stdspd[i][j];
-	    var tmppjm = 1; // no incident probability is default
-	    if ( this._data.pjm[i][j] == 0.5 )
-		tmppjm = 0.5;
-	    else if ( stdlev < 0 && stdlev < -this._themeScale )
-	    {
-		tmppjm = 0.0;
+	stdspd: function( i,j ) { 
+	    var secdat = this._data.sections[j].analyzedTimesteps[i];
+	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
+	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null && secdat.spd_std != null ) {
+		color = this._getColor( (secdat.spd-secdat.spd_avg)/secdat.spd_std, -this._themeScale, 0, '#ff0000','#00ff00' );
 	    }
-	    
-	    if ( tmppjm == 0 ) 
-		color = '#ff0000';
-	    else if ( tmppjm == 0.5 )
-		// grey if no/bad data
-		color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 	    return color;
 	},
-	spd: function( i,j ) { return this._getColor( this._data.incspd[i][j], 10, 75, '#ff0000', '#00ff00' )	}
+	avgspd: function( i,j ) { 
+	    var secdat = this._data.sections[j].analyzedTimesteps[i];
+	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
+	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null ) {
+		color = this._getColor( (secdat.spd-secdat.spd_avg), -this._themeScale, 0, '#ff0000','#00ff00' );
+	    }
+	    return color
+	},
+	inc: function( i,j ) { 
+	    var secdat = this._data.sections[j].analyzedTimesteps[i];
+	    var color = this._colorAccessors[ 'stdspd' ](i,j);
+	    if ( secdat != null && secdat.inc ) color = '#ff0000'; 
+	    return color; 
+	},
+	pjm: function( i,j ) { 
+	    var secdat = this._data.sections[j].analyzedTimesteps[i];
+	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
+	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null && secdat.spd_std != null ) {
+		color = this._getColor( (secdat.spd-secdat.spd_avg)/secdat.spd_std, -this._themeScale, 0, '#ff0000', '#00ff00' );
+		
+		var stdlev = (secdat.spd - secdat.spd_avg)/secdat.spd_std;
+		var tmppjm = 1; // no incident probability is default
+		if ( secdat.p_j_m == 0.5 )
+		    tmppjm = 0.5;
+		else if ( stdlev < 0 && stdlev < -this._themeScale )
+		{
+		    tmppjm = 0.0;
+		}
+		
+		if ( tmppjm == 0 ) 
+		    color = '#0000ff';
+		else if ( tmppjm == 0.5 )
+		    // grey if no/bad data
+		    color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
+	    }
+	    return color;
+	},
+	spd: function( i,j ) { 
+	    var secdat = this._data.sections[j].analyzedTimesteps[i];
+	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
+
+	    if ( secdat != null && secdat.spd != null ) {
+		color = this._getColor( secdat.spd, 10, 75, '#ff0000', '#00ff00' );
+	    }
+	    return color;
+	}
     },
 
     setTheme: function( th ) {
@@ -156,14 +185,14 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     },
 
     updateTheme: function() {
-	console.log( "UPDATING THEME" );
-	var numrows = Math.round(((this._data.opts.prewindow/1) + (this._data.opts.postwindow/1))/5);
+	console.debug( "UPDATING THEME" );
+	var numrows = this._data.timesteps.length;
 	this._colorDataAccessor = this._colorAccessors[ this.colorDataAccessor ];
 	
 	for ( i = 0; i < numrows; ++i ) {
 	    // iind is used to flip the diagram so time increases going up
 	    var iind = numrows-1-i;
-	    for ( j = 0; j < this._data.segments.length; ++j ) {
+	    for ( j = 0; j < this._data.sections.length; ++j ) {
 		this._td[i][j].style.backgroundColor = this._colorDataAccessor(iind,j);
 	    }
 	}
@@ -202,24 +231,29 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// d is a local shorthand variable for accessing the traffic data
 	var d = this._data;
 
+	if ( !d ) {
+	    console.debug( "Can't redraw time-space diagram because there's no data!" );
+	    return;
+	}
 
-	// FIXME: This is hacky and hardcoded.  Basically, I'm
-	// computing the number of rows (timesteps) from data passed
-	// in the JSON object.  The JSON data format needs to be
-	// standardized
-	var numrows = Math.round(((d.opts.prewindow/1) + (d.opts.postwindow/1))/5);
-	console.log( "NUMROWS IS" + numrows );
+
+	// The numrows is the number of timesteps.  Pull this from the d.timesteps array
+	var numrows = d.timesteps.length;
+	//console.debug( "NUMROWS IS " + numrows );
 	this._numTimeRows = numrows;
 
 	// FIXME: Similarly here, I'm getting the number of freeway
 	// segments (columns) to plot and computing the total length
 	// of the section.  Standardization required
 	var totlen = 0;
-	for ( j = 0; j < d.segments.length; ++j )
+	for ( j = 0; j < d.sections.length; ++j )
 	{
-	    totlen += ( d.segments[j].pmend - d.segments[j].pmstart );
+	    totlen += ( d.sections[j].seglen );
 	}
 	if ( totlen < 0 ) totlen = -totlen;
+
+	//console.debug( "TOTAL SECTIONS IS " + d.sections.length );
+	//console.debug( "TOTAL SECTIONS LENGTH IS " + totlen );
 	
 
 	// I size the rows and columns using percentages in the CSS
@@ -234,6 +268,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 	for ( i = 0; i < numrows; ++i )
 	{
+	    //console.debug( "ROW " + i );
 	    // iind is used to flip the diagram so time increases going up
 	    var iind = numrows-1-i;
 
@@ -242,62 +277,68 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    this._tr[i] = tr;
 
 	    // Now loop and create the table cells
-	    this._td[i] = new Array( d.segments.length );
-	    for ( j = 0; j < d.segments.length; ++j )
+	    this._td[i] = new Array( d.sections.length );
+	    //console.debug( "this._td[i].length = " + this._td[i].length );
+	    for ( j = 0; j < d.sections.length; ++j )
 	    {
-//		console.log( i + " < " + numrows + ", " + j + " < " + d.segments.length );
+		//console.debug( i + " < " + numrows + ", " + j + " < " + d.sections.length + " ::: " + iind);
 
 		// The width of the cell is proportional to its actual length in the real world
-		var width = 100 * (d.segments[j].pmend - d.segments[j].pmstart)/totlen;
+		var width = 100 * (d.sections[j].seglen)/totlen;
 		if ( width < 0 ) width = -width;
+		//console.debug( "width = " + width );
+		//console.debug( "OBJ: " + d.sections[j].analyzedTimesteps[iind] );
 
 		// compute borders---This is specific to display the extent of an incident
 		var borders = "";
-		if ( j > 0 && this._data.inc[iind][j] != this._data.inc[iind][j-1] )
+		var targ = d.sections[j].analyzedTimesteps[iind];
+
+		if ( j > 0 && targ.inc != d.sections[j-1].analyzedTimesteps[iind].inc )
 		{
 		    borders += "border-left-width:3px;border-left-style:solid;border-left-color:blue;";
 		}
 		// right
-		if ( j < (d.segments.length-1) && this._data.inc[iind][j] != this._data.inc[iind][j+1] )
+		if ( j < (d.sections.length-1) && targ.inc != d.sections[j+1].analyzedTimesteps[iind].inc )
 		{
 		    borders += "border-right-width:3px;border-right-style:solid;border-right-color:blue;";
 		}
 		// top
-		if ( iind > 0 && this._data.inc[iind][j] != this._data.inc[iind-1][j] )
+		if ( iind > 0 && targ.inc != d.sections[j].analyzedTimesteps[iind-1].inc )
 		{
 		    borders += "border-bottom-width:3px;border-bottom-style:solid;border-bottom-color:blue;";
 		}
 		// bottom
-		if ( iind < (d.segments.length-1) && this._data.inc[iind][j] != this._data.inc[iind+1][j] )
+		if ( iind < (d.sections.length-1) && targ.inc != d.sections[j].analyzedTimesteps[iind+1].inc )
 		{
 		    borders += "border-top-width:3px;border-top-style:solid;border-top-color:blue;";
 		}
 
+		//console.debug( "d.sections["+j+"].stnidx = " + d.sections[j].stnidx );
 		// Actually create the cell in the appropriate table row
 		this._td[i][j] = tr.appendChild( dojo.create( "td", { 
 		    id:["tsd",iind,j].join("_"), 
 		    time: iind,
 		    segment: j,
-		    station: d.segments[j].stnidx,
-		    innerHTML: ""/*i + "," + j*/, style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:"+this._colorDataAccessor(iind,j)+";"+borders,
+		    station: d.sections[j].stnidx,
+		    innerHTML: ""/*i + "(" + iind + ")," + j*/, style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:"+this._colorDataAccessor(iind,j)+";"+borders,
 		} ) );
+		//console.debug( "this._td["+i+"]["+j+"] = " + this._td[i][j] );
 	    }
 	}
     },
 
-    _loadData: function( inc ){
+    _loadData: function( url ){
 	// summary:
 	//		Grab the data from the network using an ajax call
 	// description:
 	//		This is currently too implementation specific.  
 	//              Probably best to obtain the JSON outside the widget and simply
 	//              pass it as an argument...
-	if ( !inc ) {
-	    console.debug( "Bad incfacdir " + inc );
+	if ( !url ) {
+	    console.debug( "Bad analysis url " + url );
 	    return;
 	}
-//	var fwydir = inc.split( '-' );
-	var theUrl = "/tmcpe/data/" + inc + ".json";
+	console.debug( "LOADING " + url );
 
 	var caller = this;
 	
@@ -306,19 +347,23 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// Make a synchronous call to get the incident data (which
 	// contains the speed/etc data that this widget will plot
 	dojo.xhrGet({
-	    url:			theUrl,
+	    url:			url,
 	    preventCache:	true,
 	    handleAs:		"text",
 	    sync: true, //false,
 	    load: function( r ) {
 		caller._loadObjects( r );
 	    },
-	    error:			function(r){ alert("Error: " + r); }
+	    error: function(r){ 
+		console.debug( r );
+		this._data = [];
+	    }
 	});
 
 	// Make a synchronous call to get the station data FIXME: I
 	// plan to remove this call and consolidate things into a
 	// single call
+	/*
 	dojo.xhrGet({
 	    url: "/tmcpe/data/stations.json",
 	    preventCache: true,
@@ -327,8 +372,12 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    load: function( r ) {
 		caller._processStations( r );
 	    },
-	    error:			function(r){ alert("Error: " + r); }
+	    error: function(r){ 
+		console.debug("Error: " + r); 
+		this._data = [];
+	    }
 	});
+*/
 
 
 	// Do some processing on the data we obtained above.
@@ -336,26 +385,36 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// freeway being plotted.  FIXME: the station data should
 	// probably come in the same JSON call as the speed data.
 	var data = this._data;
-	var stations = this._stations;
-	for ( j = 0; j < data.segments.length; ++j )
+
+	var sections = data.sections;
+
+	if ( !data || !sections ) { 
+	    console.debug( "NO DATA AVAILABLE...SKIPPING TSD!" );
+	    return; 
+	}
+
+	for ( j = 0; j < sections.length; ++j )
 	{
-	    var pmstart = data.segments[j].pmstart+0;
-	    var pmend = data.segments[j].pmend+0;
+/*
+	    var pmstart = sections[j].pmstart+0;
+	    var pmend = sections[j].pmend+0;
 
 	    var stnidx = null;
-	    for ( k = 0; k < stations.length && stnidx == undefined; k = k + 1 )
+	    for ( k = 0; k < sections.length && stnidx == undefined; k = k + 1 )
 	    {
-		var station = stations[k];
-		var pm = ( this.direction == "N" || this.direction == "W" ) ? -station.pm : station.pm;
+		var section = sections[k];
+		var pm = ( this.direction == "N" || this.direction == "W" ) ? -section.pm : section.pm;
 
 		//	    console.debug( "checking " + station.fwy + "==" + thefwy +" && "+station.dir+"=="+thedir+" && "+pm+">="+pmstart+" && "+pm+"<="+pmend)
 		if ( station.fwy == this.facility && station.dir == this.direction && pm >= pmstart && pm <= pmend )
 		{
 		    // store the station index for this segment
 		    stnidx = k;
-		    data.segments[j].stnidx = k;
+		    data.sections[j].stnidx = k;
 		}
 	    }
+*/
+	    data.sections[j].stnidx = j;
 	}
     },
 

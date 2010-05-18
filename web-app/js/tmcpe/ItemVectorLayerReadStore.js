@@ -133,7 +133,7 @@ dojo.declare("tmcpe.ItemVectorLayerReadStore", null,{
 		//	regexp:
 		//		Optional regular expression generated off value if value was of string type to handle wildcarding.
 		//		If present and attribute values are string, then it can be used for comparison instead of 'value'
-		return dojo.some(this.getValues(item.attributes, attribute), function(possibleValue){
+		return dojo.some(this.getValues(item, attribute), function(possibleValue){
 			if(possibleValue !== null && !dojo.isObject(possibleValue) && regexp){
 				if(possibleValue.toString().match(regexp)){
 					return true; // Boolean
@@ -154,6 +154,7 @@ dojo.declare("tmcpe.ItemVectorLayerReadStore", null,{
 			}
 		}
 */
+	    var tt = typeof something;
 	    if ( something && something instanceof OpenLayers.Feature.Vector /* && something.layer === this._vectorLayer */ )
 	    {
 		// it's an item if it's a Feature.Vector whose layer is this readstore's layer

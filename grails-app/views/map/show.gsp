@@ -116,9 +116,10 @@
 	<label for="onlyAnalyzed">Limit to Analyzed</label>	
 	<input id="onlyAnalyzed" name="Analyzed" 
 	       dojoType="dijit.form.CheckBox" 
-	       value="analyzed" 
+	       value="" 
 	       checked=""
-	       onChange="incidentList.filter();"
+	       onChange="arguments[0] ? incidentGrid.setQuery({analysesCount:'1'}) : incidentGrid.filter({})"
+	       onLoad="dojo.byId('onlyAnalyzed').value ? incidentGrid.setQuery({analysesCount:'1'}) : incidentGrid.filter({})"
 	       />
 	<button dojoType="dijit.form.Button" type="submit" name="submitButton"
 		value="Submit">
@@ -137,38 +138,38 @@
 	<div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
 	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
 	</div>
-
-	<div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
-	  <div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%">
-	    <table id="incidentGrid" 
-		   jsId="incidentGrid" 
-		   dojoType="dojox.grid.DataGrid" 
-		   sortInfo=2
-		   region="center"
-		   rowSelector="20px"
-		   onRowClick="incidentList.simpleSelectIncident"
-		   style="width:100%;height:5em;"
-		   >
-	      <thead>
-		<tr>
-		  <th field="id" dataType="String" width="10%">CAD ID</th>
-		  <th field="timestamp" dataType="Date" formatter="myFormatDate" width="10%">Timestamp</th>
-		  <th field="locString" dataType="String" width="20%">Section</th>
-		  <th field="memo" dataType="String" width="45%">Description</th>
-		  <th field="delay" dataType="Float" width="10%">Delay</th>
-		  <th field="analysesCount" dataType="Float" width="5%">Analyses</th>
-		</tr>
-	      </thead>
-	    </table>
-	  </div>
+	<div dojoType="dijit.layout.ContentPane" gutters="true" region="right" style="width: 300px">
+	  <p id="incidentDetails">Select an incident on the map to view its details here.</p>
 	</div>
       </div>
-      <div dojoType="dijit.layout.ContentPane" gutters="true" region="right" style="width: 300px">
-	<p id="incidentDetails">Select an incident on the map to view its details here.</p>
+
+      <div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
+	<div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%">
+	  <table id="incidentGrid" 
+		 jsId="incidentGrid" 
+		 dojoType="dojox.grid.DataGrid" 
+		 sortInfo=2
+		 region="center"
+		 rowSelector="20px"
+		 onRowClick="incidentList.simpleSelectIncident"
+		 style="width:100%;height:5em;"
+		 >
+	    <thead>
+	      <tr>
+		<th field="cad" dataType="String" width="10%">CAD ID</th>
+		<th field="timestamp" dataType="Date" formatter="myFormatDate" width="10%">Timestamp</th>
+		<th field="locString" dataType="String" width="20%">Section</th>
+		<th field="memo" dataType="String" width="45%">Description</th>
+		<th field="delay" dataType="Float" width="10%">Delay</th>
+		<th field="analysesCount" dataType="Integer" width="5%">Analyses</th>
+	      </tr>
+	    </thead>
+	  </table>
+	</div>
       </div>
     </div>
-    
-    <!-- Incident Data -->
+     
+   <!-- Incident Data -->
     <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" jsId="incidentStore" id="incidentStoreNode" defaultTimeout="20000"></div>
   </body>
 </html>

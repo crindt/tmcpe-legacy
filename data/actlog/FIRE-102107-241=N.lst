@@ -1,0 +1,77 @@
+GAMS Rev 145  x86/MS Windows                                                                       05/11/10 06:09:36 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1   
+   3  OPTIONS ITERLIM = 500000000
+   4  *OPTIONS LIMROW = 1000  ** UNCOMMENT TO GET LISTING OF ALL CONSTRAINTS
+   5  OPTIONS WORK = 800000
+   6  OPTION MIP = CPLEX;
+   7   
+   8  SETS
+   9          J1      Sections        /S0*S17/
+  10          M1      Time Steps      /0*8384/
+  11   
+  12  ALIAS ( J1, K1 )
+  13  ALIAS ( M1, R1 )
+  14   
+  15  PARAMETERS
+  16   
+  17          L( J1 ) section length
+  18              /
+  19                  S17     1.767000
+  20                  S16     0.450000
+  21                  S15     0.360000
+  22                  S14     0.300000
+  23                  S13     0.480000
+  24                  S12     0.415000
+  25                  S11     0.390000
+  26                  S10     0.740000
+  27                  S9      0.695000
+  28                  S8      0.500000
+  29                  S7      0.440000
+  30                  S6      0.295000
+  31                  S5      0.365000
+  32                  S4      0.480000
+  33                  S3      0.805000
+  34                  S2      0.635000
+  35                  S1      0.400000
+  36   
+  37              /
+  38                  TABLE P(J1,M1) Evidence
+**** Maximum number of columns in table exceeded (MAXTABCOL=2048)
+**** TERMINATED DUE TO LIMITS IN COLUMNS
+**** CONTACT YOUR GAMS ADMINISTRATOR
+**** 
+**** GAMS Rev 145  Apr 21, 2006 WIN.00.NA 22.2 145.000.041.VIS P3PC             
+**** 
+**** GAMS Development Corporation
+**** 1217 Potomac Street, NW
+**** Washington, DC 20007, USA
+**** 202-342-0180, 202-342-0181 fax
+**** support@gams.com, www.gams.com
+**** 
+
+SIZE LIMITS FOR ACTIVE GAMS MODULE
+
+COMPILER LIMITS
+GAMS symbols                 = no limit
+Unique set elements (labels) = no limit
+Source lines (accumulated)   = 2147483k
+Controlled set nesting level =     120
+Local map code size          =    1000
+Number of active maps        =     100
+Domainlist for maps          =     200
+Number of columns in table   =    2048
+Total active GAMS code       = 2147483k
+
+
+EXECUTION LIMITS
+Execution stack size         =     200
+Execution temp constants     =     200
+Execution code by unit       =   10000k
+Nonlinear code per model     = 2147483k
+Nonlinear code per block     =   67108k
+Nonlinear constants          =   67108k
+Nonlinear Jacobians per row  =   67108k

@@ -69,6 +69,8 @@ class BootStrap {
 
 
          grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.Incident, cc++ ){ inc, json ->
+             inc?.toJSON( json )
+/*
              def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
              json.build{
                  "class(Incident)"
@@ -83,6 +85,7 @@ class BootStrap {
                  analyses( inc.listAnalyses() )
                  analysesCount( inc.listAnalyses()?.size() )
              }
+*/
          }
 
          grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.TmcLogEntry, cc++ ){ le, json ->
@@ -122,7 +125,21 @@ class BootStrap {
              }
          }
 
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.AnalyzedSection, cc++ ) { asec, json ->
+             json.build{
+                 section(asec.section?.id)
+                 timesteps(asec.analyzedTimestep)
+             }
+         }
 
+         grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.IncidentSectionData, cc++ ) { secdat, json ->
+             json.build{
+                 stamp( secdat.fivemin )
+                 vol(secdat.vol)
+                 spd(secdat.spd)
+                 occ(secdat.occ)
+             }
+         }
      }
 
 
