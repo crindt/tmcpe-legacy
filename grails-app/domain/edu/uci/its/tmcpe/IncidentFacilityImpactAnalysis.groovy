@@ -13,6 +13,9 @@ class IncidentFacilityImpactAnalysis implements Comparable {
     Date            startTime
     Date            endTime
 
+    //////// PARAMETERS ////////
+    Double band
+
     // Treat this as a sorted set.  IncidentSectionData has an induced ordering upstream to downstream by absolute postmile
     SortedSet       analyzedSections
 

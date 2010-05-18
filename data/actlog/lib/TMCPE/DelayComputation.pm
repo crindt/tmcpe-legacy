@@ -57,7 +57,7 @@ use Class::MethodMaker
 		 }, 'tbmap_db' ],
 
      scalar => [ qw/ incid cad facil dir pm vdsid / ],
-     scalar => [ qw/ data cell stationdata / ],
+     scalar => [ qw/ data cell stationdata stationmap timemap / ],
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".gms" } }, 
 		 'gamsfile' ],
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".lst" } }, 
@@ -73,7 +73,7 @@ use Class::MethodMaker
      scalar => [ { -default => 5 }, 'min_obs_pct' ],
      scalar => [ { -default => 1.0 }, 'band' ],
      scalar => [ { -default => 1 }, 'objective' ],
-     scalar => [ { -default => -0.1 }, 'bias' ],
+     scalar => [ { -default => 0.0 }, 'bias' ],
      scalar => [ { -default => 300 }, 'reslim' ],
      scalar => [ { -default => 0 }, 'useexisting' ],
      scalar => [ qw/ logstart logend / ],
@@ -306,6 +306,32 @@ sub get_pems_data {
 #    $dbh->close();
 
     $self->data( $data );
+
+
+    my $facilkey = join( ":", $self->facil, $self->dir );
+    my $J = keys %{$data->{$i}->{$facilkey}->{stations}};
+    $J -= 1;
+    my $M = 0;
+    map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$data->{$i}->{$facilkey}->{stations}};
+
+    my $j = $J;
+
+    $self->stationdata( [] );
+    $self->stationmap( {} );
+    $self->timemap( {} );
+
+    foreach my $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
+		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    {
+	for ( my $m = 0; $m < $M; ++$m )    
+	{
+	    $self->stationdata->[$j] = $data->{$i}->{$facilkey}->{stations}->{$st};
+	    $self->stationmap->{$data->{$i}->{$facilkey}->{stations}->{$st}->{vds}->id} = $j
+	}
+	--$j;
+    }
+    
+    
 }
 
 sub write_gams_program {
@@ -317,7 +343,7 @@ sub write_gams_program {
     my $eq6 = "";
     my $eq7 = "";
     my @objective;
-    my $bias = $self->bias || -0.1;
+    my $bias = $self->bias || 0;
     
     foreach my $iii (1..3)
     {
@@ -348,7 +374,6 @@ sub write_gams_program {
     my $m;
     my $d;
     $self->cell( [] );
-    $self->stationdata( [] );
     foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
 		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
     {
@@ -373,7 +398,6 @@ sub write_gams_program {
 	    } else {
 		$self->cell->[$j]->[$m] = $d;
 	    }
-	    $self->stationdata->[$j] = $data->{$i}->{$facilkey}->{stations}->{$st};
 	}
 	--$j;
     }
@@ -614,7 +638,7 @@ AVGDELAY
 NETDELAY
 ;
 
-$objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, P( J1, M1 ) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
+$objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-$bias) * L( J1 ) * P( J1, M1 ) * D( J1, M1 ) + L( J1 ) * ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[2] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, $bias * D( J1, M1 ) + P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[3] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 0.1*P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
@@ -743,7 +767,7 @@ sub parse_results {
 	}
 	/^\*\*\*\* \d+ ERROR/ && do
 	{
-	    die "CONSULT $self->lstfile for details";
+	    die "CONSULT ".$self->lstfile." for details";
 	};
 	
 	/^----\s+VAR Z\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
@@ -786,6 +810,7 @@ sub parse_results {
 	    my ($nada, $val ) = split( /\s+/, $3 );
 	    $val = 0 if ( $val eq '.' || $val != 1 );
 	    $cell->[$1]->[$2]->{inc} = $val;
+	    print "INC: ($1,$2) = $val\n";
 	};
     }
     print STDERR "done\n";
@@ -850,6 +875,7 @@ sub write_to_db {
 				    {
 					start_time => time2str( "%D %T", $self->calcstart ),
 					end_time => time2str( "%D %T", $self->calcend ),
+					band => $self->band,
 					location_id => $loc->id,
 					total_delay => $self->tot_delay,
 					net_delay => $self->net_delay,
@@ -865,7 +891,7 @@ sub write_to_db {
     my @stations = sort { $dirscale*$a->{abs_pm} cmp $dirscale*$b->{abs_pm} } values %{$data->{$i}->{$facilkey}->{stations}};
 
     my $J = @stations;
-    $J--;
+#    $J--;
     my $j = $J;
     my $M = 0;
     map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$self->data->{$i}->{$facilkey}->{stations}};
@@ -886,8 +912,9 @@ sub write_to_db {
 		    $tmcpedelay = $secdat->{incflw} / $secdat->{incspd} * $station->{seglen} - 
 		    $secdat->{avg_flw} / $secdat->{avg_spd} * $station->{seglen};
 		}
-		my $iflag = defined $self->cell->[$cnt][$M-$m]->{inc} ? $self->cell->[$cnt][$M-$m]->{inc} + 0 : 0;
-		printf STDERR "\t* ".join( ' ', $secdat->{date}, $secdat->{timeofday} ) . "\n";
+		my $stnidx = $self->stationmap->{$station->{vds}->id};
+		my $iflag = defined $self->cell->[$stnidx][$m]->{inc} ? $self->cell->[$stnidx][$m]->{inc} + 0 : 0;
+		printf STDERR "\t* ".join( ' ', '(',$cnt,$m,') -> [', $J-$cnt, $m, ']', $secdat->{date}, $secdat->{timeofday}, $iflag ) . "\n";
 		$at = $as->create_related( 'incident_section_datas', 
 					   {
 					       fivemin => join( ' ', $secdat->{date}, $secdat->{timeofday} ),

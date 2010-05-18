@@ -54,6 +54,13 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => 8,
   },
+  "band",
+  {
+    data_type => "double precision",
+    default_value => undef,
+    is_nullable => 1,
+    size => 8,
+  },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("incident_facility_impact_analysis_pkey", ["id"]);
@@ -69,8 +76,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-10 23:03:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dqivm2MQ/rmZhxiAiMKnpA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:00:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1LaGdMRvl3oHi/GeY33wDw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

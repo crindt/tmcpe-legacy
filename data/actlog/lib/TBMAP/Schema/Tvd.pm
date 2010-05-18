@@ -88,8 +88,8 @@ __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("tvd_pkey", ["id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-10 23:02:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5zhoRVjkXRuZ4iXHQKqY7A
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:00:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iGxVtfnsW/x+JPY6lymauA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

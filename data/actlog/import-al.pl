@@ -578,7 +578,10 @@ $condition->{location_vdsid} = { '!=' => undef };
 
 
 my $incrs = $tmcpe->resultset('Incidents')->search(
-    $condition, {}
+    $condition, 
+    {
+	order_by => qw/ start_time asc /
+    }
     );
 
 INCDEL: while( my $inc = $incrs->next ) {

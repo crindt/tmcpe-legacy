@@ -150,8 +150,8 @@ __PACKAGE__->set_primary_key("gid");
 __PACKAGE__->add_unique_constraint("sjv_network_nodes_pkey", ["gid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-10 23:03:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VdGa88w71u4MSYZn6JciKA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:01:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tghx+uPbF6Gmukqrq5/pGA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

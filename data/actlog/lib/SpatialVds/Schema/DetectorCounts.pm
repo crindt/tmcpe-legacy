@@ -21,8 +21,8 @@ __PACKAGE__->set_primary_key("vds_id", "obs_day");
 __PACKAGE__->add_unique_constraint("detector_counts_pkey", ["vds_id", "obs_day"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-10 23:03:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QmRk0VOB35wy3MeI67RvNw
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:01:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Jc0un+LQr67IY9vEgXayxw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -31,8 +31,8 @@ __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("vds_segment_geometry_pkey", ["id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-10 23:02:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:i2QNDKxjqSiHt/orOv3zjg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:00:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:622bdPh5w6ELhkOA88w0EA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

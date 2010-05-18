@@ -101,7 +101,7 @@
 	    <label class="secondLabel" for="school" style="float:left">Scale</label>
 	    <div dojoType="dijit.form.HorizontalSlider" jsid="bandSlider" id="bandSlider" name="school"
 		 minimum="0"
-		 value="0.75"
+		 value="${incidentInstance.analyses.first().incidentFacilityImpactAnalyses.first().band}"
 		 maximum="10"
 		 showButtons="false"
 		 discreteValues="41"
@@ -127,7 +127,7 @@
 		<li>10</li>
 	      </ol>
 	    </div>
-	    <label id="scaleValue" style="vertical-align:top;float:left;">0.25</label>
+	    <label id="scaleValue" style="vertical-align:top;float:left;">${incidentInstance.analyses.first().incidentFacilityImpactAnalyses.first().band}</label>
 	  </div>
 	  
 <!--

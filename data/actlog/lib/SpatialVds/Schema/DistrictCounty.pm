@@ -17,8 +17,8 @@ __PACKAGE__->set_primary_key("district_id", "county_id");
 __PACKAGE__->add_unique_constraint("district_county_pkey", ["district_id", "county_id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-10 23:03:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wEWY4US3B0q5OkN6ai9TuQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:01:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FNtQh2XkeCMdazP69047dQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
