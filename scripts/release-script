@@ -3,6 +3,9 @@ stable="$1"
 last="$2"
 new="$3"
 
+if [ "$stable" == "" ]; then echo "PLEASE ENTER THE LAST STABLE VERSION: release-script <stable> <last> <new>"; exit 0; fi
+if [ "$last" == "" ]; then echo "PLEASE ENTER THE LAST VERSION: release-script <stable> <last> <new>"; exit 0; fi
+if [ "$new" == "" ]; then echo "PLEASE ENTER THE NEW VERSION NUMBER: release-script <stable> <last> <new>"; exit 0; fi
 
 curappver=`grep app.version application.properties  | sed 's/.*=\(.*\)/\1/g'`
 newappver=`echo $new | sed 's/\(.*\)\..*/\1/g'`
@@ -16,7 +19,7 @@ echo "git tag v$new"
 
 echo "grails war"
 
-echo "scp target/tmcpe-$newappver root@hyperion.its.uci.edu:/var/lib/tomcat-6/webapps"
+echo "scp target/tmcpe-$newappver.war root@hyperion.its.uci.edu:/var/lib/tomcat-6/webapps"
 
 echo "git archive --prefix=tmcpe-$new/ v$new | gzip -9 > ../tmcpe-$new.tar.gz"
 echo "git diff v$stable v$new | gzip -9 > ../patch-$new.gz"
