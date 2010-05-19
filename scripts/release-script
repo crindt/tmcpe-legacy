@@ -1,0 +1,25 @@
+#!/bin/sh
+stable="$1"
+last="$2"
+new="$3"
+
+
+curappver=`grep app.version application.properties  | sed 's/.*=\(.*\)/\1/g'`
+newappver=`echo $new | sed 's/\(.*\)\..*/\1/g'`
+
+echo "if [ $newappver != $curappver ]; then sed 's/app.version=.*/app.version=$newappver/g' application.properties >tsed && mv tsed application.properties; fi"
+
+echo "git commit -a"
+echo "sed \"s/def version = { out << '[^']*' }/def version = { out << '$new' }/g\" grails-app/taglib/TmcpeTagLib.groovy > tsed && mv tsed grails-app/taglib/TmcpeTagLib.groovy"
+echo "git commit -m 'Release $new' grails-app/taglib/TmcpeTagLib.groovy"
+echo "git tag v$new"
+
+echo "grails war"
+
+echo "scp target/tmcpe-$newappver root@hyperion.its.uci.edu:/var/lib/tomcat-6/webapps"
+
+echo "git archive --prefix=tmcpe-$new/ v$new | gzip -9 > ../tmcpe-$new.tar.gz"
+echo "git diff v$stable v$new | gzip -9 > ../patch-$new.gz"
+echo "git log --no-merges v$new ^v$last > ../ChangeLog-$new"
+echo "git shortlog --no-merges v$new ^v$last > ../ShortLog"
+echo "git diff --stat --summary -M v$last v$new > ../diffstat-$new"

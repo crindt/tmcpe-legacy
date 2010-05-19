@@ -1,7 +1,7 @@
 <html>
     <head>
       <!-- layouts/main.gsp head -->
-      <title>TMCPE (Version 0.1.2)<g:layoutTitle default="Grails" /></title>
+      <title>Caltrans D12 TMC Performance Evaluation (Version <tmcpe:version />) <g:layoutTitle default="" /></title>
       <base id="htmldom" href="${createLinkTo(dir:'/')}"/>
       <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'main.css')}" />
       <link rel="shortcut icon" href="${createLinkTo(dir:'images',file:'favicon.ico')}" type="image/x-icon" />

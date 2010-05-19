@@ -1,6 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Testbed Network View Using Openlayers</title>
+    <title>Incident List</title>
     <meta name="layout" content="main" />
 <!--
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
