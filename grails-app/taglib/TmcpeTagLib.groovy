@@ -66,5 +66,5 @@ class TmcpeTagLib {
       out << '<script>dojo.registerModulePath("tmcpe","' << createLinkTo( dir:'js/tmcpe',file:'' ) << '");</script>\n'
   }
 
-  def version = { out << '0.1.3' }
+  def version = { out << '' }
 }
