@@ -33,7 +33,7 @@ class IncidentImpactAnalysisController {
         }
     }
     def showAnalyses = {
-        def iia = IncidentImpactAnalysis.get(params.id)
+        def iia = IncidentImpactAnalysis.get(params.id.toInteger())
         if (!iia) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
@@ -52,7 +52,7 @@ class IncidentImpactAnalysisController {
     }
 
     def delete = {
-        def incidentImpactAnalysisInstance = IncidentImpactAnalysis.get( params.id )
+        def incidentImpactAnalysisInstance = IncidentImpactAnalysis.get( params.id.toInteger() )
         if(incidentImpactAnalysisInstance) {
             try {
                 incidentImpactAnalysisInstance.delete()
@@ -71,7 +71,7 @@ class IncidentImpactAnalysisController {
     }
 
     def edit = {
-        def incidentImpactAnalysisInstance = IncidentImpactAnalysis.get( params.id )
+        def incidentImpactAnalysisInstance = IncidentImpactAnalysis.get( params.id.toInteger() )
 
         if(!incidentImpactAnalysisInstance) {
             flash.message = "IncidentImpactAnalysis not found with id ${params.id}"

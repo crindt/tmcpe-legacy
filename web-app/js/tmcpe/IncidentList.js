@@ -130,7 +130,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     // called to indicate that the layer update is complete...
     _demoCallback: function() {
 	console.log( "GOT DEMO CALLBACK!" );
-//	this._loadEnd(); 
+	//	this._loadEnd(); 
     },
 
     _incidentsLayerInit: function() {
@@ -138,7 +138,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	if ( !this._progressDialog ) {
 	    this._progressDialog = new dijit.Dialog({//dojox.widget.Dialog({
-//		title: "Loading",
+		//		title: "Loading",
 		id: "progressDialog",
 		showTitle: false,
 		style: "width: 300px",
@@ -311,8 +311,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 
 	var selectStyle = OpenLayers.Util.applyDefaults({
-//	    fillColor: "blue",
-//	    strokeColor: "blue"
+	    //	    fillColor: "blue",
+	    //	    strokeColor: "blue"
 	}, OpenLayers.Feature.Vector.style["select"]);
 
 	this._selectVds = new OpenLayers.Control.SelectFeature(
@@ -421,10 +421,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var lonlats = feature.attributes.vdsLocation.split( ' ' );
 	var lonlat = new OpenLayers.LonLat( lonlats[ 0 ], lonlats[ 1 ] ).transform(map._map.displayProjection, map._map.projection)
 	var popup = new OpenLayers.Popup.FramedCloud("chicken", 
-            lonlat,
-            new OpenLayers.Size(100,100),
-            "<h2>"+feature.attributes.name + "</h2>",// + feature.attributes.description,
-            null, true, onPopupCloseVds
+						     lonlat,
+						     new OpenLayers.Size(100,100),
+						     "<h2>"+feature.attributes.name + "</h2>",// + feature.attributes.description,
+						     null, true, onPopupCloseVds
 						    );
 	feature.popup = popup;
 	il.getMap().addPopup(popup);
@@ -494,7 +494,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
     _loadEnd: function() {
 	this._jobs--;
-//	this._progressDialog.attr( "content", "finished" ); 
+	//	this._progressDialog.attr( "content", "finished" ); 
 	console.log( "LOAD END: " + this._jobs );
 	if ( this._jobs <= 0 && this._progressDialog != null ) { this._progressDialog.hide(); }
     },
@@ -518,7 +518,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	    var base = document.getElementById("htmldom").href;
 
-	// update the url
+	    // update the url
 	    this._incidentsLayer.protocol = 
 		new OpenLayers.Protocol.HTTP({
   		    url: base + "incident/list.geojson",

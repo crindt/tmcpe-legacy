@@ -57,7 +57,7 @@ class TmcpeTagLib {
   }
 
   def tmcpe = {
-//      out << tmcpe.dojoUncompressed_1_4_google()
+//      out << tmcpe.dojo_1_4_google()
       out << tmcpe.dojoUncompressed_1_4()
       //out << tmcpe.dojo_1_4()
       out << '<link rel="stylesheet" href="' << createLinkTo( dir:'css',file:'tmcpe.css' ) << '" />\n'

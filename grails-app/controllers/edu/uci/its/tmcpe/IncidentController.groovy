@@ -140,52 +140,59 @@ class IncidentController {
     }
 
     def create = {
-        def incidentInstance = new Incident()
-        incidentInstance.properties = params
-        return [incidentInstance: incidentInstance]
+        def ii = new Incident()
+        ii.properties = params
+        return [incidentInstance: ii]
     }
 
     def save = {
-        def incidentInstance = new Incident(params)
-        if (incidentInstance.save(flush: true)) {
-            flash.message = "${message(code: 'default.created.message', args: [message(code: 'incident.label', default: 'Incident'), incidentInstance.id])}"
-            redirect(action: "show", id: incidentInstance.id)
+        def ii = new Incident(params)
+        if (ii.save(flush: true)) {
+            flash.message = "${message(code: 'default.created.message', args: [message(code: 'incident.label', default: 'Incident'), ii.id])}"
+            redirect(action: "show", id: ii.id)
         }
         else {
-            render(view: "create", model: [incidentInstance: incidentInstance])
+            render(view: "create", model: [incidentInstance: ii])
         }
     }
 
     def show = {
-        def incidentInstance = Incident.get(params.id)
-        if (!incidentInstance) {
+        def ii = Incident.get(params.id)
+        if (!ii) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
         }
         else {
-            [incidentInstance: incidentInstance]
+            [incidentInstance: ii]
         }
     }
 
     def showCustom = {
-        def incidentInstance = Incident.get(params.id)
-        if (!incidentInstance) {
+        def ii = Incident.get(params.id)
+        if (!ii) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
         }
         else {
-            [incidentInstance: incidentInstance]
+            def fia = ( ii.analyses.size() > 0) ? ( ii.analyses.first().incidentFacilityImpactAnalyses.size() > 0
+                                                          ? ii.analyses.first().incidentFacilityImpactAnalyses.first() : null ) : null
+            def fiaid = null
+            if ( fia != null ) fiaid=fia.id
+            def band =null
+            if ( fia != null ) band=fia.band
+                
+            [ incidentInstance: ii, firstAnalysis: fia, band: band ]
         }
     }
 
     def showAnalyses = {
-        def incidentInstance = Incident.get(params.id)
-        if (!incidentInstance) {
+        def ii = Incident.get(params.id)
+        if (!ii) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
         } else {
             def analyses = 
-                incidentInstance.analyses.collect { ia -> 
+                ii.analyses.collect { ia -> 
                 [
                     id: ia.id, 
                     name: ia.analysisName,
@@ -200,35 +207,35 @@ class IncidentController {
     }
 
     def edit = {
-        def incidentInstance = Incident.get(params.id)
-        if (!incidentInstance) {
+        def ii = Incident.get(params.id)
+        if (!ii) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
         }
         else {
-            return [incidentInstance: incidentInstance]
+            return [incidentInstance: ii]
         }
     }
 
     def update = {
-        def incidentInstance = Incident.get(params.id)
-        if (incidentInstance) {
+        def ii = Incident.get(params.id)
+        if (ii) {
             if (params.version) {
                 def version = params.version.toLong()
-                if (incidentInstance.version > version) {
+                if (ii.version > version) {
                     
-                    incidentInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'incident.label', default: 'Incident')] as Object[], "Another user has updated this Incident while you were editing")
-                    render(view: "edit", model: [incidentInstance: incidentInstance])
+                    ii.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'incident.label', default: 'Incident')] as Object[], "Another user has updated this Incident while you were editing")
+                    render(view: "edit", model: [incidentInstance: ii])
                     return
                 }
             }
-            incidentInstance.properties = params
-            if (!incidentInstance.hasErrors() && incidentInstance.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'incident.label', default: 'Incident'), incidentInstance.id])}"
-                redirect(action: "show", id: incidentInstance.id)
+            ii.properties = params
+            if (!ii.hasErrors() && ii.save(flush: true)) {
+                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'incident.label', default: 'Incident'), ii.id])}"
+                redirect(action: "show", id: ii.id)
             }
             else {
-                render(view: "edit", model: [incidentInstance: incidentInstance])
+                render(view: "edit", model: [incidentInstance: ii])
             }
         }
         else {
@@ -238,10 +245,10 @@ class IncidentController {
     }
 
     def delete = {
-        def incidentInstance = Incident.get(params.id)
-        if (incidentInstance) {
+        def ii = Incident.get(params.id)
+        if (ii) {
             try {
-                incidentInstance.delete(flush: true)
+                ii.delete(flush: true)
                 flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
                 redirect(action: "list")
             }

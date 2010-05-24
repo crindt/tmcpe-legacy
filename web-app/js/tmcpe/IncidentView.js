@@ -6,7 +6,7 @@ dojo.require("dijit._Widget");
 dojo.require("dijit._Templated");
 dojo.require("dojox.json.ref");
 
-//dojo.require("dojox.gfx.Surface");
+// dojo.require("dojox.gfx.Surface");
 
 // our declared class
 dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
@@ -18,7 +18,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     _selectVds: null,
     _hoverVds: null,
 
-    _activityLogGrid: null, // The dom node holding the activity log grid dojo widget
+    _activityLogGrid: null, // The dom node holding the activity log grid dojo
+							// widget
     
     constructor: function() {
     },
@@ -60,7 +61,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	theParams[ 'type' ] = 'ML';
 	theParams[ 'bbox' ] = [this.getMap().getExtent().toBBOX()];
-	theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
+	theParams[ 'proj' ] = "EPSG:900913";/* map.projection */
 
 	var sectionParams = {idIn:[]};
 
@@ -107,7 +108,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     },
 
     _linkFeaturesToCells: function() {
-	// Now wire up the table data to highlight the 
+	// Now wire up the table data to highlight the
 	var tsd = this._tsd;
 	var sections = tsd._data.sections;
 	var td = tsd._td;
@@ -129,7 +130,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    {
 		var ff = vsl.features[ k ];
 		if ( station ) {
-		    //console.log( [station.vdsid,' =?= ', ff.attributes[ 'id' ] ].join( '') );
+		    // console.log( [station.vdsid,' =?= ', ff.attributes[ 'id' ]
+			// ].join( '') );
 		    if ( station && station.vdsid == ff.attributes[ 'id' ] ) {
 			feature = ff;
 		    }
@@ -174,8 +176,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 
 	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
-//	    fillColor: "cyan",
-//	    strokeColor: "cyan",
+// fillColor: "cyan",
+// strokeColor: "cyan",
 	    strokeWidth: 8,
 	    strokeOpacity: 1
 	}, OpenLayers.Feature.Vector.style["select"]);
@@ -185,19 +187,19 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
  	    highlightOnly: true,
             renderIntent: "temporary",
 	    selectStyle: hoverSelectStyle,
-	    //        eventListeners: {
-	    //            beforefeaturehighlighted: report,
-	    //            featurehighlighted: report,
-	    //            featureunhighlighted: report
-	    //        }
+	    // eventListeners: {
+	    // beforefeaturehighlighted: report,
+	    // featurehighlighted: report,
+	    // featureunhighlighted: report
+	    // }
 	});
 	this.getMap().addControl(this._hoverVds);
 	this._hoverVds.activate();
 
 
 	var selectStyle = OpenLayers.Util.applyDefaults({
-	//    fillColor: "blue",
-//	    strokeColor: "blue"
+	// fillColor: "blue",
+// strokeColor: "blue"
 	}, OpenLayers.Feature.Vector.style["select"]);
 
 	this._selectVds = new OpenLayers.Control.SelectFeature(this._vdsSegmentLines,{
@@ -210,73 +212,67 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this._selectVds.activate();   
 
 
-//	obj.getMap().zoomToExtent( obj._vdsSegmentLines.getDataExtent() );
+// obj.getMap().zoomToExtent( obj._vdsSegmentLines.getDataExtent() );
 
 /*
-	dojo.connect( this._vdsSegmentLines, "moveend", this.updateVdsSegmentsQuery );
-	dojo.connect( this._vdsSegmentLines, "featuresadded", this._linkFeaturesToCells );
-	dojo.connect( this._vdsSegmentLines, "featuresremoved", this._linkFeaturesToCells );
-*/
+ * dojo.connect( this._vdsSegmentLines, "moveend", this.updateVdsSegmentsQuery );
+ * dojo.connect( this._vdsSegmentLines, "featuresadded",
+ * this._linkFeaturesToCells ); dojo.connect( this._vdsSegmentLines,
+ * "featuresremoved", this._linkFeaturesToCells );
+ */
 
     },
 
     _clickTimeSpaceCell: function( e ) {
-	var stationnm = e.target.getAttribute( 'station' );
-	var timeidx = e.currentTarget.getAttribute( 'timeidx' );
-	var timeind = e.currentTarget.getAttribute( 'time' );
-	var station = this._tsd._data.sections[ stationnm ];
-
-	// CENTER THE MAP ON THE VDS SECTION WE CLICKED ON
-	console.log( "Centering on feature" );
-	if ( station ) {
-	    var feature = station.feature;
-	    if ( feature ) {
-		this.getMap().zoomToExtent( feature.geometry.getBounds() );
-	    }
-	} else
-	    alert( "Unable to find feature in layer" );
-
-	// SCROLL THE ACTIVITY LOG TO THE NEAREST ENTRY
-	
+    	var stationnm = e.target.getAttribute( 'station' );
+    	var timeidx = e.currentTarget.getAttribute( 'timeidx' );
+    	var timeind = e.currentTarget.getAttribute( 'time' );
+    	var station = this._tsd._data.sections[ stationnm ];
+    	
+    	// CENTER THE MAP ON THE VDS SECTION WE CLICKED ON
+    	console.log( "Centering on feature" );
+    	if ( station ) {
+    		var feature = station.feature;
+    		if ( feature ) {
+    			this.getMap().zoomToExtent( feature.geometry.getBounds() );
+    		}
+    	} else
+    		alert( "Unable to find feature in layer" );
+    	
+    	// SCROLL THE ACTIVITY LOG TO THE NEAREST ENTRY
+    	
     },
-
+    
     _hoverStation: function( e ) {
-	var stationnm = e.target.getAttribute( 'station' );
-	var station = this._tsd._data.sections[ stationnm ];
-	/*console.debug( "station:" + station.vdsid );*/
-
-	// HACK: highlight the corresponding station in the map
-	var vsl = this._vdsSegmentLines;
-	if ( vsl && station ) {
-	    var feature = station.feature;
-	    /*
-	    // Loop over the lines until we find the correct station
-	    var feature = null;
-	    for ( var j = 0; j < vsl.features.length && !feature; ++j )
-	    {
-		var ff = vsl.features[ j ];
-		if ( station.vdsid == ff.attributes[ 'id' ] ) {
-		    feature = ff;
-		}
-	    }
-            */
-            /*
-	    if ( feature ) {
-		feature.style.strokeColor = tdc.style.backgroundColor;
-		feature.style.strokeWidth = 8;
-		feature.style.strokeOpacity = 1;
-		this._vdsSegmentLines.drawFeature( feature );
-	    }
-            */
-
-	    // OK, found the feature.  Highlight it?  select it
-	    if ( feature ) {
-		this._hoverVds.unselectAll();
-		this._hoverVds.select( feature );
-	    }
-	}
+    	var stationnm = e.target.getAttribute( 'station' );
+    	var station = this._tsd._data.sections[ stationnm ];
+    	/* console.debug( "station:" + station.vdsid ); */
+    	
+    	// HACK: highlight the corresponding station in the map
+    	var vsl = this._vdsSegmentLines;
+    	if ( vsl && station ) {
+    		var feature = station.feature;
+    		/*
+    		 * // Loop over the lines until we find the correct station var feature =
+    		 * null; for ( var j = 0; j < vsl.features.length && !feature; ++j ) {
+    		 * var ff = vsl.features[ j ]; if ( station.vdsid == ff.attributes[ 'id' ] ) {
+    		 * feature = ff; } }
+    		 */
+    		/*
+    		 * if ( feature ) { feature.style.strokeColor =
+    		 * tdc.style.backgroundColor; feature.style.strokeWidth = 8;
+    		 * feature.style.strokeOpacity = 1;
+    		 * this._vdsSegmentLines.drawFeature( feature ); }
+    		 */
+    		
+    		// OK, found the feature. Highlight it? select it
+    		if ( feature ) {
+    			this._hoverVds.unselectAll();
+    			this._hoverVds.select( feature );
+    		}
+    	}
     },
-
+    
     _hoverTime: function( e ) {
 	// HACK: alter the segment colors to match tsd
 	var timeidx = e.currentTarget.getAttribute( 'timeidx' );
@@ -306,7 +302,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 		if ( station ) {
 		    var feature = station.feature;
-		    // OK, found the feature.  alter the style
+		    // OK, found the feature. alter the style
 		    if ( feature ) {
 			feature.style.strokeColor = tdc.style.backgroundColor;
 			this._vdsSegmentLines.drawFeature( feature );
@@ -314,7 +310,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		}
 	    }
 	}
-//	this._hoverStation( e ); // highlight the station we're hovering over
+// this._hoverStation( e ); // highlight the station we're hovering over
 	var stationnm = e.target.getAttribute( 'station' );
 	var station = this._tsd._data.sections[ stationnm ];
 	if ( ! station ) {
@@ -326,38 +322,42 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    };
 	}
 	var el = document.getElementById('tmcpe_tsd_cellinfo');
-	el.innerHTML = station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd._data.timesteps[timeind];/*.getTimeForIndex( timeind )*/;
+	el.innerHTML = station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd._data.timesteps[timeind];/*
+																																				 * .getTimeForIndex(
+																																				 * timeind )
+																																				 */;
     },
-
-    ////////// TABLE FUNCTIONS
+    
+    // //////// TABLE FUNCTIONS
     getActivityLogGrid: function() {
-	if ( !this._activityLogGrid ) {
-	    this._activityLogGrid = dijit.byId( 'logGridNode' );
-	}
-	return this._activityLogGrid;
+    	if ( !this._activityLogGrid ) {
+    		this._activityLogGrid = dijit.byId( 'logGridNode' );
+    	}
+    	return this._activityLogGrid;
     },
-
+    
     scrollActivityLogToItem: function ( item ) {
-	var gn = getActivityLogGrid();
-	
-	var idx = gn.getItemIndex( item );
-	if ( idx = -1 ) {
-	    // hmm, the grid hasn't materialized this item, 
-	    idx = item._0;
-	    // load the missing page
-	    // some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
-	    var pageIndex = gn._rowToPage( idx );
-	    gn._requestPage( pageIndex );
-	}
-	if ( idx >= 0 ) {
-	    gn.selection.clear();
-	    gn.selection.addToSelection( idx );
-	    gn.scrollToRow( idx );
-	} else {
-	    alert( "Strangely, item " + cad + " wasn't found in the grid!" );
-	}
-
+    	var gn = getActivityLogGrid();
+    	
+    	var idx = gn.getItemIndex( item );
+    	if ( idx = -1 ) {
+    		// hmm, the grid hasn't materialized this item,
+    		idx = item._0;
+    		// load the missing page
+    		// some hackiness from
+			// http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
+    		var pageIndex = gn._rowToPage( idx );
+    		gn._requestPage( pageIndex );
+    	}
+    	if ( idx >= 0 ) {
+    		gn.selection.clear();
+    		gn.selection.addToSelection( idx );
+    		gn.scrollToRow( idx );
+    	} else {
+    		alert( "Strangely, item " + cad + " wasn't found in the grid!" );
+    	}
+    	
     },
-
+    
     __dummyFunc: function () {}
 });

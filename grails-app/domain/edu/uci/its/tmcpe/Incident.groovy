@@ -40,18 +40,18 @@ class Incident {
      * The estimated freeway section where the incident occurred (the location of the capacity reduction)
      */
     FacilitySection section
-
+    
     Point locationGeom = new Point( x: 0, y: 0 )
     Point bestGeom     = new Point( x: 0, y: 0 )
-
+    
     SortedSet analyses
     static hasMany = [analyses:IncidentImpactAnalysis]
-
+    
     static constraints = {
         // Only allow one Incident object per cadid
         cad(unique:true)
     }
-
+    
     static mapping = {
         //table 'sigalert_locations_grails'
         table name: 'full_incidents', schema: 'actlog'
@@ -67,18 +67,18 @@ class Incident {
         bestGeom type:GeometryType 
         section column: 'location_vdsid'
         eventType column: 'event_type'
-
+        
         // turn off optimistic locking, i.e., versioning.  This class is mapped to an externally generated table
         version false
-//        cache usage:'read-only' 
+        //        cache usage:'read-only' 
     }
-
+    
     List getTmcLogEntries()
     {
         return TmcLogEntry.findAllByCad( cad );
     }
-
-
+    
+    
     public Period computeCadDuration()
     {
         List entries = getTmcLogEntries()
@@ -88,7 +88,7 @@ class Incident {
         def endj = new DateTime( end )
         return new Period( startj, endj )
     }
-
+    
     public Period computeSigalertDuration()
     {
         def start;
@@ -106,29 +106,29 @@ class Incident {
             return null
         }
     }
-
+    
     public String cadDurationString() {
         org.joda.time.format.PeriodFormatter fmt = 
             new org.joda.time.format.PeriodFormatterBuilder().
-                printZeroAlways().
-                appendHours().
-                appendSeparator(":").
-                printZeroAlways().
-                appendMinutes().toFormatter()
+            printZeroAlways().
+            appendHours().
+            appendSeparator(":").
+            printZeroAlways().
+            appendMinutes().toFormatter()
         return fmt.print( computeCadDuration() )
     }
-
+    
     public String sigalertDurationString() {
         org.joda.time.format.PeriodFormatter fmt = 
             new org.joda.time.format.PeriodFormatterBuilder().
-                printZeroAlways().
-                appendHours().
-                appendSeparator(":").
-                printZeroAlways().
-                appendMinutes().toFormatter()
+            printZeroAlways().
+            appendHours().
+            appendSeparator(":").
+            printZeroAlways().
+            appendMinutes().toFormatter()
         return fmt.print( computeSigalertDuration() )
     }
-
+    
     def stampDateTime = {
         def cal = Calendar.getInstance( )
         cal.clear()
@@ -140,16 +140,16 @@ class Incident {
         cal.set( Calendar.MINUTE, startTime.getMinutes() )
         return cal.getTime();
     }
-
+    
     def toKml( radius = 0.01 ) {
         if ( ! bestGeom ) return
-
+        
         if ( radius == 0 ) {
             return [ "<Point><coordinates>",
                 bestGeom.getX()+","+bestGeom.getY(),
                 "</coordinates></Point>"
             ].join("\n")
-
+            
         } else {
             // We want a circle
             String coords = ""
@@ -164,18 +164,18 @@ class Incident {
                 Float yy = (y+Math.sin(ang)*radius)
                 coords = coords + " " +  xx + "," + yy
             }
-
-
+            
+            
             return [ "<Polygon><outerBoundaryIs><LinearRing><coordinates>",
                 coords,
                 "</coordinates></LinearRing></outerBoundaryIs></Polygon>",
                 "<Point>",
                 p.getX()+","+p.getY(),
                 "</Point>"
-                ].join("\n")
+            ].join("\n")
         }
     }
-
+    
     def toJSON( json ) {
         def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
         return json.build{
@@ -208,9 +208,9 @@ class Incident {
         def fname = [ id, section.freewayId, section.freewayDir ].join( "-" )
         def p = ~/^${id}-\d+-[NSEW].json/
         System.out.println( p )
-
+        
         def ret = []
-
+        
         new File( 'web-app/data' ).eachFileMatch( p ) {
             f ->
             System.out.println( f )
@@ -219,7 +219,7 @@ class Incident {
             System.out.println( data )
             ret.add ( data )
         }
-
+        
         return ret
         */
     }

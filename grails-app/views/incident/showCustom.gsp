@@ -16,7 +16,7 @@
       dojo.require("tmcpe.IncidentView"); <!-- This is the application (behavioral) widget -->
       dojo.require("tmcpe.TestbedMap");
       dojo.require("tmcpe.TimeSpaceDiagram");
-
+      
       <!-- Here are all the dojo widgets we use -->
       dojo.require("dojo.data.ItemFileReadStore");
       dojo.require("dijit.form.ComboBox");
@@ -35,7 +35,11 @@
 
       <!-- Fire up the application -->
       dojo.addOnLoad(function(){ 
-          incidentView.updateFacilityImpactAnalysis( ${incidentInstance.analyses.first().incidentFacilityImpactAnalyses.first().id} );
+          if ( fia ) {
+	     incidentView.updateFacilityImpactAnalysis( fia );
+          } else {
+	     alert( "No analysis data available for incident ${incidentInstance.cad}" );
+	  }
       }
       );
 
@@ -66,12 +70,24 @@
 
 	<div dojoType="dijit.layout.ContentPane" region="top">
 
-	  <div dojoType="dojo.data.ItemFileReadStore" url="${resource(dir:'incidentImpactAnalysis', file:'showAnalyses?id='+incidentInstance.analyses.first().id)}" jsId="facilityStore" id="facilityStoredom"></div>
+	  <div dojoType="dojo.data.ItemFileReadStore"
+	       <g:if test="fia!=null">
+		 url="${resource(dir:'incidentImpactAnalysis', file:'showAnalyses?id='+fia)}" 
+	       </g:if>
+	       <g:if test="fia==null">
+		 data="{}"
+	       </g:if>
+	       jsId="facilityStore" 
+	       id="facilityStoredom"
+	       >
+	     </div>
 	  <label class="firstLabel" for="facility" style="float:left">Facility</label>
 	  <select dojoType="dijit.form.ComboBox"
 		  store="facilityStore"
 		  searchAttr="fwydir"
-		  value="${incidentInstance.section.freewayId}-${incidentInstance.section.freewayDir}"
+		  <g:if test="fia!=null">
+		    value="${incidentInstance.section.freewayId}-${incidentInstance.section.freewayDir}"
+		  </g:if>
 		  autocomplete="true"
 		  hasDownArrow="true"
 		  id="id"
@@ -101,7 +117,7 @@
 	    <label class="secondLabel" for="school" style="float:left">Scale</label>
 	    <div dojoType="dijit.form.HorizontalSlider" jsid="bandSlider" id="bandSlider" name="school"
 		 minimum="0"
-		 value="${incidentInstance.analyses.first().incidentFacilityImpactAnalyses.first().band}"
+		 value="${band ? band : 0}"
 		 maximum="10"
 		 showButtons="false"
 		 discreteValues="41"
@@ -127,7 +143,7 @@
 		<li>10</li>
 	      </ol>
 	    </div>
-	    <label id="scaleValue" style="vertical-align:top;float:left;">${incidentInstance.analyses.first().incidentFacilityImpactAnalyses.first().band}</label>
+	    <label id="scaleValue" style="vertical-align:top;float:left;">${band ? band : 0}</label>
 	  </div>
 	  
 <!--
