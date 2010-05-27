@@ -11,6 +11,9 @@ dojo.require("dojox.json.ref");
 // our declared class
 dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
+    // parameters
+    incident: null,
+
     // private vars
     _tsd: null,
     _map: null,
@@ -18,12 +21,29 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     _selectVds: null,
     _hoverVds: null,
 
+    _facilityStore: null, // The dojo facility store
+    _incidentSummary: null, // The dom node holding the incident summary
     _activityLogGrid: null, // The dom node holding the activity log grid dojo
 							// widget
     
     constructor: function() {
     },
 
+    postMixInProperties: function() {
+	this.inherited( arguments );
+    },
+
+    postCreate: function( ) {
+	this.inherited( arguments );
+	
+    },
+
+    startup: function() {
+	// load analyses
+	this._loadAnalyses();
+
+	this.inherited( arguments );
+    },
 
     initApp: function() {
 	this.initVdsSegmentsLayer( {} );
@@ -44,9 +64,61 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	return this._tsd;
     },
 
+    getFacilityStore: function() {
+	if ( ! this._facilityStore ) {
+	    this._facilityStore = dijit.byId('facilityStore');
+	    if ( ! this._facilityStore ) {
+		// create one!
+		this._facilityStore = facilityStore;
+	    }
+	}
+	return this._facilityStore;
+    },
+
+    getFacilityCombo: function() {
+	if ( ! this._facilityCombo )
+	    this._facilityCombo = dijit.byId('facilityCombo');
+	return this._facilityCombo;
+    },
+
+    _loadAnalyses: function() {
+	var base = document.getElementById("htmldom").href;
+	var caller = this;
+	var url = base + 'incident/showAnalyses?id=' + this.incident.id;
+	console.log( "LOADING DATA FOR INCIDENT " + url );
+	if ( this.incident && this.incident.id != null ) {
+	    dojo.xhrGet({
+		url: url,
+		preventCache: true,
+		handleAs: "text",
+		sync: true, //false,
+		load: function( r ) {
+		    var inc = caller.incident;
+		    inc.analyses = dojox.json.ref.fromJson( r );
+		},
+		error: function( r ) {
+		    alert( 'Error loading analyses for ' + caller.incident.cad + ': ' + r)
+		}
+	    });
+	} else {
+	    alert( "Asked to load analyses for NULL incident" );
+	}
+
+	if ( this.incident.analyses.length > 0 ) {
+	    // sets the displayed analysis to the default (0) and
+	    // loads the facility analyses into the filteringselect
+	    facilityStore.url = 'http://localhost:8080' + base + 'incidentImpactAnalysis/showAnalyses?id=' + this.incident.analyses[ 0 ].id;
+
+	    // Here, we set the default displayed TSD to that
+	    // corresponding to the primary disrupted facility
+	    var ff = this.incident.section.freewayId + '-' + this.incident.section.freewayDir;
+	    facilityCombo.attr( 'displayedValue', ff );
+	}
+    },
+
     updateFacilityImpactAnalysis: function( fiaId ) {
 	var base = document.getElementById("htmldom").href;
-	this.getTsd().updateData( base + 'incidentFacilityImpactAnalysis/show.json?id='+fiaId );
+	this.getTsd().updateUrl( base + 'incidentFacilityImpactAnalysis/show.json?id='+fiaId );
 	this.updateVdsSegmentsQuery(); 	
     },
 

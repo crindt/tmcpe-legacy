@@ -169,6 +169,7 @@ class IncidentController {
 
     def showCustom = {
         def ii = Incident.get(params.id)
+        System.err.println( "####################SHOWING CUSTOM: " + params.id )
         if (!ii) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
@@ -180,8 +181,8 @@ class IncidentController {
             if ( fia != null ) fiaid=fia.id
             def band =null
             if ( fia != null ) band=fia.band
-                
-            [ incidentInstance: ii, firstAnalysis: fia, band: band ]
+            System.err.println( "############# II: " + ii );
+            render( view:"showCustom", model: [ incidentInstance: ii, iiJson: ii as JSON, band: band ] )
         }
     }
 

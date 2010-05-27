@@ -19,13 +19,15 @@
       
       <!-- Here are all the dojo widgets we use -->
       dojo.require("dojo.data.ItemFileReadStore");
-      dojo.require("dijit.form.ComboBox");
+      dojo.require("dijit.form.FilteringSelect");
       dojo.require("dijit.form.HorizontalSlider");
       dojo.require("dijit.form.HorizontalRule");
       dojo.require("dijit.form.HorizontalRuleLabels");
       dojo.require("dijit.form.CheckBox");
       dojo.require("dojox.grid.DataGrid");
       dojo.require("dojo.date.locale");
+
+      var incidentView;
 
       <!-- A function to format a javascript date object into short-format date/time string -->
       var myFormatDate = function(inDatum){
@@ -35,11 +37,9 @@
 
       <!-- Fire up the application -->
       dojo.addOnLoad(function(){ 
-          if ( fia ) {
-	     incidentView.updateFacilityImpactAnalysis( fia );
-          } else {
-	     alert( "No analysis data available for incident ${incidentInstance.cad}" );
-	  }
+         //incidentView.updateFacilityImpactAnalysis( firstAnalysis );
+         incidentView = new tmcpe.IncidentView( {jsId: 'incidentView', incident: ${iiJson}} );
+         incidentView.startup();
       }
       );
 
@@ -47,13 +47,11 @@
 
   </head>
 
-
   <body class="tundra" onload="">
-    <div dojoType="tmcpe.IncidentView" jsId="incidentView" id="incidentView"></div>
     <div dojoType="dijit.layout.BorderContainer" region="center" design="headline" splitter="false" >
 
       <!-- INFO PANE -->
-      <div dojoType="dijit.layout.ContentPane" id="queryspec" region="top">
+      <div dojoType="dijit.layout.ContentPane" id="incidentSummary" region="top">
 	Incident ${fieldValue(bean:incidentInstance, field:'cad')}.  CAD duration: ${incidentInstance.cadDurationString()}.  Sigalert duration: ${incidentInstance.sigalertDurationString()}
 	<g:if test="${flash.message}">
           <div class="message">${flash.message}</div>
@@ -71,28 +69,21 @@
 	<div dojoType="dijit.layout.ContentPane" region="top">
 
 	  <div dojoType="dojo.data.ItemFileReadStore"
-	       <g:if test="fia!=null">
-		 url="${resource(dir:'incidentImpactAnalysis', file:'showAnalyses?id='+fia)}" 
-	       </g:if>
-	       <g:if test="fia==null">
-		 data="{}"
-	       </g:if>
+	       url=""
+	       data="{}"
 	       jsId="facilityStore" 
-	       id="facilityStoredom"
+	       id="facilityStore"
 	       >
-	     </div>
+	  </div>
 	  <label class="firstLabel" for="facility" style="float:left">Facility</label>
-	  <select dojoType="dijit.form.ComboBox"
+	  <select dojoType="dijit.form.FilteringSelect"
 		  store="facilityStore"
 		  searchAttr="fwydir"
-		  <g:if test="fia!=null">
-		    value="${incidentInstance.section.freewayId}-${incidentInstance.section.freewayDir}"
-		  </g:if>
 		  autocomplete="true"
 		  hasDownArrow="true"
-		  id="id"
+		  id="facilityCombo"
 		  jsId="facilityCombo"
-                  onChange="tsd.updateFacilityImpactAnalysis( value )} )"
+                  onChange="incidentView.updateFacilityImpactAnalysis( facilityCombo.value )"
 		  style="float:left;width:7em;"
 		  >
 	  </select>

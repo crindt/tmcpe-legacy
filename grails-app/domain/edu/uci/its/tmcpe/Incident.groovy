@@ -184,12 +184,12 @@ class Incident {
             cad(cad)
             //timestamp( df.format( stampDateTime() ) )
             timestamp( stampDateTime() )
-            locString( section.toString() )
-            memo(firstCall?firstCall.memo:sigalertBegin?sigalertBegin.memo:"<NO MEMO>")
+            locString( section?.toString() )
+            memo(firstCall ? firstCall.memo:sigalertBegin?sigalertBegin.memo : "<NO MEMO>")
             section(section)
             location( bestGeom )
             geometry( section?.segGeom )
-            delay( analyses.size() ? analyses.first().netDelay() : null )
+            delay( analyses?.size() ? analyses?.first()?.netDelay() : null )
             analysesCount( analyses?.size() )
         }
     }

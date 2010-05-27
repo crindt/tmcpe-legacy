@@ -85,18 +85,9 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 	// Let the superclass do most of the work
 	this.inherited( arguments );
-
-	// Now do our thing...
-	var what = this;
-	facilityStore.fetch({
-	    onComplete: function( items, findResult ) {
-		what.updateData( '/tmcpe/incidentFacilityImpactAnalysis/show.json?id='+items[0].id );
-	    }
-	});
-	
     },
 
-    updateData: function( /* String */ url) {
+    updateUrl: function( /* String */ url) {
 	// summary:
 	// 		function to change (or create) the time space digram
 	// description:
