@@ -74,6 +74,7 @@
 	<!-- TSD SELECTION PANE -->
 	<div dojoType="dijit.layout.ContentPane" region="top">
 
+	  <!-- The store for the individual facility analyses performed for this incident -->
 	  <div dojoType="dojo.data.ItemFileReadStore"
 	       url=""
 	       data="{}"
@@ -81,6 +82,7 @@
 	       id="facilityStore"
 	       >
 	  </div>
+
 	  <label class="firstLabel" for="facility" style="float:left">Facility</label>
 	  <!-- NOTE: The use of filtering select here instead of combobox is critical to the functioning of the app -->
 	  <select dojoType="dijit.form.FilteringSelect"

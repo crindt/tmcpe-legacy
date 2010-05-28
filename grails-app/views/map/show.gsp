@@ -37,45 +37,19 @@
         return ret;
       }
 
-      var incidentSummaryData = {
-      items: [
-      { id: "min",
-        timestamp: "",
-        locString: "",
-        memo: "",
-        delay: "12.4"
-      },
-      { id: "mean",
-        timestamp: "",
-        locString: "",
-        memo: "",
-        delay: "12.4"
-      },
-      { id: "max",
-        timestamp: "",
-        locString: "",
-        memo: "",
-        delay: "12.4"
-      }
-      ]};
-
-      var incidentSummaryLayout = [
-      {field:'id',width:'10%'},
-      {field:'timestamp',width:'10%'},
-      {field:'locString',width:'20%'},
-      {field:'memo',width:'50%'},
-      {field:'delay',dataType:'Float', width:'10%'}
-      ];
-
       dojo.addOnLoad(function(){ incidentList ? incidentList.initApp() : alert( "NO INCIDENT LIST!" );});
     </g:javascript>
-
   </head>
+
   <body onload="" 
 	class="tundra">
+
+    <!-- Application -->
     <div dojoType="tmcpe.IncidentList" jsId="incidentList" id="incidentList"></div>
 
+    <!-- Viewport -->
     <div dojoType="dijit.layout.BorderContainer" id="mapView" design="headline" region="center" gutters="true" liveSplitters="false">
+      <!-- Query Pane -->
       <div dojoType="dijit.layout.ContentPane" id="queryspec" region="top">
 	From: 
 	<input type="text" style="width:8em;" name="startDate" id="startDate" value="" dojoType="tmcpe.MyDateTextBox"
@@ -134,6 +108,7 @@
           Reset
 	</button>
       </div>
+      <!-- Map Pane -->
       <div dojoType="dijit.layout.BorderContainer" id="mapgrid" region="center" design="sidebar" style="background:green;" splitter="false" liveSplitters="false">
 	<div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
 	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
@@ -143,6 +118,7 @@
 	</div>
       </div>
 
+      <!-- Incident List Pane -->
       <div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
 	<div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%">
 	  <table id="incidentGrid" 
@@ -160,7 +136,7 @@
 		<th field="timestamp" dataType="Date" formatter="myFormatDate" width="10%">Timestamp</th>
 		<th field="locString" dataType="String" width="20%">Section</th>
 		<th field="memo" dataType="String" width="45%">Description</th>
-		<th field="delay" dataType="Float" width="10%">Delay</th>
+		<th field="delay" dataType="Float" width="10%">Delay (veh-hr)</th>
 		<th field="analysesCount" dataType="Integer" width="5%">Analyses</th>
 	      </tr>
 	    </thead>
