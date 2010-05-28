@@ -37,11 +37,16 @@
 
       <!-- Fire up the application -->
       dojo.addOnLoad(function(){ 
-         //incidentView.updateFacilityImpactAnalysis( firstAnalysis );
-         incidentView = new tmcpe.IncidentView( {jsId: 'incidentView', incident: ${iiJson}} );
+         incidentView = new tmcpe.IncidentView( {jsId: 'incidentView', incidentId: ${incidentInstance.id}} );
          incidentView.startup();
       }
       );
+
+      function popitup(url) {
+	newwindow=window.open(url,'name','height=200,width=150');
+	if (window.focus) {newwindow.focus()}
+	return false;
+      }
 
     </g:javascript>
 
@@ -66,6 +71,7 @@
       <!-- TIME SPACE DIAGRAM PANE -->
       <div dojoType="dijit.layout.BorderContainer" id="tsdPane" design="headline" region="right" style="width:50%;">
 
+	<!-- TSD SELECTION PANE -->
 	<div dojoType="dijit.layout.ContentPane" region="top">
 
 	  <div dojoType="dojo.data.ItemFileReadStore"
@@ -76,6 +82,7 @@
 	       >
 	  </div>
 	  <label class="firstLabel" for="facility" style="float:left">Facility</label>
+	  <!-- NOTE: The use of filtering select here instead of combobox is critical to the functioning of the app -->
 	  <select dojoType="dijit.form.FilteringSelect"
 		  store="facilityStore"
 		  searchAttr="fwydir"
@@ -151,6 +158,7 @@
 -->
 	</div>
 
+	<!-- TSD VIEW PANE -->
 	<div dojoType="dijit.layout.ContentPane" region="center" splitter="false">
 	  <div dojoType="tmcpe.TimeSpaceDiagram" 
 	       jsid="tsd" 
@@ -161,8 +169,19 @@
 	       direction="'${incidentInstance.section?.freewayDir}'"
 	       colorDataAccessor="stdspd"
 	       >
+<!--
+	    <div id="loadingAnalysisDiv" style="padding-top:3em;text-align:center;font-weight:bold;float:left;width:100%;z-index:0;">Loading Time-Space Diagram...</div>
+	    <div id="noAnalysisDiv" style="padding-top:3em;text-align:center;font-weight:bold;color:red;float:left;width:100%;visibility:hidden;z-index:0;">No analyses of this incident has been performed.
+	      <p>
+		<a href="http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3" onclick="return popitup('http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Perform%20analysis%20of%20Incident ${incidentInstance.cad} (id=${incidentInstance.id})&issue[description]=No%20analysis%20is%20available%20for%20incident ${incidentInstance.cad} (id=${incidentInstance.id}).  Need to explore why this is not in the database.')">
+		  Click here to request support in finding out why.
+		</a>
+	      </p>
+	    </div>
+	    -->
 	  </div>
 	</div>
+	<!-- TSD INFO PANE -->
 	<div dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 	  <div class="tmcpe_tsd_cellinfo" id="tmcpe_tsd_cellinfo">Mouseover time-space diagram for location/time information.</div>
 	</div>

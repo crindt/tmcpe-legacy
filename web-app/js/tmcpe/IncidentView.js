@@ -12,9 +12,10 @@ dojo.require("dojox.json.ref");
 dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     // parameters
-    incident: null,
+    incidentId: null,
 
     // private vars
+    _incident: null,
     _tsd: null,
     _map: null,
     _vdsSegmentLines: null,
@@ -35,11 +36,15 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     postCreate: function( ) {
 	this.inherited( arguments );
+
+	// Pull in the Incident Data
+	this._loadIncident();
 	
     },
 
     startup: function() {
 	// load analyses
+	this.getTsd()._displayLoading();
 	this._loadAnalyses();
 
 	this.inherited( arguments );
@@ -81,38 +86,61 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	return this._facilityCombo;
     },
 
+    _loadIncident: function() {
+	var base = document.getElementById("htmldom").href;
+	var caller = this;
+	var url = base + 'incident/show.json?id=' + this.incidentId;
+	console.log( "LOADING DATA FOR INCIDENT " + url );
+	dojo.xhrGet({
+	    url: url,
+	    preventCache: true,
+	    handleAs: "text",
+	    sync: true, //false,
+	    load: function( r ) {
+		var inc = caller._incident = dojox.json.ref.fromJson( r );
+	    },
+	    error: function( r ) {
+		alert( 'Error loading analyses for ' + caller.incidentId + ': ' + r)
+	    }
+	});
+    },
+
     _loadAnalyses: function() {
 	var base = document.getElementById("htmldom").href;
 	var caller = this;
-	var url = base + 'incident/showAnalyses?id=' + this.incident.id;
-	console.log( "LOADING DATA FOR INCIDENT " + url );
-	if ( this.incident && this.incident.id != null ) {
+	var url = base + 'incident/showAnalyses?id=' + this.incidentId;
+	console.log( "LOADING ANALYSES FOR INCIDENT " + url );
+	if ( this._incident && this._incident.id != null ) {
 	    dojo.xhrGet({
 		url: url,
 		preventCache: true,
 		handleAs: "text",
 		sync: true, //false,
 		load: function( r ) {
-		    var inc = caller.incident;
+		    var inc = caller._incident;
 		    inc.analyses = dojox.json.ref.fromJson( r );
 		},
 		error: function( r ) {
-		    alert( 'Error loading analyses for ' + caller.incident.cad + ': ' + r)
+		    alert( 'Error loading analyses for ' + caller._incident.cad + ': ' + r)
 		}
 	    });
 	} else {
 	    alert( "Asked to load analyses for NULL incident" );
 	}
 
-	if ( this.incident.analyses.length > 0 ) {
+	if ( this._incident.analyses.length > 0 ) {
 	    // sets the displayed analysis to the default (0) and
 	    // loads the facility analyses into the filteringselect
-	    facilityStore.url = 'http://localhost:8080' + base + 'incidentImpactAnalysis/showAnalyses?id=' + this.incident.analyses[ 0 ].id;
+	    facilityStore.url = base + 'incidentImpactAnalysis/showAnalyses?id=' + this._incident.analyses[ 0 ].id;
 
 	    // Here, we set the default displayed TSD to that
 	    // corresponding to the primary disrupted facility
-	    var ff = this.incident.section.freewayId + '-' + this.incident.section.freewayDir;
+	    var ff = this._incident.section.freewayId + '-' + this._incident.section.freewayDir;
 	    facilityCombo.attr( 'displayedValue', ff );
+	} else {
+	    this.getTsd()._displayNoAnalysis();
+	    dojo.byId('loadingAnalysisDiv').style.visibility = 'hidden';
+	    dojo.byId('noAnalysisDiv').style.visibility = 'visible';
 	}
     },
 

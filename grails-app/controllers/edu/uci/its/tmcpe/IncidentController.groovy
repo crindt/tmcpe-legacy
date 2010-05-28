@@ -163,7 +163,15 @@ class IncidentController {
             redirect(action: "list")
         }
         else {
-            [incidentInstance: ii]
+
+            withFormat {
+                html {
+                    return [incidentInstance: ii]
+                }
+                json {
+                    render ii as JSON
+                }
+            }
         }
     }
 

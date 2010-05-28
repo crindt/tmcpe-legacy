@@ -189,6 +189,41 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	}
     },
 
+    _clear: function()
+    {
+	// Remove any existing table in the widget's dom node
+	if ( this.domNode.hasChildNodes() )
+	{
+	    while ( this.domNode.childNodes.length >= 1 )
+	    {
+		this.domNode.removeChild( this.domNode.firstChild );       
+	    } 
+	}
+    },
+
+    _displayLoading: function()
+    {
+	this._clear();
+	this.domNode.appendChild
+	( dojo.create( "div", 
+		       { id: "loadingAnalysisDiv",
+			 style: "padding-top: 3em; text-align:center; font-weight:bold; width:100%;",
+			 innerHTML: "Loading Time-Space Diagram..."
+		       } ) );
+    },
+
+    _displayNoAnalysis: function()
+    {
+	this._clear();
+	var url = 'http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Perform%20analysis%20of%20Incident ' + this.incident + '&issue[description]=No%20analysis%20is%20available%20for%20incident ' + this.incident + '.  Need to explore why this is not in the database.';
+	this.domNode.appendChild
+	( dojo.create( "div",
+		       { id: "noAnalysisDiv",
+			 style: "padding-top: 3em; text-align:center; font-weight:bold; color:red; width:100%;",
+			 innerHTML: 'No analyses of this incident has been performed.<p><a href="'+url+'" onclick="return popitup("'+url+'")">Click here to request support in finding out why.</a></p>'
+		       } ) );
+    },
+
     _redraw: function()
     {
 	// summary:
@@ -200,13 +235,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this._colorDataAccessor = this._colorAccessors[ this.colorDataAccessor ];
 
 	//    dojo.byId( "statusText" ).textContent = "Drawing plot...";
-
-	// Remove any existing table in the widget's dom node
-	this.domNode.removeChild( this.domNode.firstChild );
+	this._clear();
 
 	// Now create the table element  
 	// FIXME: Some of the styling is hardcoded here.  Really should move it into a css file
-	this.domNode.appendChild( dojo.create( "table", { ref: [this.incident, this.facility, this.direction].join('-'), style: "border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;"
+	this.domNode.appendChild( dojo.create( "table", { id: "tsdTableNode", ref: [this.incident, this.facility, this.direction].join('-'), style: "border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;"
 							}) );
 	// tt is a local shorthand variable for working with the table node (makes the code cleaner)
 	var tt = this.domNode.firstChild;
