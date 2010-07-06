@@ -11,6 +11,18 @@ class IncidentController {
         redirect(action: "list", params: params)
     }
 
+    def listFacilities = {
+        System.err.println("=============LISTING FACILITIES: " + params )
+        // should order by distance from center of viewport
+        def items = [];
+        items: Incident.executeQuery( "SELECT distinct i.section.freewayId,i.section.freewayDir from Incident i order by i.section.freewayId,i.section.freewayDir" ).each() { 
+            items.add( [facdir: it[0]+'-'+it[1]] ) 
+        }
+        def facs = [ id:'facdir', items: items ]
+            
+        render facs as JSON
+    }
+
     def list = {
         System.err.println("=============LISTING: " + params )
         // NOTE, 10000 is the max we'll allow to be returned here
@@ -41,6 +53,14 @@ class IncidentController {
                     System.err.println("============TIMES: " + from + " <<>> "  + to )
                     log.debug("============TIMES: " + from + " <<>> "  + to )
                     between( 'startTime', from, to )
+                }
+
+                if ( params.Analyzed == "onlyAnalyzed" ) {
+                   not {
+                       sizeEq("analyses", 0)
+                   }
+                } else if ( params.Analyzed == "unAnalyzed" ) {
+                  sizeEq("analyses", 0)
                 }
       
                 if ( params.bbox ) {

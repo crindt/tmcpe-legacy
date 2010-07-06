@@ -85,18 +85,23 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    var value = dijit.byId( 'latestTime' ).getValue();
 	    theParams['latestTime'] = dijit.byId( 'latestTime' ).serialize( value );//myFormatDateOnly( value );
 	};
-	if ( dijit.byId( 'fwy' ).getValue() ) {
-	    var value = dijit.byId( 'fwy' ).getValue();
-	    theParams['freeway'] = value;//myFormatDateOnly( value );
+	if ( dijit.byId( 'fwydir' ).getValue() ) {
+	    var store = facilityStore;//dijit.byId( 'facilityStore' );
+	    var val = dijit.byId( 'fwydir' ).getValue();
+	    alert( val );
+	    var vv = facilityStore.getValue( val, "facdir" );
+	    alert( val + "=" + vv );
+	    theParams['freeway'] = vals[0];//myFormatDateOnly( value );
+	    theParams['direction'] = vals[1];//myFormatDateOnly( value );
 	};
-	if ( dijit.byId( 'dir' ).getValue() ) {
-	    var value = dijit.byId( 'dir' ).getValue();
-	    theParams['direction'] = value;//myFormatDateOnly( value );
-	};
-	if ( dijit.byId( 'onlyAnalyzed' ).getValue() ) {
-	    var value = dijit.byId( 'onlyAnalyzed' ).getValue();
-	    theParams['onlyAnalyzed'] = value;
-	};
+//	if ( dijit.byId( 'Analyzed' ).getValue() ) {
+//	    var value = dijit.byId( 'Analyzed' ).getValue();
+//	    theParams['Analyzed'] = value;
+//	};
+	if ( dijit.byId( 'queryForm' ).attr('value').Analyzed ) {
+	    var value = dijit.byId( 'queryForm' ).attr('value').Analyzed
+	    theParams['Analyzed'] = value;
+	}
 	var days = [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ];
 	for ( dow in days ) {
 	    var dowWid = dijit.byId( days[dow] );
