@@ -8,20 +8,21 @@ Just change the color-values to apply your own color-scheme.
 */
 
 /* Main navigation */
-.navigation li a { /*background-color: #aaa*/ }                         /* Background-color */
-.navigation li.navigation_active a { background-color: #555; }      /* Background-color of active item */
-.navigation li.navigation_active a:hover { background-color: #555;} /* Background-color of hovered active item */
-.navigation li a:hover { background-color: #999; }                  /* Background-color of hovered item */
+.navigation li a { background-color: #003060; /*background-color: #aaa*/ }                         /* Background-color */
 .navigation li a { /*color: #fff;*/ }                                   /* Text color */
-.navigation li a:hover { color: #fff; }                             /* Text color on hovering */
+.navigation li.navigation_active a { background-color: #001848; }      /* Background-color of active item */
+.navigation li.navigation_active a:hover { background-color: #001848;} /* Background-color of hovered active item */
+.navigation li a:hover { background-color: #fae051; /*#999;*/ }                  /* Background-color of hovered item */
+.navigation li a:hover { color: #001848; }                             /* Text color on hovering */
 .navigation li { /*border: 1px solid #888;*/ }                          /* Border color */
 .navigation li.navigation_first { border-left-color: #888; }        /* Border color. Typically same as above */
 .navigation li { border-left-color: #bbb; }                         /* Highlight border-color */
 .navigation li.navigation_active { border-left-color: #555; }       /* Highlight border-color of active item */
 
 /* Sub navigation */
-.subnavigation li { background-color: #555; }                       /* Background-color */
-.subnavigation li a { border-color: #555; }                         /* Should be set to the same as the above */
+/*.subnavigation li { background-color: #555; }                       /* Background-color */
+.subnavigation li { background-color: #001848; }                       /* Background-color */
+.subnavigation li a { border-color: #001848; }                         /* Should be set to the same as the above */
 .subnavigation li a { color: #fff; }                                /* Text color */
 .subnavigation li a:hover { border-color: #fff; }                   /* Markings color of hovered item */
 .subnavigation li a:hover { color: #e0e0e0; }                       /* Text color of hovered item */

@@ -90,10 +90,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	};
 	if ( dijit.byId( 'fwydir' ).getValue() ) {
 	    var store = facilityStore;//dijit.byId( 'facilityStore' );
-	    var val = dijit.byId( 'fwydir' ).getValue();
-	    alert( val );
+	    var val = dijit.byId( 'fwydir' ).item;
 	    var vv = facilityStore.getValue( val, "facdir" );
-	    alert( val + "=" + vv );
+	    var vals = vv.split("-");
 	    theParams['freeway'] = vals[0];//myFormatDateOnly( value );
 	    theParams['direction'] = vals[1];//myFormatDateOnly( value );
 	};
@@ -215,7 +214,13 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		console.log( "features removed" );
 		obj.updateIncidentsTable();
 	    },
-	    "moveend": function() { obj.updateIncidentsQuery(); }
+	    "moveend": function() { 
+		var geo = dijit.byId( 'geographic' );
+		if ( geo && geo.checked ) {
+		    // Only update the query if we're doing geographic queries
+		    obj.updateIncidentsQuery(); 
+		}
+	    }
 	});
 
 	//    map.events.register("moveend", null, function() { alert("updating query"); updateIncidentsQuery(); } )

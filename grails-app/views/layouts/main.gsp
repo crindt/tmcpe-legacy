@@ -2,10 +2,18 @@
     <head>
       <!-- layouts/main.gsp head -->
       <title>Caltrans D12 TMC Performance Evaluation (Version <tmcpe:version />) <g:layoutTitle default="" /></title>
-      <base id="htmldom" href="${createLinkTo(dir:'/')}"/>
+
+      <!-- The named base url for this site.  This is used by the
+	   TMCPE javascript to create valid links programmatically
+	   indepdent of the installation -->
+      <base id="htmldom"  href="${createLinkTo(dir:'/')}"/>
+
       <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'main.css')}" />
       <link rel="shortcut icon" href="${createLinkTo(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
+
       <nav:resources />
+      <!-- Now overload the stock navigation.css---must be after nav:resources -->
+      <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'navigation.css')}" />
       
       <!-- layouts/main.gsp layout head -->
       <g:layoutHead />

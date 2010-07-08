@@ -18,7 +18,7 @@ class IncidentController {
         items: Incident.executeQuery( "SELECT distinct i.section.freewayId,i.section.freewayDir from Incident i order by i.section.freewayId,i.section.freewayDir" ).each() { 
             items.add( [facdir: it[0]+'-'+it[1]] ) 
         }
-        def facs = [ id:'facdir', items: items ]
+        def facs = [ identifier:'facdir', items: items ]
             
         render facs as JSON
     }
