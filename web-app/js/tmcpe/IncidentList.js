@@ -65,8 +65,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	if ( !theParams || theParams == undefined ) {
 	    theParams = {};
 	}
-	theParams[ 'bbox' ] = [this.getMap().getExtent().toBBOX()];
-	theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
+	var geo = dijit.byId( 'geographic' );
+	if ( geo && geo.checked ) {
+	    theParams[ 'bbox' ] = [this.getMap().getExtent().toBBOX()];
+	    theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
+	}
 
 	// get params from the search form...
 	if ( dijit.byId( 'startDate' ).getValue() ) {
@@ -386,6 +389,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 
     updateIncidentDetails: function( feature ) {
+	var base = document.getElementById("htmldom").href;
 	var id = feature.attributes.id
 	var cad = feature.attributes.cad
 	this.getIncidentDetails().innerHTML = 
@@ -394,7 +398,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    + "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
             + "</dl>"
 	
-	    + '<p><A href="incident/showCustom?id='+id+'">Show Incident</a></p>';
+	    + '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>';
     },
 
 

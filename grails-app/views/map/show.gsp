@@ -123,14 +123,32 @@ M<html xmlns="http://www.w3.org/1999/xhtml">
 		  </tr>
 		</table>
 		<!-- Query Tooltips -->
-		<span dojoType="dijit.Tooltip" connectId="dateRangeLabel" id="dateRangeTooltip"> 
+		<span dojoType="dijit.Tooltip"
+		  connectId="dateRangeLabel" id="dateRangeTooltip">
 		  Select the date range of incidents you want to view.
+		  For instance, you can select incidents from 2007 by specifying a date range of 1/1/2007 to 1/1/2008
 		</span>
 		<span dojoType="dijit.Tooltip" connectId="timeRangeLabel" id="timeRangeTooltip"> 
 		  Select the time-of-day range you want to consider (e.g., 7:00am--10:00am.)
 		</span>
 		<span dojoType="dijit.Tooltip" connectId="dayOfWeekLabel" id="dayOfWeekTooltip"> 
 		  Select the days of the week you want to include (e.g., M-F or Sat and Sun)
+		</span>
+		<span dojoType="dijit.Tooltip"
+		  connectId="geographicLabel" id="geographicTooltip">
+		  Check if you want to only include incidents that are
+		  visible in the map window.  (Warning: unchecking
+		  this could crash the browser as it will generate a
+		  large query result)
+		</span>
+		<span dojoType="dijit.Tooltip" connectId="fwydirLabel"
+		  id="fwydirTooltip"> You can limit the results to a
+		  single facility defined by route and direction
+		  (e.g., 5-N).  The input will autocomplete based upon
+		  available analyses (i.e., it will suggest any
+		  facility that has an analyzed incident on it in the
+		  database).  You can also select from a list of
+		  available facilities.
 		</span>
 	      </td>
 
@@ -160,7 +178,7 @@ M<html xmlns="http://www.w3.org/1999/xhtml">
 		<table style="padding:0.5em;border-style=none;">
 		  <tr>
 		    <td>
-		      <label for="freeway">
+		      <label for="fwydir" id="fwydirLabel">
 			Facility
 		      </label>
 		      <input id="fwydir" 
@@ -182,11 +200,14 @@ M<html xmlns="http://www.w3.org/1999/xhtml">
 	      </td>
 	      <td style="width:33%;">
 		<input type="radio" dojoType="dijit.form.RadioButton" id="analyzed" name="Analyzed" checked="checked" value = "onlyAnalyzed" />
-		<label for="onlyAnalyzed">Limit to Analyzed</label><br/>
+		<label for="analyzed">Limit to Analyzed</label><br/>
 		<input type="radio" dojoType="dijit.form.RadioButton" id="unanalyzed" name="Analyzed" value = "unAnalyzed" />
-		<label for="onlyAnalyzed">Limit to Unanalyzed</label><br/>
+		<label for="unanalyzed">Limit to Unanalyzed</label><br/>
 		<input type="radio" dojoType="dijit.form.RadioButton" id="allanalyzed" name="Analyzed" value = "all" />
-		<label for="onlyAnalyzed">Show all incidents</label><br/>
+		<label for="allanalyzed">Show all incidents</label><br/>
+		<hr/>
+		<input type="checkbox" dojoType="dijit.form.CheckBox" id="geographic" name="Geographic" checked="checked" value="geo"/>
+		<label for="geographic" id="geographicLabel">Limit to viewport</label><br/>
 	      </td>
 	    <tr>
 	      <td colspan="3">
