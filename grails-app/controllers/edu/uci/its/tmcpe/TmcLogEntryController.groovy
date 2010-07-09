@@ -36,10 +36,11 @@ class TmcLogEntryController {
           maxResults( params.max )
           firstResult( params.offset ?:0 )
       }
-	
+
       withFormat {
          html { return [ tmcLogEntryInstanceList: results, tmcLogEntryInstanceTotal: abc ] }
          json { 
+//            log.debug( results )
             def json = [ items: results ]
             render json  as JSON 
          }

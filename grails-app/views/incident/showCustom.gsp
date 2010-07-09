@@ -57,7 +57,7 @@
 
       <!-- INFO PANE -->
       <div dojoType="dijit.layout.ContentPane" id="incidentSummary" region="top">
-	Incident ${fieldValue(bean:incidentInstance, field:'cad')}.  CAD duration: ${incidentInstance.cadDurationString()}.  Sigalert duration: ${incidentInstance.sigalertDurationString()}
+	Incident ${fieldValue(bean:incidentInstance, field:'cad')}.  Time to verify: ${incidentInstance.verifyDurationString()}. CAD duration: ${incidentInstance.cadDurationString()}.  Sigalert duration: ${incidentInstance.sigalertDurationString()}
 	<g:if test="${flash.message}">
           <div class="message">${flash.message}</div>
 	</g:if>

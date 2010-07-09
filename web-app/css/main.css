@@ -273,3 +273,22 @@ th.desc a {
 #contentstack {
     padding:1em 1em 1em 1em;
 }
+
+.summarytable td {
+    padding-left: 0.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.25em;
+}
+.summarytable tr:last-child td {
+    border-top-width: 1px;
+    border-style: solid;
+    border-color: #999999;
+    padding-bottom: 0.5em;
+}
+.summarytable .number {
+    text-align: right;
+}
+
+.docpage p {
+    padding: 10px;
+}

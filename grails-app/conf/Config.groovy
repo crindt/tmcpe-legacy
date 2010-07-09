@@ -53,9 +53,16 @@ log4j = {
     // Example of changing the log pattern for the default console
     // appender:
     //
-    //appenders {
-    //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
-    //}
+    appenders {
+	file name:'file', file:'mylog.log'
+        console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
+    }
+
+    root {
+//        debug 'console', 'file'
+        info 'console', 'file'
+        additivity = true
+    }
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
 	       'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -66,19 +73,25 @@ log4j = {
 	       'org.codehaus.groovy.grails.plugins', // plugins
 	       'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
 	       'org.springframework',
+               'edu.uci.its.tmcpe',
 	       'org.hibernate'
 
+/*
     debug 'org.jcouchdb',
           'org.codehaus.groovy.grails.plugins.starksecurity',
           'edu.uci.its',
           'edu.uci.its.tmcpe',
+          'org.codehaus.groovy.grails.web.servlet', // controllers
           'org.codehaus.groovy'
+*/
+    debug 'edu.uci.its.tmcpe',
+          'edu.uci.its'
 
           //,'org.svenson.JSONParser'
 
-    info  'org.codehaus.groovy.grails.web.servlet', // controllers
-	  'org.codehaus.groovy.grails.web.pages' //  GSP
-
+//    info  'org.codehaus.groovy.grails.web.servlet', // controllers
+//	  'org.codehaus.groovy.grails.web.pages', //  GSP
+    info   'edu.uci.its.tmcpe'
 
     warn   'org.mortbay.log'
 }

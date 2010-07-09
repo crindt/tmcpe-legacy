@@ -42,7 +42,6 @@
         alert( "DATE IS: " + ret );
         return ret;
       }
-
       dojo.addOnLoad(function(){ incidentList ? incidentList.initApp() : alert( "NO INCIDENT LIST!" );});
     </g:javascript>
   </head>
@@ -73,7 +72,7 @@
 		Time Options
 	      </th>
 	      <th>
-		Location Options
+		Incident Options
 	      </th>
 	      <th>
 		Other Options
@@ -150,6 +149,9 @@
 		  database).  You can also select from a list of
 		  available facilities.
 		</span>
+		<span dojoType="dijit.Tooltip" connectId="eventTypeLabel"
+		  id="eventTypeTooltip">Use this to limit the results to specific event types
+		</span>
 	      </td>
 
 <!--
@@ -173,7 +175,8 @@
 	  </div>
 	  -->
    <!-- Facility Data -->
-   <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" id="facilityStoreNode" jsId="facilityStore" url="http://localhost:8080/tmcpe/incident/listFacilities/"></div>
+   <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" id="facilityStoreNode" jsId="facilityStore" url="incident/listFacilities/"></div>
+   <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" id="eventTypeStoreNode" jsId="eventTypeStore" url="incident/listEventTypes/"></div>
               <td style="width:33%;">
 		<table style="padding:0.5em;border-style=none;">
 		  <tr>
@@ -181,33 +184,63 @@
 		      <label for="fwydir" id="fwydirLabel">
 			Facility
 		      </label>
+		    </td>
+		    <td>
 		      <input id="fwydir" 
 			     jsId="fwydir"
 			     type="text" 
-			     style="width:10em;" 
+			     style="width:15em;" 
 			     dojoType="dijit.form.FilteringSelect" 
 			     autoComplete="true"
 			     name="freewayDir"
-			     value="" 
-			     invalidMessage="Invalid facility."
+			     value="<Show All>" 
+			     invalidMessage="No such facility exists in the database."
 			     store="facilityStore"
 			     searchAttr="facdir"
 			     labelAttr="facdir"
+			     />
+		    <td>
+		  </tr>
+		  <tr>
+		    <td>
+		      <label for="eventType" id="eventTypeLabel">
+			Event Type
+		      </label>
+		    </td>
+		    <td>
+		      <input id="eventType" 
+			     jsId="eventType"
+			     type="text" 
+			     style="width:15em;" 
+			     dojoType="dijit.form.FilteringSelect" 
+			     autoComplete="true"
+			     name="eventType"
+			     value="<Show All>" 
+			     invalidMessage="No such event type exists in the database."
+			     store="eventTypeStore"
+			     searchAttr="evtype"
+			     labelAttr="evtype"
 			     />
 		    </td>
 		  </tr>
 		</table>
 	      </td>
 	      <td style="width:33%;">
-		<input type="radio" dojoType="dijit.form.RadioButton" id="analyzed" name="Analyzed" checked="checked" value = "onlyAnalyzed" />
-		<label for="analyzed">Limit to Analyzed</label><br/>
-		<input type="radio" dojoType="dijit.form.RadioButton" id="unanalyzed" name="Analyzed" value = "unAnalyzed" />
-		<label for="unanalyzed">Limit to Unanalyzed</label><br/>
-		<input type="radio" dojoType="dijit.form.RadioButton" id="allanalyzed" name="Analyzed" value = "all" />
-		<label for="allanalyzed">Show all incidents</label><br/>
-		<hr/>
-		<input type="checkbox" dojoType="dijit.form.CheckBox" id="geographic" name="Geographic" checked="checked" value="geo"/>
-		<label for="geographic" id="geographicLabel">Limit to viewport</label><br/>
+		<table style="padding:0.5em;">
+		  <tr>
+		    <td>
+		      <input type="radio" dojoType="dijit.form.RadioButton" id="analyzed" name="Analyzed" checked="checked" value = "onlyAnalyzed" />
+		      <label for="analyzed">Limit to Analyzed</label><br/>
+		      <input type="radio" dojoType="dijit.form.RadioButton" id="unanalyzed" name="Analyzed" value = "unAnalyzed" />
+		      <label for="unanalyzed">Limit to Unanalyzed</label><br/>
+		      <input type="radio" dojoType="dijit.form.RadioButton" id="allanalyzed" name="Analyzed" value = "all" />
+		      <label for="allanalyzed">Show all incidents</label><br/>
+		      <hr/>
+		      <input type="checkbox" dojoType="dijit.form.CheckBox" id="geographic" name="Geographic" checked="checked" value="geo"/>
+		      <label for="geographic" id="geographicLabel">Limit to viewport</label><br/>
+		    </td>
+		  </tr>
+		</table>
 	      </td>
 	    <tr>
 	      <td colspan="3">

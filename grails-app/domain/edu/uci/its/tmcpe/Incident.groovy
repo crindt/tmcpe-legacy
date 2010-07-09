@@ -44,6 +44,8 @@ class Incident {
     Point locationGeom = new Point( x: 0, y: 0 )
     Point bestGeom     = new Point( x: 0, y: 0 )
     
+    String eventType
+
     SortedSet analyses
     static hasMany = [analyses:IncidentImpactAnalysis]
     
@@ -78,6 +80,19 @@ class Incident {
         return TmcLogEntry.findAllByCad( cad );
     }
     
+    public Period computeTimeToVerify()
+    {
+        List entries = getTmcLogEntries()
+        def start = entries.first().getStampDateTime()
+        def startj = new DateTime( start )
+        def verif = entries.find() { it.activitysubject == 'VERIFICATION' }
+        if ( verif ) {
+            def verifj = new DateTime( verif.getStampDateTime() )
+            return new Period( startj, verifj )
+        } else {
+            return null
+        }
+    }
     
     public Period computeCadDuration()
     {
@@ -107,6 +122,25 @@ class Incident {
         }
     }
     
+    def verifyDurationString() {
+        log.info( "TTTTTTTTTTTTTTTTTTTTTTTTT" )
+        def ttv = computeTimeToVerify();
+        if ( ttv == null ) { 
+            log.info( "UNKNOWN" )
+            return( "<UNKNOWN>" )
+        }
+        log.info( "TTTTTTTTTTTTTTTTTTTTTTTTT" + ttv )
+        org.joda.time.format.PeriodFormatter fmt = 
+            new org.joda.time.format.PeriodFormatterBuilder().
+            printZeroAlways().
+            appendHours().
+            appendSeparator(":").
+            printZeroAlways().
+            minimumPrintedDigits( 2 ).
+            appendMinutes().toFormatter()
+        return fmt.print( ttv )
+    }
+
     public String cadDurationString() {
         org.joda.time.format.PeriodFormatter fmt = 
             new org.joda.time.format.PeriodFormatterBuilder().
@@ -114,9 +148,11 @@ class Incident {
             appendHours().
             appendSeparator(":").
             printZeroAlways().
+            minimumPrintedDigits( 2 ).
             appendMinutes().toFormatter()
         return fmt.print( computeCadDuration() )
     }
+
     
     public String sigalertDurationString() {
         org.joda.time.format.PeriodFormatter fmt = 
@@ -125,6 +161,7 @@ class Incident {
             appendHours().
             appendSeparator(":").
             printZeroAlways().
+            minimumPrintedDigits( 2 ).
             appendMinutes().toFormatter()
         return fmt.print( computeSigalertDuration() )
     }

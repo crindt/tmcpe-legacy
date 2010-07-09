@@ -88,7 +88,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    var value = dijit.byId( 'latestTime' ).getValue();
 	    theParams['latestTime'] = dijit.byId( 'latestTime' ).serialize( value );//myFormatDateOnly( value );
 	};
-	if ( dijit.byId( 'fwydir' ).getValue() ) {
+	if ( dijit.byId( 'fwydir' ).getValue() && dijit.byId( 'fwydir' ).getValue() != '<Show All>' ) {
 	    var store = facilityStore;//dijit.byId( 'facilityStore' );
 	    var val = dijit.byId( 'fwydir' ).item;
 	    var vv = facilityStore.getValue( val, "facdir" );
@@ -96,10 +96,12 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    theParams['freeway'] = vals[0];//myFormatDateOnly( value );
 	    theParams['direction'] = vals[1];//myFormatDateOnly( value );
 	};
-//	if ( dijit.byId( 'Analyzed' ).getValue() ) {
-//	    var value = dijit.byId( 'Analyzed' ).getValue();
-//	    theParams['Analyzed'] = value;
-//	};
+	if ( dijit.byId( 'eventType' ).getValue() && dijit.byId( 'eventType' ).getValue() != '<Show All>' ) {
+	    var store = eventTypeStore;//dijit.byId( 'eventTypeStore' );
+	    var val = dijit.byId( 'eventType' ).item;
+	    var vv = eventTypeStore.getValue( val, "evtype" );
+	    theParams['eventType'] = vv;
+	}	
 	if ( dijit.byId( 'queryForm' ).attr('value').Analyzed ) {
 	    var value = dijit.byId( 'queryForm' ).attr('value').Analyzed
 	    theParams['Analyzed'] = value;

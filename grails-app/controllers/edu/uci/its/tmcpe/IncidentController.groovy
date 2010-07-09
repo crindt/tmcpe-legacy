@@ -14,13 +14,27 @@ class IncidentController {
     def listFacilities = {
         System.err.println("=============LISTING FACILITIES: " + params )
         // should order by distance from center of viewport
-        def items = [];
-        items: Incident.executeQuery( "SELECT distinct i.section.freewayId,i.section.freewayDir from Incident i order by i.section.freewayId,i.section.freewayDir" ).each() { 
-            items.add( [facdir: it[0]+'-'+it[1]] ) 
+        def items =
+            Incident.executeQuery( "SELECT distinct i.section.freewayId,i.section.freewayDir from Incident i order by i.section.freewayId,i.section.freewayDir" ).collect() { 
+            [facdir: it[0]+'-'+it[1]]
         }
+        items.reverse
+        items.push( [facdir: '<Show All>'] )
+        items.reverse
         def facs = [ identifier:'facdir', items: items ]
             
         render facs as JSON
+    }
+
+    def listEventTypes = {
+        def items = 
+            Incident.executeQuery( "select distinct i.eventType from Incident i" ).collect { [evtype: it] };
+        items.reverse
+        items.push( [evtype: '<Show All>'] )
+        items.reverse
+        def evtypes = [ identifier:'evtype', items: items ]
+
+        render evtypes as JSON
     }
 
     def list = {
@@ -95,6 +109,10 @@ class IncidentController {
                     if ( dow.size() > 0 ) {
                         addToCriteria(Restrictions.sqlRestriction( "extract( dow from start_time ) IN (" + dow.join(",") + ")" ) )
                     }
+                }
+
+                if ( params.eventType && params.eventType != '<Show All>' ) {
+                    eq( 'eventType', params.eventType )
                 }
 
                 if ( params.located == '1' ) {
