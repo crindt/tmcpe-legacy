@@ -1,5 +1,9 @@
 #!/usr/bin/perl  -I./lib
 
+# This script accesses data from the D12 activity log about incidents
+# meeting command line criteria and computes delay associated with
+# those incidents using a MILP solved on a remote server.
+
 use strict;
 use Carp;
 use Getopt::Long;
