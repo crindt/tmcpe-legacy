@@ -38,9 +38,14 @@ use Class::MethodMaker
 
      scalar => [ { -type => 'TMCPE::Schema',
 		   -default_ctor => sub {
+		       my $self = shift;
+		       die "TMCPE DB NOT SPECIFIED!" if not $self->tmcpe_db_name;
+		       die "TMCPE DB HOST NOT SPECIFIED!" if not $self->tmcpe_db_host;
+		       die "TMCPE DB USER SPECIFIED!" if not $self->tmcpe_db_user;
+		       warn join(",", $self->tmcpe_db_name,$self->tmcpe_db_host,$self->tmcpe_db_user,$self->tmcpe_db_password);
 		       TMCPE::Schema->connect(
-			   "dbi:Pg:dbname=tmcpe_test;host=localhost",
-			   "postgres", undef,
+			   join("", "dbi:Pg:dbname=",$self->tmcpe_db_name,";","host=",$self->tmcpe_db_host),
+			   $self->tmcpe_db_user, $self->tmcpe_db_password,
 			   { AutoCommit => 1, db_Schema => 'tmcpe' },
 			   );
 		   }
@@ -80,6 +85,11 @@ use Class::MethodMaker
      scalar => [ qw/ calcstart calcend / ],
      scalar => [ qw/ mintimeofday mindate / ],
      scalar => [ qw/ bad_solution tot_delay avg_delay net_delay / ],
+     scalar => [ { -default => 'tmcpe_test' }, 'tmcpe_db_name' ],
+     scalar => [ { -default => 'localhost' }, 'tmcpe_db_host' ],
+     scalar => [ { -default => 'postgres' }, 'tmcpe_db_user' ],
+     scalar => [ { -default => '' }, 'tmcpe_db_password' ],
+     
 
 #     scalar => [ { -type => 'Parse::RecDescent',
 #		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
@@ -884,6 +894,7 @@ sub write_to_db {
     };
     if ( $@ ) {
 	croak $@->{msg} ;
+	exit 1;
     }
     $ifa->update;
     

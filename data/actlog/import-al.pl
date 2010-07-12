@@ -26,6 +26,10 @@ my $dateto;
 my $verbose;
 my $useexist=0;
 my $reslim=0;
+my $tmcpe_db_host = "localhost";
+my $tmcpe_db_name = "tmcpe_test";
+my $tmcpe_db_user = "postgres";
+my $tmcpe_db_password = "";
 
 GetOptions ("skip-al" => sub { $doal = 0 },
 	    "skip-icad" => sub { $doicad = 0 },
@@ -36,6 +40,10 @@ GetOptions ("skip-al" => sub { $doal = 0 },
 	    "use-existing" => \$useexist,
 	    "reslim=i" => \$reslim,
             "verbose" => \$verbose,
+	    "tmcpe-db-host=s" => \$tmcpe_db_host,
+	    "tmcpe-db-name=s" => \$tmcpe_db_name,
+	    "tmcpe-db-user=s" => \$tmcpe_db_user,
+	    "tmcpe-db-password=s" => \$tmcpe_db_password,
     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 
@@ -592,6 +600,10 @@ INCDEL: while( my $inc = $incrs->next ) {
     warn "SOLVING ".$inc->cad."\n";
 
     my $dc = new TMCPE::DelayComputation();
+    $dc->tmcpe_db_host( $tmcpe_db_host );
+    $dc->tmcpe_db_name( $tmcpe_db_name );
+    $dc->tmcpe_db_user( $tmcpe_db_user );
+    $dc->tmcpe_db_password( $tmcpe_db_password );
     $dc->cad( $inc->cad );
     $dc->incid( $inc->id );
     $dc->reslim( $reslim );

@@ -5,7 +5,7 @@ class UrlMappings {
                 // apply constraints here
             }
         }
-        "/"(view:"/home/index")
+        "/"(view:"/home/index/")
         "500"(view:'/error')
     }
 }
