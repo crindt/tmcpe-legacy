@@ -5,7 +5,11 @@ class UrlMappings {
                 // apply constraints here
             }
         }
-        "/"(view:"/home/index/")
+//        "/"(view:"/home/index")
+        "/" {
+            controller = "home"
+            action = [GET: "index"]
+        }
         "500"(view:'/error')
     }
 }
