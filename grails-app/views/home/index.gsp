@@ -206,10 +206,13 @@
 	      <h2>Further Information</h2>
 	      <p>
 		Detailed documentation about the site is available
-		from the Testbed issue tracking
-		tool <a href="http://localhost/redmine/projects/tmcpe">http://localhost/redmine/projects/tmcpe</a>.
-		You must be an authenticated user to use this site.  Useful links:
+		from
+		the <a href="http://localhost/redmine/projects/tmcpe">Testbed
+		issue tracking tool </a>.  You must be an
+		authenticated user to use this site.  Useful links:
 		<ul>
+		  <li>Tooltips are provided where possible to guide
+		  the user on how to use the interface</li>
 		  <li>The <a href="http://localhost/redmine/projects/tmcpe/wiki">User Guide</a></li>
 		</ul>
 	      </p>
@@ -219,11 +222,22 @@
 	<div dojoType="dijit.layout.ContentPane" id="contentright" region="right" style="width:30%;">
 	  <p>Current statistics for period between ${stats["tot"].tot[1]} and ${stats["tot"].tot[2]}</p>
 	  <table class="summarytable">
-	    <tr><th id="eventTypeHeader">Event type</th><th id="analyzedHeader" class="number">Analyzed</th><th id="totalColumnHeader" class="number">Total</th><th id="totalDelayColumnHeader" class="number">Total Delay</th></tr>
+	    <tr><th id="eventTypeHeader">Event type</th><th id="analyzedHeader" class="number">Analyzed</th><th id="totalColumnHeader" class="number">Total</th><th id="delayColumnHeader" class="number">Analyzed Delay</th><th id="tmcSavingsColumnHeader" class="number">TMC Delay Savings</th></tr>
 	    <g:each in="${stats.findAll {it.key != 'tot'}}">
-	      <tr><td>${it.key}</td><td class="number">${it.value.analyzed[0]}</td><td class="number">${it.value.tot[0]}</td><td></td></tr>	  
+	      <tr>
+		<td>${it.key}</td>
+		<td class="number"><g:formatNumber number="${it.value.analyzed}" format="###,##0"/></td>
+		<td class="number"><g:formatNumber number="${it.value.tot[0]}" format="###,##0"/></td>
+		<td class="number"><g:formatNumber number="${it?.value?.delay?it?.value?.delay:0}" format="###,##0"/></td>
+		<td class="number" id="unavailable"><!--<g:formatNumber number="0" format="###,##0"/>-->n/a</td>
+	      </tr>	  
 	    </g:each>
-	    <tr><td>Total</td><td class="number">${stats["tot"].analyzed[0]}</td><td class="number">${stats["tot"].tot[0]}</td><td class="number"></td></tr>
+	    <tr>
+	      <td>Total</td>
+	      <td class="number"><g:formatNumber number="${stats['tot'].analyzed[0]}" format="###,##0"/></td>
+	      <td class="number"><g:formatNumber number="${stats['tot'].tot[0]}" format="###,##0"/></td>
+	      <td class="number"><g:formatNumber number="${stats['tot']?.delay?stats['tot'].delay:0}" format="###,##0"/></td>
+	      <td class="number" id="unavailable"><!--<g:formatNumber number="0" format="###,##0"/>-->n/a</td></tr>
 	  </table>
 	  <!-- Summary Table Tooltips -->
 	  <span dojoType="dijit.Tooltip"
@@ -231,16 +245,26 @@
 	    The event type classification
 	  </span>
 	  <span dojoType="dijit.Tooltip"
-		connectId="analyzedHeader">
-	    The number of each event type that have been analyzed for delay
+		connectId="analyzedHeader"> The number of each event
+	    type that have been analyzed for delay.  Only incidents
+	    whose location is known are automatically analyzed.
 	  </span>
 	  <span dojoType="dijit.Tooltip"
 		connectId="totalColumnHeader">
-	    The total of each event type in the database
+	    The total number of each event type in the database
 	  </span>
 	  <span dojoType="dijit.Tooltip"
-		connectId="totalDelayColumnHeader">
-	    The total computed delay for each event type
+		connectId="delayColumnHeader">
+	    The computed delay for analyzed incidents in each category
+	  </span>
+	  <span dojoType="dijit.Tooltip"
+		connectId="tmcSavingsColumnHeader"> The computed TMC
+		delay savings for analyzed incidents in each
+		category.  <span class="alert">This computation is not
+		yet available on the website.</span>
+	  </span>
+	  <span dojoType="dijit.Tooltip"
+		connectId="unavailable"> This computation is not yet available on the website.
 	  </span>
 	</div>
       </div>

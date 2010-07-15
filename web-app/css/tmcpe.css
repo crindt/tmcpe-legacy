@@ -251,3 +251,13 @@ div.docpage {
     width: 100%;
     clear: both;
 }
+
+.alert {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+strong {
+    font-family: slanted;
+    font-weight: bold;
+}
