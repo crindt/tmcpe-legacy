@@ -296,18 +296,29 @@
 		 region="center"
 		 rowSelector="20px"
 		 onRowClick="incidentList.simpleSelectIncident"
-		 style="width:100%;height:5em;"
+		 style="width:100%;height:4em;"
 		 >
 	    <thead>
 	      <tr>
 		<th field="cad" dataType="String" width="10%">CAD ID</th>
 		<th field="timestamp" dataType="Date" formatter="myFormatDate" width="10%">Timestamp</th>
 		<th field="locString" dataType="String" width="20%">Section</th>
-		<th field="memo" dataType="String" width="45%">Description</th>
+		<th field="memo" dataType="String" width="35%">Description</th>
 		<th field="delay" dataType="Float" width="10%">Delay (veh-hr)</th>
+		<th field="delay" dataType="Float" width="10%">TMC Savings (veh-hr)</th>
 		<th field="analysesCount" dataType="Integer" width="5%">Analyses</th>
 	      </tr>
 	    </thead>
+	  </table>
+	</div>
+	<div dojoType="dijit.layout.ContentPane" id="gridSummaryContainer" region="bottom" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%;">
+	  <table>
+	    <tr>
+	      <th width="74.6%"></th>
+	      <th width="10%">1.23</th>
+	      <th width="5%">1.23</th>
+	      <th width="20px"></th>
+	    </tr>
 	  </table>
 	</div>
       </div>
