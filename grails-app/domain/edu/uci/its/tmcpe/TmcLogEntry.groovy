@@ -24,7 +24,7 @@ class TmcLogEntry implements Comparable {
     static hasMany = [ pMeas: TmcPerformanceMeasures ]
 
     Date stampDateTime
-    static transients = [ "stampDateTime" ]
+    static transients = [ "stampDateTime", "deviceSummary" ]
 
     static mapping = {
 //        table 'ct_al_backup_2007'
@@ -40,6 +40,17 @@ class TmcLogEntry implements Comparable {
 
     String toString() {
         return DateFormat.getDateTimeInstance().format(stamp) + ": " + activitysubject + " | " + memo 
+    }
+
+    String getDeviceSummary() {
+        def ret = ""
+        if ( device_number && device_number != "" ) ret += "#" + device_number
+        if ( device_fwy && device_fwy != "" ) {
+            ret += " (" + device_fwy
+            if ( device_name && device_name != "" ) ret += " @ " + device_name
+            ret += ")"
+        }
+        return ret
     }
 
     public java.util.Date getStampDateTime() {

@@ -64,7 +64,7 @@
       </div>
 
       <!-- MAP PANE -->
-      <div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" splitter="false" style="width:50%;">
+      <div dojoType="dijit.layout.ContentPane" class="dijitContentPaneLoading" id="mapPane" region="center" splitter="false" style="width:50%;">
 	<div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
       </div>
 
@@ -161,7 +161,7 @@
 	</div>
 
 	<!-- TSD VIEW PANE -->
-	<div dojoType="dijit.layout.ContentPane" region="center" splitter="false">
+	<div dojoType="dijit.layout.ContentPane" region="center" splitter="false" style="text-align:center;">
 	  <div dojoType="tmcpe.TimeSpaceDiagram" 
 	       jsid="tsd" 
 	       id="tsd" 
@@ -171,16 +171,6 @@
 	       direction="'${incidentInstance.section?.freewayDir}'"
 	       colorDataAccessor="stdspd"
 	       >
-<!--
-	    <div id="loadingAnalysisDiv" style="padding-top:3em;text-align:center;font-weight:bold;float:left;width:100%;z-index:0;">Loading Time-Space Diagram...</div>
-	    <div id="noAnalysisDiv" style="padding-top:3em;text-align:center;font-weight:bold;color:red;float:left;width:100%;visibility:hidden;z-index:0;">No analyses of this incident has been performed.
-	      <p>
-		<a href="http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3" onclick="return popitup('http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Perform%20analysis%20of%20Incident ${incidentInstance.cad} (id=${incidentInstance.id})&issue[description]=No%20analysis%20is%20available%20for%20incident ${incidentInstance.cad} (id=${incidentInstance.id}).  Need to explore why this is not in the database.')">
-		  Click here to request support in finding out why.
-		</a>
-	      </p>
-	    </div>
-	    -->
 	  </div>
 	</div>
 	<!-- TSD INFO PANE -->
@@ -211,9 +201,7 @@
 	      <th field="id" dataType="Integer" width="10em">Id</th>
 	      <th field="stampDateTime" dataType="Date" formatter="myFormatDate" width="15em">Date</th>
 	      <th field="status" dataType="String" width="10em">Status</th>
-	      <th field="deviceNumber" dataType="String" width="10em">Device #</th>
-	      <th field="deviceFwy" dataType="String" width="10em">Device Fwy</th>
-	      <th field="deviceName" dataType="String" width="10em">Device Name</th>
+	      <th field="deviceSummary" dataType="String" width="15em">Device</th>
 	      <th field="activitySubject" dataType="String" width="15em">Subject</th>
 	      <th field="memo" dataType="String" width="auto">Memo</th>
 	    </tr>

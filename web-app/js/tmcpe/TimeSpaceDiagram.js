@@ -205,10 +205,10 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     {
 	this._clear();
 	this.domNode.appendChild
-	( dojo.create( "div", 
+	( dojo.create( "span", 
 		       { id: "loadingAnalysisDiv",
-			 style: "padding-top: 3em; text-align:center; font-weight:bold; width:100%;",
-			 innerHTML: "Loading Time-Space Diagram..."
+			 class: "dijitContentPaneLoading",
+			 innerHTML: "Loading..."
 		       } ) );
     },
 
