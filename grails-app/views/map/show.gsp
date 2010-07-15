@@ -133,13 +133,6 @@
 		<span dojoType="dijit.Tooltip" connectId="dayOfWeekLabel" id="dayOfWeekTooltip"> 
 		  Select the days of the week you want to include (e.g., M-F or Sat and Sun)
 		</span>
-		<span dojoType="dijit.Tooltip"
-		  connectId="geographicLabel" id="geographicTooltip">
-		  Check if you want to only include incidents that are
-		  visible in the map window.  (Warning: unchecking
-		  this could crash the browser as it will generate a
-		  large query result)
-		</span>
 		<span dojoType="dijit.Tooltip" connectId="fwydirLabel"
 		  id="fwydirTooltip"> You can limit the results to a
 		  single facility defined by route and direction
@@ -230,17 +223,40 @@
 		  <tr>
 		    <td>
 		      <input type="radio" dojoType="dijit.form.RadioButton" id="analyzed" name="Analyzed" checked="checked" value = "onlyAnalyzed" />
-		      <label for="analyzed">Limit to Analyzed</label><br/>
+		      <label for="analyzed" id="limitToAnalyzedLabel">Limit to Analyzed</label><br/>
 		      <input type="radio" dojoType="dijit.form.RadioButton" id="unanalyzed" name="Analyzed" value = "unAnalyzed" />
-		      <label for="unanalyzed">Limit to Unanalyzed</label><br/>
+		      <label for="unanalyzed" id="limitToUnanalizedLabel">Limit to Unanalyzed</label><br/>
 		      <input type="radio" dojoType="dijit.form.RadioButton" id="allanalyzed" name="Analyzed" value = "all" />
-		      <label for="allanalyzed">Show all incidents</label><br/>
+		      <label for="allanalyzed" id="limitToAllLabel">Show all incidents</label><br/>
 		      <hr/>
 		      <input type="checkbox" dojoType="dijit.form.CheckBox" id="geographic" name="Geographic" checked="checked" value="geo"/>
 		      <label for="geographic" id="geographicLabel">Limit to viewport</label><br/>
 		    </td>
 		  </tr>
 		</table>
+		<span dojoType="dijit.Tooltip" connectId="limitToAnalyzedLabel">
+		  Use this to limit the query to only incidents that
+		  have been analyzed.  Use this option for reporting on TMC performance.
+		</span>
+		<span dojoType="dijit.Tooltip" connectId="limitToUnanalizedLabel">
+		  Use this to limit the query to only incidents
+		  that <strong>haven't</strong> yet been
+		  analyzed.  Use this option for identifying missing
+		  incidents for analysis.
+		</span>
+		<span dojoType="dijit.Tooltip" connectId="limitToAll">
+		  Use this if you don't want to limit the query based
+		  on whether the incident has been analyzed or not.
+		</span>
+		<span dojoType="dijit.Tooltip" connectId="geographicLabel">
+		  Check this box if you want to limit the query to
+		  incidents that are visible in the map.  Uncheck it
+		  if you want the query to be based only on the query
+		  form whether they're visible in the viewport or not.
+		  <div class="alert">(Warning: unchecking
+		  this could crash the browser as it will generate a
+		  large query result)</div>
+		</span>
 	      </td>
 	    <tr>
 	      <td colspan="3">
