@@ -94,9 +94,7 @@ class BootStrap {
                  "class(TmcLogEntry)"
                  id(le.id)
                  cad(le.cad)
-                 deviceNumber(le.device_number)
-                 deviceFwy(le.device_fwy)
-                 deviceName(le.device_name)
+                 deviceSummary( le.getDeviceSummary() )
                  stampDateTime( le.getStampDateTime() )
                  status(le.status)
                  activitySubject( le.activitysubject )
