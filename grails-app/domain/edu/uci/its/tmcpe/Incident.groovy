@@ -227,6 +227,7 @@ class Incident {
             location( bestGeom )
             geometry( section?.segGeom )
             delay( analyses?.size() ? analyses?.first()?.netDelay() : null )
+            savings( 0 ) // FIXME: update this.
             analysesCount( analyses?.size() )
         }
     }

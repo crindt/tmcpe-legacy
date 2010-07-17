@@ -6,8 +6,7 @@ class TmcpeTagLib {
   }
 
   def dojoUncompressed_1_4 = {
-      out << "    <script type=\"text/javascript\">var djConfig = {parseOnLoad: true,isDebug: true};</script>"
-      out << '<script src="' << resource(dir:'js/dojo/dojo',file:'dojo.js.uncompressed.js') << '"></script>'
+      out << '<script src="' << resource(dir:'js/dojo/dojo',file:'dojo.js.uncompressed.js') << '" djConfig = "parseOnLoad: true, isDebug: true"></script>'
 
       out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo/dijit/themes/tundra/layout',file:'BorderContainer.css') << '"/>'
       out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo/dojox/grid/resources',file:'Grid.css') << '"/>'

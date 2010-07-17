@@ -35,6 +35,10 @@
         return ret;
       };
 
+      var myFormatNumber = function( inNum ) {
+        return dojo.number.format(inNum, {places:0});
+      };
+
       var myFormatDateOnly = function( inDate ) {
         if ( inDate == null ) return "";
         return myFormatDate( inDate );
@@ -66,6 +70,10 @@
 	    il.updateIncidentsQuery();
 	  </script>
 
+	  <!-- Facility Data for the query form -->
+	  <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" id="facilityStoreNode" jsId="facilityStore" url="incident/listFacilities/"></div>
+	  <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" id="eventTypeStoreNode" jsId="eventTypeStore" url="incident/listEventTypes/"></div>
+
 	  <table>
 	    <tr>
 	      <th>
@@ -96,7 +104,7 @@
 		    <td>
 		      <input type="text" style="width:8em;" name="earliestTime" id="earliestTime" value="" dojoType="tmcpe.MyTimeTextBox"
 			     required="false" />
-		      &nbsp;to:
+		      <label for="endTime">&nbsp;to:</label>
 		      <input type="text" style="width:8em;" name="latestTime" id="latestTime" value="" dojoType="tmcpe.MyTimeTextBox"
 			     required="false" />
 		    </td>
@@ -168,8 +176,6 @@
 	  </div>
 	  -->
    <!-- Facility Data -->
-   <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" id="facilityStoreNode" jsId="facilityStore" url="incident/listFacilities/"></div>
-   <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" id="eventTypeStoreNode" jsId="eventTypeStore" url="incident/listEventTypes/"></div>
               <td style="width:33%;">
 		<table style="padding:0.5em;border-style=none;">
 		  <tr>
@@ -263,7 +269,6 @@
 		<button dojoType="dijit.form.Button" type="submit" name="submitButton"
 			value="Submit">
 		  Submit
-		  </script>
 		</button>
 		<button dojoType="dijit.form.Button" type="reset">
 		  Reset
@@ -288,24 +293,54 @@
 
       <!-- Incident List Pane -->
       <div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
-	<div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;" splitter="false" liveSplitters="false" style="height:50%">
+	<div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;padding:0px;" splitter="false" liveSplitters="false" style="height:50%">
 	  <table id="incidentGrid" 
 		 jsId="incidentGrid" 
 		 dojoType="dojox.grid.DataGrid" 
 		 sortInfo=2
 		 region="center"
-		 rowSelector="20px"
 		 onRowClick="incidentList.simpleSelectIncident"
-		 style="width:100%;height:5em;"
+		 style="width:100%;height:4em;"
 		 >
 	    <thead>
 	      <tr>
-		<th field="cad" dataType="String" width="10%">CAD ID</th>
-		<th field="timestamp" dataType="Date" formatter="myFormatDate" width="10%">Timestamp</th>
-		<th field="locString" dataType="String" width="20%">Section</th>
-		<th field="memo" dataType="String" width="45%">Description</th>
-		<th field="delay" dataType="Float" width="10%">Delay (veh-hr)</th>
-		<th field="analysesCount" dataType="Integer" width="5%">Analyses</th>
+		<th field="cad" tooltip="Check" dataType="String" styles="padding-left:5px;padding-right:5px;" width="10%">CAD ID</th>
+		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" formatter="myFormatDate" width="10%">Timestamp</th>
+		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="20%">Section</th>
+		<th field="memo" dataType="String" styles="padding-left:5px;padding-right:5px;" width="35%">Description</th>
+		<th field="delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">Delay</th>
+		<th field="savings" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">TMC Savings</th>
+		<th field="analysesCount" dataType="Integer" styles="padding-left:5px;padding-right:5px;text-align:center;" width="5%">Analyses</th>
+	      </tr>
+	    </thead>
+	  </table>
+	</div>
+	<div dojoType="dijit.layout.ContentPane" id="gridSummaryContainer" region="bottom" style="background:purple;" splitter="false" liveSplitters="false" style="padding:0px;">
+	  <div dojoType="dojo.data.ItemFileReadStore" 
+	       data="{items:[
+		     {'cad':'','timestamp':'',locString:'','memo':'Totals for Analyzed:','delay':'234.45','savings':'567.89',analysesCount:'',dummy:''},
+		     ]}" 
+	       jsId="incidentSummaryStore" 
+	       id="incidentSummaryStoreNode"
+	       style="visibility:hidden;">
+	  </div>
+	  <table id="incidentSummaryGrid" 
+		 jsId="incidentSummaryGrid" 
+		 dojoType="dojox.grid.DataGrid"
+		 onRowClick=""
+		 style="width:100%;height:2.5em;background-color:#eeeeee;margin:0px;margin-top:3px;"
+		 store="incidentSummaryStore"
+		 >
+	    <thead>
+	      <tr>
+		<th field="cad" dataType="String" styles="padding-left:5px;padding-right:5px;" width="10%">CAD ID</th>
+		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" width="10%">Timestamp</th>
+		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="20%">Section</th>
+		<th field="memo" dataType="String" width="35%" styles="padding-left:5px;padding-right:5px;text-align:right;font-weight:bold;">Description</th>
+		<th field="delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">Delay (veh-hr)</th>
+		<th field="savings" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">TMC Savings (veh-hr)</th>
+		<th field="analysesCount" dataType="Integer" styles="padding-left:5px;padding-right:5px;text-align:center;" width="5%">Analyses</th>
+		<th field="dummy" dataType="Integer" width="19px"></th>
 	      </tr>
 	    </thead>
 	  </table>

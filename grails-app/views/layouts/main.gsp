@@ -6,7 +6,7 @@
       <!-- The named base url for this site.  This is used by the
 	   TMCPE javascript to create valid links programmatically
 	   indepdent of the installation -->
-      <base id="htmldom"  href="${resource(dir:'/')}"/>
+      <base id="htmldom"  href="${resource(dir:'/',absolute:true)}" />
 
       <link rel="stylesheet" href="${resource(dir:'css',file:'main.css')}" />
       <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
