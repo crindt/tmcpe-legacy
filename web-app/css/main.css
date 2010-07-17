@@ -267,3 +267,6 @@ th.desc a {
     padding-left: 28px;
 }
 
+#incidentSummaryGrid .dojoxGridHeader { display:none; }
+
+#incidentGrid .dojoGridScrollbox { overflow-y:scroll; }

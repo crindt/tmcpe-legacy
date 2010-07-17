@@ -386,11 +386,54 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	//    alert( "Selected " + cad )
     },
 
+
     updateIncidentsTable: function( theParams ) {
 	// Point the store to the incidents layer
 	var store = new tmcpe.ItemVectorLayerReadStore( {vectorLayer: this._incidentsLayer} );
 	this.getIncidentGrid().setStore( store );
 
+	var updateIncidentsSummary = function( items, request ) {
+	    // Update the summary statistics:
+	    console.debug( "Updating the incidents Summary" );
+	    var totAnalyzed = 0;
+	    var tot = 0;
+	    var totDelay = 0;
+	    var totSavings = 0;
+	    
+	    for (var i = 0; i<items.length; ++i )
+	    {
+		tot++;
+		var item = items[ i ];
+		if ( item.attributes.analysesCount ) {
+		    totAnalyzed++;
+		}
+		if ( item.attributes.delay ) {
+//		    totDelay += store.getAttribute( item, 'delay', 0 );
+		    totDelay += item.attributes.delay;
+		    console.log( totDelay + ' += ' + item.attributes.delay );
+		}
+		if ( item.attributes.savings ) {
+//		    totSavings = store.getAttribute( item, 'savings', 0 );
+		    totDelay += item.attributes.savings;
+		}
+
+	    }
+
+	    var newStore = new dojo.data.ItemFileReadStore({
+		data: { items: [
+		    {cad: '',
+		     timestamp: '',
+		     locString: '',
+		     memo:'Totals for Analyzed:',
+		     delay: totDelay,
+		     savings: totSavings,
+		     analysesCount: '',
+		     dummy: ''}
+		]}});
+	    incidentSummaryGrid.setStore(newStore);
+	};
+	
+	store.fetch( {onComplete: updateIncidentsSummary} );
     },
 
 
