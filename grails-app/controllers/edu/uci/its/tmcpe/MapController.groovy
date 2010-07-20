@@ -16,4 +16,8 @@ class MapController {
     def show = {
         return [ ]
     }
+
+    def simple = {
+        return [ ]
+    }
 }

@@ -92,6 +92,7 @@ dojo.declare("tmcpe.TestbedMap", [ dijit._Widget ], {
 
     postCreate: function() {
 
+	// This is hardcoded to OC right now
 	this._map.zoomToExtent(
             new OpenLayers.Bounds(
 	            -117.9784, 33.594, -117.6832, 33.7768
