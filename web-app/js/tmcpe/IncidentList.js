@@ -6,6 +6,8 @@ dojo.require("dijit._Widget");
 dojo.require("dijit._Templated");
 dojo.require("dijit.Dialog");
 dojo.require("dijit.ProgressBar");
+dojo.require("dijit.layout.StackContainer");
+dojo.require("dijit.layout.ContentPane");
 dojo.require("dojox.json.ref");
 
 dojo.require("tmcpe.TestbedMap");
@@ -26,6 +28,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _hoverVds: null,
 
     _incidentGrid: null,
+    _incidentStackContainer: null,
 
     _incidentDetails: null,
 
@@ -33,6 +36,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _progressTot: null,
     _progressDialog: null,
     _progressBar: null,
+
+
 
     _jobs: 0,
 
@@ -173,7 +178,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
             projection: this.getMap().displayProjection,
-            strategies: [new OpenLayers.Strategy.Fixed()],
+//            strategies: [new OpenLayers.Strategy.Fixed()],
+	    strategies: [new OpenLayers.Strategy.BBOX({resFactor: 1.1}),new OpenLayers.Strategy.Cluster()],
             protocol: new OpenLayers.Protocol.HTTP({
             	url: base + "incident/list.geojson",//theurl,
             	params: this._constructIncidentsParams(),
@@ -431,7 +437,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		     dummy: ''}
 		]}});
 	    incidentSummaryGrid.setStore(newStore);
-	};
+	}
 	
 	store.fetch( {onComplete: updateIncidentsSummary} );
     },
@@ -440,15 +446,60 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
     updateIncidentDetails: function( feature ) {
 	var base = document.getElementById("htmldom").href;
-	var id = feature.attributes.id
-	var cad = feature.attributes.cad
-	this.getIncidentDetails().innerHTML = 
-	    "<h3>INCIDENT " + cad + "</h3><dl>" 
-	    + "<dt>loc</dt><dd>" + feature.attributes.locString + "</dd>"
-	    + "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
-            + "</dl>"
-	
-	    + '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>';
+
+	if ( feature.cluster ) {
+	    if ( !this._incidentStackContainer ) {
+		// create the stack container!
+		this._incidentStackContainer = new dijit.layout.StackContainer({
+		    id: "incidentStackContainer"
+		}, "incidentDetails" );
+	    } else {
+		// Delete existing panes.
+		var cc = this._incidentStackContainer.getChildren();
+		for ( var i = 0; i < cc.length; ++i ) {
+		    var c = cc[i];
+		    this._incidentStackContainer.removeChild( c );
+		    c.destroy();
+		}
+	    }
+	    for ( var i = 0; i < feature.cluster.length; ++i )
+	    {
+		var f = feature.cluster[ i ];
+		var id = f.attributes.id;
+		var cad = f.attributes.cad;
+
+		var cp = new dijit.layout.ContentPane(
+		    { title: "INCIDENT " + cad,
+		      content: "<dl>" 
+		      + "<dt>loc</dt><dd>" + f.attributes.locString + "</dd>"
+		      + "<dt>memo</dt><dd>" + f.attributes.memo + "</dd>"
+		      + "</dl>"
+		      + '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
+		    });
+		this._incidentStackContainer.addChild(cp);
+	    }
+            var controller = new dijit.layout.StackController({
+		containerId: "incidentStackContainer"
+            },"incidentDetailsController");
+
+	    this._incidentStackContainer.startup();
+	    controller.startup();
+
+	} else {
+
+	    var id = feature.attributes.id;
+	    var cad = feature.attributes.cad;
+
+	    il.scrollIncidentsToItem( feature );
+	    
+	    this.getIncidentDetails().innerHTML = 
+		"<h3>INCIDENT " + cad + "</h3><dl>" 
+		+ "<dt>loc</dt><dd>" + feature.attributes.locString + "</dd>"
+		+ "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
+		+ "</dl>"
+	    
+		+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>';
+	}
     },
 
 
@@ -457,7 +508,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var il = dijit.byId( 'incidentList' );
 	var feature = event.feature;
 
-	il.scrollIncidentsToItem( feature );
 	il.updateIncidentDetails( feature );
     },
 
@@ -573,7 +623,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
     _updateIncidentsLayer: function( theParams ) {
 
-	if ( this._incidentsLayer.protocol.url == "" ) {
+//	if ( this._incidentsLayer.protocol.url == "" ) {
 
 	    var base = document.getElementById("htmldom").href;
 
@@ -585,7 +635,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    format: new OpenLayers.Format.GeoJSON({}),
 		    callback: function() { console.log( "GOT CALLBACK!" ); }
 		});
-	}
+//	}
 	this._incidentsLayer.refresh({force: true, params:theParams});
     },
 
