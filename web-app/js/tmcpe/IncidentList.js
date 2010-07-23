@@ -31,7 +31,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _incidentStackContainer: null,
     _previousIncident: null,
     _nextIncident: null,
-    
     _incidentDetails: null,
 
     _progressCount: null,
@@ -180,7 +179,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
             projection: this.getMap().displayProjection,
-	    //            strategies: [new OpenLayers.Strategy.Fixed()],
+//            strategies: [new OpenLayers.Strategy.Fixed()],
 	    strategies: [new OpenLayers.Strategy.BBOX({resFactor: 1.1}),new OpenLayers.Strategy.Cluster()],
             protocol: new OpenLayers.Protocol.HTTP({
             	url: base + "incident/list.geojson",//theurl,
@@ -700,10 +699,15 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
     _updateIncidentsLayer: function( theParams ) {
 
+<<<<<<< HEAD
 	//	if ( this._incidentsLayer.protocol.url == "" ) {
+=======
+//	if ( this._incidentsLayer.protocol.url == "" ) {
+>>>>>>> Partial implementation of incident icon clustering.  refs #257.
 
 	var base = document.getElementById("htmldom").href;
 
+<<<<<<< HEAD
 	// update the url
 	this._incidentsLayer.protocol = 
 	    new OpenLayers.Protocol.HTTP({
@@ -713,6 +717,17 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		callback: function() { console.log( "GOT CALLBACK!" ); }
 	    });
 	//	}
+=======
+	    // update the url
+	    this._incidentsLayer.protocol = 
+		new OpenLayers.Protocol.HTTP({
+  		    url: base + "incident/list.geojson",
+		    params: theParams,
+		    format: new OpenLayers.Format.GeoJSON({}),
+		    callback: function() { console.log( "GOT CALLBACK!" ); }
+		});
+//	}
+>>>>>>> Partial implementation of incident icon clustering.  refs #257.
 	this._incidentsLayer.refresh({force: true, params:theParams});
     },
 
