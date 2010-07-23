@@ -283,8 +283,9 @@
 	<div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
 	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
 	</div>
-	<div dojoType="dijit.layout.ContentPane" gutters="true" region="right" style="width: 300px">
-	  <p id="incidentDetails">Select an incident on the map to view its details here.</p>
+	<div dojoType="dijit.layout.ContentPane" id="incidentDetailPane" gutters="true" region="right" style="width: 300px">
+	  <div id="incidentDetails">Select an incident on the map to view its details here.</div>
+	  <div id="incidentDetailsController"></div>
 
 	</div>
 

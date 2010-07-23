@@ -87,7 +87,7 @@ class IncidentController {
                   sizeEq("analyses", 0)
                 }
       
-                if ( params.bbox && params.proj ) {
+                if ( params.bbox && params.proj && params.geographic ) {
                     def bbox = params.bbox.split(",")
                     def valid = 0;
                     log.debug("============BBOX: " + bbox.join(","))
