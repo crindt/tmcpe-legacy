@@ -228,6 +228,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		var geo = dijit.byId( 'geographic' );
 		if ( geo && geo.checked ) {
 		    // Only update the query if we're doing geographic queries
+		    console.log( "updating because of movement" );
 		    obj.updateIncidentsQuery(); 
 		}
 	    }
@@ -242,6 +243,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	}, OpenLayers.Feature.Vector.style["select"]);
 
 
+	// for event closure
+	var obj = this;
+
 	this._hoverIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer,{ 
  	    hover: true,
  	    highlightOnly: true,
@@ -249,9 +253,19 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    selectStyle: hoverSelectStyle,
 	    eventListeners: {
 		//    beforefeaturehighlighted: report,
-	        //    featurehighlighted: report,
-		//            featureunhighlighted: report
-		//        }
+	        featurehighlighted: function( evt ) {
+		    var feature = evt.feature
+		    if ( feature && feature.cluster ) {
+			var xy = obj.getMap().getControl('ll_mouse').lastXy || new OpenLayers.Pixel(0,0);
+			var loc = feature.cluster[0].attributes.locString;
+			var txt = loc + ': <span style="font-weight:bold;">' + feature.cluster.length + " event" + ( feature.cluster.length == 1 ? "" : "s" ) + "</span>";
+			obj._map.showTooltip( txt, xy.x, xy.y );
+		    }
+		},
+		featureunhighlighted: function( feature ) {
+//		    alert( "unhighlighted" );
+		    obj._map.hideTooltip();
+		}
 	    }
 	});
 	this.getMap().addControl(this._hoverIncident);
@@ -260,6 +274,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this._selectIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer);
 	this.getMap().addControl(this._selectIncident);
 	this._selectIncident.activate();
+
+	this.updateIncidentsQuery();
     },
 
     _constructVdsSegmentsParams: function( theParams ) {
@@ -452,20 +468,28 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var scwi = this._incidentStackContainer.getIndexOfChild( scw ) + 1;
 
 	var tot = this._incidentStackContainer.getChildren().length;
-
-	dojo.byId( 'incidentIndex' ).innerHTML = scwi + " of " + tot;
-	// set status of "previous" button
-	if ( scwi == 1 ) {
-	    dojo.byId( 'previousIncident' ).disabled = true;
-	} else {
-	    dojo.byId( 'previousIncident' ).disabled = false;
-	}
 	
-	// set status of "next" button
-	if ( scwi == tot ) {
-	    dojo.byId( 'nextIncident' ).disabled = true;
+	if ( tot > 1 ){
+	    // More than 1! update (and show) cluster controls
+	    dojo.byId('incidentDetailsController').style.visibility = 'visible';
+
+	    dojo.byId( 'incidentIndex' ).innerHTML = scwi + " of " + tot;
+	    // set status of "previous" button
+	    if ( scwi == 1 ) {
+		dojo.byId( 'previousIncident' ).disabled = true;
+	    } else {
+		dojo.byId( 'previousIncident' ).disabled = false;
+	    }
+	    
+	    // set status of "next" button
+	    if ( scwi == tot ) {
+		dojo.byId( 'nextIncident' ).disabled = true;
+	    } else {
+		dojo.byId( 'nextIncident' ).disabled = false;
+	    }
 	} else {
-	    dojo.byId( 'nextIncident' ).disabled = false;
+	    // only 1! hide cluster controls
+	    dojo.byId('incidentDetailsController').style.visibility = 'hidden';
 	}
     },
 
@@ -475,6 +499,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	if ( feature.cluster ) {
 	    if ( !this._incidentStackContainer ) {
 		// create the stack container!
+		dojo.byId( 'incidentDetails' ).innerHTML="";
+		dojo.byId( 'incidentDetails' ).marginTop = 0;
 		this._incidentStackContainer = new dijit.layout.StackContainer({
 		    id: "incidentStackContainer"
 		}, "incidentDetails" );
@@ -496,15 +522,21 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 		var cp = new dijit.layout.ContentPane(
 		    { title: "INCIDENT " + cad,
-		      content: "<dl>" 
-		      + "<dt>CAD</dt><dd>" + f.attributes.cad + "</dd>"
-		      + "<dt>Location</dt><dd>" + f.attributes.locString + "</dd>"
-		      + "<dt>Memo</dt><dd>" + f.attributes.memo + "</dd>"
-		      + "<dt>Delay</dt><dd>" + f.attributes.delay + "</dd>"
-		      + "<dt>Savings</dt><dd>" + f.attributes.savings + "</dd>"
-		      + "</dl>"
-		      + '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
+		      content: '<table class="incidentSummary">' 
+		      + "<tr><th>CAD</th><td>" + f.attributes.cad + "</td></tr>"
+		      + '<tr><th style="width:7em">Start Time</th><td>' + f.attributes.timestamp + "</td></tr>"
+		      + "<tr><th>Location</th><td>" + f.attributes.locString + "</td></tr>"
+		      + "<tr><th>Memo</th><td>" + f.attributes.memo + "</td></tr>"
+		      + "<tr><th>Delay</th><td>" + f.attributes.delay + " veh-hr</td></tr>"
+		      + "<tr><th>Savings</th><td>" + f.attributes.savings + " veh-hr</td></tr>"
+		      + "</table>"
+		      //+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
 		    });
+		// Create "show details button"
+//		cp.appendChild( new dijit.form.Button({
+//		    title: "Show Incident",
+//		    onClick: "window.open('" + base+'incident/showCustom?id='+id+ "','win'"+id+")"
+//		}));
 		this._incidentStackContainer.addChild(cp);
 	    }
 	    

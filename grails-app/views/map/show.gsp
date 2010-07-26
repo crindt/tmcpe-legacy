@@ -46,13 +46,13 @@
         alert( "DATE IS: " + ret );
         return ret;
       }
+
       dojo.addOnLoad(function(){ incidentList ? incidentList.initApp() : alert( "NO INCIDENT LIST!" );});
     </g:javascript>
   </head>
 
   <body onload="" 
 	class="tundra">
-
     <!-- Application -->
     <div dojoType="tmcpe.IncidentList" jsId="incidentList" id="incidentList"></div>
 
@@ -283,22 +283,27 @@
 	<div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
 	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
 	</div>
-	<div dojoType="dijit.layout.ContentPane" id="incidentDetailPane" gutters="true" region="right" style="width: 300px">
-	  <div id="incidentDetails">Select an incident on the map to view its details here.</div>
-	  <div id="incidentDetailsController">
-	    <button id="previousIncident" 
-		    dojoType="dijit.form.Button"
-		    onClick="dijit.byId('incidentStackContainer').back();incidentList.updateIncidentCluster();"
-		    >
-	      &lt;
-	    </button>
-	    <span id="incidentIndex">0 of 0</span>
-	    <button id="nextIncident" 
-		    dojoType="dijit.form.Button"
-		    onClick="dijit.byId('incidentStackContainer').forward();incidentList.updateIncidentCluster();"
-		    >
-	      &gt;
-	    </button>
+	<!-- Incident Details Pane -->
+	<div dojoType="dijit.layout.BorderContainer" gutters="false" region="right" style="width: 300px;background:white;">
+	  <div dojoType="dijit.layout.ContentPane" id="incidentDetailPane" gutters="true" region="center" >
+	    <div id="incidentDetails" style="margin-top:3em;">Select an incident on the map to view its details here.</div>
+	  </div>
+	  <div dojoType="dijit.layout.ContentPane" id="incidentDetailsControllerPane" gutters="true" region="bottom">
+	    <div id="incidentDetailsController" class="centered-div centered" style="width:12em;">
+	      <button id="previousIncident" 
+		      dojoType="dijit.form.Button"
+		      onClick="dijit.byId('incidentStackContainer').back();incidentList.updateIncidentCluster();"
+		      >
+		&lt;
+	      </button>
+	      <span id="incidentIndex">0 of 0</span>
+	      <button id="nextIncident" 
+		      dojoType="dijit.form.Button"
+		      onClick="dijit.byId('incidentStackContainer').forward();incidentList.updateIncidentCluster();"
+		      >
+		&gt;
+	      </button>
+	    </div>
 	  </div>
 	</div>
 
