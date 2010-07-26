@@ -261,3 +261,29 @@ strong {
     font-family: slanted;
     font-weight: bold;
 }
+
+// Move to TestbedMap.css
+
+.popup {
+    position: absolute;
+    padding: 5px;
+    font-size: 8pt;
+    z-index: 800;
+    background-color: #ffffff;
+    border-style: solid;
+}
+
+.centered-div {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table.incidentSummary th, table.incidentSummary td {
+    padding-top:0.5em;
+    vertical-align:text-top;
+    background: #fff; /* ditches grails header stuff */
+}
+table.incidentSummary th {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
