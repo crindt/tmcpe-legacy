@@ -31,6 +31,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _incidentStackContainer: null,
     _previousIncident: null,
     _nextIncident: null,
+
     _incidentDetails: null,
 
     _progressCount: null,
