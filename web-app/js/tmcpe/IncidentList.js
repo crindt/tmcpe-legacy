@@ -534,6 +534,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		      + "</table>"
 		      //+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
 		    });
+		// Create "show details button"
+//		cp.appendChild( new dijit.form.Button({
+//		    title: "Show Incident",
+//		    onClick: "window.open('" + base+'incident/showCustom?id='+id+ "','win'"+id+")"
+//		}));
 		this._incidentStackContainer.addChild(cp);
 		// Create "show details button"
 		var base = document.getElementById("htmldom").href;
