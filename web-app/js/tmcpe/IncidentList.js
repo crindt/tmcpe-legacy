@@ -562,6 +562,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    } else {
 		this.updateIncidentCluster();
 	    }
+
 	} else {
 
 	    var id = feature.attributes.id;
