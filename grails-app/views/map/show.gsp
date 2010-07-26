@@ -285,8 +285,21 @@
 	</div>
 	<div dojoType="dijit.layout.ContentPane" id="incidentDetailPane" gutters="true" region="right" style="width: 300px">
 	  <div id="incidentDetails">Select an incident on the map to view its details here.</div>
-	  <div id="incidentDetailsController"></div>
-
+	  <div id="incidentDetailsController">
+	    <button id="previousIncident" 
+		    dojoType="dijit.form.Button"
+		    onClick="dijit.byId('incidentStackContainer').back();incidentList.updateIncidentCluster();"
+		    >
+	      &lt;
+	    </button>
+	    <span id="incidentIndex">0 of 0</span>
+	    <button id="nextIncident" 
+		    dojoType="dijit.form.Button"
+		    onClick="dijit.byId('incidentStackContainer').forward();incidentList.updateIncidentCluster();"
+		    >
+	      &gt;
+	    </button>
+	  </div>
 	</div>
 
 

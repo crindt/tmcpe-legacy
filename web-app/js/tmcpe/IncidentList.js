@@ -22,14 +22,16 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _incidentsLayer: null,
     _selectIncident: null,
     _hoverIncident: null,
-
+    
     _vdsLayer: null,
     _selectVds: null,
     _hoverVds: null,
-
+    
     _incidentGrid: null,
     _incidentStackContainer: null,
-
+    _previousIncident: null,
+    _nextIncident: null,
+    
     _incidentDetails: null,
 
     _progressCount: null,
@@ -178,7 +180,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
             projection: this.getMap().displayProjection,
-//            strategies: [new OpenLayers.Strategy.Fixed()],
+	    //            strategies: [new OpenLayers.Strategy.Fixed()],
 	    strategies: [new OpenLayers.Strategy.BBOX({resFactor: 1.1}),new OpenLayers.Strategy.Cluster()],
             protocol: new OpenLayers.Protocol.HTTP({
 		url: base + "incident/list.geojson",//theurl,
@@ -244,20 +246,20 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
  	    hover: true,
  	    highlightOnly: true,
             renderIntent: "temporary",
-	    selectStyle: hoverSelectStyle
-	    //        eventListeners: {
-	    //            beforefeaturehighlighted: report,
-	    //            featurehighlighted: report,
-	    //            featureunhighlighted: report
-	    //        }
+	    selectStyle: hoverSelectStyle,
+	    eventListeners: {
+		//    beforefeaturehighlighted: report,
+	        //    featurehighlighted: report,
+		//            featureunhighlighted: report
+		//        }
+	    }
 	});
 	this.getMap().addControl(this._hoverIncident);
 	this._hoverIncident.activate();
-
+	
 	this._selectIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer);
 	this.getMap().addControl(this._selectIncident);
 	this._selectIncident.activate();
-
     },
 
     _constructVdsSegmentsParams: function( theParams ) {
@@ -285,10 +287,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var base = document.getElementById("htmldom").href;
 
 	this._vdsLayer = new OpenLayers.Layer.Vector("Vds Segments", {
-            projection: this.getMap().displayProjection,
-            strategies: [new OpenLayers.Strategy.Fixed()],
+	    projection: this.getMap().displayProjection,
+	    strategies: [new OpenLayers.Strategy.Fixed()],
 	    style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
-            protocol: new OpenLayers.Protocol.HTTP({
+	    protocol: new OpenLayers.Protocol.HTTP({
   		url: base + "vds/list.geojson",
 		params: myParams,
 		format: new OpenLayers.Format.GeoJSON({})
@@ -414,12 +416,12 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    totAnalyzed++;
 		}
 		if ( item.attributes.delay ) {
-//		    totDelay += store.getAttribute( item, 'delay', 0 );
+		    //		    totDelay += store.getAttribute( item, 'delay', 0 );
 		    totDelay += item.attributes.delay;
 		    console.log( totDelay + ' += ' + item.attributes.delay );
 		}
 		if ( item.attributes.savings ) {
-//		    totSavings = store.getAttribute( item, 'savings', 0 );
+		    //		    totSavings = store.getAttribute( item, 'savings', 0 );
 		    totDelay += item.attributes.savings;
 		}
 
@@ -444,6 +446,29 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 
 
+    updateIncidentCluster: function() {
+	var scw = this._incidentStackContainer.selectedChildWidget;
+
+	var scwi = this._incidentStackContainer.getIndexOfChild( scw ) + 1;
+
+	var tot = this._incidentStackContainer.getChildren().length;
+
+	dojo.byId( 'incidentIndex' ).innerHTML = scwi + " of " + tot;
+	// set status of "previous" button
+	if ( scwi == 1 ) {
+	    dojo.byId( 'previousIncident' ).disabled = true;
+	} else {
+	    dojo.byId( 'previousIncident' ).disabled = false;
+	}
+	
+	// set status of "next" button
+	if ( scwi == tot ) {
+	    dojo.byId( 'nextIncident' ).disabled = true;
+	} else {
+	    dojo.byId( 'nextIncident' ).disabled = false;
+	}
+    },
+
     updateIncidentDetails: function( feature ) {
 	var base = document.getElementById("htmldom").href;
 
@@ -453,6 +478,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		this._incidentStackContainer = new dijit.layout.StackContainer({
 		    id: "incidentStackContainer"
 		}, "incidentDetails" );
+		this._incidentStackContainer.startup();
 	    } else {
 		// Delete existing panes.
 		var cc = this._incidentStackContainer.getChildren();
@@ -471,20 +497,24 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		var cp = new dijit.layout.ContentPane(
 		    { title: "INCIDENT " + cad,
 		      content: "<dl>" 
-		      + "<dt>loc</dt><dd>" + f.attributes.locString + "</dd>"
-		      + "<dt>memo</dt><dd>" + f.attributes.memo + "</dd>"
+		      + "<dt>CAD</dt><dd>" + f.attributes.cad + "</dd>"
+		      + "<dt>Location</dt><dd>" + f.attributes.locString + "</dd>"
+		      + "<dt>Memo</dt><dd>" + f.attributes.memo + "</dd>"
+		      + "<dt>Delay</dt><dd>" + f.attributes.delay + "</dd>"
+		      + "<dt>Savings</dt><dd>" + f.attributes.savings + "</dd>"
 		      + "</dl>"
 		      + '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
 		    });
 		this._incidentStackContainer.addChild(cp);
 	    }
-            var controller = new dijit.layout.StackController({
-		containerId: "incidentStackContainer"
-            },"incidentDetailsController");
-
-	    this._incidentStackContainer.startup();
-	    controller.startup();
-
+	    
+	    if ( feature.cluster.length == 0 ) {
+		dojo.byId( 'previousIncident' ).disable = true;
+		dojo.byId( 'nextIncident' ).disable = true;
+		dojo.byId( 'incidentIndex' ).innerHTML = "0 of 0";
+	    } else {
+		this.updateIncidentCluster();
+	    }
 	} else {
 
 	    var id = feature.attributes.id;
@@ -516,9 +546,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var il = dijit.byId( 'incidentList' );
 	var feature = event.feature;
 	if(feature.popup) {
-            il.getMap().removePopup(feature.popup);
-            feature.popup.destroy();
-            delete feature.popup;
+	    il.getMap().removePopup(feature.popup);
+	    feature.popup.destroy();
+	    delete feature.popup;
 	}
     },
 
@@ -543,9 +573,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var il = dijit.byId( 'incidentList' );
 	var feature = event.feature;
 	if(feature.popup) {
-            il.getMap().removePopup(feature.popup);
-            feature.popup.destroy();
-            delete feature.popup;
+	    il.getMap().removePopup(feature.popup);
+	    feature.popup.destroy();
+	    delete feature.popup;
 	}
     },
 
@@ -623,19 +653,19 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
     _updateIncidentsLayer: function( theParams ) {
 
-//	if ( this._incidentsLayer.protocol.url == "" ) {
+	//	if ( this._incidentsLayer.protocol.url == "" ) {
 
-	    var base = document.getElementById("htmldom").href;
+	var base = document.getElementById("htmldom").href;
 
-	    // update the url
-	    this._incidentsLayer.protocol = 
-		new OpenLayers.Protocol.HTTP({
-  		    url: base + "incident/list.geojson",
-		    params: theParams,
-		    format: new OpenLayers.Format.GeoJSON({}),
-		    callback: function() { console.log( "GOT CALLBACK!" ); }
-		});
-//	}
+	// update the url
+	this._incidentsLayer.protocol = 
+	    new OpenLayers.Protocol.HTTP({
+  		url: base + "incident/list.geojson",
+		params: theParams,
+		format: new OpenLayers.Format.GeoJSON({}),
+		callback: function() { console.log( "GOT CALLBACK!" ); }
+	    });
+	//	}
 	this._incidentsLayer.refresh({force: true, params:theParams});
     },
 
@@ -657,19 +687,19 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 
     sleep: function (naptime){
-        naptime = naptime * 1000;
-        var sleeping = true;
-        var now = new Date();
-        var alarm;
-        var startingMSeconds = now.getTime();
-        //alert("starting nap at timestamp: " + startingMSeconds + "\nWill sleep for: " + naptime + " ms");
-        while(sleeping){
-            alarm = new Date();
-            alarmMSeconds = alarm.getTime();
-            if(alarmMSeconds - startingMSeconds > naptime){ sleeping = false; }
-        }        
-        //alert("Wakeup!");
+	naptime = naptime * 1000;
+	var sleeping = true;
+	var now = new Date();
+	var alarm;
+	var startingMSeconds = now.getTime();
+	//alert("starting nap at timestamp: " + startingMSeconds + "\nWill sleep for: " + naptime + " ms");
+	while(sleeping){
+	    alarm = new Date();
+	    alarmMSeconds = alarm.getTime();
+	    if(alarmMSeconds - startingMSeconds > naptime){ sleeping = false; }
+	}        
+	//alert("Wakeup!");
     },
-
+    
     __dummyFunction: function() {}
 });
