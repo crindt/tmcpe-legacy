@@ -112,7 +112,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	stdspd: function( i,j ) { 
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
-	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null && secdat.spd_std != null ) {
+	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null && secdat.spd_std != null 
+		 && secdat.p_j_m != 0.5  // fixme: a proxy to indicate that the historical speed estimate is tained
+//		 && secdat.days_in_avg < 30  // fixme: make this a parameter
+//		 && secdat.pct_obs_avg < 30  // fixme: make this a parameter
+	       ) {
 		color = this._getColor( (secdat.spd-secdat.spd_avg)/secdat.spd_std, -this._themeScale, 0, '#ff0000','#00ff00' );
 	    }
 	    return color;
@@ -120,7 +124,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	avgspd: function( i,j ) { 
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
-	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null ) {
+	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null 
+		 && secdat.p_j_m != 0.5  // fixme: a proxy to indicate that the historical speed estimate is tained
+//		 && secdat.days_in_avg < 30  // fixme: make this a parameter
+//		 && secdat.pct_obs_avg < 30  // fixme: make this a parameter
+	       ) {
 		color = this._getColor( (secdat.spd-secdat.spd_avg), -this._themeScale, 0, '#ff0000','#00ff00' );
 	    }
 	    return color
