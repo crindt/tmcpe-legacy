@@ -39,7 +39,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     _progressDialog: null,
     _progressBar: null,
 
-
+    _incidentDetailButtonTooltip: null,
 
     _jobs: 0,
 
@@ -514,12 +514,14 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    c.destroy();
 		}
 	    }
+	    var buttons = new Array();
 	    for ( var i = 0; i < feature.cluster.length; ++i )
 	    {
 		var f = feature.cluster[ i ];
 		var id = f.attributes.id;
 		var cad = f.attributes.cad;
-
+		
+		var buttonId = 'showIncidentButton-'+f.attributes.id;
 		var cp = new dijit.layout.ContentPane(
 		    { title: "INCIDENT " + cad,
 		      content: '<table class="incidentSummary">' 
@@ -529,16 +531,29 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		      + "<tr><th>Memo</th><td>" + f.attributes.memo + "</td></tr>"
 		      + "<tr><th>Delay</th><td>" + f.attributes.delay + " veh-hr</td></tr>"
 		      + "<tr><th>Savings</th><td>" + f.attributes.savings + " veh-hr</td></tr>"
+		      + '<tr><td colspan=2 style="text-align:center;"><button id="'+buttonId+'"></button></td></tr>'
 		      + "</table>"
 		      //+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
 		    });
-		// Create "show details button"
-//		cp.appendChild( new dijit.form.Button({
-//		    title: "Show Incident",
-//		    onClick: "window.open('" + base+'incident/showCustom?id='+id+ "','win'"+id+")"
-//		}));
 		this._incidentStackContainer.addChild(cp);
+		// Create "show details button"
+		var base = document.getElementById("htmldom").href;
+		var button =new dijit.form.Button({
+		    label: "Show Incident Detail",
+		    onClick: function() { window.open(base+'incident/showCustom?id='+id); }
+		},buttonId);
+
+		// append button list for tooltips
+		buttons[i] = buttonId;
 	    }
+	    // Add the tooltip for the buttons
+	    if ( this._incidentDetailButtonTooltip ) {
+		this._incidentDetailButtonTooltip.destroy();
+	    }
+	    this._incidentDetailButtonTooltip = new dijit.Tooltip({
+		connectId: buttons,
+		label: "The incident detail will open in a new window"
+	    });
 	    
 	    if ( feature.cluster.length == 0 ) {
 		dojo.byId( 'previousIncident' ).disable = true;
