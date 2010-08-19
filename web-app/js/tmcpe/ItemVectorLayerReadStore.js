@@ -255,7 +255,13 @@ dojo.declare("tmcpe.ItemVectorLayerReadStore", null,{
 		    for(i = 0; i < arrayOfItems.length; ++i){
 			var item = arrayOfItems[i];
 			if(item !== null){
-			    items.push(item);
+			    if ( item.cluster && item.cluster.length > 0 ) {
+				for ( j = 0; j < item.cluster.length; ++j ) {
+				    items.push( item.cluster[ j ] );
+				}
+			    } else {
+				items.push(item);
+			    }
 			}
 		    }
 		    findCallback(items, requestArgs);
