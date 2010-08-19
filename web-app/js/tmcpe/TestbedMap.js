@@ -78,8 +78,8 @@ dojo.declare("tmcpe.TestbedMap", [ dijit._Widget ], {
     _formatLonlats: function(lonLat) {
         var lat = lonLat.lat;
         var long = lonLat.lon;
-        var ns = OpenLayers.Util.getFormattedLonLat(lat);
-        var ew = OpenLayers.Util.getFormattedLonLat(long,'lon');
+        var ns = lat; OpenLayers.Util.getFormattedLonLat(lat);
+        var ew = long; OpenLayers.Util.getFormattedLonLat(long,'lon');
         return ns + ', ' + ew + ' (' + (Math.round(lat * 10000) / 10000) + ', ' + (Math.round(long * 10000) / 10000) + ')';
     },
     

@@ -45,7 +45,7 @@
         var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDate), {selector:'date', formatLength:'short'} );
         alert( "DATE IS: " + ret );
         return ret;
-      }
+      };
 
       dojo.addOnLoad(function(){ incidentList ? incidentList.initApp() : alert( "NO INCIDENT LIST!" );});
     </g:javascript>

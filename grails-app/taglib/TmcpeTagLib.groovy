@@ -6,13 +6,16 @@ class TmcpeTagLib {
   }
 
   def dojoUncompressed_1_4 = {
-      out << '<script src="' << resource(dir:'js/dojo/dojo',file:'dojo.js.uncompressed.js') << '" djConfig = "parseOnLoad: true, isDebug: true"></script>'
+      out << '    <script type="text/javascript">' << "\n"
+      out << '       var djConfig = {parseOnLoad: true,isDebug: true,debugAtAllCosts:true};' << "\n"
+      out << '    </script>' << "\n"
+      out << '<script src="' << resource(dir:'js/dojo-uncompressed/dojo',file:'dojo.js') << '"></script>' << "\n"
 
-      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo/dijit/themes/tundra/layout',file:'BorderContainer.css') << '"/>'
-      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo/dojox/grid/resources',file:'Grid.css') << '"/>'
-      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo/dojox/grid/resources',file:'tundraGrid.css') << '"/>'
-      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo/dijit/themes/tundra',file:'tundra.css') << '"/>'
-      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo/dojo/resources',file:'dojo.css') << '" />'
+      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo-uncompressed/dijit/themes/tundra/layout',file:'BorderContainer.css') << '"/>' << "\n"
+      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo-uncompressed/dojox/grid/resources',file:'Grid.css') << '"/>' << "\n"
+      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo-uncompressed/dojox/grid/resources',file:'tundraGrid.css') << '"/>' << "\n"
+      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo-uncompressed/dijit/themes/tundra',file:'tundra.css') << '"/>' << "\n"
+      out << '<link rel="stylesheet" href="'<< resource(dir:'js/dojo-uncompressed/dojo/resources',file:'dojo.css') << '" />' << "\n"
   }
   def dojoUncompressed_1_4_google = {
       out << '    <script type="text/javascript">var djConfig = {parseOnLoad: true,isDebug: true,baseUrl:"./",modulePaths:{my:"js/tmcpe"}};</script>'
@@ -61,8 +64,8 @@ class TmcpeTagLib {
 
   def tmcpe = {
 //      out << tmcpe.dojo_1_4_google()
-//      out << tmcpe.dojoUncompressed_1_4()
-      out << tmcpe.dojo_1_4()
+      out << tmcpe.dojoUncompressed_1_4()
+//      out << tmcpe.dojo_1_4()
       out << '<link rel="stylesheet" href="' << resource( dir:'css',file:'tmcpe.css' ) << '" />\n'
 
 //      out << '<script>dojo.registerModulePath("tmcpe","js/tmcpe");</script>\n'
