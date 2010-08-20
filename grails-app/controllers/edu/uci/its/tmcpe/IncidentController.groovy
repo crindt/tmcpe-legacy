@@ -171,7 +171,7 @@ class IncidentController {
                def json = [];
                theList.each() { json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, properties: it ] ) }
                def fjson = [ type: "FeatureCollection", features: json ]
-               render fjson as JSON;
+               render fjson as JSON
            }
        }
 
