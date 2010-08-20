@@ -1,3 +1,7 @@
+// The following is required to avoid 'objectDefinitionSource' error
+// per: https://cvs.codehaus.org/browse/GRAILSPLUGINS-2166
+import grails.plugins.springsecurity.SecurityConfigType
+
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
@@ -12,20 +16,20 @@
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
 grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
-                      xml: ['text/xml', 'application/xml'],
-                      text: 'text/plain',
-                      js: 'text/javascript',
-                      rss: 'application/rss+xml',
-                      atom: 'application/atom+xml',
-                      css: 'text/css',
-                      csv: 'text/csv',
-                      all: '*/*',
-                      json: ['application/json','text/json'],
-                      geojson: ['application/json','text/json'],
-                      form: 'application/x-www-form-urlencoded',
-                      multipartForm: 'multipart/form-data',
-                      kml: 'application/vnd.google-earth.kml+xml .kml'
-                    ]
+	xml: ['text/xml', 'application/xml'],
+	text: 'text/plain',
+	js: 'text/javascript',
+	rss: 'application/rss+xml',
+	atom: 'application/atom+xml',
+	css: 'text/css',
+	csv: 'text/csv',
+	all: '*/*',
+	json: ['application/json','text/json'],
+	geojson: ['application/json','text/json'],
+	form: 'application/x-www-form-urlencoded',
+	multipartForm: 'multipart/form-data',
+	kml: 'application/vnd.google-earth.kml+xml .kml'
+]
 // The default codec used to encode data with ${}
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
@@ -36,71 +40,78 @@ grails.enable.native2ascii = true
 
 // set per-environment serverURL stem for creating absolute links
 environments {
-    production {
-        grails.serverURL = "http://parsons.its.uci.edu/${appName}-${appVersion}"
-    }
-    development {
-        grails.serverURL = "http://192.168.0.2:8080/$appName"
-    }
-    test {
-        grails.serverURL = "http://192.168.0.2:8080/$appName"
-    }
-
+	production {
+		grails.serverURL = "http://parsons.its.uci.edu/${appName}-${appVersion}"
+		grails.casURL = "http://parsons.its.uci.edu/cas-server-webapp-3.4.2.1"
+	}
+	development {
+		grails.serverURL = "http://192.168.0.2:8080/$appName"
+		grails.casURL = "http://hyperion.its.uci.edu:8080/cas-server-webapp-3.4.2.1"
+	}
+	test {
+		grails.serverURL = "http://192.168.0.2:8080/$appName"
+		grails.casURL = "http://hyperion.its.uci.edu:8080/cas-server-webapp-3.4.2.1"
+	}
+	
 }
 
 // log4j configuration
 log4j = {
-    // Example of changing the log pattern for the default console
-    // appender:
-    //
-    appenders {
-	file name:'file', file:'mylog.log'
-        console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
-    }
-
-    root {
-//        debug 'console', 'file'
-        info 'console', 'file'
-        additivity = true
-    }
-
-    error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
-	       'org.codehaus.groovy.grails.web.pages', //  GSP
-	       'org.codehaus.groovy.grails.web.sitemesh', //  layouts
-	       'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-	       'org.codehaus.groovy.grails.web.mapping', // URL mapping
-	       'org.codehaus.groovy.grails.commons', // core / classloading
-	       'org.codehaus.groovy.grails.plugins', // plugins
-	       'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
-	       'org.springframework',
-               'edu.uci.its.tmcpe',
-	       'org.hibernate'
-
-/*
-    debug 'org.jcouchdb',
-          'org.codehaus.groovy.grails.plugins.starksecurity',
-          'edu.uci.its',
-          'edu.uci.its.tmcpe',
-          'org.codehaus.groovy.grails.web.servlet', // controllers
-          'org.codehaus.groovy'
-*/
-    debug 'edu.uci.its.tmcpe',
-          'edu.uci.its'
-
-          //,'org.svenson.JSONParser'
-
-//    info  'org.codehaus.groovy.grails.web.servlet', // controllers
-//	  'org.codehaus.groovy.grails.web.pages', //  GSP
-    info   'edu.uci.its.tmcpe'
-
-    warn   'org.mortbay.log'
+	// Example of changing the log pattern for the default console
+	// appender:
+	//
+	appenders {
+		file name:'file', file:'mylog.log'
+		console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
+	}
+	
+	root {
+		//        debug 'console', 'file'
+		info 'console', 'file'
+		additivity = true
+	}
+	
+	error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+			'org.codehaus.groovy.grails.web.pages', //  GSP
+			'org.codehaus.groovy.grails.web.sitemesh', //  layouts
+			'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+			'org.codehaus.groovy.grails.web.mapping', // URL mapping
+			'org.codehaus.groovy.grails.commons', // core / classloading
+			'org.codehaus.groovy.grails.plugins', // plugins
+			'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
+			'org.springframework',
+			'edu.uci.its.tmcpe',
+			'org.hibernate'
+	
+	/*
+	 debug 'org.jcouchdb',
+	 'org.codehaus.groovy.grails.plugins.starksecurity',
+	 'edu.uci.its',
+	 'edu.uci.its.tmcpe',
+	 'org.codehaus.groovy.grails.web.servlet', // controllers
+	 'org.codehaus.groovy'
+	 */
+	debug 'edu.uci.its.tmcpe',
+			'edu.uci.its',
+			'org.springframework.security',
+			'org.springframework.security.web',
+			'org.springframework.security.cas',
+			'org.jasig.cas'
+	
+	//,'org.svenson.JSONParser'
+	
+	//    info  'org.codehaus.groovy.grails.web.servlet', // controllers
+	//	  'org.codehaus.groovy.grails.web.pages', //  GSP
+	info   'edu.uci.its.tmcpe'
+	
+	warn   'org.mortbay.log'
 }
 
 vdsdata {
-couchdb {
-      host = "localhost"
-      db_suffix = "morehash"
-}      
+	couchdb {
+		host = "localhost"
+		db_suffix = "morehash"
+	}      
 }
 
 // Added by the Joda-Time plugin:
@@ -114,3 +125,30 @@ grails.gorm.default.mapping = {
 	"user-type" type: org.joda.time.contrib.hibernate.PersistentLocalDateTime, class: org.joda.time.LocalDateTime
 	"user-type" type: org.joda.time.contrib.hibernate.PersistentPeriod, class: org.joda.time.Period
 }
+
+// Added by the Spring Security Core plugin:
+grails.plugins.springsecurity.userLookup.userDomainClassName = 'edu.uci.its.auth.User'
+grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'edu.uci.its.auth.UserRole'
+grails.plugins.springsecurity.authority.className = 'edu.uci.its.auth.Role'
+grails.plugins.springsecurity.requestMap.className = 'edu.uci.its.auth.Requestmap'
+grails.plugins.springsecurity.securityConfigType = grails.plugins.springsecurity.SecurityConfigType.Requestmap
+//grails.plugins.springsecurity.registerLoggerListener = true
+//grails.plugins.springsecurity.rejectIfNoRule = true
+
+
+// For CAS spring security plugin
+grails.plugins.springsecurity.cas.loginUri = '/login'
+grails.plugins.springsecurity.cas.serviceUrl = "http://192.168.0.2:8080/tmcpe/j_spring_cas_security_check"
+grails.plugins.springsecurity.cas.serverUrlPrefix = "http://hyperion.its.uci.edu:8080/cas-server-webapp-3.4.2.1"
+grails.plugins.springsecurity.cas.proxyCallbackUrl = "http://192.168.0.2:8080/tmcpe/secure/receptor"
+grails.plugins.springsecurity.cas.proxyReceptorUrl = '/secure/receptor'
+// Single-sign-out
+grails.plugins.springsecurity.logout.afterLogoutUrl = "http://hyperion.its.uci.edu:8080/cas-server-webapp-3.4.2.1/logout?url=http://192.168.0.2:8080/tmcpe/"
+
+grails.plugins.springsecurity.securityConfigType = SecurityConfigType.Annotation
+grails.plugins.springsecurity.openid.domainClass = 'edu.uci.its.auth.OpenID'
+
+
+// Search for explicit validation tags on classes that aren't domain classes
+grails.validateable.packages = ['edu.uci.its.auth']
+

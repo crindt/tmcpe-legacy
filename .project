@@ -43,6 +43,31 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>class-diagram-0.4-grails-app-conf</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/class-diagram-0.4/grails-app/conf</location>
+		</link>
+		<link>
+			<name>class-diagram-0.4-grails-app-controllers</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/class-diagram-0.4/grails-app/controllers</location>
+		</link>
+		<link>
+			<name>class-diagram-0.4-grails-app-services</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/class-diagram-0.4/grails-app/services</location>
+		</link>
+		<link>
+			<name>class-diagram-0.4-grails-app-views</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/class-diagram-0.4/grails-app/views</location>
+		</link>
+		<link>
+			<name>class-diagram-0.4-src-groovy</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/class-diagram-0.4/src/groovy</location>
+		</link>
+		<link>
 			<name>datasources-0.5-src-groovy</name>
 			<type>2</type>
 			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/datasources-0.5/src/groovy</location>
@@ -51,6 +76,21 @@
 			<name>datasources-0.5-src-java</name>
 			<type>2</type>
 			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/datasources-0.5/src/java</location>
+		</link>
+		<link>
+			<name>extended-data-binding-0.3-grails-app-i18n</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/extended-data-binding-0.3/grails-app/i18n</location>
+		</link>
+		<link>
+			<name>extended-data-binding-0.3-grails-app-taglib</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/extended-data-binding-0.3/grails-app/taglib</location>
+		</link>
+		<link>
+			<name>extended-data-binding-0.3-src-groovy</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/extended-data-binding-0.3/src/groovy</location>
 		</link>
 		<link>
 			<name>joda-time-1.1-grails-app-taglib</name>
@@ -66,6 +106,81 @@
 			<name>joda-time-1.1-src-java</name>
 			<type>2</type>
 			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/joda-time-1.1/src/java</location>
+		</link>
+		<link>
+			<name>markdown-0.2.1-grails-app-conf</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/markdown-0.2.1/grails-app/conf</location>
+		</link>
+		<link>
+			<name>markdown-0.2.1-grails-app-services</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/markdown-0.2.1/grails-app/services</location>
+		</link>
+		<link>
+			<name>markdown-0.2.1-grails-app-taglib</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/markdown-0.2.1/grails-app/taglib</location>
+		</link>
+		<link>
+			<name>markdown-0.2.1-src-groovy</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/markdown-0.2.1/src/groovy</location>
+		</link>
+		<link>
+			<name>markdown-0.2.1-src-java</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/markdown-0.2.1/src/java</location>
+		</link>
+		<link>
+			<name>navigation-1.1-grails-app-i18n</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/navigation-1.1/grails-app/i18n</location>
+		</link>
+		<link>
+			<name>navigation-1.1-grails-app-services</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/navigation-1.1/grails-app/services</location>
+		</link>
+		<link>
+			<name>navigation-1.1-grails-app-taglib</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/navigation-1.1/grails-app/taglib</location>
+		</link>
+		<link>
+			<name>spring-security-cas-1.0.1-grails-app-conf</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/spring-security-cas-1.0.1/grails-app/conf</location>
+		</link>
+		<link>
+			<name>spring-security-cas-1.0.1-src-java</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/spring-security-cas-1.0.1/src/java</location>
+		</link>
+		<link>
+			<name>spring-security-core-1.0.1-grails-app-conf</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/spring-security-core-1.0.1/grails-app/conf</location>
+		</link>
+		<link>
+			<name>spring-security-core-1.0.1-grails-app-services</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/spring-security-core-1.0.1/grails-app/services</location>
+		</link>
+		<link>
+			<name>spring-security-core-1.0.1-grails-app-taglib</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/spring-security-core-1.0.1/grails-app/taglib</location>
+		</link>
+		<link>
+			<name>spring-security-core-1.0.1-src-groovy</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/spring-security-core-1.0.1/src/groovy</location>
+		</link>
+		<link>
+			<name>spring-security-core-1.0.1-src-java</name>
+			<type>2</type>
+			<location>/home/crindt/.grails/1.3.3/projects/tmcpe-webapp/plugins/spring-security-core-1.0.1/src/java</location>
 		</link>
 		<link>
 			<name>tomcat-1.3.3-src-groovy</name>
