@@ -139,14 +139,26 @@ grails.plugins.springsecurity.securityConfigType = grails.plugins.springsecurity
 // For CAS spring security plugin
 grails.plugins.springsecurity.cas.loginUri = '/login'
 grails.plugins.springsecurity.cas.serviceUrl = "http://192.168.0.2:8080/tmcpe/j_spring_cas_security_check"
-grails.plugins.springsecurity.cas.serverUrlPrefix = "http://hyperion.its.uci.edu:8080/cas-server-webapp-3.4.2.1"
+grails.plugins.springsecurity.cas.serverUrlPrefix = "http://hyperion.its.uci.edu:8080/cas"
 grails.plugins.springsecurity.cas.proxyCallbackUrl = "http://192.168.0.2:8080/tmcpe/secure/receptor"
 grails.plugins.springsecurity.cas.proxyReceptorUrl = '/secure/receptor'
 // Single-sign-out
-grails.plugins.springsecurity.logout.afterLogoutUrl = "http://hyperion.its.uci.edu:8080/cas-server-webapp-3.4.2.1/logout?url=http://192.168.0.2:8080/tmcpe/"
+grails.plugins.springsecurity.logout.afterLogoutUrl = "http://hyperion.its.uci.edu:8080/cas/logout?service=http://192.168.0.2:8080/tmcpe/"
 
 grails.plugins.springsecurity.securityConfigType = SecurityConfigType.Annotation
 grails.plugins.springsecurity.openid.domainClass = 'edu.uci.its.auth.OpenID'
+
+
+// For LDAP spring security plugin
+grails.plugins.springsecurity.ldap.context.managerDn = 'cn=Manager,dc=ctmlabs,dc=org'
+grails.plugins.springsecurity.ldap.context.managerPassword = 'ctmlabs.org'
+grails.plugins.springsecurity.ldap.context.server = 'ldap://hyperion.its.uci.edu:389'
+grails.plugins.springsecurity.ldap.authorities.groupSearchBase =
+	 'ou=groups,dc=ctmlabs,dc=org'
+grails.plugins.springsecurity.ldap.authorities.ldapGroupSearchFilter = 'uniquemember={0}'
+grails.plugins.springsecurity.ldap.search.base = 'ou=people,dc=ctmlabs,dc=org'
+ldap.mapper.userDetailsClass = 'inetOrgPerson'
+
 
 
 // Search for explicit validation tags on classes that aren't domain classes
