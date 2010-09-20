@@ -175,12 +175,12 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
             protocol: new OpenLayers.Protocol.HTTP({
-		url: base + "incident/list.geojson",//theurl,
-		params: this._constructIncidentsParams(),
-		style: {strokeWidth: 2, strokeColor: "#0000ff", strokeOpacity: 0.25 },
-		format: new OpenLayers.Format.GeoJSON({}),
-		callback: OpenLayers.Function.bind( function( response, options) { this._demoCallback.apply( this, [ response, options ] ) }, this )
-            })
+            	url: base + "incident/list.geojson",//theurl,
+            	params: this._constructIncidentsParams(),
+            	style: {strokeWidth: 2, strokeColor: "#0000ff", strokeOpacity: 0.25 },
+            	format: new OpenLayers.Format.GeoJSON({})
+            }),
+            reportError: true
 	});
 
 	var obj = this;

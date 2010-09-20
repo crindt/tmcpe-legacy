@@ -23,10 +23,7 @@
  */
 package org.postgis.hibernate;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
-import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,7 +31,6 @@ import java.sql.Types;
 
 import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
-import java.io.InputStream;
 import org.postgis.Geometry;
 import org.postgis.binary.BinaryParser;
 import org.postgis.binary.BinaryWriter;
@@ -121,6 +117,7 @@ public class GeometryType implements UserType {
 	/* (non-Javadoc)
 	 * @see org.hibernate.usertype.UserType#returnedClass()
 	 */
+	@SuppressWarnings("rawtypes")
 	public Class returnedClass() {
 		return Geometry.class;
 	}

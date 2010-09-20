@@ -4,17 +4,7 @@ class HomeController {
 
     static navigation = [
         [group: 'tabs', order:1, title:'Home', action: 'index'],
-        [group: 'tabs', order:98, title:'Report Problem', id: 'problemButton', action: 'report'],
-        [group: 'tabs', order:99, title:'Help', action: 'help']
         ]
-
-    def report = {
-        redirect(target:"_blank", url:'http://localhost/redmine/projects/tmcpe/issues/new')
-    }
-
-    def help = {
-        redirect(target:"_blank", url:'http://localhost/redmine/projects/tmcpe/wiki/User_Guide')
-    }
 
     def index = {
 

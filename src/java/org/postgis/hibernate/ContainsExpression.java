@@ -56,6 +56,7 @@ public class ContainsExpression implements Criterion{
 		return new TypedValue[]{new TypedValue(Hibernate.custom(GeometryType.class), geom, EntityMode.POJO)};
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public String toSqlString(Criteria criteria, CriteriaQuery criteriaQuery) throws HibernateException {
 		Dialect dialect = criteriaQuery.getFactory().getDialect();
 		String[] columns = criteriaQuery.getColumnsUsingProjection(criteria, propertyName);

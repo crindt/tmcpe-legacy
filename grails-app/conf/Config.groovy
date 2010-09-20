@@ -72,16 +72,16 @@ log4j = {
 	}
 	
 	error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
-			'org.codehaus.groovy.grails.web.pages', //  GSP
-			'org.codehaus.groovy.grails.web.sitemesh', //  layouts
-			'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-			'org.codehaus.groovy.grails.web.mapping', // URL mapping
-			'org.codehaus.groovy.grails.commons', // core / classloading
-			'org.codehaus.groovy.grails.plugins', // plugins
-			'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
-			'org.springframework',
-			'edu.uci.its.tmcpe',
-			'org.hibernate'
+	'org.codehaus.groovy.grails.web.pages', //  GSP
+	'org.codehaus.groovy.grails.web.sitemesh', //  layouts
+	'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+	'org.codehaus.groovy.grails.web.mapping', // URL mapping
+	'org.codehaus.groovy.grails.commons', // core / classloading
+	'org.codehaus.groovy.grails.plugins', // plugins
+	'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
+	'org.springframework',
+	'edu.uci.its.tmcpe',
+	'org.hibernate'
 	
 	/*
 	 debug 'org.jcouchdb',
@@ -92,11 +92,11 @@ log4j = {
 	 'org.codehaus.groovy'
 	 */
 	debug 'edu.uci.its.tmcpe',
-			'edu.uci.its',
-			'org.springframework.security',
-			'org.springframework.security.web',
-			'org.springframework.security.cas',
-			'org.jasig.cas'
+	'edu.uci.its'
+	//'org.springframework.security',
+	//'org.springframework.security.web',
+	//'org.springframework.security.cas',
+	//'org.jasig.cas'
 	
 	//,'org.svenson.JSONParser'
 	
@@ -135,7 +135,6 @@ grails.plugins.springsecurity.securityConfigType = grails.plugins.springsecurity
 //grails.plugins.springsecurity.registerLoggerListener = true
 //grails.plugins.springsecurity.rejectIfNoRule = true
 
-
 // For CAS spring security plugin
 grails.plugins.springsecurity.cas.loginUri = '/login'
 grails.plugins.springsecurity.cas.serviceUrl = "http://192.168.0.2:8080/tmcpe/j_spring_cas_security_check"
@@ -154,7 +153,7 @@ grails.plugins.springsecurity.ldap.context.managerDn = 'cn=Manager,dc=ctmlabs,dc
 grails.plugins.springsecurity.ldap.context.managerPassword = 'ctmlabs.org'
 grails.plugins.springsecurity.ldap.context.server = 'ldap://hyperion.its.uci.edu:389'
 grails.plugins.springsecurity.ldap.authorities.groupSearchBase =
-	 'ou=groups,dc=ctmlabs,dc=org'
+'ou=groups,dc=ctmlabs,dc=org'
 grails.plugins.springsecurity.ldap.authorities.ldapGroupSearchFilter = 'uniquemember={0}'
 grails.plugins.springsecurity.ldap.search.base = 'ou=people,dc=ctmlabs,dc=org'
 ldap.mapper.userDetailsClass = 'inetOrgPerson'
@@ -163,4 +162,5 @@ ldap.mapper.userDetailsClass = 'inetOrgPerson'
 
 // Search for explicit validation tags on classes that aren't domain classes
 grails.validateable.packages = ['edu.uci.its.auth']
+
 

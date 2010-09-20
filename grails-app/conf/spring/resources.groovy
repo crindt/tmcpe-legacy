@@ -57,6 +57,7 @@ beans = {
 	
 	ldapAuthoritiesPopulator(CtmlabsLdapAuthoritiesPopulator, ref( 'contextSource' ), conf.ldap.authorities.groupSearchBase ) {
 		groupSearchFilter = conf.ldap.authorities.ldapGroupSearchFilter
+		defaultRole = "ROLE_USER"  // make sure all authenticated users belong to ROLE_USER, the most basic role
 	}
 
 

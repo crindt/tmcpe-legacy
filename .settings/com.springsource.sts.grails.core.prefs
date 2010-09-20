@@ -1,0 +1,16 @@
+#Fri Aug 20 14:57:35 PDT 2010
+com.springsource.sts.grails.core.source.attachment-com.springsource.org.jasig.cas.client-3.1.8.jar=/usr/local/src/cas-client-3.1.8/cas-client-core/src/main/java
+com.springsource.sts.grails.core.source.attachment-grails-bootstrap-1.3.3.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-grails-core-1.3.3.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-grails-crud-1.3.3.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-grails-gorm-1.3.3.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-grails-resources-1.3.3.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-grails-spring-1.3.3.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-grails-test-1.3.3.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-grails-tomcat-plugin-1.0.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-grails-web-1.3.3.jar=/usr/local/src/springsource/grails-1.3.3/src/java
+com.springsource.sts.grails.core.source.attachment-org.springframework.security.cas-3.0.3.RELEASE.jar=/usr/local/src/spring-security/cas/src/main/java
+com.springsource.sts.grails.core.source.attachment-org.springframework.security.core-3.0.3.RELEASE.jar=/usr/local/src/spring-security/core/src/main/java
+com.springsource.sts.grails.core.source.attachment-org.springframework.security.web-3.0.3.RELEASE.jar=/usr/local/src/spring-security/web/src/main/java
+com.springsource.sts.grails.core.use.default.install=false
+eclipse.preferences.version=1

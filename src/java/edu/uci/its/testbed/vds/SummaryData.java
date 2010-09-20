@@ -1,6 +1,5 @@
 package edu.uci.its.testbed.vds;
 
-import org.svenson.JSON;
 import org.svenson.JSONProperty;
 
 public class SummaryData

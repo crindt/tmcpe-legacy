@@ -6,35 +6,24 @@ import edu.uci.its.auth.User
 class BootStrap {
 	
 	def springSecurityService
+	def navigationService
+	
 	
 	def init = { servletContext ->
 		servletContext.setAttribute("newDataBinder", GlobalPropertyEditorConfig.&newDataBinder)
 		servletContext.setAttribute("newBeanWrapper", GlobalPropertyEditorConfig.&newBeanWrapper)
-/*		
-		String password = springSecurityService.encodePassword('password')
 		
-		def roleAdmin = new Role(authority: 'ROLE_ADMIN').save()
-		def roleUser = new Role(authority: 'ROLE_USER').save()
+		// Set up default navigation menu items!!
+				
+		// The login link only appears of the user is not logged in, logout appears otherwise
+		navigationService.registerItem( 'dashboard', [order:98, title:'Login', controller: 'login', isVisible: { !springSecurityService.isLoggedIn() } ] )
+		navigationService.registerItem( 'dashboard', [order:98, title:'Logout', controller: 'logout', isVisible: { springSecurityService.isLoggedIn() } ] )
+
+		// Two different help links depending on whether the user is logged in		
+		navigationService.registerItem( 'dashboard', [order:99, title:'Help', controller: 'help', action: 'index', isVisible: { !springSecurityService.isLoggedIn() } ] )
+		navigationService.registerItem( 'dashboard', [order:99, title:'Help', controller: 'help', action: 'fullHelp', isVisible: { springSecurityService.isLoggedIn() } ] )
 		
-		def user = new User(username: 'user', password: password, enabled: true).save()
-		def admin = new User(username: 'admin', password: password, enabled: true).save()
-		
-		UserRole.create user, roleUser
-		UserRole.create admin, roleUser
-		UserRole.create admin, roleAdmin, true
-		
-		 // Create some roles 
-		 new Role(authority: 'ROLE_SUPER_USER', description: 'Super user').save()
-		 new Role(authority: 'IS_AUTHENTICATED_ANONYMOUSLY', description: 'Anonymous').save()
-		 System.err.println( "Added roles " + (Role.findAll().join(", ")) )
-		 // Create a user, and add the super user role 
-		 // You do this only if you're using the DAO implementation, for LDAP users don't live in your DB. 
-		 def user = new User(username: 'crindt', password: PasswordEncoder.encode('d0996e', 'SHA-256', true)) 
-		 user.save() 
-		 user.addToRoles(Role.findByAuthority('ROLE_SUPER_USER')) 
-		 user.save() 
-		 System.err.println( "USER: " + user )
-		 */
+		navigationService.updated()
 		
 		//         grails.converters.JSON.registerObjectMarshaller( org.postgis.Point ) { p, json -> 
 		//             json.build{

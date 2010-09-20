@@ -38,10 +38,11 @@
 	      <!--<g:render template="/mainmenu" />-->
 	    </div>
 	    <div style="float:right;">
+	      <sec:ifLoggedIn>Logged in as <sec:loggedInUserInfo field="username"/></sec:ifLoggedIn>
 	      <nav:render/>
 	      <span dojoType="dijit.Tooltip"
 		    connectId="problemButton">
-		Click to open a new issue on the issue tracker (you must already be logged in)
+			Click to open a new issue on the issue tracker (you must already be logged in)
 	      </span>
 	    </div>
 	  </div>

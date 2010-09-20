@@ -1,6 +1,18 @@
-<head>
-<meta name='layout' content='main' />
-<title>Login</title>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>TMC Performance Evaulation</title>
+    <meta name="layout" content="main" />
+<!--
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+-->
+    <!-- Load the map javascript and css -->
+    <!-- <tmcpe:openlayers_latest /> --> <!--  brings in the openlayers stuff -->
+    <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
+
+    <g:javascript>
+      dojo.require("dijit.layout.StackContainer");
+      dojo.require("dijit.Tooltip");
+    </g:javascript>
 <style type='text/css' media='screen'>
 #login {
 	margin:15px 0px; padding:0px;
@@ -40,9 +52,18 @@
 #login .inner .text_ {width:120px;}
 #login .inner .chk {height:12px;}
 </style>
-</head>
+    
+    
+  </head>
 
-<body>
+  <body onload="" 
+	class="tundra">
+    <!-- Application -->
+         <!-- (none) -->
+
+    <!-- Viewport -->
+<div dojoType="dijit.layout.ContentPane" region="center">
+
 	<div id='login'>
 		<div class='inner'>
 			<g:if test='${flash.message}'>
@@ -68,6 +89,7 @@
 				</p>
 			</form>
 		</div>
+	</div>
 	</div>
 <script type='text/javascript'>
 <!--
