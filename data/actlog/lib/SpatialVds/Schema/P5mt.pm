@@ -1,4 +1,4 @@
-package SpatialVds::Schema::Pems5minMini;
+package SpatialVds::Schema::P5mt;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use warnings;
 use base 'DBIx::Class';
 
 __PACKAGE__->load_components("Core");
-__PACKAGE__->table("pems_5min_mini");
+__PACKAGE__->table("p5mt");
 __PACKAGE__->add_columns(
   "stamp",
   {
@@ -17,24 +17,6 @@ __PACKAGE__->add_columns(
   },
   "vdsid",
   { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
-  "distrct",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
-  "route",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
-  "dir",
-  {
-    data_type => "character",
-    default_value => undef,
-    is_nullable => 1,
-    size => 1,
-  },
-  "dtype",
-  {
-    data_type => "character",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
   "seg_len",
   { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
   "samples_all",
@@ -222,13 +204,20 @@ __PACKAGE__->add_columns(
   { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
   "obs_8",
   { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
+  "calendar_key",
+  { data_type => "date", default_value => undef, is_nullable => 1, size => 4 },
+  "time_key",
+  {
+    data_type => "time without time zone",
+    default_value => undef,
+    is_nullable => 1,
+    size => 8,
+  },
 );
-__PACKAGE__->set_primary_key("vdsid", "stamp");
-__PACKAGE__->add_unique_constraint("pems_5min_mini_pkey", ["vdsid", "stamp"]);
 
 
 # Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:21:08
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:DgsHkhOGLaa+DMSYwUno+Q
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GFNgS0keGAWW7w5XmnQ3kA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

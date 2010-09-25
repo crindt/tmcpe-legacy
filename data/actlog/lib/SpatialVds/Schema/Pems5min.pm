@@ -204,8 +204,6 @@ __PACKAGE__->add_columns(
   { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
   "obs_8",
   { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
-  "calendar_key",
-  { data_type => "date", default_value => undef, is_nullable => 1, size => 4 },
   "time_key",
   {
     data_type => "time without time zone",
@@ -218,8 +216,8 @@ __PACKAGE__->set_primary_key("vdsid", "stamp");
 __PACKAGE__->add_unique_constraint("pems_5min_pkey", ["vdsid", "stamp"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:01:18
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/qhh0y5HIlqEJSo0YtlY2Q
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:21:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6+C3gIWbtRRXO1Hf0OeHOw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

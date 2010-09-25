@@ -73,30 +73,18 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => 80,
   },
-  "log_id",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 255,
-  },
 );
 __PACKAGE__->set_primary_key("keyfield");
 __PACKAGE__->add_unique_constraint("icad_pkey", ["keyfield"]);
 __PACKAGE__->has_many(
-  "icad_detail_icads",
+  "icad_details",
   "TMCPE::ActivityLog::Schema::IcadDetail",
   { "foreign.icad" => "self.keyfield" },
 );
-__PACKAGE__->has_many(
-  "icad_detail_icad_ids",
-  "TMCPE::ActivityLog::Schema::IcadDetail",
-  { "foreign.icad_id" => "self.keyfield" },
-);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:00:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:cAoSP/wt47LhWvZm/OcKOA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:20:40
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fKmATSXCno/0ipcr0xAUfA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

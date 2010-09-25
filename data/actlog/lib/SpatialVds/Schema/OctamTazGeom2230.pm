@@ -1,4 +1,4 @@
-package SpatialVds::Schema::OctamGeom2230;
+package SpatialVds::Schema::OctamTazGeom2230;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use warnings;
 use base 'DBIx::Class';
 
 __PACKAGE__->load_components("Core");
-__PACKAGE__->table("octam_geom_2230");
+__PACKAGE__->table("octam_taz_geom_2230");
 __PACKAGE__->add_columns(
   "taz_id",
   { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
@@ -22,8 +22,8 @@ __PACKAGE__->set_primary_key("taz_id");
 __PACKAGE__->add_unique_constraint("octam_geom_2230_pkey", ["taz_id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:01:18
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SwaWx67IzSxsw+NWy9vAkA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:21:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:c5KyRsoKCmotOpKMDEhzRQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
