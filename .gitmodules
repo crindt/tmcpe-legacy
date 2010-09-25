@@ -1,0 +1,3 @@
+[submodule "osm"]
+	path = osm
+	url = /home/crindt/Desktop/osm
