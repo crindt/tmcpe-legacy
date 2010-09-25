@@ -238,7 +238,7 @@ sub get_pems_data {
 	    
 	} else {
 	    if ( @rows != @times ) {
-		assert ( @rows == @times  );
+		croak "# ROWS DOESN'T EQUAL # TIMES---CHUCKING" if ( @rows != @times  );
 	    }
 
 	    foreach my $row ( @rows ) {
@@ -675,6 +675,10 @@ NETDELAY ..	N=E=Y-A
     
     $of << qq{
 MODEL BASE / ALL /;
+
+*** Use the cplex.opt options file---should contain probe(3) to speed solution!
+BASE.OptFile=1;
+
 SOLVE BASE USING MIP MINIMIZING Z;
 DISPLAY D.l;
 };
@@ -802,10 +806,16 @@ sub parse_results {
 	    $found = 1;
 	    next LINE;
 	};
-	/^\*\*\*\* REPORT SUMMARY/ && do
+	/^\*\*\*\* REPORT SUMMARY\s*([^\s].*)/ && do
 	{
 	    $found = 0;
 	    next LINE;
+	};
+	( /.*(\d+)\s+(NONOPT)/ || /.*(\d+)\s+(INFEASIBLE)/ || /.*(\d+)\s+(UNBOUNDED)/ ) && do
+        {
+	    if ( ($1+0) > 0 ) {
+		$self->bad_solution( "Failed to find a solution: $1 $2 rows" );
+	    }
 	};
 	/RESOURCE INTERRUPT/ && do
 	{
@@ -859,6 +869,7 @@ sub write_to_db {
     my $ia;
     my $ifa;
     eval {
+	# search for and delete all existing analyses
 	my @existing = $ia = $self->tmcpe_db->resultset( 'IncidentImpactAnalysis' )->search(
 	    {   incident_id => $self->incid });
 	foreach my $ex (@existing) {
