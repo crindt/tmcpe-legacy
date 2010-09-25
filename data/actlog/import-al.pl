@@ -35,6 +35,8 @@ my $tmcpe_db_name = "tmcpe_test";
 my $tmcpe_db_user = "postgres";
 my $tmcpe_db_password = "";
 
+my $dc = new TMCPE::DelayComputation();
+
 GetOptions ("skip-al" => sub { $doal = 0 },
 	    "skip-icad" => sub { $doicad = 0 },
 	    "skip-incidents" => sub { $doinc = 0 },
@@ -48,6 +50,12 @@ GetOptions ("skip-al" => sub { $doal = 0 },
 	    "tmcpe-db-name=s" => \$tmcpe_db_name,
 	    "tmcpe-db-user=s" => \$tmcpe_db_user,
 	    "tmcpe-db-password=s" => \$tmcpe_db_password,
+	    "dc-band" => sub { $dc->band( $_[1] ) },
+	    "dc-prewindow=i" => sub { $dc->prewindow( $_[1] ) },
+	    "dc-postwindow=i" => sub { $dc->postwindow( $_[1] ) },
+	    "dc-vds-downstream-fudge=f" => sub { 
+		$dc->vds_downstream_fudge( $_[1] ) 
+	    },
     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 
@@ -228,7 +236,7 @@ sub process_performance_measures {
 		detail => $detail
 	    };
 	    $data->{blocklanes} = $lanes;
-	    $log->create_related( 'performance_measures_log_ids', $data );
+	    $log->create_related( 'performance_measures', $data );
 	}
     }
     return $data;
@@ -315,6 +323,8 @@ ICAD:
 
     goto INCIDENTS if not $doicad;
 
+print STDERR "PROCESSING ICAD...";
+
 my $rs;
 eval {
     my $condition = {};
@@ -339,6 +349,9 @@ eval {
 croak "ERROR ".$@->{msg} if $@;
 
 # loop over all the new records, and shove them into the postgres db
+my $tot=0;
+my $imported=0;
+my $dup=0;
 while ( my $t = $rs->next ) {
     # push data in
     my $rec;
@@ -410,19 +423,21 @@ while ( my $t = $rs->next ) {
 	# now, push 'em into the db in order
 	foreach my $det ( sort { str2time( $a->{stamp} ) cmp str2time( $b->{stamp} ) } @dets )
 	{
-	    eval { $rec->create_related( 'icad_detail', { stamp => $det->{stamp}, detail => $det->{detail} } ); };
+	    eval { $rec->create_related( 'icad_details', { stamp => $det->{stamp}, detail => $det->{detail} } ); };
 	    croak join( "", "ERROR: ", ( $@->{msg} ? $@->{msg} : $@ ) ) if ( $@ );
 	}
 
 	warn "SUCCESSFULLY PROCESSED ICAD $logid to $d12cad\n" if $verbose;
+	$imported++;
 
     } else {
 	warn "SKIPPED DUPLICATE ENTRY ".$t->logid."\n"  if $verbose;
 	$rec = $exist;
+	$dup++;
     }
-    
-
+    $tot++
 }
+print STDERR "$imported imported and $dup duplicates ignored out of $tot total entries\n";
 
 
 # here we create incidents and tag them coursely by type inferring
@@ -432,7 +447,17 @@ INCIDENTS:
     goto CRITEVENTS if not $doinc;
 
 # Add to/update incidents
-my $alrs = $tmcpe->resultset('D12ActivityLog')->search( undef, { 
+my $datecond;
+$datecond->{'>='} = $datefrom if $datefrom;
+$datecond->{'<='} = $dateto   if $dateto;
+
+my $condition;
+
+# Can't use this condition because starttime doesn't exist in the D12ActivityLog
+#$condition->{starttime} = $datecond if $datecond;
+$condition->{cad} = { -in => [ @ARGV ] } if @ARGV;
+
+my $alrs = $tmcpe->resultset('D12ActivityLog')->search( $condition, { 
     'select' => [ 'cad', { min => 'stamp', -as => 'starttime' }	],
     'as'       => [ qw/ cad starttime / ],
     group_by => [ qw/ cad / ],
@@ -440,12 +465,15 @@ my $alrs = $tmcpe->resultset('D12ActivityLog')->search( undef, {
 
 my $lp = new TMCPE::ActivityLog::LocationParser();
 
-while ( my $al = $alrs->next ) {
-    eval {
+eval {
+    while ( my $al = $alrs->next ) {
+	# see if the incident is already in the database
 	my $inc = $tmcpe->resultset('Incidents')->search(
 	    { cad => $al->cad},
 	    { rows => 1 } )->single;
+
 	if ( not $inc ) {
+	    # if not, create a new incident object
 	    warn join( "", "ADDING CAD ", $al->cad, " TO CAD TABLE\n" );
 	    $_ = $al->cad;
 	    my $type="UNKNOWN";
@@ -476,6 +504,7 @@ while ( my $al = $alrs->next ) {
 		rows => 1 
 	    }
 	    )->single;
+
 	if ( $icad && $icad->tbxy ) {
 	    # got I cad, convert the TBXY
 	    my ( $x, $y ) = split(/:/, $icad->tbxy );
@@ -549,12 +578,11 @@ while ( my $al = $alrs->next ) {
 		    warn "SUCCESS TO PARSE MEMO: $memo";
 		}
 	    }
+	}
 	    
-	    
-	    # now set the locdata if we found it...
-	    if ( $locdata ) {
-		$inc->location_vdsid( $locdata->id );
-	    }
+	# now set the locdata if we found it...
+	if ( $locdata ) {
+	    $inc->location_vdsid( $locdata->id );
 	}
 
 	if ( ! $inc->first_call && $openinc ) {
@@ -563,11 +591,11 @@ while ( my $al = $alrs->next ) {
 	}
 
 	$inc->update();
-    };
-    if ( $@ ) {
-	warn "ERROR ".$@->{msg};
-	$logfile << "ERROR ".$@->{msg};
     }
+};
+if ( $@ ) {
+    warn "ERROR ".$@->{msg};
+    $logfile << "ERROR ".$@->{msg};
 }
 
 
@@ -603,7 +631,6 @@ INCDEL: while( my $inc = $incrs->next ) {
 
     warn "SOLVING ".$inc->cad."\n";
 
-    my $dc = new TMCPE::DelayComputation();
     $dc->tmcpe_db_host( $tmcpe_db_host );
     $dc->tmcpe_db_name( $tmcpe_db_name );
     $dc->tmcpe_db_user( $tmcpe_db_user );
