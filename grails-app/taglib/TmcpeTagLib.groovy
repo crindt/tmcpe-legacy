@@ -48,7 +48,11 @@ class TmcpeTagLib {
   def openlayers = {
       out << '<script src="' << resource(dir:'js/openlayers/lib/',file:'OpenLayers.js') << '"></script>'
 
-      out << '<script src="http://maps.google.com/maps?file=api&amp;v=2&sensor=false&key=ABQIAAAAyBYmSWPVcV0YpoIbSHToHRR7e8w5iNj4_L2k9sczPbHcJZYRIhRedyRq4_pqB4yZdKrJiL7e0ipZQQ" type="text/javascript"></script>'
+      if ( grails.util.Environment.getEnvironment() == grails.util.Environment.PRODUCTION ) {
+         out << '<script src="http://maps.google.com/maps?file=api&amp;v=2&sensor=false&key=ABQIAAAAyBYmSWPVcV0YpoIbSHToHRR7e8w5iNj4_L2k9sczPbHcJZYRIhRedyRq4_pqB4yZdKrJiL7e0ipZQQ" type="text/javascript"></script>'
+      } else {
+         out << '<script src="http://maps.google.com/maps?file=api&amp;v=2&sensor=false&key=ABQIAAAAyBYmSWPVcV0YpoIbSHToHRQIRESITgsCs0G5rYyVKDmtJMTj6xRaMHwKfNdKW2Hzj0ZAuG7Fi8x48A" type="text/javascript"></script>'
+      }
   }
 
   def openlayers_latest = {
