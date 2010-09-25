@@ -122,19 +122,14 @@ __PACKAGE__->has_many(
   { "foreign.sigalert_begin" => "self.keyfield" },
 );
 __PACKAGE__->has_many(
-  "performance_measures_log_ids",
-  "TMCPE::ActivityLog::Schema::PerformanceMeasures",
-  { "foreign.log_id" => "self.keyfield" },
-);
-__PACKAGE__->has_many(
-  "performance_measures_log_ids",
+  "performance_measures",
   "TMCPE::ActivityLog::Schema::PerformanceMeasures",
   { "foreign.log_id" => "self.keyfield" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:00:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:684kfv/6bKU1Zy+n/+P9QQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:20:40
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Y1wX1RKtUT3eYsI6wgA86w
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

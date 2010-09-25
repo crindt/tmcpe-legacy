@@ -41,7 +41,7 @@ class FacilitySection {
         id column: 'id'
         name column: 'name'
         lanes column: 'lanes'
-        segmentLength column: 'segment_length'
+        segmentLength column: 'length'
         freewayId column: 'freeway_id'
         freewayDir column: 'freeway_dir'
         district column: 'district'

@@ -26,42 +26,59 @@ use Class::MethodMaker
      new    => [ qw/ new / ]
     ];
 
+sub choke {
+    my ( $self, @args ) = @_;
+    1;
+}
 
+
+# Search for a facility that matches the given number in the given network $anet
+# If anet is omitted, search all networks for the first match (interstate first, then SR)
 sub get_facility {
-    my ( $self, $num, $onet ) = @_;
+    my ( $self, $num, $anet ) = @_;
     my $crit = { ref => $num };
 
-    # tweak net to known standards:
-    my $net = $onet;
-    $_ = uc($net);
-    /^I$/ && do { $net = 'US:I' };
-    /^SR$/ && do { $net = 'US:CA' };
-    /^CA$/ && do { $net = 'US:CA' };
-    $crit->{net} = $net if defined $net;
-
-    # look it up using testbed_facilities
-    my @res = $self->vds_db->resultset( 'TestbedFacilities' )->search( 
-	$crit,
-	{
-	    columns => [ qw/net ref/ ],
-	    distinct => 1
-	}
-	);
-
-    my $fac;
-    if ( $#res > 0 ) {
-	# @ res should only contain one entry, more than one facility matches!
-	croak "More than one facility matches: [".join( '-', grep { defined $_ } $net, $num )."]";
-    } elsif ( $#res == 0 ) {
-	# good
-	my $rec = shift @res;
-	return { cname => join( '-', $rec->net, $rec->ref ),
-		 net => $rec->net,
-		 ref => $rec->ref
-	};
-    } else {
-	croak "No facility found that matches: [".join( '-', grep { defined $_ } $net, $num )."]";
+    my @nets = ('I', 'SR');
+    if ( $anet ) {
+	@nets = ($anet);
     }
+
+    # tweak net to known standards:
+    foreach my $onet ( @nets ) {
+	my $net = $onet;
+	$_ = uc($net);
+	/^I$/ && do { $net = 'US:I' };
+	/^SR$/ && do { $net = 'US:CA' };
+	/^CA$/ && do { $net = 'US:CA' };
+	$crit->{net} = $net if defined $net;
+	
+	# look it up using testbed_facilities
+	my @res = $self->vds_db->resultset( 'TestbedFacilities' )->search( 
+	    $crit,
+	    {
+		columns => [ qw/net ref/ ],
+		distinct => 1
+	    }
+	    );
+	
+	my $fac;
+	if ( $#res > 0 ) {
+	    # @ res should only contain one entry, more than one facility matches!
+#	    warn "More than one facility matches: [".join( '-', grep { defined $_ } $net, $num )."]";
+	    croak "More than one facility matches: [".join( '-', grep { defined $_ } $net, $num )."]";
+	} elsif ( $#res == 0 ) {
+	    # good
+	    my $rec = shift @res;
+	    return { cname => join( '-', $rec->net, $rec->ref ),
+		     net => $rec->net,
+		     ref => $rec->ref
+	    };
+	} 
+    }
+
+    # didn't find any!!
+#    warn "No facility found that matches: [".join( '-', grep { defined $_ } $anet, $num )."]";
+    croak "No facility found that matches: [".join( '-', grep { defined $_ } $anet, $num )."]";
 }
 
 sub get_vds_ramp {
@@ -117,13 +134,25 @@ sub get_vds_ramp {
 }
 
 sub get_vds_fw {
-    my ( $self, $facdir, $relloc, $xfacdir ) = @_;
+    my ( $self, %a ) = @_;
+    #$facdir, $relloc, $xfacdir
+    my $facdir = $a{facdir};
+
+    # if facdir relloc facdir2
+    my $xfacdir = $a{facdir2};
+
+    # if facdir relloc facility
+    $xfacdir = { facility => $a{facility} } if !$xfacdir;
 
     # assumptions
     $facdir->{facility}->{ref} =~ /\d+/ or croak join( "", "Bad facility refnum in get_vds: [", $facdir->{ref}, "]" );
     $facdir->{dir} =~ /[NSEW]/ or croak join( "", "Bad facility direction in get_vds: [", $facdir->{dir}, "]" );
     my $xfac = join( "-", grep { defined $_ } ($xfacdir->{facility}->{net}, $xfacdir->{facility}->{ref} || croak join( "NO CROSS FREEWAY NAME IN VDS LOOKUP" ) ) );;
     my $xdir = $xfacdir->{dir} || undef;
+
+    # convert freeway cross references e.g., NB 55 AT I-5, (with
+    # no direction) to '<dir> OF <xfreeway>' notation
+    $xfac = join( ' ', $facdir->{dir}, 'OF', $xfac );
 
     my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
 	{
@@ -150,7 +179,7 @@ sub get_vds_fw {
     # At this point, @res should contain a list of similar vds with names similar to the specified cross street
     if ( @res ) {
 	# For now, we'll just take the first one.
-	print STDERR "CANDIDATES FOR $facdir->{dir}B $facdir->{facility}->{net}-$facdir->{facility}->{ref} @ $xfac \n" if $::RD_TRACE;
+	print STDERR "CANDIDATES FOR $facdir->{dir}B ".join( '-', grep { $_ } ( $facdir->{facility}->{net},$facdir->{facility}->{ref}))." @ $xfac \n" if $::RD_TRACE;
 	print STDERR "\t".join( ",", map{ $_->freeway_dir . "B " . $_->name } @res )."\n" if $::RD_TRACE;
 
 	my $vds = shift @res;
@@ -179,7 +208,10 @@ sub get_vds_xs {
     defined $facdir->{facility}->{ref} && ($facdir->{facility}->{ref} =~ /\d+/ ) 
 	or croak join( "", "Bad facility refnum in get_vds: [", ($facdir->{facility}->{ref} ? $facdir->{facility}->{ref} : "<no ref found>"), "]" );
     defined $facdir->{dir} && ($facdir->{dir} =~ /[NSEW]/) or croak join( "", "Bad facility direction in get_vds: [", $facdir->{dir}, "]" );
-    $xstreet->{stname} || croak join( "NO XSTREET IN VDS LOOKUP" );
+    if ( !$xstreet->{stname} ) {
+#	warn "NO XSTREET IN VDS LOOKUP";
+	croak join( "NO XSTREET IN VDS LOOKUP" ); 
+    };
 
     # Do to some degenerate cases, we no longer match on the basis of
     # freeway direction.  Instead, we prioritize on freeway direction
@@ -276,7 +308,8 @@ incloc: facdir[ $arg[0] ] hov connector to facdir[ $arg[0] ] { eval{ $return = $
         facdir[ $arg[0] ] to facdir[ $arg[0] ] connector { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > |
         facdir[ $arg[0] ] connector facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > | 
         ramp to facorst[ $arg[0] ]  { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > |
-        facdir[ $arg[0] ] relloc facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( @item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] relloc facdir2[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( %item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] relloc facility[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( %item ); } } <reject: $@ > |
         facdir[ $arg[0] ] relloc street { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > |
         facdir[ $arg[0] ] relloc ramp { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > |
         facdir[ $arg[0] ] on ramp  { eval{ $return = $arg[0]->get_vds_ramp( %item ); } } <reject: $@ >
@@ -290,8 +323,11 @@ facorst: facdir[ $arg[0] ] |
          facility[ $arg[0] ] | 
          street
 
+
 facdir: dir sep(?) facility[ $arg[0] ] { $return = { facility => $item{facility}, dir => $item{dir} }; } |
         facility[ $arg[ 0 ] ] sep(?) dir { $return = { facility => $item{facility}, dir => $item{dir} }; }
+
+facdir2: facdir[ $arg[ 0 ] ] { $return = $item{facdir} }
 
 ramp: street ramptype { $return = { street => $item{street}, ramptype => $item{ramptype} }; }
 
@@ -299,6 +335,8 @@ ramptype: onramp | offramp
 
 onramp: 'ON-RAMP' | 'ONRAMP' | 'ON/RAMP' | 'ON/R'  
 offramp: 'OFF-RAMP' | 'OFFRAMP' | 'OFF/RAMP' | 'OFF/R' 
+route: 'route' | 'rte' |  'RTE'
+
 
 street: eng_street { $return = $item{eng_street} } | 
         span_street { $return = $item{span_street} }
@@ -378,14 +416,22 @@ at: /\bAT\b/ | /\@/
 facility: net sep facnum { 
               ref $arg[0] eq 'TMCPE::ActivityLog::LocationParser' || ::croak "No object passed: ".join(",", map { $_.'='.(ref $_) } @arg ); 
 	      eval{ $return = $arg[0]->get_facility( $item{facnum}, $item{net} ) };
+              $return = { net => $item{net}, ref => $item{facnum} };
           } <reject: $@> |
           net facnum {
               ref $arg[0] eq 'TMCPE::ActivityLog::LocationParser' || ::croak "No object passed ".join(",", map { $_.'='.(ref $_) } @arg ); 
 	      eval{ $return = $arg[0]->get_facility( $item{facnum}, $item{net} ) }; 
+              $return = { net => $item{net}, ref => $item{facnum} };
+          } <reject: $@> |
+          route facnum {
+              ref $arg[0] eq 'TMCPE::ActivityLog::LocationParser' || ::croak "No object passed ".join(",", map { $_.'='.(ref $_) } @arg ); 
+	      eval{ $return = $arg[0]->get_facility( $item{facnum}, 'I' ) }; 
+              $return = { ref => $item{facnum} };
           } <reject: $@> |
           facnum { 
               ref $arg[0] eq 'TMCPE::ActivityLog::LocationParser' || ::croak "No object passed ".join(",", map { $_.'='.(ref $_) } @arg ); 
 	      eval{ $return = $arg[0]->get_facility( $item{facnum} ) }; 
+              $return = { ref => $item{facnum} };
           } <reject: $@>
 
 net: /\bI/ | 
@@ -404,7 +450,8 @@ to: /\bTO\b/
 
 on: /\bON\b/
 
-dir: /\b([NSEW])B*\b/ { my $val = $item[1]; $val =~ s/B//g; $return = $val; } | 
+dir: /\b([NSEW])B\b/ { my $val = $item[1]; $val =~ s/B//g; $return = $val; } | 
+     /\b([NSEW])\b/ { my $val = $item[1]; $val =~ s/B//g; $return = $val; } | 
      /\bNORTH\b/ { $return = 'N'; } |
      /\bSOUTH\b/ { $return = 'S'; } |
      /\bEAST\b/ { $return = 'E'; } |

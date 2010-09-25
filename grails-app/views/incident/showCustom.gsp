@@ -184,8 +184,15 @@
 	  </div>
 	</div>
 	<!-- TSD INFO PANE -->
-	<div dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
-	  <div class="tmcpe_tsd_cellinfo" id="tmcpe_tsd_cellinfo">Mouseover time-space diagram for location/time information.</div>
+	<div dojoType="dijit.layout.ContentPane" region="bottom"  style="padding:0px;margin:0px" splitter="false">
+	  <div dojoType="dijit.layout.BorderContainer" id="tsdInfoPane" style="padding:0px;margin:0px;height:2em;" design="headline" >	
+	    <div dojoType="dijit.layout.ContentPane" region="top" style="padding:0px;margin:0px" >
+	      <div class="tmcpe_tsd_cellinfo" id="tmcpe_tsd_cellinfo">Mouseover time-space diagram for location/time information.</div>
+	    </div>
+	    <div dojoType="dijit.layout.ContentPane" region="bottom" style="padding:0px;margin:0px" >
+	       <a id="tmcpe_tsd_xls_link"></a>
+	    </div>
+          </div>
 	</div>
       </div>
 

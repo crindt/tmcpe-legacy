@@ -17,6 +17,22 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => 64,
   },
+  "freeway_dir",
+  {
+    data_type => "character varying",
+    default_value => undef,
+    is_nullable => 1,
+    size => 2,
+  },
+  "lanes",
+  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  "length",
+  {
+    data_type => "numeric",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
   "cal_pm",
   {
     data_type => "character varying",
@@ -45,35 +61,8 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
-  "lanes",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
-  "segment_length",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
-  "version",
+  "last_modified",
   { data_type => "date", default_value => undef, is_nullable => 1, size => 4 },
-  "freeway_id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
-  "freeway_dir",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
-  "vdstype",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 4,
-  },
-  "district",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
   "gid",
   { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
   "geom",
@@ -83,6 +72,17 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "freeway_id",
+  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  "vdstype",
+  {
+    data_type => "character varying",
+    default_value => undef,
+    is_nullable => 1,
+    size => 4,
+  },
+  "district",
+  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
   "rel",
   { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
   "seg_geom",
@@ -95,8 +95,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:00:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:E1bbnzRGH8gqQLGlaGu+Ww
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:20:40
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6FpqSsx8SpJdLBwd9FIjtA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

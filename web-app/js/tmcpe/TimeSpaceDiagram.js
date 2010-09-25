@@ -129,7 +129,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 //		 && secdat.days_in_avg < 30  // fixme: make this a parameter
 //		 && secdat.pct_obs_avg < 30  // fixme: make this a parameter
 	       ) {
-		color = this._getColor( (secdat.spd-secdat.spd_avg), -this._themeScale, 0, '#ff0000','#00ff00' );
+		color = this._getColor( (secdat.spd-secdat.spd_avg), -this._themeScale*10, 0, '#ff0000','#00ff00' );
 	    }
 	    return color
 	},

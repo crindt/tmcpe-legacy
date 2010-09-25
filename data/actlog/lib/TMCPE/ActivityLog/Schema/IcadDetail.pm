@@ -31,8 +31,6 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => 1024,
   },
-  "icad_id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
 );
 __PACKAGE__->set_primary_key("keyfield");
 __PACKAGE__->add_unique_constraint("icad_detail_pkey", ["keyfield"]);
@@ -41,15 +39,10 @@ __PACKAGE__->belongs_to(
   "TMCPE::ActivityLog::Schema::Icad",
   { keyfield => "icad" },
 );
-__PACKAGE__->belongs_to(
-  "icad_id",
-  "TMCPE::ActivityLog::Schema::Icad",
-  { keyfield => "icad_id" },
-);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:00:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gT4/5OPuM/aEtVyGg9APWg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:20:40
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:goYWmcja+0s0aJpj1+JhSQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

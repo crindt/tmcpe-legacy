@@ -23,8 +23,8 @@ __PACKAGE__->belongs_to(
 __PACKAGE__->belongs_to("gid", "SpatialVds::Schema::GeomPoints4269", { gid => "gid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-05-18 15:01:18
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fvlvHRCskyVS3aVMkx1Iqg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:21:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SuIuZE7NSqYQRIS0tT/dKA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

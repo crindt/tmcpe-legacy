@@ -14,8 +14,8 @@ select o.vdsid, o.stamp, max(o.cnt_all) o_vol, max(o.occ_all) o_occ, max(o.spd_a
        count(a.cnt_all) days_in_avg, sum(a.samples_all)/count(a.cnt_all) avg_samples, avg(a.pct_obs_all) a_pct_obs,
        avg(a.cnt_all) a_vol, avg(a.occ_all) a_occ, avg(a.spd_all) a_spd, 
        stddev(a.cnt_all) sd_vol, stddev(a.occ_all) sd_occ, stddev(a.spd_all) sd_spd
-from pems_5min_mini o 
-     left join pems_5min_mini a on (
+from pems_5min o 
+     left join pems_5min a on (
      	  a.vdsid=o.vdsid AND 
      	  o.stamp::time=a.stamp::time AND 
 	  extract( 'dow' from o.stamp ) = extract( 'dow' from a.stamp ) 
