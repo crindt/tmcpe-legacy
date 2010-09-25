@@ -15,14 +15,21 @@ import grails.plugins.springsecurity.SecurityConfigType
 // }
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
-grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
+
+grails.mime.types = [ 
+	html: ['text/html','application/xhtml+xml'],
 	xml: ['text/xml', 'application/xml'],
-	text: 'text/plain',
+	text: 'text-plain',
 	js: 'text/javascript',
 	rss: 'application/rss+xml',
 	atom: 'application/atom+xml',
 	css: 'text/css',
 	csv: 'text/csv',
+	pdf: 'application/pdf',
+	rtf: 'application/rtf',
+	excel: 'application/vnd.ms-excel',
+	xls: 'application/vnd.ms-excel',
+	ods: 'application/vnd.oasis.opendocument.spreadsheet',
 	all: '*/*',
 	json: ['application/json','text/json'],
 	geojson: ['application/json','text/json'],
@@ -30,6 +37,8 @@ grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
 	multipartForm: 'multipart/form-data',
 	kml: 'application/vnd.google-earth.kml+xml .kml'
 ]
+
+
 // The default codec used to encode data with ${}
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"

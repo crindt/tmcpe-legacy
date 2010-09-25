@@ -21,6 +21,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     _vdsSegmentLines: null,
     _selectVds: null,
     _hoverVds: null,
+    _facilityImpactAnalysis: null, // the active impact analysis (the one in the plot)
 
     _facilityStore: null, // The dojo facility store
     _incidentSummary: null, // The dom node holding the incident summary
@@ -136,7 +137,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    // Here, we set the default displayed TSD to that
 	    // corresponding to the primary disrupted facility
 	    var ff = this._incident.section.freewayId + '-' + this._incident.section.freewayDir;
-	    facilityCombo.attr( 'displayedValue', ff );
+	    facilityCombo.set( 'displayedValue', ff );
 	} else {
 	    this.getTsd()._displayNoAnalysis();
 	    dojo.byId('loadingAnalysisDiv').style.visibility = 'hidden';
@@ -146,7 +147,14 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     updateFacilityImpactAnalysis: function( fiaId ) {
 	var base = document.getElementById("htmldom").href;
+	this._facilityImpactAnalysis = fiaId;
 	this.getTsd().updateUrl( base + 'incidentFacilityImpactAnalysis/show.json?id='+fiaId );
+
+	// Update XLS link
+	var base = document.getElementById("htmldom").href;
+	dojo.byId('tmcpe_tsd_xls_link').innerHTML = 'Download XLS for facility analysis ' + this._facilityImpactAnalysis;
+	dojo.byId('tmcpe_tsd_xls_link').href = base+'incidentFacilityImpactAnalysis/show.xls?id='+this._facilityImpactAnalysis;
+
 	this.updateVdsSegmentsQuery(); 	
     },
 
@@ -422,7 +430,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    };
 	}
 	var el = document.getElementById('tmcpe_tsd_cellinfo');
-	var str = station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd._data.timesteps[timeind];
+	var str = station.vdsid + ":" + station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd._data.timesteps[timeind];
 	if ( station.analyzedTimesteps[timeidx].p_j_m == 0.5 ) str += ' <span style="color:#ff0000;font-weight:bold">&lt;DATA IS UNRELIABLE&gt;</span>';
 	el.innerHTML = str;
     },

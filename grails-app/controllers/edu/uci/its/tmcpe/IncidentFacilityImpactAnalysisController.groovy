@@ -1,6 +1,10 @@
 package edu.uci.its.tmcpe
 
 import grails.converters.*
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.hslf.model.Sheet;
+import org.apache.poi.hssf.util.CellReference;
 
 class IncidentFacilityImpactAnalysisController {
 
@@ -78,6 +82,150 @@ class IncidentFacilityImpactAnalysisController {
                         ]
                     render json as JSON
                 }
+		xls {
+			Workbook wb = new HSSFWorkbook()
+			def fname = "incident-" + incidentFacilityImpactAnalysisInstance?.incidentImpactAnalysis?.incident?.cad + "-data.xls"
+			
+                        // Get the timesteps
+                        def timesteps = null
+                        incidentFacilityImpactAnalysisInstance.analyzedSections.collect {
+                            if ( it.analyzedTimestep != null && ( timesteps == null || ( it.analyzedTimestep.size() > timesteps.size() ) ) ) {
+                                timesteps = it.analyzedTimestep
+                            }
+                        }
+
+                        def firstcol=2
+                        def firstrow=4
+
+                        for ( dt in ["spd", "vol", "occ", "p_j_m", "incident_flag", "cap", "dem", "q", "spdkm", "alpha", "tmcpe_delay", "E(v^2)", "SMS(mph)", "den(vplm)"] ) {
+
+                            // create sheet
+                            def sheet = wb.createSheet( dt )
+
+                            // if we're doing "alpha", dump out the alpha parameters we're using
+                            if ( dt == "E(v^2)" ) {
+                                def param_row = sheet.createRow((short)firstrow-firstrow)
+                                param_row.createCell((short)1).setCellValue( 1.22 )
+                                param_row.createCell((short)2).setCellValue( -15.21 )
+                                param_row.createCell((short)3).setCellValue( 207.95 )
+                            }
+                            
+                            // create row header
+                            def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+                            def rcount = firstrow
+                            for ( it4 in timesteps ) { 
+                                def hrow = sheet.createRow((short)rcount)
+                                hrow.createCell( (short)0 ).setCellValue( df.format( it4?.fivemin ) ) 
+                                if ( dt == "cap" || dt == "dem" ) {
+                                   def cs_start = new CellReference(rcount,firstcol)
+                                   def cs_end = new CellReference(rcount,230)
+                                   hrow.createCell((short)(firstcol-1)).setCellFormula( "max("+cs_start.formatAsString()+":"+cs_end.formatAsString()+")")
+                                 } else if ( dt == "q" ) {
+                                   // 
+                                   def cap = new CellReference('cap',rcount,firstcol-1,false,false)
+                                   def den = new CellReference('dem',rcount,firstcol-1,false,false)
+                                   def lcap = new CellReference(rcount,firstcol)
+                                   def lden = new CellReference(rcount,firstcol+1)
+                                   hrow.createCell((short)(firstcol)).setCellFormula( cap.formatAsString() )
+                                   hrow.createCell((short)(firstcol+1)).setCellFormula( den.formatAsString() )
+                                   hrow.createCell((short)(firstcol+2)).setCellFormula( lcap.formatAsString() + "-" + lden.formatAsString() )
+                                 }
+                               rcount++
+                            }
+
+                            def ccount = firstcol
+                            def pm_col = sheet.createRow((short)(firstrow-3))
+                            def seglen_col = sheet.createRow((short)(firstrow-2))
+                            def nlanes_col = sheet.createRow((short)(firstrow-1))
+                            for ( it2 in incidentFacilityImpactAnalysisInstance.analyzedSections ) {
+                                if ( dt != "q" ) {
+                                    // create col header for everything but the "q" page
+                                    pm_col.createCell((short)(ccount)).setCellValue(it2.section.absPostmile)
+                                    seglen_col.createCell((short)(ccount)).setCellValue(it2.section.segmentLength)
+                                    nlanes_col.createCell((short)(ccount)).setCellValue(it2.section.lanes)
+                                }
+                                
+                                // now put in all timestamps
+                                rcount = firstrow
+                                for ( it3 in it2.analyzedTimestep ) {
+                                    def row = sheet.getRow((short)rcount)
+                                    if ( row == null ) { row = sheet.createRow((short)rcount) }
+
+                                    if ( dt == "spdkm" ) {
+                                        def cs1 = new CellReference("spd",rcount,ccount,false,false);
+                                        def form = "1.6093*"+cs1.formatAsString()
+                                        row.createCell((short)(ccount)).setCellFormula( form )
+
+                                    } else if ( dt == "alpha" ) {
+                                        def co1 = new CellReference("occ",rcount,ccount,false,false);
+                                        def cv1 = new CellReference("vol",rcount,ccount,false,false);
+                                        def form = "1000*100*"+co1.formatAsString()+"/(12*"+cv1.formatAsString()+")"
+                                        row.createCell((short)(ccount)).setCellFormula( form )
+
+                                    } else if ( dt == "E(v^2)" ) {
+                                        def p1 = new CellReference("E(v^2)",firstrow-firstrow,1,true,true);
+                                        def p2 = new CellReference("E(v^2)",firstrow-firstrow,2,true,true);
+                                        def p3 = new CellReference("E(v^2)",firstrow-firstrow,3,true,true);
+                                        def cs1 = new CellReference("spdkm",rcount,ccount,false,false);
+                                        // =1.22*spdkm!B3^2-15.21*spdkm!B3+207.95
+                                        def form = "min("+p1.formatAsString()+"*"+cs1.formatAsString()+"^2"+
+                                            "+"+p2.formatAsString()+"*"+cs1.formatAsString()+
+                                            "+"+p3.formatAsString()+","+cs1.formatAsString()+")"
+                                        row.createCell((short)(ccount)).setCellFormula( form )
+
+                                    } else if ( dt == "SMS(mph)" ) {
+                                        //=(3*spdkm!B3+(9*spdkm!B3^2-8*'ev2'!B3)^0.5)/4
+                                        def ev2 = new CellReference("E(v^2)",rcount,ccount,false,false);
+                                        def cs1 = new CellReference("spdkm",rcount,ccount,false,false);
+                                        def form = "(3*"+cs1.formatAsString()+
+                                            "+(9*"+cs1.formatAsString()+"^2-8*"+ev2.formatAsString()+")^0.5)/4/1.6093"
+                                        row.createCell((short)(ccount)).setCellFormula( form )
+
+                                    } else if ( dt == "den(vplm)" ) {
+                                        //=12*vol!B3/SMS!B3
+                                        def cv1 = new CellReference("vol",rcount,ccount,false,false);
+                                        def nl = new CellReference("den(vplm)",firstrow-1,ccount,false,true);
+                                        def SMS = new CellReference("SMS(mph)",rcount,ccount,false,false);
+                                        def form = "12*"+cv1.formatAsString()+"/"+nl.formatAsString()+"/"+SMS.formatAsString()
+                                        row.createCell((short)(ccount)).setCellFormula( form )
+
+                                    } else if ( dt == "cap" ) {
+                                        def if1 = new CellReference("incident_flag",rcount,ccount,false,false);
+                                        def if2 = new CellReference("incident_flag",rcount,ccount-1,false,false)
+                                        def v = new CellReference("vol",rcount,ccount-1,false,false)
+                                        //=if(and(incident_flag!C5=1,incident_flag!B5=0),vol!B5,0)
+                                        row.createCell((short)(ccount)).setCellFormula( "if(and("+if1.formatAsString()+"=1,"+if2.formatAsString()+"=0),"+v.formatAsString()+",0)" )
+
+                                    } else if ( dt == "dem" ) {
+                                        def if1 = new CellReference("incident_flag",rcount,ccount,false,false);
+                                        def if2 = new CellReference("incident_flag",rcount,ccount-1,false,false)
+                                        def v = new CellReference("vol",rcount,ccount,false,false)
+                                        //=if(and(incident_flag!C5=1,incident_flag!B5=0),vol!B5,0)
+                                        row.createCell((short)(ccount)).setCellFormula( "if(and("+if1.formatAsString()+"=0,"+if2.formatAsString()+"=1),"+v.formatAsString()+",0)" )
+                                    } else if ( dt == "q" ) {
+                                        // do nothing
+                                    } else {
+                                        row.createCell((short)(ccount)).setCellValue( it3."$dt" )
+                                    }
+                                    rcount++
+                                }
+                                ccount++
+                            }
+                        }
+
+			// render the output (without a view)
+			response.setContentType("application/vnd.ms-excel")
+			response.setHeader("Content-disposition", "attachment;filename=${fname}") 
+
+			// write the workbook to the response output stream					
+			wb.write ( response.outputStream )
+
+                        // Close the outputstream or the grails
+                        // architecture won't try to render the
+                        // conventional view, which will cause an
+                        // error
+                        response.outputStream.close()
+		}
             }
         }
     }
