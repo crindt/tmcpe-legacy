@@ -102,7 +102,7 @@ sub get_affected_vds {
     
     my $vdsrs;
     $_ = $self->dir;
-    if ( /N/ || /W/ ) {
+    if ( /N/ || /E/ ) {
     # northbound and westbound facilities increase downstream, so
     # we want to query between [ incloc - (max dist) ] and incloc
     $vdsrs = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
@@ -171,16 +171,16 @@ sub get_pems_data {
     # OK, we need to determine the time periods for which we expect
     # data: Basically, it's every five-minute period between calcstart
     # and calcend inclusive.
-    my $cs5 = ($calcstart % 300) ? POSIX::ceil( $calcstart ) + 300 : $calcstart;
-    my $ce5 = ($calcend % 300) ? POSIX::floor( $calcend ) : $calcend;
+    my $cs5 = ($calcstart % 300) ? POSIX::floor( $calcstart/300 ) * 300 : $calcstart;
+    my $ce5 = ($calcend % 300) ? POSIX::ceil( $calcend/300 ) * 300 : $calcend;
 
     my @times;
     for ( my $ct = $cs5; $ct <= $ce5; $ct += 300 ) {
 	push @times, time2str( "%D %T", $ct );
     }
 	
-    my $ss = time2str( "%D %T", $calcstart );
-    my $es = time2str( "%D %T", $calcend );
+    my $ss = time2str( "%D %T", $cs5 );
+    my $es = time2str( "%D %T", $ce5 );
 
     print STDERR "ANALYZED TIMES BETWEEN $ss AND $es ARE:\n";
     map { print STDERR "\t$_\n"; } @times;
@@ -904,6 +904,7 @@ sub write_to_db {
 				    } );
     };
     if ( $@ ) {
+    	warn $@->{msg};
 	croak $@->{msg} ;
 	exit 1;
     }
