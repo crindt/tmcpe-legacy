@@ -347,7 +347,7 @@ sub get_pems_data {
 sub write_gams_program {
     my ( $self ) = @_;
 
-    my $eq3 = "";
+    my $eq3 = "*";
     my $eq4 = "";
     my $eq5 = "";
     my $eq6 = "";
@@ -468,6 +468,9 @@ PARAMETERS
 	
 	if ( defined( $target ) )
 	{
+	    $of << sprintf( "*		S%s = %s %s\n", 
+			    $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{vds}->id, 
+			    $data->{$i}->{$facilkey}->{stations}->{$target}->{name} );
 	    $of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{seglen} );
 	}
 	
@@ -482,6 +485,9 @@ PARAMETERS
     # gotta dump the last one too!
     if ( defined( $target ) )
     {
+	$of << sprintf( "*		S%s = %s %s\n", 
+			$targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{vds}->id, 
+			$data->{$i}->{$facilkey}->{stations}->{$target}->{name} );
 	$of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{seglen} );
     }
     $of << qq{
@@ -627,6 +633,32 @@ PARAMETERS
 	--$j;
     }
     
+    $of << qq{
+	TABLE FORCE( J1, M1 ) 
+};
+    $of << sprintf( "     " );
+    for ( $m = 0; $m < $M; ++$m )
+    {
+	$of << sprintf( " %5d", $m );
+    }
+    $of << "\n";
+    
+    $j = $J;
+    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
+		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    {
+	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
+	
+	for ( $m = 0; $m < $M; ++$m )    
+	{
+	    $ddd = 0;
+#	    $ddd = 1 if ($m == 2 && $j == 5 );
+#	    $ddd = 1 if ($m == 15 && $j == 8 );
+	    $of << sprintf( " %5.0f", $ddd );
+	}
+	$of << "\n";
+	--$j;
+    }
     
     
     $of << qq{
@@ -651,29 +683,35 @@ $eq7 EQ7
 TOTDELAY
 AVGDELAY
 NETDELAY
+FORCEEQ
 ;
 
 $objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-$bias) * L( J1 ) * P( J1, M1 ) * D( J1, M1 ) + L( J1 ) * ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[2] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, $bias * D( J1, M1 ) + P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[3] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 0.1*P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
+***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's downstream at time M1 must be <= 0
 EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+***             if j1,m1 is a boundary in time (+, later) at J1, the sum of all D's later than M1 at section J1 must be <= 0
 EQ2(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1, M1+1 ) );
+***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's later that M1 at section J1 must be <= 0
 $eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
-***             the sum over all cells upstream and later than the target cell must be zero if the target cell is a boundary cell in space(-) and time(+)
+***             if 
+***             the sum over all cells downstream and later than the target cell must be zero if the target cell is a boundary cell in space(-) and time(+)
 $eq4 EQ4(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
 $eq4                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) );
-***             the sum over all cells downstream and later than the target cell must be zero if the target cell is a boundary cell in space(+) and time(+)
+***             the sum over all cells upstream and later than the target cell must be zero if the target cell is a boundary cell in space(+) and time(+)
 $eq5 EQ5(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
 $eq5                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1+1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) );
-***             the sum over all cells downstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(+) and time(-)
+***             the sum over all cells upstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(+) and time(-)
 $eq6 EQ6(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), SUM( R1\$(ORD( R1 ) < ORD( M1 ) ), D( K1, R1 ) ) ) 
 $eq6                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1+1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) );
-***             the sum over all cells upstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(-) and time(-)
+***             the sum over all cells downstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(-) and time(-)
 $eq7 EQ7(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) < ORD( M1 ) ), D( K1, R1 ) ) ) 
 $eq7                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) );
-TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) ) );
-AVGDELAY ..	A=E=SUM( J1, SUM( M1, L( J1 ) / AV(J1,M1) * AF( J1, M1 ) ) );
-NETDELAY ..	N=E=Y-A
+TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) * D(J1,M1) ) );
+AVGDELAY ..	A=E=SUM( J1, SUM( M1, L( J1 ) / AV(J1,M1) * AF( J1, M1 ) * D(J1,M1) ) );
+NETDELAY ..	N=E=Y-A;
+FORCEEQ(J1,M1) .. D( J1, M1 ) =G= FORCE( J1, M1 );
 };
 
     # constrain based upon shockwave?
@@ -792,18 +830,22 @@ sub parse_results {
 	/^----\s+VAR Z\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
 	{
 	    $z = $1;
+	    $z = 0 if $z eq '.';
 	};
 	/^----\s+VAR Y\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
 	{
 	    $tot_delay = $1;
+	    $tot_delay = 0 if $tot_delay eq '.';
 	};
 	/^----\s+VAR N\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
 	{
 	    $net_delay = $1;
+	    $net_delay = 0 if $net_delay eq '.';
 	};
 	/^----\s+VAR A\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
 	{
 	    $avg_delay = $1;
+	    $avg_delay = 0 if $avg_delay eq '.';
 	};
       
 	/^----\s+VAR D/ && do
