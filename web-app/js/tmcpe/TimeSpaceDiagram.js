@@ -327,22 +327,22 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 		if ( j > 0 && targ.inc != d.sections[j-1].analyzedTimesteps[iind].inc )
 		{
-		    borders += "border-left-width:3px;border-left-style:solid;border-left-color:blue;";
+		    borders += "border-left-width:3px;border-left-style:solid;border-left-color:cyan;";
 		}
 		// right
 		if ( j < (d.sections.length-1) && targ.inc != d.sections[j+1].analyzedTimesteps[iind].inc )
 		{
-		    borders += "border-right-width:3px;border-right-style:solid;border-right-color:blue;";
+		    borders += "border-right-width:3px;border-right-style:solid;border-right-color:cyan;";
 		}
 		// top
 		if ( iind > 0 && targ.inc != d.sections[j].analyzedTimesteps[iind-1].inc )
 		{
-		    borders += "border-bottom-width:3px;border-bottom-style:solid;border-bottom-color:blue;";
+		    borders += "border-bottom-width:3px;border-bottom-style:solid;border-bottom-color:cyan;";
 		}
 		// bottom
 		if ( iind < (d.sections.length-1) && targ.inc != d.sections[j].analyzedTimesteps[iind+1].inc )
 		{
-		    borders += "border-top-width:3px;border-top-style:solid;border-top-color:blue;";
+		    borders += "border-top-width:3px;border-top-style:solid;border-top-color:cyan;";
 		}
 
 		//console.debug( "d.sections["+j+"].stnidx = " + d.sections[j].stnidx );
