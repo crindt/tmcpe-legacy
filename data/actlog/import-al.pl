@@ -55,9 +55,8 @@ GetOptions ("skip-al-import" => sub { $doal = 0 },
 	    "dc-band" => sub { $dc->band( $_[1] ) },
 	    "dc-prewindow=i" => sub { $dc->prewindow( $_[1] ) },
 	    "dc-postwindow=i" => sub { $dc->postwindow( $_[1] ) },
-	    "dc-vds-downstream-fudge=f" => sub { 
-		$dc->vds_downstream_fudge( $_[1] ) 
-	    },
+	    "dc-vds-downstream-fudge=f" => sub { $dc->vds_downstream_fudge( $_[1] ) },
+	    "dc-min-avg-days=i" => sub { $dc->min_avg_days( $_[1] ) }
     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 
