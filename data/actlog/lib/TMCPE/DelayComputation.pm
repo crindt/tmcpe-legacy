@@ -479,6 +479,11 @@ PARAMETERS
 	$targetj = $j;
 	--$j;
     }
+    # gotta dump the last one too!
+    if ( defined( $target ) )
+    {
+	$of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{seglen} );
+    }
     $of << qq{
 	    /
 	    };
