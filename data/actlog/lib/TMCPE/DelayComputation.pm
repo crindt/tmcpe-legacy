@@ -79,8 +79,11 @@ use Class::MethodMaker
      scalar => [ { -default => 1.0 }, 'band' ],
      scalar => [ { -default => 1 }, 'objective' ],
      scalar => [ { -default => 0.0 }, 'bias' ],
-     scalar => [ { -default => 300 }, 'reslim' ],
      scalar => [ { -default => 0 }, 'useexisting' ],
+     scalar => [ { -default => 0 }, 'use_eq3' ],
+     scalar => [ { -default => 1 }, 'use_eq4567' ],
+     scalar => [ { -default => 500000000 }, 'iterlim' ],
+     scalar => [ { -default => 300 }, 'reslim' ],  # 5 minutes
      scalar => [ qw/ logstart logend / ],
      scalar => [ qw/ calcstart calcend / ],
      scalar => [ qw/ mintimeofday mindate / ],
@@ -348,10 +351,15 @@ sub write_gams_program {
     my ( $self ) = @_;
 
     my $eq3 = "*";
-    my $eq4 = "";
-    my $eq5 = "";
-    my $eq6 = "";
-    my $eq7 = "";
+    $eq3 = "" if $self->use_eq3;
+    my $eq4 = "*" ;
+    $eq4 = "" if $self->use_eq4567;
+    my $eq5 = "*";
+    $eq5 = "" if $self->use_eq4567;
+    my $eq6 = "*";
+    $eq6 = "" if $self->use_eq4567;
+    my $eq7 = "*";
+    $eq7 = "" if $self->use_eq4567;
     my @objective;
     my $bias = $self->bias || 0;
     
@@ -676,6 +684,9 @@ OBJECTIVE
 EQ1
 EQ2
 $eq3 EQ3
+$eq3 EQ3b
+*$eq3 EQ3c
+*$eq3 EQ3d
 $eq4 EQ4
 $eq5 EQ5
 $eq6 EQ6
@@ -693,8 +704,14 @@ $objective[3] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 0.1*P(J1,M1) * D( J1, M1 ) + ( 
 EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
 ***             if j1,m1 is a boundary in time (+, later) at J1, the sum of all D's later than M1 at section J1 must be <= 0
 EQ2(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1, M1+1 ) );
-***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's later that M1 at section J1 must be <= 0
-$eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's later that M1 at section J1-1 must be <= 0
+***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
+**$eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1-1, R1 ) ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+$eq3 EQ3(J1,M1) ..	D( J1-1, M1+1 ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+***             if j1,m1 is a boundary in time (-, earlier) at section j1, the sum of all D's upstream from j1 at section time M1-1 must be <= 0
+***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
+**$eq3 EQ3b(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), D( K1, M1-1 ) ) =l= CARD(J1) +  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
+$eq3 EQ3b(J1,M1) ..	D( J1+1, M1-1 ) =l= CARD(J1) +  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
 ***             if 
 ***             the sum over all cells downstream and later than the target cell must be zero if the target cell is a boundary cell in space(-) and time(+)
 $eq4 EQ4(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
@@ -932,7 +949,7 @@ sub write_to_db {
 	    $ex->delete;	    
 	}
 
-	return if $self->bad_solution;
+	croak {msg => join(":", "BAD SOLUTION: ", $self->bad_solution ) } if $self->bad_solution;
 
 	$ia = $self->tmcpe_db->resultset( 'IncidentImpactAnalysis' )->create(
 	    {
@@ -949,13 +966,13 @@ sub write_to_db {
 					net_delay => $self->net_delay,
 					avg_delay => $self->avg_delay,
 				    } );
+	$ifa->update;
     };
     if ( $@ ) {
     	warn $@->{msg};
 	croak $@->{msg} ;
 	exit 1;
     }
-    $ifa->update;
     
     # now shove the station data in there...
     my @stations = sort { $dirscale*$a->{abs_pm} cmp $dirscale*$b->{abs_pm} } values %{$data->{$i}->{$facilkey}->{stations}};

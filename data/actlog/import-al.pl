@@ -35,6 +35,7 @@ my $tmcpe_db_host = "localhost";
 my $tmcpe_db_name = "tmcpe_test";
 my $tmcpe_db_user = "postgres";
 my $tmcpe_db_password = "";
+my $skipifexisting=1;
 
 my $dc = new TMCPE::DelayComputation();
 
@@ -46,17 +47,25 @@ GetOptions ("skip-al-import" => sub { $doal = 0 },
 	    "date-from=s" => \$datefrom,
 	    "date-to=s" => \$dateto,
 	    "use-existing" => \$useexist,
-	    "reslim=i" => \$reslim,
+	    "skip-if-existing" => \$skipifexisting,  # don't do a delay analysis if there's already a solution in the db
             "verbose" => \$verbose,
 	    "tmcpe-db-host=s" => \$tmcpe_db_host,
 	    "tmcpe-db-name=s" => \$tmcpe_db_name,
 	    "tmcpe-db-user=s" => \$tmcpe_db_user,
 	    "tmcpe-db-password=s" => \$tmcpe_db_password,
-	    "dc-band" => sub { $dc->band( $_[1] ) },
+	    "dc-band=f" => sub { $dc->band( $_[1] ) },
 	    "dc-prewindow=i" => sub { $dc->prewindow( $_[1] ) },
 	    "dc-postwindow=i" => sub { $dc->postwindow( $_[1] ) },
 	    "dc-vds-downstream-fudge=f" => sub { $dc->vds_downstream_fudge( $_[1] ) },
-	    "dc-min-avg-days=i" => sub { $dc->min_avg_days( $_[1] ) }
+	    "dc-vds-upstream-fallback=f" => sub { $dc->vds_upstream_fallback( $_[1] ) },
+	    "dc-min-avg-days=i" => sub { $dc->min_avg_days( $_[1] ) },
+	    "dc-min-obs-pct=i" => sub { $dc->min_obs_pct( $_[1] ) },
+	    "dc-use-eq3" => sub { $dc->use_eq3( 1 ) },
+	    "dc-dont-use-eq3" => sub { $dc->use_eq3( 0 ) },
+	    "dc-use-eq4567" => sub { $dc->use_eq4567( 1 ) },
+	    "dc-dont-use-eq4567" => sub { $dc->use_eq4567( 0 ) },
+	    "dc-reslim=i" => sub { $dc->reslim( $_[1] ) },
+	    "dc-iterlim=i" => sub { $dc->iterlim( $_[1] ) },
     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 
@@ -67,11 +76,18 @@ my $d12 = Caltrans::ActivityLog::Schema->connect(
     { AutoCommit => 1 },
     );
 
-my $tmcpe = TMCPE::ActivityLog::Schema->connect(
+my $tmcpeal = TMCPE::ActivityLog::Schema->connect(
     "dbi:Pg:dbname=tmcpe_test;host=localhost",
     "postgres", undef,
     { AutoCommit => 1 },
     );
+
+my $tmcpe = TMCPE::Schema->connect(
+    join("", "dbi:Pg:dbname=","tmcpe_test",";","host=","localhost"),
+    $tmcpe_db_user, $tmcpe_db_password,
+    { AutoCommit => 1, db_Schema => 'tmcpe' },
+    );
+
 
 my $vdsdb = SpatialVds::Schema->connect(
     "dbi:Pg:dbname=spatialvds;host=localhost",
@@ -278,12 +294,12 @@ sub load_al_entries {
 	    $date =~ s/-/\//g;
 	    my $stamp = join(" ", $date, $t->stamptime );
 	    
-	    my $exist = $tmcpe->resultset('D12ActivityLog')->find( $t->keyfield );
+	    my $exist = $tmcpeal->resultset('D12ActivityLog')->find( $t->keyfield );
 	    
 	    if ( not $exist ) {
 		
 		eval { 
-		    $rec = $tmcpe->resultset('D12ActivityLog')->create(
+		    $rec = $tmcpeal->resultset('D12ActivityLog')->create(
 			{
 			    keyfield => $t->keyfield,
 			    stamp => $stamp,
@@ -371,13 +387,13 @@ while ( my $t = $rs->next ) {
 			  sprintf( "%2.2d%2.2d%4.4d", $stamp[1], $stamp[2], $stamp[0] ) # the dates /should/ have leading zeros
 	);
 
-    my $exist = $tmcpe->resultset('Icad')->find( $t->keyfield );
+    my $exist = $tmcpeal->resultset('Icad')->find( $t->keyfield );
 
     if ( not $exist ) {
 	
 	
 	# OK, create the record for this entry
-	eval { $rec = $tmcpe->resultset('Icad')->create( 
+	eval { $rec = $tmcpeal->resultset('Icad')->create( 
 		   {
 		       keyfield => $t->keyfield,
 		       logid => $t->logid,
@@ -458,7 +474,7 @@ my $condition;
 #$condition->{starttime} = $datecond if $datecond;
 $condition->{cad} = { -in => [ @ARGV ] } if @ARGV;
 
-my $alrs = $tmcpe->resultset('D12ActivityLog')->search( $condition, { 
+my $alrs = $tmcpeal->resultset('D12ActivityLog')->search( $condition, { 
     'select' => [ 'cad', { min => 'stamp', -as => 'starttime' }	],
     'as'       => [ qw/ cad starttime / ],
     group_by => [ qw/ cad / ],
@@ -469,7 +485,7 @@ my $lp = new TMCPE::ActivityLog::LocationParser();
 eval {
     while ( my $al = $alrs->next ) {
 	# see if the incident is already in the database
-	my $inc = $tmcpe->resultset('Incidents')->search(
+	my $inc = $tmcpeal->resultset('Incidents')->search(
 	    { cad => $al->cad},
 	    { rows => 1 } )->single;
 
@@ -486,7 +502,7 @@ eval {
 	    elsif ( /^FAIR.*$/ || /^OC[\s_]*FAIR.*$/ ) { $type = "OCFAIR" }
 	    elsif ( /^EMERG.*$/ ) { $type = "EMERGENCY" }
 	    
-	    $inc = $tmcpe->resultset('Incidents')->create( 
+	    $inc = $tmcpeal->resultset('Incidents')->create( 
 		{ cad => $al->cad,
 		  event_type => $type,
 		  start_time => $al->get_column( 'starttime' )
@@ -494,7 +510,7 @@ eval {
 	}
 	
 	# OK, now match up the icad entry, if any
-	my $icad = $tmcpe->resultset('Icad')->search( 
+	my $icad = $tmcpeal->resultset('Icad')->search( 
 	    {
 		-or => [
 		     'd12cad' => $inc->cad,
@@ -525,7 +541,7 @@ eval {
 	}
 
 	# Now, search for any location strings in the cad logs
-	my @incloc = $tmcpe->resultset( 'D12ActivityLog' )->search( 
+	my @incloc = $tmcpeal->resultset( 'D12ActivityLog' )->search( 
 	    {
 		cad => $inc->cad
 	    },
@@ -616,9 +632,10 @@ my $condition;
 
 $condition->{start_time} = $datecond if $datecond;
 $condition->{location_vdsid} = { '!=' => undef };
+$condition->{cad} = { -in => [ @ARGV ] } if @ARGV;
 
 
-my $incrs = $tmcpe->resultset('Incidents')->search(
+my $incrs = $tmcpeal->resultset('Incidents')->search(
     $condition, 
     {
 	order_by => qw/ start_time asc /
@@ -628,8 +645,19 @@ my $incrs = $tmcpe->resultset('Incidents')->search(
 INCDEL: while( my $inc = $incrs->next ) {
 
     # skip incidents if cadids are specified and they don't match.
-    next INCDEL if ( @ARGV && not map { $inc->cad =~ /$_/ } @ARGV );
     next INCDEL if ( !( $inc->sigalert_begin ) && $onlysigalerts );
+    
+    if ( $skipifexisting ) {
+	# don't do the computation if one exists (should tweak to use confirm parameters are identical
+	my $ia;
+	my @existing = $ia = $tmcpe->resultset( 'IncidentImpactAnalysis' )->search(
+	    { incident_id => $inc->id });
+	
+	if ( @existing ) {
+	    warn "SKIPPING DELAY COMPUTATION FOR ".$inc->cad." BECAUSE ONE ALREADY EXISTS";
+	    next INCDEL;
+	}
+    }
 
     warn "SOLVING ".$inc->cad."\n";
 
@@ -639,7 +667,10 @@ INCDEL: while( my $inc = $incrs->next ) {
     $dc->tmcpe_db_password( $tmcpe_db_password );
     $dc->cad( $inc->cad );
     $dc->incid( $inc->id );
-    $dc->reslim( $reslim );
+
+    if ( !$inc->cad ) {
+	croak "INCIDENT DOESN'T have a cadid!!!!";
+    }
 
     my $vdsid = $inc->location_vdsid;
 
