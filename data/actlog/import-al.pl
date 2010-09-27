@@ -25,6 +25,7 @@ my $doicad=1;
 my $doinc=1;
 my $docritevents=1;
 my $dodelaycomp=1;
+my $onlysigalerts=0;
 my $datefrom;
 my $dateto;
 my $verbose;
@@ -37,10 +38,11 @@ my $tmcpe_db_password = "";
 
 my $dc = new TMCPE::DelayComputation();
 
-GetOptions ("skip-al" => sub { $doal = 0 },
-	    "skip-icad" => sub { $doicad = 0 },
+GetOptions ("skip-al-import" => sub { $doal = 0 },
+	    "skip-icad-import" => sub { $doicad = 0 },
 	    "skip-incidents" => sub { $doinc = 0 },
 	    "skip-critical-events" => sub { $docritevents = 0 },
+	    "only-sigalerts" => \$onlysigalerts,
 	    "date-from=s" => \$datefrom,
 	    "date-to=s" => \$dateto,
 	    "use-existing" => \$useexist,
@@ -552,7 +554,7 @@ eval {
 		    # always use R/D/L string to identify location
 		    my ( $locstr ) = ( /ROUTE\/DIR\/LOCATION:\s*(.*)/ );
 		    if ( $locstr ) {
-			$locdata = $lp->get_location( uc($locstr) ) ;
+			$locdata = $lp->get_location( uc($locstr), $inc->location_geom ) ;
 			if ( !$locdata ) {
 			    warn "FAILED TO PARSE R/D/L: $locstr";
 			    $loclogfile << $locstr."\n";
@@ -628,6 +630,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 
     # skip incidents if cadids are specified and they don't match.
     next INCDEL if ( @ARGV && not map { $inc->cad =~ /$_/ } @ARGV );
+    next INCDEL if ( !( $inc->sigalert_begin ) && $onlysigalerts );
 
     warn "SOLVING ".$inc->cad."\n";
 

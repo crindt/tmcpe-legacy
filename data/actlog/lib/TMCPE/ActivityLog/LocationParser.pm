@@ -82,7 +82,7 @@ sub get_facility {
 }
 
 sub get_vds_ramp {
-    my ($self, %a) = @_;
+    my ($self, $icad_geom, %a) = @_;
     my $facdir = $a{facdir};
     my $ramp = $a{ramp};
 
@@ -94,15 +94,35 @@ sub get_vds_ramp {
 
     $rtype = 'OR' if $rtype =~ /ON/;
     $rtype = 'FR' if $rtype =~ /OFF/;
-    
-    my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
-	{
+
+    my $crit;
+    my $order;
+    if ( $icad_geom ) {
+	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => $rtype,
 	    freeway_id => $facdir->{facility}->{ref},
 	    freeway_dir => $facdir->{dir},
-	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $rstreet ] ], # using trigram similiarity
-	},
+	    -or => {
+		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $rstreet ] ], # using trigram similiarity
+	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".${$icad_geom}.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
+            }
+        };
+        $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) desc", 
+		   'similarity desc' ];
+    } else {
+	$crit =	{
+	    district_id => 12,  # hardcoded!
+	    type_id => $rtype,
+	    freeway_id => $facdir->{facility}->{ref},
+	    freeway_dir => $facdir->{dir},
+	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $rstreet ] ] # using trigram similiarity
+        };
+        $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 'similarity desc' ];
+    }
+    
+    my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( $crit,
 	{
 	    select => [ 'id', 
 			'name', 
@@ -113,7 +133,7 @@ sub get_vds_ramp {
 			"freeway_dir = \'$facdir->{dir}\'"  
 		],
 	    as     => [ qw/ id name freeway_id freeway_dir abs_pm similarity dirmatch/ ],
-	    order_by => [ "freeway_dir = \'$facdir->{dir}\' desc", 'similarity desc' ]
+            order_by => $order
 	}
 	);
 
@@ -134,7 +154,7 @@ sub get_vds_ramp {
 }
 
 sub get_vds_fw {
-    my ( $self, %a ) = @_;
+    my ( $self, $icad_geom, %a ) = @_;
     #$facdir, $relloc, $xfacdir
     my $facdir = $a{facdir};
 
@@ -154,14 +174,35 @@ sub get_vds_fw {
     # no direction) to '<dir> OF <xfreeway>' notation
     $xfac = join( ' ', $facdir->{dir}, 'OF', $xfac );
 
-    my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
-	{
+    my $crit;
+    my $order;
+    if ( $icad_geom ) {
+	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => 'ML',
 	    freeway_id => $facdir->{facility}->{ref},
 	    freeway_dir => $facdir->{dir},
-	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xfac ] ], # using trigram similiarity
-	},
+	    -or => {
+		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xfac ] ], # using trigram similiarity
+	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".${$icad_geom}.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
+            }
+        };
+        $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) desc", 
+		   'similarity desc' ];
+    } else {
+	$crit =	{
+	    district_id => 12,  # hardcoded!
+	    type_id => 'ML',
+	    freeway_id => $facdir->{facility}->{ref},
+	    freeway_dir => $facdir->{dir},
+	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xfac ] ] # using trigram similiarity
+        };
+        $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 'similarity desc' ];
+    }
+
+
+    my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( $crit,
 	{
 	    select => [ 'id', 
 			'name', 
@@ -172,7 +213,7 @@ sub get_vds_fw {
 			"freeway_dir = \'$facdir->{dir}\'"  
 		],
 	    as     => [ qw/ id name freeway_id freeway_dir abs_pm similarity dirmatch/ ],
-	    order_by => [ "freeway_dir = \'$facdir->{dir}\' desc", 'similarity desc' ]
+	    order_by => $order
 	}
 	);
 
@@ -194,7 +235,7 @@ sub get_vds_fw {
 
 
 sub get_vds_xs {
-    my ($self, %a) = @_;
+    my ($self, $icad_geom, %a) = @_;
 
     my $facdir = $a{facdir};
     my $xstreet = $a{street};
@@ -213,17 +254,38 @@ sub get_vds_xs {
 	croak join( "NO XSTREET IN VDS LOOKUP" ); 
     };
 
-    # Do to some degenerate cases, we no longer match on the basis of
-    # freeway direction.  Instead, we prioritize on freeway direction
-    # matches.  If that fails, then we sort it out below...
-    my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
-	{
+
+    my $crit;
+    my $order;
+    if ( $icad_geom ) {
+	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => 'ML',
 	    freeway_id => $facdir->{facility}->{ref},
 #	    freeway_dir => $facdir->{dir},
-	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xstreet->{stname} ] ], # using trigram similiarity
-	},
+	    -or => {
+		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xstreet->{stname} ] ], # using trigram similiarity
+	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".${$icad_geom}.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
+            }
+        };
+        $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) desc", 
+		   'similarity desc' ];
+    } else {
+	$crit =	{
+	    district_id => 12,  # hardcoded!
+	    type_id => 'ML',
+	    freeway_id => $facdir->{facility}->{ref},
+#	    freeway_dir => $facdir->{dir},
+	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xstreet->{stname} ] ] # using trigram similiarity
+        };
+        $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 'similarity desc' ];
+    }
+
+    # Do to some degenerate cases, we no longer match on the basis of
+    # freeway direction.  Instead, we prioritize on freeway direction
+    # matches.  If that fails, then we sort it out below...
+    my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( $crit,
 	{
 	    select => [ 'id', 
 			'name', 
@@ -234,7 +296,7 @@ sub get_vds_xs {
 			"freeway_dir = \'$facdir->{dir}\'"  
 		],
 	    as     => [ qw/ id name freeway_id freeway_dir abs_pm similarity dirmatch/ ],
-	    order_by => [ "freeway_dir = \'$facdir->{dir}\' desc", 'similarity desc' ]
+	    order_by => $order
 	}
 	);
 
@@ -290,31 +352,31 @@ sub create_parser {
     #$::RD_HINT=1;
     
     my $mparser = Parse::RecDescent->new(q(
-memo: embeddedloc[ $arg[0] ] { 
+memo: embeddedloc[ $arg[0], $arg[ 2 ] ] { 
           print STDERR "SUCCESSFULLY IDENTIFIED VDS ".$item{embeddedloc}->id." [".$item{embeddedloc}->name."] AS LOCATION\n" if $::RD_TRACE; 
 	  ${$arg[1]} = $item{embeddedloc};
       } |
       /^.*$/ {print STDERR "FAILED  ON: [".$item[1]."]\n" if $::RD_TRACE }
 
-embeddedloc: incloc[ $arg[0] ] { $return = $item{incloc} } |
-       incloc[ $arg[0] ] /[-,\.]+/ { $return = $item{incloc} } |
-       /.*?[-,\.]+/ incloc[ $arg[ 0 ] ] /[-,\.]+/ { $return = $item{incloc} } |
-       /.*?[-,\.]+/ incloc[ $arg[ 0 ] ] { $return = $item{incloc} }
+embeddedloc: incloc[ $arg[0], $arg[ 1 ] ] { $return = $item{incloc} } |
+       incloc[ $arg[0], $arg[ 2 ] ] /[-,\.]+/ { $return = $item{incloc} } |
+       /.*?[-,\.]+/ incloc[ $arg[ 0 ], $arg[ 1 ]  ] /[-,\.]+/ { $return = $item{incloc} } |
+       /.*?[-,\.]+/ incloc[ $arg[ 0 ], $arg[ 1 ]  ] { $return = $item{incloc} }
 
 conto: connector to
 
-incloc: facdir[ $arg[0] ] hov connector to facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > | 
-        facdir[ $arg[0] ] connector to facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > | 
-        facdir[ $arg[0] ] to facdir[ $arg[0] ] connector { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > |
-        facdir[ $arg[0] ] connector facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > | 
-        ramp to facorst[ $arg[0] ]  { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > |
-        facdir[ $arg[0] ] relloc facdir2[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( %item ); } } <reject: $@ > |
-        facdir[ $arg[0] ] relloc facility[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( %item ); } } <reject: $@ > |
-        facdir[ $arg[0] ] relloc street { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > |
-        facdir[ $arg[0] ] relloc ramp { eval{ $return = $arg[0]->get_vds_xs( %item ); } } <reject: $@ > |
-        facdir[ $arg[0] ] on ramp  { eval{ $return = $arg[0]->get_vds_ramp( %item ); } } <reject: $@ >
+incloc: facdir[ $arg[0] ] hov connector to facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > | 
+        facdir[ $arg[0] ] connector to facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > | 
+        facdir[ $arg[0] ] to facdir[ $arg[0] ] connector { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] connector facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > | 
+        ramp to facorst[ $arg[0] ]  { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] relloc facdir2[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( $arg[ 1 ], %item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] relloc facility[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( $arg[ 1 ], %item); } } <reject: $@ > |
+        facdir[ $arg[0] ] relloc street { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] relloc ramp { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] on ramp  { eval{ $return = $arg[0]->get_vds_ramp( $arg[ 1 ], %item ); } } <reject: $@ >
 
-force:  facdir[ $arg[0] ] relloc street { eval{ $return = $arg[0]->get_vds_xs( %item ); }; return 1; } <reject: $@ >
+force:  facdir[ $arg[0] ] relloc street { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); }; return 1; } <reject: $@ >
 
         
 
@@ -409,7 +471,7 @@ camino: /\bCAMINO\b/ | /\bCAM\b/ | /\bEL CAMINO\b/
 
 sep: '-' | '/'
 
-relloc: at | /\bJ[NSEW]O\b/
+relloc: at | /\bJ?[NSEW]O\b/
 
 at: /\bAT\b/ | /\@/
 
@@ -481,10 +543,10 @@ sub testrule {
 
 
 sub get_location {
-    my ( $self, $str ) = @_;
+    my ( $self, $str, $icad_geom ) = @_;
 
     my $res = {};
-    if ( $self->parser->memo( $str, 1, $self, \$res ) ) {
+    if ( $self->parser->memo( $str, 1, $self, \$res, $icad_geom ) ) {
 	return $res;
     } else {
 	warn " FAILED TO PARSE [".$str."]" if $::RD_TRACE;
