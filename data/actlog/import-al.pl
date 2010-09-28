@@ -48,6 +48,7 @@ GetOptions ("skip-al-import" => sub { $doal = 0 },
 	    "date-to=s" => \$dateto,
 	    "use-existing" => \$useexist,
 	    "skip-if-existing" => \$skipifexisting,  # don't do a delay analysis if there's already a solution in the db
+	    "dont-skip-if-existing" => sub { $skipifexisting = 0 },  # don't do a delay analysis if there's already a solution in the db
             "verbose" => \$verbose,
 	    "tmcpe-db-host=s" => \$tmcpe_db_host,
 	    "tmcpe-db-name=s" => \$tmcpe_db_name,
@@ -650,7 +651,7 @@ INCDEL: while( my $inc = $incrs->next ) {
     if ( $skipifexisting ) {
 	# don't do the computation if one exists (should tweak to use confirm parameters are identical
 	my $ia;
-	my @existing = $ia = $tmcpe->resultset( 'IncidentImpactAnalysis' )->search(
+	my @existing = $tmcpe->resultset( 'IncidentImpactAnalysis' )->search(
 	    { incident_id => $inc->id });
 	
 	if ( @existing ) {
@@ -687,7 +688,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->vdsid( $vds->id );
 	$dc->logstart( $inc->start_time );
 
-	my @incloc = $tmcpe->resultset( 'D12ActivityLog' )->search( 
+	my @incloc = $tmcpeal->resultset( 'D12ActivityLog' )->search( 
 	    {
 		cad => $inc->cad
 	    },
