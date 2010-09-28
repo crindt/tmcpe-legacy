@@ -67,6 +67,7 @@ GetOptions ("skip-al-import" => sub { $doal = 0 },
 	    "dc-dont-use-eq4567" => sub { $dc->use_eq4567( 0 ) },
 	    "dc-reslim=i" => sub { $dc->reslim( $_[1] ) },
 	    "dc-iterlim=i" => sub { $dc->iterlim( $_[1] ) },
+	    "dc-bias=f" => sub { $dc->bias( $_[1] ) },
     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 

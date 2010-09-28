@@ -697,7 +697,7 @@ NETDELAY
 FORCEEQ
 ;
 
-$objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-$bias) * L( J1 ) * P( J1, M1 ) * D( J1, M1 ) + L( J1 ) * ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
+$objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-($bias)) * L( J1 ) * P( J1, M1 ) * D( J1, M1 ) + L( J1 ) * ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[2] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, $bias * D( J1, M1 ) + P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[3] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 0.1*P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 ***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's downstream at time M1 must be <= 0
@@ -706,12 +706,12 @@ EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  C
 EQ2(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1, M1+1 ) );
 ***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's later that M1 at section J1-1 must be <= 0
 ***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
-**$eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1-1, R1 ) ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
-$eq3 EQ3(J1,M1) ..	D( J1-1, M1+1 ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+$eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1-1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+**$eq3 EQ3(J1,M1) ..	D( J1-1, M1+1 ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
 ***             if j1,m1 is a boundary in time (-, earlier) at section j1, the sum of all D's upstream from j1 at section time M1-1 must be <= 0
 ***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
-**$eq3 EQ3b(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), D( K1, M1-1 ) ) =l= CARD(J1) +  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
-$eq3 EQ3b(J1,M1) ..	D( J1+1, M1-1 ) =l= CARD(J1) +  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
+$eq3 EQ3b(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), D( K1, M1-1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
+**$eq3 EQ3b(J1,M1) ..	D( J1+1, M1-1 ) =l= CARD(J1) +  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
 ***             if 
 ***             the sum over all cells downstream and later than the target cell must be zero if the target cell is a boundary cell in space(-) and time(+)
 $eq4 EQ4(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
