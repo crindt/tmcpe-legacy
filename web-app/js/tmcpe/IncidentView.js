@@ -19,6 +19,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     _tsd: null,
     _map: null,
     _vdsSegmentLines: null,
+    _incidentsLayer: null,
     _selectVds: null,
     _hoverVds: null,
     _facilityImpactAnalysis: null, // the active impact analysis (the one in the plot)
@@ -49,10 +50,14 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this._loadAnalyses();
 
 	this.inherited( arguments );
+
+	// This should draw the location of the incident on the map (if available)
+	this._incidentsLayerInit( {} );
     },
 
     initApp: function() {
 	this.initVdsSegmentsLayer( {} );
+	this._incidentsLayerInit( {} );
     },
 
     getMap: function() {
@@ -140,8 +145,6 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    facilityCombo.set( 'displayedValue', ff );
 	} else {
 	    this.getTsd()._displayNoAnalysis();
-	    dojo.byId('loadingAnalysisDiv').style.visibility = 'hidden';
-	    dojo.byId('noAnalysisDiv').style.visibility = 'visible';
 	}
     },
 
@@ -249,6 +252,64 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		station.feature = feature;
 	    }
 	}
+    },
+
+    _incidentsLayerInit: function() {
+	// should validate
+	var obj = this;
+
+	// Create the incidents layer.  The URL is hardcoded here...
+	var base = document.getElementById("htmldom").href;
+
+	var theParams = {};
+
+	theParams[ 'id' ] = this.incidentId;
+	
+	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
+            projection: this.getMap().displayProjection,
+            strategies: [new OpenLayers.Strategy.Fixed()],
+            protocol: new OpenLayers.Protocol.HTTP({
+            	url: base + "incident/list.geojson",//theurl,
+            	params: theParams,
+            	style: {strokeWidth: 2, strokeColor: "#ff0000", strokeOpacity: 0.25, fillColor: "#ff0000" },
+            	format: new OpenLayers.Format.GeoJSON({})
+            }),
+            reportError: true
+	});
+
+	var obj = this;
+	this._incidentsLayer.events.on({
+//            "featureselected": obj.onFeatureSelectIncident,
+//            "featureunselected": obj.onFeatureUnselectIncident,
+	});
+
+	//    map.events.register("moveend", null, function() { alert("updating query"); updateIncidentsQuery(); } )
+	this.getMap().addLayers([this._incidentsLayer]);
+
+	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
+	    fillColor: "red",
+	    strokeColor: "red"
+	}, OpenLayers.Feature.Vector.style["select"]);
+
+
+	this._hoverIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer,{ 
+ 	    hover: true,
+ 	    highlightOnly: true,
+            renderIntent: "temporary",
+	    selectStyle: hoverSelectStyle
+	    //        eventListeners: {
+	    //            beforefeaturehighlighted: report,
+	    //            featurehighlighted: report,
+	    //            featureunhighlighted: report
+	    //        }
+	});
+	this.getMap().addControl(this._hoverIncident);
+	this._hoverIncident.activate();
+
+	this._selectIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer);
+	this.getMap().addControl(this._selectIncident);
+	this._selectIncident.activate();
+
     },
 
     initVdsSegmentsLayer: function( theParams ) {

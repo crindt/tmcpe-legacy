@@ -48,6 +48,13 @@ class IncidentController {
         def now = new java.util.Date();
         def incidentCriteria = {
             and {
+                if ( params.id ) {
+                    eq( "id", params.id.toInteger() )
+                }
+                if ( params.cad ) {
+                    eq( "cad", params.cad )
+                }
+
                 section {
                     if ( params.freeway && params.freeway != '' ) {
                         eq( "freewayId", params.freeway.toInteger() )
@@ -80,7 +87,7 @@ class IncidentController {
                   sizeEq("analyses", 0)
                 }
       
-                if ( params.bbox ) {
+                if ( params.bbox && params.proj ) {
                     def bbox = params.bbox.split(",")
                     def valid = 0;
                     log.debug("============BBOX: " + bbox.join(","))
