@@ -38,8 +38,8 @@ __PACKAGE__->set_primary_key("calendar_key");
 __PACKAGE__->add_unique_constraint("calendar_pkey", ["calendar_key"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:21:08
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:G/YQ9MY2L6fDw+uN7L2dfQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-27 17:06:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:N/7Sin2HSo724VCezNXz/Q
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

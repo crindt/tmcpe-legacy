@@ -21,8 +21,8 @@ __PACKAGE__->set_primary_key("vds_id", "obs_day");
 __PACKAGE__->add_unique_constraint("pems_ramp_aggregate_pkey", ["vds_id", "obs_day"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-24 21:21:08
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qdBHJilcIPd5zxfgTfZDVw
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-27 17:06:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yq8eVfsg+SvSWwsjaVYQrw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
