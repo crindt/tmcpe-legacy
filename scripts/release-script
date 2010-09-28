@@ -13,7 +13,7 @@ newappver=`echo $new | sed 's/\(.*\)\..*/\1/g'`
 echo "if [ $newappver != $curappver ]; then sed 's/app.version=.*/app.version=$newappver/g' application.properties >tsed && mv tsed application.properties; fi"
 
 echo "git commit -a"
-echo "sed \"s/def version = { out << '[^']*' }/def version = { out << '$new' }/g\" grails-app/taglib/TmcpeTagLib.groovy > tsed && mv tsed grails-app/taglib/TmcpeTagLib.groovy"
+echo "sed \"s/def version = { out << '[^']*'/def version = { out << '$new'/g\" grails-app/taglib/TmcpeTagLib.groovy > tsed && mv tsed grails-app/taglib/TmcpeTagLib.groovy"
 echo "git commit -m 'Release $new' grails-app/taglib/TmcpeTagLib.groovy"
 echo "git tag v$new"
 

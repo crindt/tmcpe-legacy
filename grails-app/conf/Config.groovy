@@ -150,10 +150,10 @@ grails.plugins.springsecurity.securityConfigType = grails.plugins.springsecurity
 grails.plugins.springsecurity.cas.loginUri = '/login'
 grails.plugins.springsecurity.cas.serviceUrl = "${grails.serverURL}/j_spring_cas_security_check"
 grails.plugins.springsecurity.cas.serverUrlPrefix = "${grails.casURL}"
-grails.plugins.springsecurity.cas.proxyCallbackUrl = "http://${grails.serverURL}/secure/receptor"
+grails.plugins.springsecurity.cas.proxyCallbackUrl = "${grails.serverURL}/secure/receptor"
 grails.plugins.springsecurity.cas.proxyReceptorUrl = '/secure/receptor'
 // Single-sign-out
-grails.plugins.springsecurity.logout.afterLogoutUrl = "${grails.casURL}/logout?service=http://${grails.serverURL}/"
+grails.plugins.springsecurity.logout.afterLogoutUrl = "${grails.casURL}/logout?service=${grails.serverURL}/"
 
 grails.plugins.springsecurity.securityConfigType = SecurityConfigType.Annotation
 grails.plugins.springsecurity.openid.domainClass = 'edu.uci.its.auth.OpenID'

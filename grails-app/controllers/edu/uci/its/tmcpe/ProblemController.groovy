@@ -6,7 +6,7 @@ class ProblemController {
 	def springSecurityService
 
     static navigation = [
-        [group: 'dashboard', order:97, title:'Report Problem', action: 'report', id: 'problemButton', isVisible: { springSecurityService.isLoggedIn() }],
+        [group: 'dashboard', order:97, title:'Report Problem', action: 'report', isVisible: { springSecurityService.isLoggedIn() }],
         ]
 
 	def report = {

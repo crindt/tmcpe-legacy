@@ -8,7 +8,7 @@ Just change the color-values to apply your own color-scheme.
 */
 
 /* Main navigation */
-.navigation li a { background-color: #001848; /*background-color: #aaa*/ }                         /* Background-color */
+.navigation li a { background-color: #aaa; /*#001848;*/ }                         /* Background-color */
 .navigation li a { /*color: #fff;*/ }                                   /* Text color */
 .navigation li.navigation_active a { background-color: #006dba; }      /* Background-color of active item */
 .navigation li.navigation_active a:hover { background-color: #006dba;} /* Background-color of hovered active item */
