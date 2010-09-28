@@ -325,24 +325,36 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		var borders = "";
 		var targ = d.sections[j].analyzedTimesteps[iind];
 
-		if ( j > 0 && targ.inc != d.sections[j-1].analyzedTimesteps[iind].inc )
-		{
-		    borders += "border-left-width:3px;border-left-style:solid;border-left-color:cyan;";
+		// left = downstream
+		if ( j > 0 ) {
+		    var ds = d.sections[j-1].analyzedTimesteps[iind];
+		    if ( ds && targ.inc != ds.inc ) {
+			borders += "border-left-width:3px;border-left-style:solid;border-left-color:cyan;";
+		    }
 		}
-		// right
-		if ( j < (d.sections.length-1) && targ.inc != d.sections[j+1].analyzedTimesteps[iind].inc )
-		{
-		    borders += "border-right-width:3px;border-right-style:solid;border-right-color:cyan;";
+		// right = upstream
+		if ( j < (d.sections.length-1) ) {
+		    var us = d.sections[j+1].analyzedTimesteps[iind]
+		    if ( us && targ.inc != us.inc )
+		    {
+			borders += "border-right-width:3px;border-right-style:solid;border-right-color:cyan;";
+		    }
 		}
-		// top
-		if ( iind > 0 && targ.inc != d.sections[j].analyzedTimesteps[iind-1].inc )
-		{
-		    borders += "border-bottom-width:3px;border-bottom-style:solid;border-bottom-color:cyan;";
+		// top = later
+		if ( iind > 0 ) {
+		    var later = d.sections[j].analyzedTimesteps[iind-1]
+		    if ( later && targ.inc != later.inc )
+		    {
+			borders += "border-bottom-width:3px;border-bottom-style:solid;border-bottom-color:cyan;";
+		    }
 		}
-		// bottom
-		if ( iind < (d.sections.length-1) && targ.inc != d.sections[j].analyzedTimesteps[iind+1].inc )
-		{
-		    borders += "border-top-width:3px;border-top-style:solid;border-top-color:cyan;";
+		// bottom = earlier
+		if ( iind < (d.sections.length-1) ) {
+		    var earlier = d.sections[j].analyzedTimesteps[iind+1]
+		    if ( earlier && targ.inc != earlier.inc )
+		    {
+			borders += "border-top-width:3px;border-top-style:solid;border-top-color:cyan;";
+		    }
 		}
 
 		//console.debug( "d.sections["+j+"].stnidx = " + d.sections[j].stnidx );
