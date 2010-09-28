@@ -224,13 +224,26 @@ class IncidentController {
     }
 
     def showCustom = {
-        def ii = Incident.get(params.id)
-        System.err.println( "####################SHOWING CUSTOM: " + params.id )
+        def ii
+        if ( params.id ) {
+            ii = Incident.get(params.id)
+        } else if ( params.cad ) {
+            // specified as a cad search for it.
+            def c = Incident.createCriteria()
+            def theList = c.list {
+                eq( "cad", params.cad )
+            }
+            if ( theList.size() == 1 ) {
+                // Got it!
+                ii = theList[0]
+            }
+        }
         if (!ii) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
         }
         else {
+            System.err.println( "####################SHOWING CUSTOM: " + params.id + " : " + ii.cad )
             def fia = ( ii.analyses.size() > 0) ? ( ii.analyses.first().incidentFacilityImpactAnalyses.size() > 0
                                                           ? ii.analyses.first().incidentFacilityImpactAnalyses.first() : null ) : null
             def fiaid = null
