@@ -55,7 +55,7 @@ environments {
 	}
 	development {
 		grails.serverURL = "http://localhost:8080/$appName"
-		grails.casURL = "https://parsons.its.uci.edu/cas"
+		grails.casURL = "https://192.168.0.1/cas"
 	}
 	test {
 		grails.serverURL = "http://localhost:8080/$appName"
@@ -101,6 +101,7 @@ log4j = {
 	 'org.codehaus.groovy'
 	 */
 	debug 'edu.uci.its.tmcpe',
+	'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
 	'edu.uci.its'
 	//'org.springframework.security',
 	//'org.springframework.security.web',
