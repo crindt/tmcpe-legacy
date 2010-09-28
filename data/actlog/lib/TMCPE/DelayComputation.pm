@@ -934,7 +934,7 @@ sub write_to_db {
     my $ifa;
     eval {
 	# search for and delete all existing analyses
-	my @existing = $ia = $self->tmcpe_db->resultset( 'IncidentImpactAnalysis' )->search(
+	my @existing = $self->tmcpe_db->resultset( 'IncidentImpactAnalysis' )->search(
 	    {   incident_id => $self->incid });
 	foreach my $ex (@existing) {
 	    my @related = $ex->search_related( 'incident_facility_impact_analyses' );
