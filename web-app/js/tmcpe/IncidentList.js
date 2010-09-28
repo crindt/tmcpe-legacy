@@ -523,13 +523,15 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		
 		var buttonId = 'showIncidentButton-'+f.attributes.id;
 		var button;
+		var ii = f.attributes.memo.indexOf(":DOSEP:");
+		var memo = f.attributes.memo.substring(ii);
 		var cp = new dijit.layout.ContentPane(
 		    { title: "INCIDENT " + cad,
 		      content: '<table class="incidentSummary">' 
 		      + "<tr><th>CAD</th><td>" + f.attributes.cad + "</td></tr>"
-		      + '<tr><th style="width:7em">Start Time</th><td>' + f.attributes.timestamp + "</td></tr>"
+		      + '<tr><th style="width:8em;">Start Time</th><td>' + f.attributes.timestamp + "</td></tr>"
 		      + "<tr><th>Location</th><td>" + f.attributes.locString + "</td></tr>"
-		      + "<tr><th>Memo</th><td>" + f.attributes.memo + "</td></tr>"
+		      + "<tr><th>Memo</th><td>" + memo + "</td></tr>"
 		      + "<tr><th>Delay</th><td>" + f.attributes.delay + " veh-hr</td></tr>"
 		      + "<tr><th>Savings</th><td>" + f.attributes.savings + " veh-hr</td></tr>"
 		      + '<tr><td colspan=2 style="text-align:center;"><button id="'+buttonId+'"></button></td></tr>'

@@ -33,7 +33,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
     // _themeScale: Float
     //        A scaling parameter used by the colorDataAccessor.  This is generally controlled by the user interface
-    _themeScale: 0.75,
+    themeScale: 1.5,
 
     // colorDataAccessor: String
     //        The name of the standard accessor to use.  This should be set by the user interface.
@@ -117,7 +117,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 //		 && secdat.days_in_avg < 30  // fixme: make this a parameter
 //		 && secdat.pct_obs_avg < 30  // fixme: make this a parameter
 	       ) {
-		color = this._getColor( (secdat.spd-secdat.spd_avg)/secdat.spd_std, -this._themeScale, 0, '#ff0000','#00ff00' );
+		color = this._getColor( (secdat.spd-secdat.spd_avg)/secdat.spd_std, -this.themeScale, 0, '#ff0000','#00ff00' );
 	    }
 	    return color;
 	},
@@ -129,7 +129,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 //		 && secdat.days_in_avg < 30  // fixme: make this a parameter
 //		 && secdat.pct_obs_avg < 30  // fixme: make this a parameter
 	       ) {
-		color = this._getColor( (secdat.spd-secdat.spd_avg), -this._themeScale*10, 0, '#ff0000','#00ff00' );
+		color = this._getColor( (secdat.spd-secdat.spd_avg), -this.themeScale*10, 0, '#ff0000','#00ff00' );
 	    }
 	    return color
 	},
@@ -143,13 +143,13 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null && secdat.spd_std != null ) {
-		color = this._getColor( (secdat.spd-secdat.spd_avg)/secdat.spd_std, -this._themeScale, 0, '#ff0000', '#00ff00' );
+		color = this._getColor( (secdat.spd-secdat.spd_avg)/secdat.spd_std, -this.themeScale, 0, '#ff0000', '#00ff00' );
 		
 		var stdlev = (secdat.spd - secdat.spd_avg)/secdat.spd_std;
 		var tmppjm = 1; // no incident probability is default
 		if ( secdat.p_j_m == 0.5 )
 		    tmppjm = 0.5;
-		else if ( stdlev < 0 && stdlev < -this._themeScale )
+		else if ( stdlev < 0 && stdlev < -this.themeScale )
 		{
 		    tmppjm = 0.0;
 		}
@@ -179,7 +179,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     },
 
     setThemeScale: function( ths ) {
-	this._themeScale = ths;
+	this.themeScale = ths;
 	this.updateTheme();
     },
 

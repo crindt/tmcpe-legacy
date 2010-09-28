@@ -491,8 +491,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    };
 	}
 	var el = document.getElementById('tmcpe_tsd_cellinfo');
-	var str = station.vdsid + ":" + station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "] ===== " + this._tsd._data.timesteps[timeind];
-	if ( station.analyzedTimesteps[timeidx].p_j_m == 0.5 ) str += ' <span style="color:#ff0000;font-weight:bold">&lt;DATA IS UNRELIABLE&gt;</span>';
+	var str = station.vdsid + ":" + station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "], " + this._tsd._data.timesteps[timeind];
+	if ( station.analyzedTimesteps[timeidx].p_j_m == 0.5 ) str += ' <span style="color:#ff0000;font-weight:bold">&lt;UNRELIABLE&gt;</span>';
 	el.innerHTML = str;
     },
     

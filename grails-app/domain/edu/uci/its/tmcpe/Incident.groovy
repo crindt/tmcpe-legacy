@@ -223,7 +223,7 @@ class Incident {
             //timestamp( df.format( stampDateTime() ) )
             timestamp( stampDateTime() )
             locString( section?.toString() )
-            memo(firstCall ? firstCall.memo:sigalertBegin?sigalertBegin.memo : "<NO MEMO>")
+            memo(firstCall ? firstCall.memoOnly:sigalertBegin?sigalertBegin.memoOnly : "<NO MEMO>")
             section(section)
             location( bestGeom )
             geometry( section?.segGeom )

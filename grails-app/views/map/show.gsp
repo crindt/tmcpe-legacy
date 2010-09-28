@@ -100,7 +100,7 @@
 		    </td>
 		  </tr>
 		  <tr>
-		    <td><label id="timeRangeLabel" for="earliestTime">Time of Day:</label></td>
+		    <td><label id="timeRangeLabel" style="width:10em;" for="earliestTime">Time of Day:</label></td>
 		    <td>
 		      <input type="text" style="width:8em;" name="earliestTime" id="earliestTime" value="" dojoType="tmcpe.MyTimeTextBox"
 			     required="false" />

@@ -73,6 +73,40 @@ class TmcLogEntry implements Comparable {
         return is?.first();
     }
 
+    def getMemoHash() {
+        def pieces = memo.split(/:DOSEP:/)
+        def hash = [:]
+        if ( pieces.size() == 0 ) return hash
+        System.err.println( "PIECES: " + pieces )
+        hash['memo'] = pieces[0]
+        pieces.eachWithIndex() { obj,i ->
+            if ( i == 0 ) {
+                hash['memo'] = obj
+            } else {
+                def subp = obj.split(/:/)
+                if (subp.size()>1) {
+                    def key = subp[0]
+                    def val = subp[1..subp.size()-1].join(":")
+                    hash[key] = val
+                }
+            }
+        }
+        return hash
+    }
+
+    // return the first portion of the memo
+    def getMemoOnly() {
+        return getMemoHash()['memo']
+    }
+
+    def getRouteDirLocation() {
+        return getMemoHash()['Route/Dir/Location']
+    }
+
+    def getPerformanceMeasures() {
+        return getMemoHash()['PerformanceMeasures']
+    }
+
     // order by cad, stampdate, stamptime
     int compareTo( obj ) {
         int ret

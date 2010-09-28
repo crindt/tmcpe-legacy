@@ -100,7 +100,7 @@
 	  <label class="secondLabel" for="theme" style="float:left">Theme</label>
 	  <select id="mapTheme"
 		  dojoType="dijit.form.ComboBox"
-		  value=""
+		  value="stdspd"
 		  autocomplete="true"
 		  hasDownArrow="true"
 		  onChange="tsd.setTheme( dojo.byId( 'mapTheme' ).value );"
@@ -166,6 +166,7 @@
 	       jsid="tsd" 
 	       id="tsd" 
 	       style="width:100%;height:100%;"
+	       themeScale="${band?band:0}"
 	       incident="'${incidentInstance.id}'"
 	       facility="'${incidentInstance.section?.freewayId}'"
 	       direction="'${incidentInstance.section?.freewayDir}'"
