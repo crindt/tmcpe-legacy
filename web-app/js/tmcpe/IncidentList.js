@@ -522,6 +522,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		var cad = f.attributes.cad;
 		
 		var buttonId = 'showIncidentButton-'+f.attributes.id;
+		var button;
 		var cp = new dijit.layout.ContentPane(
 		    { title: "INCIDENT " + cad,
 		      content: '<table class="incidentSummary">' 
@@ -536,12 +537,20 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		      //+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
 		    });
 		this._incidentStackContainer.addChild(cp);
+
 		// Create "show details button"
 		var base = document.getElementById("htmldom").href;
-		var button =new dijit.form.Button({
+
+		var button;
+		if ( button = dijit.byId( buttonId ) ) {
+		    button.destroyRecursive();
+		}
+
+		button =new dijit.form.Button({
 		    label: "Show Incident Detail",
 		    onClick: function() { window.open(base+'incident/showCustom?id='+id); }
 		},buttonId);
+
 
 		// append button list for tooltips
 		buttons[i] = buttonId;
