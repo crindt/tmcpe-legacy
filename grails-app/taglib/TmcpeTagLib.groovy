@@ -72,5 +72,5 @@ class TmcpeTagLib {
       out << '<script>dojo.registerModulePath("tmcpe","' << resource( dir:'js/tmcpe',file:'' ) << '");</script>\n'
   }
 
-  def version = { out << '0.3.2' << ' [' << grails.util.Environment.getCurrent() << ']' }
+  def version = { out << '0.3.3' << ' [' << grails.util.Environment.getCurrent() << ']' }
 }
