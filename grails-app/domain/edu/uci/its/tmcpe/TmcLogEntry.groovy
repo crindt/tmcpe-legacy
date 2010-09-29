@@ -24,7 +24,7 @@ class TmcLogEntry implements Comparable {
     static hasMany = [ pMeas: TmcPerformanceMeasures ]
 
     Date stampDateTime
-    static transients = [ "stampDateTime", "deviceSummary" ]
+    static transients = [ "stampDateTime", "deviceSummary", "memoOnly", "performanceMeasures", "routeDirLocation" ]
 
     static mapping = {
 //        table 'ct_al_backup_2007'
@@ -91,19 +91,20 @@ class TmcLogEntry implements Comparable {
                 }
             }
         }
+        System.err.println( "MEMO: " + hash )
         return hash
     }
 
     // return the first portion of the memo
-    def getMemoOnly() {
+    public String getMemoOnly() {
         return getMemoHash()['memo']
     }
 
-    def getRouteDirLocation() {
+    public String getRouteDirLocation() {
         return getMemoHash()['Route/Dir/Location']
     }
 
-    def getPerformanceMeasures() {
+    public String getPerformanceMeasures() {
         return getMemoHash()['PerformanceMeasures']
     }
 

@@ -221,7 +221,7 @@
 	      <th field="status" dataType="String" width="10em">Status</th>
 	      <th field="deviceSummary" dataType="String" width="15em">Device</th>
 	      <th field="activitySubject" dataType="String" width="15em">Subject</th>
-	      <th field="memo" dataType="String" width="auto">Memo</th>
+	      <th field="memoOnly" dataType="String" width="auto">Memo</th>
 	    </tr>
 	  </thead>
 	</table>

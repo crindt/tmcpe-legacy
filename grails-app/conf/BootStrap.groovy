@@ -14,9 +14,11 @@ class BootStrap {
 		servletContext.setAttribute("newBeanWrapper", GlobalPropertyEditorConfig.&newBeanWrapper)
 		
 		// Set up default navigation menu items!!
+
+            
 				
 		// The login link only appears of the user is not logged in, logout appears otherwise
-		navigationService.registerItem( 'dashboard', [order:98, title:'Login', controller: 'login', isVisible: { !springSecurityService.isLoggedIn() } ] )
+		navigationService.registerItem( 'dashboard', [order:98, title:'Login', controller: 'login', action: 'casAuth', isVisible: { !springSecurityService.isLoggedIn() } ] )
 		navigationService.registerItem( 'dashboard', [order:98, title:'Logout', controller: 'logout', isVisible: { springSecurityService.isLoggedIn() } ] )
 
 		// Two different help links depending on whether the user is logged in		
@@ -96,6 +98,7 @@ class BootStrap {
 				status(le.status)
 				activitySubject( le.activitysubject )
 				memo(le.memo)
+				memoOnly(le.memoOnly)
 			}
 		}
 		
