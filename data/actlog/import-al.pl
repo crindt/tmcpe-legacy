@@ -67,7 +67,11 @@ GetOptions ("skip-al-import" => sub { $doal = 0 },
 	    "dc-dont-use-eq4567" => sub { $dc->use_eq4567( 0 ) },
 	    "dc-reslim=i" => sub { $dc->reslim( $_[1] ) },
 	    "dc-iterlim=i" => sub { $dc->iterlim( $_[1] ) },
+	    "dc-limrow=i" => sub { $dc->limrow( $_[1] ) },
 	    "dc-bias=f" => sub { $dc->bias( $_[1] ) },
+	    "dc-weight-for-distance" => sub { $dc->lengthweight( 1 ) },
+	    "dc-dont-weight-for-distance" => sub { $dc->lengthweight( 0 ) },
+	    "dc-limit-shockwave=f" => sub { $dc->use_eq8( 1 ); $dc->max_shock_speed( $_[1] ) },
     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 

@@ -82,8 +82,12 @@ use Class::MethodMaker
      scalar => [ { -default => 0 }, 'useexisting' ],
      scalar => [ { -default => 0 }, 'use_eq3' ],
      scalar => [ { -default => 1 }, 'use_eq4567' ],
+     scalar => [ { -default => 0 }, 'use_eq8' ],
+     scalar => [ { -default => 0 }, 'limrow' ],
      scalar => [ { -default => 500000000 }, 'iterlim' ],
      scalar => [ { -default => 300 }, 'reslim' ],  # 5 minutes
+     scalar => [ { -default => 1 }, 'lengthweight' ],
+     scalar => [ { -default => 15 }, 'max_shock_speed' ],  # 15 mi/hr
      scalar => [ qw/ logstart logend / ],
      scalar => [ qw/ calcstart calcend / ],
      scalar => [ qw/ mintimeofday mindate / ],
@@ -92,7 +96,6 @@ use Class::MethodMaker
      scalar => [ { -default => 'localhost' }, 'tmcpe_db_host' ],
      scalar => [ { -default => 'postgres' }, 'tmcpe_db_user' ],
      scalar => [ { -default => '' }, 'tmcpe_db_password' ],
-     
 
 #     scalar => [ { -type => 'Parse::RecDescent',
 #		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
@@ -360,8 +363,12 @@ sub write_gams_program {
     $eq6 = "" if $self->use_eq4567;
     my $eq7 = "*";
     $eq7 = "" if $self->use_eq4567;
+    my $eq8 = "*";
+    $eq8 = "" if $self->use_eq8;
     my @objective;
     my $bias = $self->bias || 0;
+
+    if ( $self->lengthweight ) { $self->objective( 2 ) }
     
     foreach my $iii (1..3)
     {
@@ -423,12 +430,14 @@ sub write_gams_program {
     print STDERR "WRITING PROGRAM $i to ".$self->gamsfile."...";
     my $RESLIM="*";
     $RESLIM = join( " = ", "OPTIONS RESLIM", $self->reslim ) if $self->reslim;
+    my $LIMROW = "*";
+    $LIMROW = join( " = ", "OPTIONS LIMROW", $self->limrow ) if $self->limrow;
     
     $of < qq{
 \$ONUELLIST
 OPTIONS ITERLIM = 500000000
 $RESLIM
-*OPTIONS LIMROW = 1000  ** UNCOMMENT TO GET LISTING OF ALL CONSTRAINTS
+$LIMROW
 OPTIONS WORK = 800000
 OPTION MIP = CPLEX;
 };
@@ -444,9 +453,9 @@ ALIAS ( M1, R1 )
 
 PARAMETERS
 };
-    
+
     $of << qq{
-	L( J1 ) section length
+	PM( J1 ) section postmile
 	    /
 };
     $j = $J;
@@ -457,23 +466,47 @@ PARAMETERS
     foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
 		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
     {
-#	my $l1 = 0;
-#	my $l2 = 0;
-#	if ( defined( $target ) )
-#	{
-#	    $l1 = abs( $data->{$i}->{$facilkey}->{stations}->{$target}->{abs_pm} - $data->{$i}->{$facilkey}->{stations}->{$st}->{abs_pm} ) / 2.0;
-#	}
-#	if ( defined( $last ) )
-#	{
-#	    $l2 = abs( $data->{$i}->{$facilkey}->{stations}->{$target}->{abs_pm} - $data->{$i}->{$facilkey}->{stations}->{$last}->{abs_pm} ) / 2.0;
-#	}
-#	
-#	if ( defined( $target ) )
-#	{
-#	    my $l = $l1 + $l2;
-#	    $of << sprintf( "		S%s	%f\n", $targetj, $l );
-#	}
+	if ( defined( $target ) )
+	{
+	    $of << sprintf( "*		S%s = %s %s\n", 
+			    $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{vds}->id, 
+			    $data->{$i}->{$facilkey}->{stations}->{$target}->{name} );
+	    $of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{abs_pm} );
+	}
 	
+	$data->{$i}->{$facilkey}->{stations}->{$st}->{index} = $targetj;
+	
+	$last = $target;
+	$lastj = $targetj;
+	$target = $st;
+	$targetj = $j;
+	--$j;
+    }
+    # gotta dump the last one too!
+    if ( defined( $target ) )
+    {
+	$of << sprintf( "*		S%s = %s %s\n", 
+			$targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{vds}->id, 
+			$data->{$i}->{$facilkey}->{stations}->{$target}->{name} );
+	$of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{abs_pm} );
+    }
+    $of << qq{
+	    /
+	    };
+
+    
+    $of << qq{
+	L( J1 ) section length
+	    /
+};
+    $j = $J;
+    $last = undef;
+    $lastj = undef;
+    $target = undef;
+    $targetj = undef;
+    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
+		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    {
 	if ( defined( $target ) )
 	{
 	    $of << sprintf( "*		S%s = %s %s\n", 
@@ -667,7 +700,12 @@ PARAMETERS
 	$of << "\n";
 	--$j;
     }
+    my $MAX_SHOCK_DIST = $self->max_shock_speed/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     
+    my $shockdir=1;
+    if ( /N/ || /E/ ) {
+	$shockdir=-1;
+    }
     
     $of << qq{
 VARIABLES
@@ -691,6 +729,8 @@ $eq4 EQ4
 $eq5 EQ5
 $eq6 EQ6
 $eq7 EQ7
+$eq8 EQ8
+$eq8 EQ8b
 TOTDELAY
 AVGDELAY
 NETDELAY
@@ -698,19 +738,19 @@ FORCEEQ
 ;
 
 $objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-($bias)) * L( J1 ) * P( J1, M1 ) * D( J1, M1 ) + L( J1 ) * ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
-$objective[2] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, $bias * D( J1, M1 ) + P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
+$objective[2] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-($bias)) *           P( J1, M1 ) * D( J1, M1 ) +           ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[3] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 0.1*P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 ***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's downstream at time M1 must be <= 0
 EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
 ***             if j1,m1 is a boundary in time (+, later) at J1, the sum of all D's later than M1 at section J1 must be <= 0
 EQ2(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1, M1+1 ) );
-***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's later that M1 at section J1-1 must be <= 0
+***             if j1,m1 is a boundary in space (+, downstream) at time m1, the sum of all D's later that M1 at section J1+1 must be <= 0
 ***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
-$eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1-1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+$eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1+1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1+1, M1 ) );
 **$eq3 EQ3(J1,M1) ..	D( J1-1, M1+1 ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
 ***             if j1,m1 is a boundary in time (-, earlier) at section j1, the sum of all D's upstream from j1 at section time M1-1 must be <= 0
 ***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
-$eq3 EQ3b(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), D( K1, M1-1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
+$eq3 EQ3b(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1-1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
 **$eq3 EQ3b(J1,M1) ..	D( J1+1, M1-1 ) =l= CARD(J1) +  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
 ***             if 
 ***             the sum over all cells downstream and later than the target cell must be zero if the target cell is a boundary cell in space(-) and time(+)
@@ -725,6 +765,11 @@ $eq6                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1
 ***             the sum over all cells downstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(-) and time(-)
 $eq7 EQ7(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) < ORD( M1 ) ), D( K1, R1 ) ) ) 
 $eq7                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) );
+** SHOCKWAVE CONSTRAINT
+** Loading wave
+$eq8 EQ8(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+$MAX_SHOCK_DIST)), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
+** Clearing wave
+$eq8 EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-$MAX_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1+1,M1) - D(J1,M1) );
 TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) * D(J1,M1) ) );
 AVGDELAY ..	A=E=SUM( J1, SUM( M1, L( J1 ) / AV(J1,M1) * AF( J1, M1 ) * D(J1,M1) ) );
 NETDELAY ..	N=E=Y-A;
