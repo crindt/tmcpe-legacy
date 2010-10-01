@@ -80,14 +80,19 @@ use Class::MethodMaker
      scalar => [ { -default => 1 }, 'objective' ],
      scalar => [ { -default => 0.0 }, 'bias' ],
      scalar => [ { -default => 0 }, 'useexisting' ],
-     scalar => [ { -default => 0 }, 'use_eq3' ],
+     scalar => [ { -default => 1 }, 'use_eq1' ],
+     scalar => [ { -default => 1 }, 'use_eq2' ],
+     scalar => [ { -default => 1 }, 'use_eq3' ],
      scalar => [ { -default => 1 }, 'use_eq4567' ],
      scalar => [ { -default => 0 }, 'use_eq8' ],
+     scalar => [ { -default => 0 }, 'use_eq8b' ],
      scalar => [ { -default => 0 }, 'limrow' ],
      scalar => [ { -default => 500000000 }, 'iterlim' ],
      scalar => [ { -default => 300 }, 'reslim' ],  # 5 minutes
      scalar => [ { -default => 1 }, 'lengthweight' ],
-     scalar => [ { -default => 15 }, 'max_shock_speed' ],  # 15 mi/hr
+     scalar => [ { -default => 15 }, 'max_load_shock_speed' ],  # 15 mi/hr
+     scalar => [ { -default => 15 }, 'max_clear_shock_speed' ],  # 15 mi/hr
+     scalar => [ { -default => {} }, 'force' ],
      scalar => [ qw/ logstart logend / ],
      scalar => [ qw/ calcstart calcend / ],
      scalar => [ qw/ mintimeofday mindate / ],
@@ -353,6 +358,12 @@ sub get_pems_data {
 sub write_gams_program {
     my ( $self ) = @_;
 
+    my $eq1 = "*";
+    $eq1 = "" if $self->use_eq1;
+
+    my $eq2 = "*";
+    $eq2 = "" if $self->use_eq2;
+
     my $eq3 = "*";
     $eq3 = "" if $self->use_eq3;
     my $eq4 = "*" ;
@@ -365,6 +376,8 @@ sub write_gams_program {
     $eq7 = "" if $self->use_eq4567;
     my $eq8 = "*";
     $eq8 = "" if $self->use_eq8;
+    my $eq8b = "*";
+    $eq8b = "" if $self->use_eq8;
     my @objective;
     my $bias = $self->bias || 0;
 
@@ -693,6 +706,7 @@ PARAMETERS
 	for ( $m = 0; $m < $M; ++$m )    
 	{
 	    $ddd = 0;
+#	    $ddd = $self->force->[$j][$m] if defined( $self->force->[$j][$m] );
 #	    $ddd = 1 if ($m == 2 && $j == 5 );
 #	    $ddd = 1 if ($m == 15 && $j == 8 );
 	    $of << sprintf( " %5.0f", $ddd );
@@ -700,12 +714,15 @@ PARAMETERS
 	$of << "\n";
 	--$j;
     }
-    my $MAX_SHOCK_DIST = $self->max_shock_speed/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
+    my $MAX_LOAD_SHOCK_DIST = $self->max_load_shock_speed/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
+    my $MAX_CLEAR_SHOCK_DIST = $self->max_clear_shock_speed/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     
     my $shockdir=1;
     if ( /N/ || /E/ ) {
 	$shockdir=-1;
     }
+
+    
     
     $of << qq{
 VARIABLES
@@ -719,8 +736,8 @@ BINARY VARIABLE D
 
 EQUATIONS
 OBJECTIVE
-EQ1
-EQ2
+$eq1 EQ1
+$eq2 EQ2
 $eq3 EQ3
 $eq3 EQ3b
 *$eq3 EQ3c
@@ -730,20 +747,31 @@ $eq5 EQ5
 $eq6 EQ6
 $eq7 EQ7
 $eq8 EQ8
-$eq8 EQ8b
+$eq8b EQ8b
 TOTDELAY
 AVGDELAY
 NETDELAY
-FORCEEQ
+*FORCEEQ
+};
+
+    if ( $self->force ) {
+	foreach my $k ( keys %{$self->force} ) {
+	    my $v = $self->force->{$k};
+	    my ( $j, $m ) = split(/:/, $k );
+	    $of << "FORCE_S$j"."_$m\n";
+	}
+    }
+	
+    $of << qq{
 ;
 
 $objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-($bias)) * L( J1 ) * P( J1, M1 ) * D( J1, M1 ) + L( J1 ) * ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[2] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-($bias)) *           P( J1, M1 ) * D( J1, M1 ) +           ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
 $objective[3] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 0.1*P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
-***             if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's downstream at time M1 must be <= 0
-EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+***             if j1,m1 is a boundary in space (-, upstream) at time m1, the sum of all D's upstream at time M1 must be <= 0
+$eq1 EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
 ***             if j1,m1 is a boundary in time (+, later) at J1, the sum of all D's later than M1 at section J1 must be <= 0
-EQ2(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1, M1+1 ) );
+$eq2 EQ2(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1, M1+1 ) );
 ***             if j1,m1 is a boundary in space (+, downstream) at time m1, the sum of all D's later that M1 at section J1+1 must be <= 0
 ***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
 $eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1+1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1+1, M1 ) );
@@ -753,30 +781,42 @@ $eq3 EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1+1, R1 ) ) =l= CARD(M
 $eq3 EQ3b(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1-1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
 **$eq3 EQ3b(J1,M1) ..	D( J1+1, M1-1 ) =l= CARD(J1) +  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
 ***             if 
-***             the sum over all cells downstream and later than the target cell must be zero if the target cell is a boundary cell in space(-) and time(+)
-$eq4 EQ4(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
-$eq4                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) );
-***             the sum over all cells upstream and later than the target cell must be zero if the target cell is a boundary cell in space(+) and time(+)
+***             the sum over all cells upstream and later than the target cell must be zero if the target cell is a boundary cell in space(-) and time(+)
+***             We tweak this to require that all sections at time M1+1 and all times at section J1-1 are non-incident as well
+$eq4 EQ4(J1,M1) ..	SUM( K1, SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
+$eq4                  =l= (2+CARD(M1)+CARD(J1))*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) )
+$eq4                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1))+SUM(K1,1-D(K1,M1+1)));
+* $eq4 EQ4(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
+* $eq4                  =l= (2+CARD(M1)+CARD(J1))*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) )
+* $eq4                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1))+SUM(K1,1-D(K1,M1+1)));
+***             the sum over all cells downstream and later than the target cell must be zero if the target cell is a boundary cell in space(+) and time(+)
 $eq5 EQ5(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
 $eq5                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1+1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) );
-***             the sum over all cells upstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(+) and time(-)
+***             the sum over all cells downstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(+) and time(-)
 $eq6 EQ6(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), SUM( R1\$(ORD( R1 ) < ORD( M1 ) ), D( K1, R1 ) ) ) 
 $eq6                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1+1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) );
-***             the sum over all cells downstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(-) and time(-)
+***             the sum over all cells upstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(-) and time(-)
+***             We tweak this to require that all sections at section J1-1 are non-incident as well
 $eq7 EQ7(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) < ORD( M1 ) ), D( K1, R1 ) ) ) 
-$eq7                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) );
+$eq7                  =l= (2+CARD(M1))*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) )
+$eq7                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1)));
 ** SHOCKWAVE CONSTRAINT
 ** Loading wave
-$eq8 EQ8(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+$MAX_SHOCK_DIST)), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
+$eq8 EQ8(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+$MAX_LOAD_SHOCK_DIST)), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
 ** Clearing wave
-$eq8 EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-$MAX_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1+1,M1) - D(J1,M1) );
+$eq8b EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-$MAX_CLEAR_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1+1,M1) - D(J1,M1) );
 TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) * D(J1,M1) ) );
 AVGDELAY ..	A=E=SUM( J1, SUM( M1, L( J1 ) / AV(J1,M1) * AF( J1, M1 ) * D(J1,M1) ) );
 NETDELAY ..	N=E=Y-A;
-FORCEEQ(J1,M1) .. D( J1, M1 ) =G= FORCE( J1, M1 );
+*FORCEEQ(J1,M1) .. D( J1, M1 ) =G= FORCE( J1, M1 );
 };
-
-    # constrain based upon shockwave?
+    if ( $self->force ) {
+	foreach my $k ( keys %{$self->force} ) {
+	    my $v = $self->force->{$k};
+	    my ( $j, $m ) = split(/:/, $k );
+	    $of << "FORCE_S$j"."_$m .. D( 'S$j', '$m' ) =e= $v;\n";
+	}
+    }
     
     $of << qq{
 MODEL BASE / ALL /;

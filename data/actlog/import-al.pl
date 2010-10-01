@@ -36,6 +36,7 @@ my $tmcpe_db_name = "tmcpe_test";
 my $tmcpe_db_user = "postgres";
 my $tmcpe_db_password = "";
 my $skipifexisting=1;
+my @forced;
 
 my $dc = new TMCPE::DelayComputation();
 
@@ -61,6 +62,8 @@ GetOptions ("skip-al-import" => sub { $doal = 0 },
 	    "dc-vds-upstream-fallback=f" => sub { $dc->vds_upstream_fallback( $_[1] ) },
 	    "dc-min-avg-days=i" => sub { $dc->min_avg_days( $_[1] ) },
 	    "dc-min-obs-pct=i" => sub { $dc->min_obs_pct( $_[1] ) },
+	    "dc-use-eq2" => sub { $dc->use_eq2( 1 ) },
+	    "dc-dont-use-eq2" => sub { $dc->use_eq2( 0 ) },
 	    "dc-use-eq3" => sub { $dc->use_eq3( 1 ) },
 	    "dc-dont-use-eq3" => sub { $dc->use_eq3( 0 ) },
 	    "dc-use-eq4567" => sub { $dc->use_eq4567( 1 ) },
@@ -71,9 +74,14 @@ GetOptions ("skip-al-import" => sub { $doal = 0 },
 	    "dc-bias=f" => sub { $dc->bias( $_[1] ) },
 	    "dc-weight-for-distance" => sub { $dc->lengthweight( 1 ) },
 	    "dc-dont-weight-for-distance" => sub { $dc->lengthweight( 0 ) },
-	    "dc-limit-shockwave=f" => sub { $dc->use_eq8( 1 ); $dc->max_shock_speed( $_[1] ) },
+	    "dc-limit-loading-shockwave=f" => sub { $dc->use_eq8( 1 ); $dc->max_load_shock_speed( $_[1] ) },
+	    "dc-limit-clearing-shockwave=f" => sub { $dc->use_eq8b( 1 ); $dc->max_clear_shock_speed( $_[1] ) },
+	    "dc-force=s" => \@forced,
     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
+my $force;
+map { my ( $j,$m,$v ) = /(\d+),(\d+)=(\d+)/ ; $force->{"$j:$m"} = $v; } @forced;
+$dc->force( $force );
 
 
 my $d12 = Caltrans::ActivityLog::Schema->connect(
