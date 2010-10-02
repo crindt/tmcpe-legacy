@@ -50,6 +50,7 @@ class TmcpeTagLib {
 
   def openlayers = {
       out << '<script src="' << resource(dir:'js/openlayers/lib/',file:'OpenLayers.js') << '"></script>'
+      out << '<script src="' << resource(dir:'js/tmcpe/',file:'BBOXHandler.js') << '"></script>'
 
       if ( grails.util.Environment.getCurrent() == grails.util.Environment.PRODUCTION ) {
          out << '<script src="http://maps.google.com/maps?file=api&amp;v=2&sensor=false&key=ABQIAAAAyBYmSWPVcV0YpoIbSHToHRR7e8w5iNj4_L2k9sczPbHcJZYRIhRedyRq4_pqB4yZdKrJiL7e0ipZQQ" type="text/javascript"></script>'
@@ -64,8 +65,8 @@ class TmcpeTagLib {
 
   def tmcpe = {
 //      out << tmcpe.dojo_1_4_google()
-      out << tmcpe.dojoUncompressed_1_4()
-//      out << tmcpe.dojo_1_4()
+//      out << tmcpe.dojoUncompressed_1_4()
+      out << tmcpe.dojo_1_4()
       out << '<link rel="stylesheet" href="' << resource( dir:'css',file:'tmcpe.css' ) << '" />\n'
 
 //      out << '<script>dojo.registerModulePath("tmcpe","js/tmcpe");</script>\n'
