@@ -4,7 +4,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <groupId>edu.uci.its</groupId>
   <artifactId>tmcpe</artifactId>
   <packaging>war</packaging>
-  <version>0.2</version>
+  <version>0.3</version>
 
   <dependencies>
     <dependency>
