@@ -108,6 +108,20 @@ use Class::MethodMaker
      new    => [ qw/ new / ]
     ];
 
+sub get_gams_file {
+     my $self = shift; 
+     my $fn = $self->cad."-".$self->facil."=".$self->dir.".gms";
+     $self->gamsfile( $fn );
+     return $fn;
+}
+
+sub get_lst_file {
+    my $self = shift; 
+    my $fn = $self->cad."-".$self->facil."=".$self->dir.".lst";
+    $self->lstfile( $fn );
+    return $fn;
+}
+
 sub get_affected_vds {
     my ( $self ) = @_;
     
@@ -394,7 +408,7 @@ sub write_gams_program {
 
     my $facilkey = join( ":", $self->facil, $self->dir );
 
-    my $of = io ( $self->gamsfile );
+    my $of = io ( $self->get_gams_file );
 
     my $J = keys %{$data->{$i}->{$facilkey}->{stations}};
     $J -= 1;
@@ -440,7 +454,7 @@ sub write_gams_program {
 	--$j;
     }
 
-    print STDERR "WRITING PROGRAM $i to ".$self->gamsfile."...";
+    print STDERR "WRITING PROGRAM $i to ".$self->get_gams_file."...";
     my $RESLIM="*";
     $RESLIM = join( " = ", "OPTIONS RESLIM", $self->reslim ) if $self->reslim;
     my $LIMROW = "*";
@@ -873,7 +887,7 @@ sub solve_program {
     print "SYNCING OVER...";
 #    my $resf = io( "/usr/local/src/lp_solve_5.5/lp_solve/lp_solve -presolve -wmps $mpsname < $self->fname|" );
 
-    my $gf = $self->gamsfile;
+    my $gf = $self->get_gams_file;
     my $gu = $self->gams_user;
     my $gh = $self->gams_host;
     
@@ -888,9 +902,9 @@ sub solve_program {
     system( "ssh $gu\@$gh 'cd tmcpe/work && /cygdrive/c/Progra~1/GAMS22.2/gams.exe $gf $RESLIM'" );
     print "done\n";
     
-    print "SYNCING BACK...".$self->lstfile;
+    print "SYNCING BACK...".$self->get_lst_file;
 
-    system( "rsync -avz $gu\@$gh:tmcpe/work/".$self->lstfile." ." );
+    system( "rsync -avz $gu\@$gh:tmcpe/work/".$self->get_lst_file." ." );
     
     print "DONE\nPROCESSING...";
 }
@@ -899,7 +913,7 @@ sub parse_results {
     my ( $self ) = @_;
 
     # Now read and parse the results returned from GAMS
-    my $resf = io( $self->lstfile );
+    my $resf = io( $self->get_lst_file );
     my $found = 0;
     my $error = 0;
 
@@ -926,7 +940,7 @@ sub parse_results {
 	}
 	/^\*\*\*\* \d+ ERROR/ && do
 	{
-	    die "CONSULT ".$self->lstfile." for details";
+	    die "CONSULT ".$self->get_lst_file." for details";
 	};
 	
 	/^----\s+VAR Z\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
