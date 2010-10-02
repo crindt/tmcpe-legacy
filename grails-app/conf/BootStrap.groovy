@@ -136,6 +136,8 @@ class BootStrap {
 				vol(secdat.vol)
 				spd(secdat.spd)
 				occ(secdat.occ)
+                                inc(secdat.incident_flag)
+                                delay(secdat.tmcpe_delay)
 			}
 		}
 	}

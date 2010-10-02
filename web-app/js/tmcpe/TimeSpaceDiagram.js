@@ -108,9 +108,66 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	return dd2;
     },
 
+    _toColorHex: function( /* integer */ v ) {
+	return this._colorAccessors._toColorHex( v );
+    },
+
+    _getColor: function( /*float*/ val, /*float*/ min, /*float*/ max, /*float*/ minval, /*float*/ maxval ) {
+	return this._colorAccessors._getColor( val, min, max, minval, maxval );
+    },
+    
     _colorAccessors: {
-	stdspd: function( i,j ) { 
-	    var secdat = this._data.sections[j].analyzedTimesteps[i];
+	
+	_getColor: function( /*float*/ val, /*float*/ min, /*float*/ max, /*float*/ minval, /*float*/ maxval ) {
+	    // summary:
+	    //		Computes a color between green and red based upon the given value and limits
+	    // description:
+	    //		If val >= max, the color is green.  If val <=
+	    //		min, the color is red.  If it's in between,
+	    //		the color is trends from green->yellow->orange->red
+	    var spdfrac = (val-min)/(max-min);
+	    if ( spdfrac < 0 )
+	    {
+		return minval;
+	    }
+	    else if ( spdfrac > 1 )
+	    {
+		return maxval;
+	    }
+	    var r = 1;
+	    var g = 1;
+	    var b = 0;
+	    if ( spdfrac <= 0.5 )
+	    {
+		r = 1;
+		g = spdfrac/0.5;
+	    }
+	    else
+	    {
+		r = ( 1 - (spdfrac-0.5)/0.5 );
+		g = 1;
+	    }
+	    //	var ret = [ parseInt( r*255 ), parseInt( g*255 ), parseInt( b*255 ), 1.0 ];
+	    var ret = "#"+[ this._toColorHex( r*255 ), this._toColorHex( g*255 ), this._toColorHex( b*255 ) ].join("");
+	    return ret;
+	},
+
+
+	_toColorHex: function( /* integer */ v ) {
+	    // summary:
+	    //		helper function to convert a decimal integer to a hexidecimal value
+	    var val = parseInt( v ).toString( 16 );
+	    if ( val.length < 2 ) val = '0' + val;
+	    return val;
+	},
+
+	stdspd: function( i,j,secdata ) { 
+	    var secdat;
+	    if ( secdata == null ) {
+		    secdat = this._data.sections[j].analyzedTimesteps[i];
+	    } else {
+		secdat = secdata;
+	    }
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null && secdat.spd_std != null 
 		 && secdat.p_j_m != 0.5  // fixme: a proxy to indicate that the historical speed estimate is tained
@@ -135,8 +192,8 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	},
 	inc: function( i,j ) { 
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
-	    var color = this._colorAccessors[ 'stdspd' ](i,j);
-	    if ( secdat != null && secdat.inc ) color = '#ff0000'; 
+	    var color = this._colorAccessors[ 'stdspd' ](i,j,secdat);
+	    if ( secdat != null && secdat.inc ) color = '#0000ff'; 
 	    return color; 
 	},
 	pjm: function( i,j ) { 
@@ -491,48 +548,6 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	}
 	// read the json data
 	this._stations = dojox.json.ref.fromJson( r );
-    },
-    
-    _getColor: function( /*float*/ val, /*float*/ min, /*float*/ max, /*float*/ minval, /*float*/ maxval ) {
-	// summary:
-	//		Computes a color between green and red based upon the given value and limits
-	// description:
-	//		If val >= max, the color is green.  If val <=
-	//		min, the color is red.  If it's in between,
-	//		the color is trends from green->yellow->orange->red
-	var spdfrac = (val-min)/(max-min);
-	if ( spdfrac < 0 )
-	{
-	    return minval;
-	}
-	else if ( spdfrac > 1 )
-	{
-	    return maxval;
-	}
-	var r = 1;
-	var g = 1;
-	var b = 0;
-	if ( spdfrac <= 0.5 )
-	{
-	    r = 1;
-	    g = spdfrac/0.5;
-	}
-	else
-	{
-	    r = ( 1 - (spdfrac-0.5)/0.5 );
-	    g = 1;
-	}
-//	var ret = [ parseInt( r*255 ), parseInt( g*255 ), parseInt( b*255 ), 1.0 ];
-	var ret = "#"+[ this._toColorHex( r*255 ), this._toColorHex( g*255 ), this._toColorHex( b*255 ) ].join("");
-	return ret;
-    },
-
-    _toColorHex: function( /* integer */ v ) {
-	// summary:
-	//		helper function to convert a decimal integer to a hexidecimal value
-	var val = parseInt( v ).toString( 16 );
-	if ( val.length < 2 ) val = '0' + val;
-	return val;
     },
 
     
