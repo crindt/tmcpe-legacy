@@ -192,6 +192,8 @@
 	    </div>
 	    <div dojoType="dijit.layout.ContentPane" region="bottom" style="padding:0px;margin:0px" >
 	       <a id="tmcpe_tsd_xls_link"></a>
+	       &nbsp;|&nbsp;
+	       <a id="tmcpe_report_problem_link"></a>
 	    </div>
           </div>
 	</div>
