@@ -20,68 +20,147 @@ use SQL::Abstract;
 use TMCPE::ActivityLog::LocationParser;
 use TMCPE::DelayComputation;
 
-my $doal=1;
-my $doicad=1;
-my $doinc=1;
-my $docritevents=1;
-my $dodelaycomp=1;
-my $onlysigalerts=0;
-my $datefrom;
-my $dateto;
-my $verbose;
-my $useexist=0;
-my $reslim=0;
-my $tmcpe_db_host = "localhost";
-my $tmcpe_db_name = "tmcpe_test";
-my $tmcpe_db_user = "postgres";
-my $tmcpe_db_password = "";
-my $skipifexisting=1;
-my @forced;
+my %opt = ();
 
-my $dc = new TMCPE::DelayComputation();
+GetOptions( \%opt, 
+	    "skip-al-import",
+	    "skip-icad-import",
+	    "skip-incidents",
+	    "skip-critical-events",
+	    "only-sigalerts",
+	    "date-from=s",
+	    "date-to=s",
+	    "use-existing",
+	    "replace-existing",
+            "verbose",
+	    "tmcpe-db-host=s",
+	    "tmcpe-db-name=s",
+	    "tmcpe-db-user=s",
+	    "tmcpe-db-password=s",
+	    "dc-band=f",
+	    "dc-prewindow=i",
+	    "dc-postwindow=i",
+	    "dc-vds-downstream-fudge=f",
+	    "dc-vds-upstream-fallback=f",
+	    "dc-min-avg-days=i",
+	    "dc-min-obs-pct=i",
+	    "dc-use-eq2",
+	    "dc-dont-use-eq2",
+	    "dc-use-eq3",
+	    "dc-dont-use-eq3",
+	    "dc-use-eq4567",
+	    "dc-dont-use-eq4567",
+	    "dc-reslim=i",
+	    "dc-iterlim=i",
+	    "dc-limrow=i",
+	    "dc-bias=f",
+	    "dc-weight-for-distance",
+	    "dc-dont-weight-for-distance",
+	    "dc-limit-loading-shockwave=f",
+	    "dc-limit-clearing-shockwave=f",
+	    "dc-force=s@",
+	    "dc-reprocess-existing",
+) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
-GetOptions ("skip-al-import" => sub { $doal = 0 },
-	    "skip-icad-import" => sub { $doicad = 0 },
-	    "skip-incidents" => sub { $doinc = 0 },
-	    "skip-critical-events" => sub { $docritevents = 0 },
-	    "only-sigalerts" => \$onlysigalerts,
-	    "date-from=s" => \$datefrom,
-	    "date-to=s" => \$dateto,
-	    "use-existing" => \$useexist,
-	    "skip-if-existing" => \$skipifexisting,  # don't do a delay analysis if there's already a solution in the db
-	    "dont-skip-if-existing" => sub { $skipifexisting = 0 },  # don't do a delay analysis if there's already a solution in the db
-            "verbose" => \$verbose,
-	    "tmcpe-db-host=s" => \$tmcpe_db_host,
-	    "tmcpe-db-name=s" => \$tmcpe_db_name,
-	    "tmcpe-db-user=s" => \$tmcpe_db_user,
-	    "tmcpe-db-password=s" => \$tmcpe_db_password,
-	    "dc-band=f" => sub { $dc->band( $_[1] ) },
-	    "dc-prewindow=i" => sub { $dc->prewindow( $_[1] ) },
-	    "dc-postwindow=i" => sub { $dc->postwindow( $_[1] ) },
-	    "dc-vds-downstream-fudge=f" => sub { $dc->vds_downstream_fudge( $_[1] ) },
-	    "dc-vds-upstream-fallback=f" => sub { $dc->vds_upstream_fallback( $_[1] ) },
-	    "dc-min-avg-days=i" => sub { $dc->min_avg_days( $_[1] ) },
-	    "dc-min-obs-pct=i" => sub { $dc->min_obs_pct( $_[1] ) },
-	    "dc-use-eq2" => sub { $dc->use_eq2( 1 ) },
-	    "dc-dont-use-eq2" => sub { $dc->use_eq2( 0 ) },
-	    "dc-use-eq3" => sub { $dc->use_eq3( 1 ) },
-	    "dc-dont-use-eq3" => sub { $dc->use_eq3( 0 ) },
-	    "dc-use-eq4567" => sub { $dc->use_eq4567( 1 ) },
-	    "dc-dont-use-eq4567" => sub { $dc->use_eq4567( 0 ) },
-	    "dc-reslim=i" => sub { $dc->reslim( $_[1] ) },
-	    "dc-iterlim=i" => sub { $dc->iterlim( $_[1] ) },
-	    "dc-limrow=i" => sub { $dc->limrow( $_[1] ) },
-	    "dc-bias=f" => sub { $dc->bias( $_[1] ) },
-	    "dc-weight-for-distance" => sub { $dc->lengthweight( 1 ) },
-	    "dc-dont-weight-for-distance" => sub { $dc->lengthweight( 0 ) },
-	    "dc-limit-loading-shockwave=f" => sub { $dc->use_eq8( 1 ); $dc->max_load_shock_speed( $_[1] ) },
-	    "dc-limit-clearing-shockwave=f" => sub { $dc->use_eq8b( 1 ); $dc->max_clear_shock_speed( $_[1] ) },
-	    "dc-force=s" => \@forced,
-    ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
-my $force;
-map { my ( $j,$m,$v ) = /(\d+),(\d+)=(\d+)/ ; $force->{"$j:$m"} = $v; } @forced;
-$dc->force( $force );
+my $procopt = {
+    al_import => 1,
+    icad_import => 1,
+    incidents => 1,
+    critical_events => 1,
+    dodelaycomp => 1,
+    only_sigalerts => 0,
+    verbose => 0,
+    useexist => 0,
+    tmcpe_db_host => "localhost",
+    tmcpe_db_name => "tmcpe_test",
+    tmcpe_db_user => "postgres",
+    tmcpe_db_password => "",
+    replace_existing => 1,
+    reprocess_existing => 1,
+    forced => []
+};
+
+foreach my $o ( keys %opt ) {
+    # negate all skips
+    my @p = split(/-/, $o);
+    my $neg = undef;
+    my @vv = ();
+    my $var = "";
+    my $dc = undef;
+    while ( $_ = shift @p ) {
+	if ( /^dc$/ ) {
+	    $dc="dc";
+	} elsif ( ( /^skip$/ || /^dont$/ ) && not @vv ) { 
+	    $neg++; 
+	} else {
+	    push @vv, $_;
+	}
+    }
+    $var = join( '_', grep { defined $_ } ( @vv ) );
+    my $on = undef;
+    if ( defined $neg ) {
+	$on = ($neg+1) % 2;
+    }
+
+    my $val = defined( $on ) ? $on : $opt{$o};
+    if ( $dc ) {
+	$procopt->{dc}{$var} = $val;
+    } else {
+	$procopt->{$var} = $val;
+    }
+
+    1;
+}
+
+
+my $verbose if $procopt->{verbose};
+my $tmcpe_db_host = $procopt->{tmcpe_db_host};
+my $tmcpe_db_name = $procopt->{tmcpe_db_name};
+my $tmcpe_db_user = $procopt->{tmcpe_db_user};
+my $tmcpe_db_password = $procopt->{tmcpe_db_password};
+
+
+1;
+# GetOptions ("skip-al-import" => sub { $procopt->{al_import} = 0 },
+# 	    "skip-icad-import" => sub { $icad_import = 0 },
+# 	    "skip-incidents" => sub { $incidents = 0 },
+# 	    "skip-critical-events" => sub { $critical_events = 0 },
+# 	    "only-sigalerts" => \$only_sigalerts,
+# 	    "date-from=s" => \$datefrom,
+# 	    "date-to=s" => \$procopt->{dateto},
+# 	    "use-existing" => \$useexist,
+# 	    "skip-if-existing" => \$procopt->{reprocess_existing},  # don't do a delay analysis if there's already a solution in the db
+# 	    "dont-skip-if-existing" => sub { $procopt->{reprocess_existing} = 0 },  # don't do a delay analysis if there's already a solution in the db
+#             "verbose" => \$verbose,
+# 	    "tmcpe-db-host=s" => \$tmcpe_db_host,
+# 	    "tmcpe-db-name=s" => \$tmcpe_db_name,
+# 	    "tmcpe-db-user=s" => \$tmcpe_db_user,
+# 	    "tmcpe-db-password=s" => \$tmcpe_db_password,
+# 	    "dc-band=f" => sub { $dc->band( $_[1] ) },
+# 	    "dc-prewindow=i" => sub { $dc->prewindow( $_[1] ) },
+# 	    "dc-postwindow=i" => sub { $dc->postwindow( $_[1] ) },
+# 	    "dc-vds-downstream-fudge=f" => sub { $dc->vds_downstream_fudge( $_[1] ) },
+# 	    "dc-vds-upstream-fallback=f" => sub { $dc->vds_upstream_fallback( $_[1] ) },
+# 	    "dc-min-avg-days=i" => sub { $dc->min_avg_days( $_[1] ) },
+# 	    "dc-min-obs-pct=i" => sub { $dc->min_obs_pct( $_[1] ) },
+# 	    "dc-use-eq2" => sub { $dc->use_eq2( 1 ) },
+# 	    "dc-dont-use-eq2" => sub { $dc->use_eq2( 0 ) },
+# 	    "dc-use-eq3" => sub { $dc->use_eq3( 1 ) },
+# 	    "dc-dont-use-eq3" => sub { $dc->use_eq3( 0 ) },
+# 	    "dc-use-eq4567" => sub { $dc->use_eq4567( 1 ) },
+# 	    "dc-dont-use-eq4567" => sub { $dc->use_eq4567( 0 ) },
+# 	    "dc-reslim=i" => sub { $dc->reslim( $_[1] ) },
+# 	    "dc-iterlim=i" => sub { $dc->iterlim( $_[1] ) },
+# 	    "dc-limrow=i" => sub { $dc->limrow( $_[1] ) },
+# 	    "dc-bias=f" => sub { $dc->bias( $_[1] ) },
+# 	    "dc-weight-for-distance" => sub { $dc->lengthweight( 1 ) },
+# 	    "dc-dont-weight-for-distance" => sub { $dc->lengthweight( 0 ) },
+# 	    "dc-limit-loading-shockwave=f" => sub { $dc->use_eq8( 1 ); $dc->max_load_shock_speed( $_[1] ) },
+# 	    "dc-limit-clearing-shockwave=f" => sub { $dc->use_eq8b( 1 ); $dc->max_clear_shock_speed( $_[1] ) },
+# 	    "dc-force=s" => \@forced,
+#     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
+
 
 
 my $d12 = Caltrans::ActivityLog::Schema->connect(
@@ -133,7 +212,7 @@ lanetype: 'HOV' | '#'
     );
 
 
-goto ICAD if not $doal;
+goto ICAD if not $procopt->{al_import};
 
 foreach my $table ( ( map { "CtAlBackup$_" } ( 2003..2010 ) ) , "CtAlTransaction" )
 {
@@ -288,8 +367,8 @@ sub load_al_entries {
     eval {
 	my $condition = {};
 	my $datecond;
-	$datecond->{'>='} = $datefrom if $datefrom;
-	$datecond->{'<='} = $dateto   if $dateto;
+	$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
+	$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
 	
 	$condition->{stampdate} = $datecond if $datecond;
 	
@@ -352,7 +431,7 @@ sub load_al_entries {
 
 ICAD:
 
-    goto INCIDENTS if not $doicad;
+    goto INCIDENTS if not $procopt->{icad_import};
 
 print STDERR "PROCESSING ICAD...";
 
@@ -360,13 +439,13 @@ my $rs;
 eval {
     my $condition = {};
     my $datecond;
-    $datecond->{'>='} = $datefrom if $datefrom;
-    $datecond->{'<='} = $dateto   if $dateto;
+    $datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
+    $datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
     
     $condition->{logtime} = $datecond if $datecond;
 
     my $txt1 = "STR_TO_DATE( logtime, '%m/%d/%Y %h:%i:%s %p' )";
-    my $txt2 = "STR_TO_DATE('$datefrom','%Y-%m-%d')";
+    my $txt2 = "STR_TO_DATE('$procopt->{datefrom}','%Y-%m-%d')";
     
     $rs = $d12->resultset('UciAtIcad')->search(	
 	{
@@ -475,12 +554,12 @@ print STDERR "$imported imported and $dup duplicates ignored out of $tot total e
 # from the cad id
 INCIDENTS:
 
-    goto CRITEVENTS if not $doinc;
+    goto CRITEVENTS if not $procopt->{incidents};
 
 # Add to/update incidents
 my $datecond;
-$datecond->{'>='} = $datefrom if $datefrom;
-$datecond->{'<='} = $dateto   if $dateto;
+$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
+$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
 
 my $condition;
 
@@ -633,14 +712,14 @@ if ( $@ ) {
 
 # next, we should parse the new entries to identify critical events,
 # including incidents to analyze
-CRITEVENTS: goto DONE if not $docritevents;
+CRITEVENTS: goto DONE if not $procopt->{critical_events};
 
 
-DELAYCOMP: goto DONE if not $dodelaycomp;
+DELAYCOMP: goto DONE if not $procopt->{dodelaycomp};
 
 my $datecond;
-$datecond->{'>='} = $datefrom if $datefrom;
-$datecond->{'<='} = $dateto   if $dateto;
+$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
+$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
 
 my $condition;
 
@@ -659,9 +738,9 @@ my $incrs = $tmcpeal->resultset('Incidents')->search(
 INCDEL: while( my $inc = $incrs->next ) {
 
     # skip incidents if cadids are specified and they don't match.
-    next INCDEL if ( !( $inc->sigalert_begin ) && $onlysigalerts );
+    next INCDEL if ( !( $inc->sigalert_begin ) && $procopt->{only_sigalerts} );
     
-    if ( $skipifexisting ) {
+    if ( not $procopt->{replace_existing} ) {
 	# don't do the computation if one exists (should tweak to use confirm parameters are identical
 	my $ia;
 	my @existing = $tmcpe->resultset( 'IncidentImpactAnalysis' )->search(
@@ -675,6 +754,12 @@ INCDEL: while( my $inc = $incrs->next ) {
 
     warn "SOLVING ".$inc->cad."\n";
 
+    my $dc = new TMCPE::DelayComputation();
+
+    my $force;
+    map { my ( $j,$m,$v ) = /(\d+),(\d+)=(\d+)/ ; $force->{"$j:$m"} = $v; } @{$procopt->{forced}};
+    $dc->force( $force );
+    
     $dc->tmcpe_db_host( $tmcpe_db_host );
     $dc->tmcpe_db_name( $tmcpe_db_name );
     $dc->tmcpe_db_user( $tmcpe_db_user );
@@ -682,12 +767,19 @@ INCDEL: while( my $inc = $incrs->next ) {
     $dc->cad( $inc->cad );
     $dc->incid( $inc->id );
 
+    foreach my $o ( keys %{$procopt->{dc}} ) {
+	my $val = $procopt->{dc}{$o};
+	my $cmd = "\$dc->$o( $val )";
+	eval $cmd;
+	croak "FAILED SETTING DELAYCOMP OPTION: $@\n" if $@;
+    }
+    
     if ( !$inc->cad ) {
 	croak "INCIDENT DOESN'T have a cadid!!!!";
     }
-
+    
     my $vdsid = $inc->location_vdsid;
-
+    
     eval { 
 	my $vds = $tbmapdb->resultset('Tvd')->find( $vdsid );
 	if ( !$vds ) {
@@ -700,6 +792,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->pm( $vds->abs_pm );
 	$dc->vdsid( $vds->id );
 	$dc->logstart( $inc->start_time );
+	$dc->bad_solution( 0 );
 
 	my @incloc = $tmcpeal->resultset( 'D12ActivityLog' )->search( 
 	    {
@@ -711,7 +804,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 	my $end = pop @incloc;
 
 	$dc->logend( $end->stamp );
-	$dc->useexisting( $useexist );
+	$dc->useexisting( $procopt->{dc}{reprocess_existing} );
 	
 	$dc->compute_delay;
 

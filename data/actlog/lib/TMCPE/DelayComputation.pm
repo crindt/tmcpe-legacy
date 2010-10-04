@@ -67,6 +67,7 @@ use Class::MethodMaker
 		 'gamsfile' ],
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".lst" } }, 
 		 'lstfile' ],
+     scalar => [ { -default => 0 }, 'debug' ],
      scalar => [ { -default => 10 }, 'vds_upstream_fallback' ],
      scalar => [ { -default => 1 }, 'vds_downstream_fudge' ],
      scalar => [ { -default => '192.168.0.3' }, 'gams_host' ],
@@ -79,7 +80,7 @@ use Class::MethodMaker
      scalar => [ { -default => 1.0 }, 'band' ],
      scalar => [ { -default => 1 }, 'objective' ],
      scalar => [ { -default => 0.0 }, 'bias' ],
-     scalar => [ { -default => 0 }, 'useexisting' ],
+     scalar => [ { -default => 0 }, 'reprocess_existing' ],
      scalar => [ { -default => 1 }, 'use_eq1' ],
      scalar => [ { -default => 1 }, 'use_eq2' ],
      scalar => [ { -default => 1 }, 'use_eq3' ],
@@ -89,9 +90,9 @@ use Class::MethodMaker
      scalar => [ { -default => 0 }, 'limrow' ],
      scalar => [ { -default => 500000000 }, 'iterlim' ],
      scalar => [ { -default => 300 }, 'reslim' ],  # 5 minutes
-     scalar => [ { -default => 1 }, 'lengthweight' ],
-     scalar => [ { -default => 15 }, 'max_load_shock_speed' ],  # 15 mi/hr
-     scalar => [ { -default => 15 }, 'max_clear_shock_speed' ],  # 15 mi/hr
+     scalar => [ { -default => 1 }, 'weight_for_distance' ],
+     scalar => [ { -default => 15 }, 'limit_loading_shockwave' ],  # 15 mi/hr
+     scalar => [ { -default => 15 }, 'limit_clearing_shockwave' ],  # 15 mi/hr
      scalar => [ { -default => {} }, 'force' ],
      scalar => [ qw/ logstart logend / ],
      scalar => [ qw/ calcstart calcend / ],
@@ -163,6 +164,243 @@ sub get_affected_vds {
 
     return $vdsrs->all
     
+}
+
+# routine to read data from an existing GAMS program file
+sub get_gams_data {
+    my ( $self, @avds ) = @_;
+
+    my @tt = Localtime(str2time($self->logstart));
+    my $incstart = Mktime(@tt[0..5]);
+    my $calcstart = Mktime(Add_Delta_DHMS(@tt[0..5],0,0,-$self->prewindow,0));
+    $self->calcstart( $calcstart );
+    @tt = Localtime(str2time($self->logend));
+    my $incend   = Mktime(@tt[0..5]);
+    my $calcend   = Mktime(Add_Delta_DHMS(@tt[0..5],0,0,$self->postwindow,0));
+    $self->calcend( $calcend );
+
+
+    my $if = io ( $self->get_gams_file );
+
+    my $inseclen=0;
+    my $inpjm=0;
+    my $inv=0;
+    my $inav=0;
+    my $inf=0;
+    my $inaf=0;
+    my $delimcount;
+    my $insets=0;
+    my $inparams=0;
+    my ( $mstart, $mend );
+    my ( $jstart, $jend );
+    my $pjmcnt;
+    my $vcnt;
+    my $avcnt;
+    my $fcnt;
+    my $afcnt;
+    my $seccnt;
+    my $facilkey = join( ":", $self->facil, $self->dir );
+    my $i = $self->cad;
+    my $data;
+
+    foreach my $vds ( @avds ) {
+	my $vdsid = $vds->id;
+	my $facilkey = join( ":", $vds->freeway_id, $vds->freeway_dir );
+	
+	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{vds} = $vds;
+	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{abs_pm} = $vds->abs_pm;
+	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{fwy} = $vds->freeway_id;
+	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{dir} = $vds->freeway_dir;
+	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{name} = $vds->name;
+	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{seglen} = $vds->length;
+    };
+
+    # OK, we need to determine the time periods for which we expect
+    # data: Basically, it's every five-minute period between calcstart
+    # and calcend inclusive.
+    my $cs5 = ($calcstart % 300) ? POSIX::floor( $calcstart/300 ) * 300 : $calcstart;
+    my $ce5 = ($calcend % 300) ? POSIX::ceil( $calcend/300 ) * 300 : $calcend;
+
+    my @times;
+    for ( my $ct = $cs5; $ct <= $ce5; $ct += 300 ) {
+	push @times, time2str( "%D %T", $ct );
+    }
+
+
+    my $secs;
+
+    my @ms;
+
+  LINE:
+    while( my $line = $if->getline() ) {
+	$_ = $line;
+	if ( $inparams ) {
+	    if ( $inseclen ) {
+		# read sections
+		/^\s*\/\s*$/ && do { if ( ++$delimcount > 1 ) { 
+		    $inseclen = 0 }; 
+		};
+		/^\*\s+S(\d+)\s=\s(\d+)\s(.*?)\s*$/ && do {
+		    my ( $secnum, $vdsid, $vdsname ) = ($1,$2,$3);
+		    $seccnt++;
+		    # store seclens here
+		    $secs->{$secnum} = { vdsid => $vdsid, vdsname => $vdsname, secnum => $secnum };
+		}
+	    } elsif ( $inpjm ) {
+		# read evidence
+		if ( $pjmcnt < 0 ) {  # the headers
+		    @ms = grep { $_ ne "" } split( /\s+/, $_ );
+		} else {
+		    my ( $sec, @pjm ) = grep { $_ ne "" } split( /\s+/, $_ );
+
+		    # store evidence here
+		    my $vdsid = $secs->{$pjmcnt}->{vdsid};
+		    croak "BAD VDSID IN PJM READ" if not $vdsid;
+		    for my $m (0..$#pjm) {
+			# do the date/time here too
+			my ($date,$time) = split(/\s+/, $times[$m]);			
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{date} = $date;
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{timeofday} = $time;
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{days_in_avg} = $pjm[$m] == 0.5 ? 0 : 30;
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{avg_pctobs} = $pjm[$m] == 0.5 ? 0 : 100;
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{p_j_m} = $pjm[$m];
+		    }
+
+		}
+		$pjmcnt++;
+		if ( $pjmcnt > $jend ) {
+		    # we've read all the evidence
+		    $inpjm = 0;
+		}
+	    } elsif ( $inv ) {
+		# read speeds
+		if ( $vcnt < 0 ) {  # the headers
+		    @ms = grep { $_ ne "" } split( /\s+/, $_ );
+		} else {
+		    my ( $sec, @v ) = grep { $_ ne "" } split( /\s+/, $_ );
+
+		    # store speeds here
+		    my $vdsid = $secs->{$vcnt}->{vdsid};
+		    croak "BAD VDSID IN V READ" if not $vdsid;
+		    for my $m (0..$#v) {
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{incspd} = $v[$m];
+		    }
+		}
+		$vcnt++;
+		if ( $vcnt > $jend ) {
+		    # we've read all the evidence
+		    $inv = 0;
+		}
+	    } elsif ( $inav ) {
+		# read avg speeds
+		if ( $avcnt < 0 ) {  # the headers
+		    @ms = grep { $_ ne "" } split( /\s+/, $_ );
+		} else {
+		    my ( $sec, @av ) = grep { $_ ne "" } split( /\s+/, $_ );
+
+		    # store avg speeds here
+		    my $vdsid = $secs->{$avcnt}->{vdsid};
+		    croak "BAD VDSID IN AV READ" if not $vdsid;
+		    for my $m (0..$#av) {
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{avg_spd} = $av[$m];
+		    }
+		}
+		$avcnt++;
+		if ( $avcnt > $jend ) {
+		    # we've read all the evidence
+		    $inav = 0;
+		}
+	    } elsif ( $inf ) {
+		# read flows
+		if ( $fcnt < 0 ) {  # the headers
+		    @ms = grep { $_ ne "" } split( /\s+/, $_ );
+		} else {
+		    my ( $sec, @f ) = grep { $_ ne "" } split( /\s+/, $_ );
+
+		    # store flow here
+		    my $vdsid = $secs->{$fcnt}->{vdsid};
+		    croak "BAD VDSID IN F READ" if not $vdsid;
+		    for my $m (0..$#f) {
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{incflw} = $f[$m];
+		    }
+		}
+		$fcnt++;
+		if ( $fcnt > $jend ) {
+		    # we've read all the evidence
+		    $inf = 0;
+		}
+	    } elsif ( $inaf ) {
+		# read avg speeds
+		if ( $afcnt < 0 ) {  # the headers
+		    @ms = grep { $_ ne "" } split( /\s+/, $_ );
+		} else {
+		    my ( $sec, @af ) = grep { $_ ne "" } split( /\s+/, $_ );
+
+		    # store avg flow here
+		    my $vdsid = $secs->{$afcnt}->{vdsid};
+		    croak "BAD VDSID IN AF READ" if not $vdsid;
+		    for my $m (0..$#af) {
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{avg_flw} = $af[$m];
+		    }
+		}
+		$afcnt++;
+		if ( $afcnt > $jend ) {
+		    # we've read all the evidence
+		    $inaf = 0;
+		}
+	    }
+
+
+	    /\s+L\(\s*J1\s*\)\ssection\slength/ && do { $inseclen = 1; $delimcount = 0; $seccnt = 0; };
+	    /\s+TABLE\s+P\(\s*J1\s*,\s*M1\s*\)\sEvidence/ && do { $inpjm = 1; $pjmcnt=-1; };
+	    /\s+TABLE\s+V\(\s*J1\s*,\s*M1\s*\)/ && do { $inv = 1; $vcnt = -1 };
+	    /\s+TABLE\s+AV\(\s*J1\s*,\s*M1\s*\)/ && do { $inav = 1; $avcnt = -1 };
+	    /\s+TABLE\s+F\(\s*J1\s*,\s*M1\s*\)/ && do { $inf = 1; $fcnt = -1 };
+	    /\s+TABLE\s+AF\(\s*J1\s*,\s*M1\s*\)/ && do { $inaf = 1; $afcnt = -1 };
+	}
+
+
+	/^\s*SETS/ && do { 
+	    $insets = 1; 
+	};
+	if ( $insets ) {
+	    /\s*J1\s*Sections\s*\/S(\d+)\*S(\d+)\// && do {
+		($jstart, $jend) = ($1,$2);
+	    };
+	    /\s*M1\s*Time\sSteps\s*\/(\d+)\*(\d+)\// && do {
+		($mstart, $mend) = ($1,$2);
+	    };
+
+	}
+
+	/\s*PARAMETERS/ && do { 
+	    $insets = 0; $inparams = 1 
+	};
+    }
+    $self->data( $data );
+
+
+    my $J = keys %{$data->{$i}->{$facilkey}->{stations}};
+    $J -= 1;
+    my $M = 0;
+    map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$data->{$i}->{$facilkey}->{stations}};
+
+    my $j = $J;
+
+    $self->stationdata( [] );
+    $self->stationmap( {} );
+    $self->timemap( {} );
+
+    foreach my $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
+		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    {
+	for ( my $m = 0; $m < $M; ++$m )    
+	{
+	    $self->stationdata->[$j] = $data->{$i}->{$facilkey}->{stations}->{$st};
+	    $self->stationmap->{$data->{$i}->{$facilkey}->{stations}->{$st}->{vds}->id} = $j
+	}
+	--$j;
+    }
 }
 
 
@@ -395,7 +633,7 @@ sub write_gams_program {
     my @objective;
     my $bias = $self->bias || 0;
 
-    if ( $self->lengthweight ) { $self->objective( 2 ) }
+    if ( $self->weight_for_distance ) { $self->objective( 2 ) }
     
     foreach my $iii (1..3)
     {
@@ -728,8 +966,8 @@ PARAMETERS
 	$of << "\n";
 	--$j;
     }
-    my $MAX_LOAD_SHOCK_DIST = $self->max_load_shock_speed/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
-    my $MAX_CLEAR_SHOCK_DIST = $self->max_clear_shock_speed/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
+    my $MAX_LOAD_SHOCK_DIST = $self->limit_loading_shockwave/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
+    my $MAX_CLEAR_SHOCK_DIST = $self->limit_clearing_shockwave/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     
     my $shockdir=1;
     if ( /N/ || /E/ ) {
@@ -993,7 +1231,7 @@ sub parse_results {
 	    my ($nada, $val ) = split( /\s+/, $3 );
 	    $val = 0 if ( $val eq '.' || $val != 1 );
 	    $cell->[$1]->[$2]->{inc} = $val;
-	    print "INC: ($1,$2) = $val\n";
+	    print "INC: ($1,$2) = $val\n" if $self->debug;
 	};
     }
     print STDERR "done\n";
@@ -1068,9 +1306,8 @@ sub write_to_db {
 	$ifa->update;
     };
     if ( $@ ) {
-    	warn $@->{msg};
-	croak $@->{msg} ;
-	exit 1;
+    	warn ( ref $@ ? $@->{msg} : $@ );
+    	croak ( ref $@ ? $@->{msg} : $@ );
     }
     
     # now shove the station data in there...
@@ -1100,7 +1337,8 @@ sub write_to_db {
 		}
 		my $stnidx = $self->stationmap->{$station->{vds}->id};
 		my $iflag = defined $self->cell->[$stnidx][$m]->{inc} ? $self->cell->[$stnidx][$m]->{inc} + 0 : 0;
-		printf STDERR "\t* ".join( ' ', '(',$cnt,$m,') -> [', $J-$cnt, $m, ']', $secdat->{date}, $secdat->{timeofday}, $iflag ) . "\n";
+		printf STDERR "\t* ".join( ' ', '(',$cnt,$m,') -> [', $J-$cnt, $m, ']', $secdat->{date}, $secdat->{timeofday}, $iflag,
+		    $secdat->{incspd}, $secdat->{avg_spd}) . "\n";
 		$at = $as->create_related( 'incident_section_datas', 
 					   {
 					       fivemin => join( ' ', $secdat->{date}, $secdat->{timeofday} ),
@@ -1245,9 +1483,16 @@ sub compute_delay {
 
     my @avds = $self->get_affected_vds( $self->facil, $self->dir, $self->pm );
 
+    
+    if ( $self->reprocess_existing && 0 ) {
+	# read old data from the gams program
+	$self->get_gams_data( @avds );
+
+    } else {
 	$self->get_pems_data( @avds );
+    }
 	
-    if ( !$self->useexisting ) {
+    if ( !$self->reprocess_existing ) {
 	$self->write_gams_program( );
 	
 	$self->solve_program( );
