@@ -28,7 +28,7 @@ class AnalyzedSection implements Comparable {
     // This induces an ordering on section lists.  Upstream sections come first
     int compareTo( obj ) {
         int dir = 1;
-        if ( section.freewayDir == 'N' || section.freewayDir == 'E' ) dir = -1;
+        if ( section.freewayDir == 'S' || section.freewayDir == 'W' ) dir = -1;
         float tmp = dir * ( section.absPostmile - obj.section.absPostmile );
         return tmp < 0 ? -1 : ( float == 0 ? 0 : 1 )
     } 

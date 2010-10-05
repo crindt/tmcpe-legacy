@@ -109,7 +109,7 @@ sub get_vds_ramp {
             }
         };
         $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
-		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) desc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
 		   'similarity desc' ];
     } else {
 	$crit =	{
@@ -188,7 +188,7 @@ sub get_vds_fw {
             }
         };
         $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
-		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) desc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
 		   'similarity desc' ];
     } else {
 	$crit =	{
@@ -255,6 +255,8 @@ sub get_vds_xs {
     };
 
 
+    my $xstreetname = $xstreet->{stname};
+    $xstreetname =~ s/^\s*(.*?)\s*/$1/g;
     my $crit;
     my $order;
     if ( $icad_geom ) {
@@ -264,12 +266,12 @@ sub get_vds_xs {
 	    freeway_id => $facdir->{facility}->{ref},
 #	    freeway_dir => $facdir->{dir},
 	    -or => {
-		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xstreet->{stname} ] ], # using trigram similiarity
+		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xstreetname ] ], # using trigram similiarity
 	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".${$icad_geom}.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
             }
         };
         $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
-		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) desc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
 		   'similarity desc' ];
     } else {
 	$crit =	{
@@ -277,7 +279,7 @@ sub get_vds_xs {
 	    type_id => 'ML',
 	    freeway_id => $facdir->{facility}->{ref},
 #	    freeway_dir => $facdir->{dir},
-	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xstreet->{stname} ] ] # using trigram similiarity
+	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xstreetname ] ] # using trigram similiarity
         };
         $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 'similarity desc' ];
     }
@@ -285,6 +287,7 @@ sub get_vds_xs {
     # Do to some degenerate cases, we no longer match on the basis of
     # freeway direction.  Instead, we prioritize on freeway direction
     # matches.  If that fails, then we sort it out below...
+    my $geom = $icad_geom ? ${$icad_geom} : "POINT(0,0)";
     my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( $crit,
 	{
 	    select => [ 'id', 
@@ -292,10 +295,11 @@ sub get_vds_xs {
 			'freeway_id',
 			'freeway_dir',
 			'abs_pm',
-			{similarity => [ 'name', "'$xstreet->{stname}'" ]},
-			"freeway_dir = \'$facdir->{dir}\'"  
+			{similarity => [ 'name', "'$xstreetname'" ]},
+			"freeway_dir = \'$facdir->{dir}\'",
+			{ st_distance => [ 'st_transform( '.$geom.', 2230 )', 'st_transform( geom, 2230 )'], -as => 'dist' }
 		],
-	    as     => [ qw/ id name freeway_id freeway_dir abs_pm similarity dirmatch/ ],
+	    as     => [ qw/ id name freeway_id freeway_dir abs_pm similarity dirmatch dist/ ],
 	    order_by => $order
 	}
 	);
@@ -303,7 +307,7 @@ sub get_vds_xs {
     # At this point, @res should contain a list of similar vds with names similar to the specified cross street
     if ( @res ) {
 	# For now, we'll just take the first one.
-	print STDERR "CANDIDATES FOR $facdir->{dir}B $facdir->{facility}->{net}-$facdir->{facility}->{ref} @ $xstreet->{stname}\n" if $::RD_TRACE;
+	print STDERR "CANDIDATES FOR $facdir->{dir}B $facdir->{facility}->{net}-$facdir->{facility}->{ref} @ $xstreetname\n" if $::RD_TRACE;
 	print STDERR "\t".join( ",", map{ $_->freeway_dir . "B " . $_->name } @res )."\n" if $::RD_TRACE;
 
 	my $vds = shift @res;
@@ -338,7 +342,7 @@ sub get_vds_xs {
 
 	return $vds;
     } else {
-	croak "NO VDS FOUND TO MATCH $facdir->{dir}B $facdir->{facility}->{net}-$facdir->{facility}->{ref} @ $xstreet->{stname}"
+	croak "NO VDS FOUND TO MATCH $facdir->{dir}B $facdir->{facility}->{net}-$facdir->{facility}->{ref} @ $xstreetname"
     }
 }
 
@@ -500,7 +504,7 @@ net: /\bI/ |
      /\bSR/| 
      /\bCA/
 
-facnum: /\d+/
+facnum: /\d+\b/
 
 facmod: hov | connector
 

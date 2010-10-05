@@ -31,7 +31,16 @@ LINE: while( my $line = uc($f->getline()) ) {
     if ( ! $locdata ) {
 	warn "FAILED ON $line";
     } else {
-	warn "SUCCESS ON $line";
+	warn "SUCCESS ON $line: vds=".join( "",
+					    $locdata->id,
+					    " [",
+					    $locdata->freeway_id,
+					    "-",
+					    $locdata->freeway_dir,
+					    " @ ",
+					    $locdata->name,
+					    "]\n"
+	    );
     }
     
 }

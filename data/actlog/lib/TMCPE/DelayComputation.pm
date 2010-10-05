@@ -62,7 +62,7 @@ use Class::MethodMaker
 		 }, 'tbmap_db' ],
 
      scalar => [ qw/ incid cad facil dir pm vdsid / ],
-     scalar => [ qw/ data cell stationdata stationmap timemap / ],
+     scalar => [ qw/ data cell stationdata timemap / ],
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".gms" } }, 
 		 'gamsfile' ],
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".lst" } }, 
@@ -88,11 +88,16 @@ use Class::MethodMaker
      scalar => [ { -default => 0 }, 'use_eq8' ],
      scalar => [ { -default => 0 }, 'use_eq8b' ],
      scalar => [ { -default => 0 }, 'limrow' ],
+     scalar => [ { -default => 5 }, 'dt' ],  # number of minutes in a time step
      scalar => [ { -default => 500000000 }, 'iterlim' ],
      scalar => [ { -default => 300 }, 'reslim' ],  # 5 minutes
      scalar => [ { -default => 1 }, 'weight_for_distance' ],
-     scalar => [ { -default => 15 }, 'limit_loading_shockwave' ],  # 15 mi/hr
-     scalar => [ { -default => 15 }, 'limit_clearing_shockwave' ],  # 15 mi/hr
+     scalar => [ { -default => 20 }, 'limit_loading_shockwave' ],  # 15 mi/hr
+     scalar => [ { -default => 60 }, 'limit_clearing_shockwave' ],  # 15 mi/hr
+     scalar => [ qw/ boundary_intersects_within / ], # =[dx,dt]: require incident boundary to include at least 
+		                                    # one cell within dx miles of reported location AND
+		                                    #          within dt minutes of log start
+     scalar => [ { -default => 0 }, 'limit_to_start_region' ],
      scalar => [ { -default => {} }, 'force' ],
      scalar => [ qw/ logstart logend / ],
      scalar => [ qw/ calcstart calcend / ],
@@ -129,7 +134,7 @@ sub get_affected_vds {
     my $vdsrs;
     $_ = $self->dir;
     if ( /N/ || /E/ ) {
-    # northbound and westbound facilities increase downstream, so
+    # northbound and eastbound facilities increase downstream, so
     # we want to query between [ incloc - (max dist) ] and incloc
     $vdsrs = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
 	{
@@ -145,7 +150,7 @@ sub get_affected_vds {
 	{ order_by => 'abs_pm desc' }
 	);
     } else {
-	# southbound and eastbound facilities decrease downstream, so
+	# southbound and westbound facilities decrease downstream, so
 	# we want to query between incloc and [ incloc + (max dist) ]
 	$vdsrs = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
 	    {
@@ -388,7 +393,6 @@ sub get_gams_data {
     my $j = $J;
 
     $self->stationdata( [] );
-    $self->stationmap( {} );
     $self->timemap( {} );
 
     foreach my $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
@@ -397,7 +401,6 @@ sub get_gams_data {
 	for ( my $m = 0; $m < $M; ++$m )    
 	{
 	    $self->stationdata->[$j] = $data->{$i}->{$facilkey}->{stations}->{$st};
-	    $self->stationmap->{$data->{$i}->{$facilkey}->{stations}->{$st}->{vds}->id} = $j
 	}
 	--$j;
     }
@@ -590,7 +593,6 @@ sub get_pems_data {
     my $j = $J;
 
     $self->stationdata( [] );
-    $self->stationmap( {} );
     $self->timemap( {} );
 
     foreach my $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
@@ -599,7 +601,6 @@ sub get_pems_data {
 	for ( my $m = 0; $m < $M; ++$m )    
 	{
 	    $self->stationdata->[$j] = $data->{$i}->{$facilkey}->{stations}->{$st};
-	    $self->stationmap->{$data->{$i}->{$facilkey}->{stations}->{$st}->{vds}->id} = $j
 	}
 	--$j;
     }
@@ -633,7 +634,7 @@ sub write_gams_program {
     my @objective;
     my $bias = $self->bias || 0;
 
-    if ( $self->weight_for_distance ) { $self->objective( 2 ) }
+    if ( $self->weight_for_distance ) { $self->objective( 1 ) }
     
     foreach my $iii (1..3)
     {
@@ -658,18 +659,20 @@ sub write_gams_program {
     
     my $MM = $M - 1;
 
+    my @stations = sort { $a->{abs_pm} <=> $b->{abs_pm} } ( values %{$data->{$i}->{$facilkey}->{stations}} );
+    $_ = $self->dir;
+    @stations = reverse @stations if ( /S/ || /W/ );
+
     # set up cell
-    my $j = $J;
-    my $st;
+    my $j = 0;
     my $m;
     my $d;
     $self->cell( [] );
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    foreach my $st ( @stations )
     {
 	for ( $m = 0; $m < $M; ++$m )    
 	{
-	    $d = $data->{$i}->{$facilkey}->{stations}->{$st}->{data}->[$m];
+	    $d = $st->{data}->[$m];
 	    if ( not defined $d ) {
 		warn "BAD data for $st, $m";
 		$self->cell->[$j]->[$m] = { 
@@ -689,7 +692,7 @@ sub write_gams_program {
 		$self->cell->[$j]->[$m] = $d;
 	    }
 	}
-	--$j;
+	$j++;
     }
 
     print STDERR "WRITING PROGRAM $i to ".$self->get_gams_file."...";
@@ -719,41 +722,21 @@ ALIAS ( M1, R1 )
 PARAMETERS
 };
 
+
     $of << qq{
 	PM( J1 ) section postmile
 	    /
 };
-    $j = $J;
-    my $last = undef;
-    my $lastj = undef;
-    my $target = undef;
-    my $targetj = undef;
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
-    {
-	if ( defined( $target ) )
-	{
-	    $of << sprintf( "*		S%s = %s %s\n", 
-			    $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{vds}->id, 
-			    $data->{$i}->{$facilkey}->{stations}->{$target}->{name} );
-	    $of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{abs_pm} );
-	}
-	
-	$data->{$i}->{$facilkey}->{stations}->{$st}->{index} = $targetj;
-	
-	$last = $target;
-	$lastj = $targetj;
-	$target = $st;
-	$targetj = $j;
-	--$j;
-    }
-    # gotta dump the last one too!
-    if ( defined( $target ) )
+
+    $j = 0;
+    foreach my $st ( @stations )
     {
 	$of << sprintf( "*		S%s = %s %s\n", 
-			$targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{vds}->id, 
-			$data->{$i}->{$facilkey}->{stations}->{$target}->{name} );
-	$of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{abs_pm} );
+			$st->{vds}->id, 
+			$st->{name} );
+	$of << sprintf( "		S%s	%f\n", $j, $st->{abs_pm} );
+
+	$j++;
     }
     $of << qq{
 	    /
@@ -764,37 +747,16 @@ PARAMETERS
 	L( J1 ) section length
 	    /
 };
-    $j = $J;
-    $last = undef;
-    $lastj = undef;
-    $target = undef;
-    $targetj = undef;
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
-    {
-	if ( defined( $target ) )
-	{
-	    $of << sprintf( "*		S%s = %s %s\n", 
-			    $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{vds}->id, 
-			    $data->{$i}->{$facilkey}->{stations}->{$target}->{name} );
-	    $of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{seglen} );
-	}
-	
-	$data->{$i}->{$facilkey}->{stations}->{$st}->{index} = $targetj;
-	
-	$last = $target;
-	$lastj = $targetj;
-	$target = $st;
-	$targetj = $j;
-	--$j;
-    }
-    # gotta dump the last one too!
-    if ( defined( $target ) )
+
+    $j = 0;
+    foreach my $st ( @stations )
     {
 	$of << sprintf( "*		S%s = %s %s\n", 
-			$targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{vds}->id, 
-			$data->{$i}->{$facilkey}->{stations}->{$target}->{name} );
-	$of << sprintf( "		S%s	%f\n", $targetj, $data->{$i}->{$facilkey}->{stations}->{$target}->{seglen} );
+			$j, $st->{vds}->id, 
+			$st->{name} );
+	$of << sprintf( "		S%s	%f\n", $j, $st->{seglen} );
+	
+	$j++;
     }
     $of << qq{
 	    /
@@ -811,15 +773,15 @@ PARAMETERS
     }
     $of << "\n";
     
-    $j = $J;
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+
+    $j = 0;
+    foreach my $st ( @stations )
     {
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
 	{
-	    $d = $data->{$i}->{$facilkey}->{stations}->{$st}->{data}->[$m];
+	    $d = $st->{data}->[$m];
 	    if ( not defined $self->cell->[$j]->[$m]->{p_j_m} ) {
 		1;
 	    }
@@ -827,10 +789,10 @@ PARAMETERS
 	    $of << sprintf( " %5.1f", $pjm );
 	}
 	$of << "\n";
-	--$j;
+	$j++;
     }
     
-    $of << qq{	TABLE V( J1, M1 )
+    $of << qq{	TABLE V( J1, M1 ) 
 };
     $of << sprintf( "     " );
     for ( $m = 0; $m < $M; ++$m )
@@ -839,21 +801,20 @@ PARAMETERS
     }
     $of << "\n";
     
-    $j = $J;
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    $j = 0;
+    foreach my $st ( @stations )
     {
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
 	{
-	    $d = $data->{$i}->{$facilkey}->{stations}->{$st}->{data}->[$m];
+	    $d = $st->{data}->[$m];
 	    my $ddd = $d->{incspd};
 	    $ddd = 0 if !$ddd;
 	    $of << sprintf( " %5.1f", $ddd );
 	}
 	$of << "\n";
-	--$j;
+	$j++;
     }
     
     
@@ -866,22 +827,20 @@ PARAMETERS
     }
     $of << "\n";
     
-    $j = $J;
-    my $ddd;
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    $j = 0;
+    foreach my $st ( @stations )
     {
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
 	{
-	    $d = $data->{$i}->{$facilkey}->{stations}->{$st}->{data}->[$m];
-	    $ddd = $d->{avg_spd};
+	    $d = $st->{data}->[$m];
+	    my $ddd = $d->{avg_spd};
 	    $ddd = 0 if !$ddd;
 	    $of << sprintf( " %5.1f", $ddd );
 	}
 	$of << "\n";
-	--$j;
+	$j++;
     }
     
     $of << qq{	TABLE F( J1, M1 )
@@ -894,21 +853,20 @@ PARAMETERS
     }
     $of << "\n";
     
-    $j = $J;
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    $j = 0;
+    foreach my $st ( @stations )
     {
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
 	{
-	    $d = $data->{$i}->{$facilkey}->{stations}->{$st}->{data}->[$m];
-	    $ddd = $d->{incflw};
+	    $d = $st->{data}->[$m];
+	    my $ddd = $d->{incflw};
 	    $ddd = 0 if !$ddd;
 	    $of << sprintf( " %5.0f", $ddd );
 	}
 	$of << "\n";
-	--$j;
+	$j++;
     }
     
     
@@ -922,57 +880,42 @@ PARAMETERS
     }
     $of << "\n";
     
-    $j = $J;
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
+    $j = 0;
+    foreach my $st ( @stations )
     {
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
 	{
-	    $d = $data->{$i}->{$facilkey}->{stations}->{$st}->{data}->[$m];
-	    $ddd = $d->{avg_flw};
+	    $d = $st->{data}->[$m];
+	    my $ddd = $d->{avg_flw};
 	    $ddd = 0 if !$ddd;
 	    $of << sprintf( " %5.0f", $ddd );
 	}
 	$of << "\n";
-	--$j;
+	$j++;
     }
-    
-    $of << qq{
-	TABLE FORCE( J1, M1 ) 
-};
-    $of << sprintf( "     " );
-    for ( $m = 0; $m < $M; ++$m )
-    {
-	$of << sprintf( " %5d", $m );
-    }
-    $of << "\n";
-    
-    $j = $J;
-    foreach $st ( sort { $data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $data->{$i}->{$facilkey}->{stations} } )
-    {
-	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
-	
-	for ( $m = 0; $m < $M; ++$m )    
-	{
-	    $ddd = 0;
-#	    $ddd = $self->force->[$j][$m] if defined( $self->force->[$j][$m] );
-#	    $ddd = 1 if ($m == 2 && $j == 5 );
-#	    $ddd = 1 if ($m == 15 && $j == 8 );
-	    $of << sprintf( " %5.0f", $ddd );
-	}
-	$of << "\n";
-	--$j;
-    }
+
     my $MAX_LOAD_SHOCK_DIST = $self->limit_loading_shockwave/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     my $MAX_CLEAR_SHOCK_DIST = $self->limit_clearing_shockwave/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     
+    my ($BOUNDARY_DX, $BOUNDARY_DT) = split(/,/, $self->boundary_intersects_within );
+    my $use_boundary_constraint = "*";
+    if ( defined( $BOUNDARY_DX ) && defined( $BOUNDARY_DT ) ) {
+	$use_boundary_constraint = "";
+    }
+    my $startlim = $self->limit_to_start_region ? "" : "*";
+    
+    
     my $shockdir=1;
-    if ( /N/ || /E/ ) {
+    $_ = $self->dir;
+    if ( /S/ || /W/ ) {
 	$shockdir=-1;
     }
+
+    my $incstart_index = $self->prewindow/5;
+    my $incpm = $self->pm;
+    my $dt = $self->dt;
 
     
     
@@ -980,11 +923,13 @@ PARAMETERS
 VARIABLES
 	Z		objective
 	D(J1,M1)	incident state
+	S(J1,M1)	start point
 	Y		total incident delay
 	A		average delay
 	N		net delay
 
 BINARY VARIABLE D
+BINARY VARIABLE S
 
 EQUATIONS
 OBJECTIVE
@@ -1000,10 +945,15 @@ $eq6 EQ6
 $eq7 EQ7
 $eq8 EQ8
 $eq8b EQ8b
+$use_boundary_constraint EQ9
 TOTDELAY
 AVGDELAY
 NETDELAY
-*FORCEEQ
+$startlim ONESTART
+$startlim NOSTART_NOREGION
+$startlim IFSTART_THEN_D
+$startlim START_BOUNDARY
+$startlim $use_boundary_constraint START_CONSTRAINT
 };
 
     if ( $self->force ) {
@@ -1054,13 +1004,21 @@ $eq7                  =l= (2+CARD(M1))*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1
 $eq7                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1)));
 ** SHOCKWAVE CONSTRAINT
 ** Loading wave
-$eq8 EQ8(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+$MAX_LOAD_SHOCK_DIST)), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
+$eq8 EQ8(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-($shockdir)*$MAX_LOAD_SHOCK_DIST)), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
 ** Clearing wave
-$eq8b EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-$MAX_CLEAR_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1+1,M1) - D(J1,M1) );
+$eq8b EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+($shockdir)*$MAX_CLEAR_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1+1,M1) - D(J1,M1) );
+** REQUIRE THAT IF THERE IS ANY BOUNDARY, IT MUST INCLUDE CELLS WITHIN A CERTAIN DISTANCE OF THE EXPECTED TIME-SPACE LOCATION OF THE DISRUPTION
+$use_boundary_constraint EQ9 .. SUM( J1, SUM( M1, D(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<$BOUNDARY_DT), D(K1,R1)));
 TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) * D(J1,M1) ) );
 AVGDELAY ..	A=E=SUM( J1, SUM( M1, L( J1 ) / AV(J1,M1) * AF( J1, M1 ) * D(J1,M1) ) );
 NETDELAY ..	N=E=Y-A;
-*FORCEEQ(J1,M1) .. D( J1, M1 ) =G= FORCE( J1, M1 );
+$startlim ONESTART .. (SUM(J1,SUM(M1,S(J1,M1)))) =L= 1;
+$startlim NOSTART_NOREGION .. SUM(J1,SUM(M1,D(J1,M1))) =L= CARD(M1)*CARD(J1)*(SUM(J1,SUM(M1,S(J1,M1))));
+$startlim IFSTART_THEN_D(J1,M1) .. D(J1,M1) =G= S(J1,M1);
+$startlim START_BOUNDARY(J1,M1) .. SUM( K1, D( K1, M1-1 ) ) + SUM( R1, D( J1 + 1, R1 ) ) 
+$startlim                  =l= CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( S( J1, M1 ) );
+** REQUIRE THAT IF THERE IS ANY BOUNDARY, IT MUST INCLUDE CELLS WITHIN A CERTAIN DISTANCE OF THE EXPECTED TIME-SPACE LOCATION OF THE DISRUPTION
+$startlim $use_boundary_constraint START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<$BOUNDARY_DT), S(K1,R1)));
 };
     if ( $self->force ) {
 	foreach my $k ( keys %{$self->force} ) {
@@ -1078,6 +1036,7 @@ BASE.OptFile=1;
 
 SOLVE BASE USING MIP MINIMIZING Z;
 DISPLAY D.l;
+$startlim DISPLAY S.l;
 };
     
     $of->close;
@@ -1202,6 +1161,11 @@ sub parse_results {
 	    $avg_delay = 0 if $avg_delay eq '.';
 	};
       
+	/^----\s+VAR S/ && do
+	{
+	    $found = 0;
+	    next LINE;
+	};
 	/^----\s+VAR D/ && do
 	{
 	    $found = 1;
@@ -1264,8 +1228,9 @@ sub write_to_db {
 
     my $data = $self->data;
 
-    my $dirscale = 1;
-    $dirscale = -1 if ( $self->dir eq 'S' || $self->dir eq 'E' );
+    my @stations = sort { $a->{abs_pm} <=> $b->{abs_pm} } ( values %{$data->{$i}->{$facilkey}->{stations}} );
+    $_ = $self->dir;
+    @stations = reverse @stations if ( /S/ || /W/ );
 
     my $ia;
     my $ifa;
@@ -1311,15 +1276,12 @@ sub write_to_db {
     }
     
     # now shove the station data in there...
-    my @stations = sort { $dirscale*$a->{abs_pm} cmp $dirscale*$b->{abs_pm} } values %{$data->{$i}->{$facilkey}->{stations}};
-
     my $J = @stations;
 #    $J--;
-    my $j = $J;
     my $M = 0;
     map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$self->data->{$i}->{$facilkey}->{stations}};
 
-    my $cnt = 0;
+    my $j = 0;
     foreach my $station ( @stations ) {
 	my $as;
 	eval { $as = $ifa->create_related( 'analyzed_sections', { section_id=> $station->{vds}->id } ); };
@@ -1335,9 +1297,9 @@ sub write_to_db {
 		    $tmcpedelay = $secdat->{incflw} / $secdat->{incspd} * $station->{seglen} - 
 		    $secdat->{avg_flw} / $secdat->{avg_spd} * $station->{seglen};
 		}
-		my $stnidx = $self->stationmap->{$station->{vds}->id};
+		my $stnidx = $j;
 		my $iflag = defined $self->cell->[$stnidx][$m]->{inc} ? $self->cell->[$stnidx][$m]->{inc} + 0 : 0;
-		printf STDERR "\t* ".join( ' ', '(',$cnt,$m,') -> [', $J-$cnt, $m, ']', $secdat->{date}, $secdat->{timeofday}, $iflag,
+		printf STDERR "\t* ".join( ' ', '(',$j,$m,')', $secdat->{date}, $secdat->{timeofday}, $iflag,
 		    $secdat->{incspd}, $secdat->{avg_spd}) . "\n";
 		$at = $as->create_related( 'incident_section_datas', 
 					   {
@@ -1363,7 +1325,7 @@ sub write_to_db {
 	    }
 	    $m++;
 	}
-	$cnt++;
+	$j++;
     }
 }
 
@@ -1428,7 +1390,7 @@ sub write_json {
     {
 	for ( my $m = 0; $m < $M; ++$m )    
 	{
-	    my $d = $self->data->{$i}->{$facilkey}->{stations}->{$st}->{data}->[$m];
+	    my $d = $self->st->{data}->[$m];
 	    my $ddd = $d->{incspd};
 	    $incspd->[$m][$cnt] = $d->{incspd}+0;
 	    $stdspd->[$m][$cnt] = $d->{stddev_spd}+0;

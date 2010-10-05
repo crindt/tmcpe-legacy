@@ -368,8 +368,9 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    // Now loop and create the table cells
 	    this._td[i] = new Array( d.sections.length );
 	    //console.debug( "this._td[i].length = " + this._td[i].length );
-	    for ( j = 0; j < d.sections.length; ++j )
+	    for ( jind = 0; jind < d.sections.length; ++jind )
 	    {
+		var j = d.sections.length-jind-1;
 		//console.debug( i + " < " + numrows + ", " + j + " < " + d.sections.length + " ::: " + iind);
 
 		// The width of the cell is proportional to its actual length in the real world
@@ -383,15 +384,15 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		var targ = d.sections[j].analyzedTimesteps[iind];
 
 		// left = downstream
-		if ( j > 0 ) {
-		    var ds = d.sections[j-1].analyzedTimesteps[iind];
+		if ( j < (d.sections.length-1) ) {
+		    var ds = d.sections[j+1].analyzedTimesteps[iind];
 		    if ( ds && targ.inc != ds.inc ) {
 			borders += "border-left-width:3px;border-left-style:solid;border-left-color:cyan;";
 		    }
 		}
 		// right = upstream
-		if ( j < (d.sections.length-1) ) {
-		    var us = d.sections[j+1].analyzedTimesteps[iind]
+		if ( j >0 ) {
+		    var us = d.sections[j-1].analyzedTimesteps[iind]
 		    if ( us && targ.inc != us.inc )
 		    {
 			borders += "border-right-width:3px;border-right-style:solid;border-right-color:cyan;";

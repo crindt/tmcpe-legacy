@@ -32,6 +32,7 @@ GetOptions( \%opt,
 	    "date-to=s",
 	    "use-existing",
 	    "replace-existing",
+	    "dont-replace-existing",
             "verbose",
 	    "tmcpe-db-host=s",
 	    "tmcpe-db-name=s",
@@ -58,8 +59,14 @@ GetOptions( \%opt,
 	    "dc-dont-weight-for-distance",
 	    "dc-limit-loading-shockwave=f",
 	    "dc-limit-clearing-shockwave=f",
+	    "dc-use-eq8",
+	    "dc-use-eq8b",
+	    "dc-dont-use-eq8",
+	    "dc-dont-use-eq8b",
 	    "dc-force=s@",
 	    "dc-reprocess-existing",
+	    "dc-boundary-intersects-within=s",
+	    "dc-limit-to-start-region",
 ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 
@@ -565,7 +572,10 @@ my $condition;
 
 # Can't use this condition because starttime doesn't exist in the D12ActivityLog
 #$condition->{starttime} = $datecond if $datecond;
-$condition->{cad} = { -in => [ @ARGV ] } if @ARGV;
+my @include = grep { not /^not-/ } @ARGV;
+my @exclude = grep { /^not-/ } @ARGV;
+$condition->{cad}->{'-in'} = [ @include ] if @include;
+$condition->{cad}->{'-not_in'} = [ map { $_ =~ s/^not-//g; $_ } @exclude ] if @exclude;
 
 my $alrs = $tmcpeal->resultset('D12ActivityLog')->search( $condition, { 
     'select' => [ 'cad', { min => 'stamp', -as => 'starttime' }	],
@@ -667,7 +677,15 @@ eval {
 			    warn "FAILED TO PARSE R/D/L: $locstr";
 			    $loclogfile << $locstr."\n";
 			} else {
-			    warn "SUCCESS TO PARSE R/D/L: $locstr";
+			    warn "SUCCESS TO PARSE R/D/L: $locstr: vds=".join( "",
+					    $locdata->id,
+					    " [",
+					    $locdata->freeway_id,
+					    "-",
+					    $locdata->freeway_dir,
+					    " @ ",
+					    $locdata->name,
+					    "]\n" );
 			}
 		    }
 		} elsif ( /Performance_Measures:(.*)/ ) {
@@ -680,12 +698,20 @@ eval {
 	    
 	    # fallback to finding location
 	    if ( ! $locdata && ( ! ( $memo =~ /^\s*$/ ) ) ) {
-		$locdata = $lp->get_location( uc($memo) );
+		$locdata = $lp->get_location( uc($memo), $inc->location_geom );
 		if ( !$locdata ) {
 		    warn "FAILED TO PARSE MEMO: $memo";
 		    $loclogfile << $memo."\n";
 		} else {
-		    warn "SUCCESS TO PARSE MEMO: $memo";
+		    warn "SUCCESS TO PARSE MEMO: $memo: vds=".join( "",
+					    $locdata->id,
+					    " [",
+					    $locdata->freeway_id,
+					    "-",
+					    $locdata->freeway_dir,
+					    " @ ",
+					    $locdata->name,
+					    "]\n" );
 		}
 	    }
 	}
@@ -725,7 +751,10 @@ my $condition;
 
 $condition->{start_time} = $datecond if $datecond;
 $condition->{location_vdsid} = { '!=' => undef };
-$condition->{cad} = { -in => [ @ARGV ] } if @ARGV;
+my @include = grep { not /^not-/ } @ARGV;
+my @exclude = grep { /^not-/ } @ARGV;
+$condition->{cad}->{'-in'} = [ @include ] if @include;
+$condition->{cad}->{'-not_in'} = [ map { $_ =~ s/^not-//g; $_ } @exclude ] if @exclude;
 
 
 my $incrs = $tmcpeal->resultset('Incidents')->search(
@@ -757,9 +786,10 @@ INCDEL: while( my $inc = $incrs->next ) {
     my $dc = new TMCPE::DelayComputation();
 
     my $force;
-    map { my ( $j,$m,$v ) = /(\d+),(\d+)=(\d+)/ ; $force->{"$j:$m"} = $v; } @{$procopt->{forced}};
+    map { my ( $j,$m,$v ) = /(\d+),(\d+)=(\d+)/ ; $force->{"$j:$m"} = $v; } @{$procopt->{dc}{force}};
     $dc->force( $force );
     
+    $dc->debug( $procopt->{verbose} );
     $dc->tmcpe_db_host( $tmcpe_db_host );
     $dc->tmcpe_db_name( $tmcpe_db_name );
     $dc->tmcpe_db_user( $tmcpe_db_user );
@@ -767,9 +797,11 @@ INCDEL: while( my $inc = $incrs->next ) {
     $dc->cad( $inc->cad );
     $dc->incid( $inc->id );
 
+  DCOPT:
     foreach my $o ( keys %{$procopt->{dc}} ) {
+	next DCOPT if $o eq 'force';
 	my $val = $procopt->{dc}{$o};
-	my $cmd = "\$dc->$o( $val )";
+	my $cmd = "\$dc->$o( '$val' )";
 	eval $cmd;
 	croak "FAILED SETTING DELAYCOMP OPTION: $@\n" if $@;
     }
@@ -804,7 +836,6 @@ INCDEL: while( my $inc = $incrs->next ) {
 	my $end = pop @incloc;
 
 	$dc->logend( $end->stamp );
-	$dc->useexisting( $procopt->{dc}{reprocess_existing} );
 	
 	$dc->compute_delay;
 
