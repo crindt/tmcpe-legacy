@@ -496,24 +496,25 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     updateIncidentDetails: function( feature ) {
 	var base = document.getElementById("htmldom").href;
 
-	if ( feature.cluster ) {
-	    if ( !this._incidentStackContainer ) {
-		// create the stack container!
-		dojo.byId( 'incidentDetails' ).innerHTML="";
-		dojo.byId( 'incidentDetails' ).marginTop = 0;
-		this._incidentStackContainer = new dijit.layout.StackContainer({
-		    id: "incidentStackContainer"
-		}, "incidentDetails" );
-		this._incidentStackContainer.startup();
-	    } else {
-		// Delete existing panes.
-		var cc = this._incidentStackContainer.getChildren();
-		for ( var i = 0; i < cc.length; ++i ) {
-		    var c = cc[i];
-		    this._incidentStackContainer.removeChild( c );
-		    c.destroy();
-		}
+	if ( !this._incidentStackContainer ) {
+	    // create the stack container!
+	    dojo.byId( 'incidentDetails' ).innerHTML="";
+	    dojo.byId( 'incidentDetails' ).marginTop = 0;
+	    this._incidentStackContainer = new dijit.layout.StackContainer({
+		id: "incidentStackContainer"
+	    }, "incidentDetails" );
+	    this._incidentStackContainer.startup();
+	} else {
+	    // Delete existing panes.
+	    var cc = this._incidentStackContainer.getChildren();
+	    for ( var i = 0; i < cc.length; ++i ) {
+		var c = cc[i];
+		this._incidentStackContainer.removeChild( c );
+		c.destroy();
 	    }
+	}
+
+	if ( feature.cluster ) {
 	    var buttons = new Array();
 	    for ( var i = 0; i < feature.cluster.length; ++i )
 	    {
@@ -570,24 +571,62 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		dojo.byId( 'previousIncident' ).disable = true;
 		dojo.byId( 'nextIncident' ).disable = true;
 		dojo.byId( 'incidentIndex' ).innerHTML = "0 of 0";
+		this.updateIncidentCluster();
 	    } else {
 		this.updateIncidentCluster();
 	    }
 
 	} else {
 
-	    var id = feature.attributes.id;
-	    var cad = feature.attributes.cad;
+	    var f = feature;
+	    var id = f.attributes.id;
+	    var cad = f.attributes.cad;
 
+	    var il = dijit.byId( 'incidentList' );
 	    il.scrollIncidentsToItem( feature );
+
+	    var buttonId = 'showIncidentButton-'+f.attributes.id;
+	    var button;
+	    var ii = f.attributes.memo.indexOf(":DOSEP:");
+	    var memo = f.attributes.memo.substring(ii);
+	    var cp = new dijit.layout.ContentPane(
+		{ title: "INCIDENT " + cad,
+		  content: '<table class="incidentSummary">' 
+		  + "<tr><th>CAD</th><td>" + f.attributes.cad + "</td></tr>"
+		  + '<tr><th style="width:8em;">Start Time</th><td>' + f.attributes.timestamp + "</td></tr>"
+		  + "<tr><th>Location</th><td>" + f.attributes.locString + "</td></tr>"
+		  + "<tr><th>Memo</th><td>" + memo + "</td></tr>"
+		  + "<tr><th>Delay</th><td>" + f.attributes.delay + " veh-hr</td></tr>"
+		  + "<tr><th>Savings</th><td>" + f.attributes.savings + " veh-hr</td></tr>"
+		  + '<tr><td colspan=2 style="text-align:center;"><button id="'+buttonId+'"></button></td></tr>'
+		  + "</table>"
+		  //+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
+		});
+	    this._incidentStackContainer.addChild(cp);
 	    
-	    this.getIncidentDetails().innerHTML = 
-		"<h3>INCIDENT " + cad + "</h3><dl>" 
-		+ "<dt>loc</dt><dd>" + feature.attributes.locString + "</dd>"
-		+ "<dt>memo</dt><dd>" + feature.attributes.memo + "</dd>"
-		+ "</dl>"
+	    // Create "show details button"
+	    var base = document.getElementById("htmldom").href;
 	    
-		+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>';
+	    var button;
+	    if ( button = dijit.byId( buttonId ) ) {
+		button.destroyRecursive();
+	    }
+	    
+	    button =new dijit.form.Button({
+		label: "Show Incident Detail",
+		onClick: function() { window.open(base+'incident/showCustom?id='+id); }
+	    },buttonId);
+
+
+	    // Add the tooltip for the buttons
+	    if ( this._incidentDetailButtonTooltip ) {
+		this._incidentDetailButtonTooltip.destroy();
+	    }
+	    this._incidentDetailButtonTooltip = new dijit.Tooltip({
+		connectId: buttonId,
+		label: "The incident detail will open in a new window"
+	    });
+	    this.updateIncidentCluster();
 	}
     },
 
