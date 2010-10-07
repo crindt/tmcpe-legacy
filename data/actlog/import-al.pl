@@ -70,6 +70,9 @@ GetOptions( \%opt,
 	    "dc-boundary-intersects-within=s",
 	    "dc-limit-to-start-region",
 	    "dc-unknown-evidence-value=f",
+	    "dc-optcr=f",
+	    "dc-threads=i",
+	    "dc-probe=i",
 ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 

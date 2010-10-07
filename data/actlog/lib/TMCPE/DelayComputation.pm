@@ -109,7 +109,9 @@ use Class::MethodMaker
      scalar => [ { -default => 'localhost' }, 'tmcpe_db_host' ],
      scalar => [ { -default => 'postgres' }, 'tmcpe_db_user' ],
      scalar => [ { -default => '' }, 'tmcpe_db_password' ],
-
+     scalar => [ { -default => '0.1' }, "optcr" ],
+     scalar => [ { -default => '2' }, "threads" ],
+     scalar => [ { -default => '3' }, "probe" ],
 #     scalar => [ { -type => 'Parse::RecDescent',
 #		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
 #		 }, 'parser' ],
@@ -1026,11 +1028,22 @@ $startlim $use_boundary_constraint START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1
 	}
     }
     
+    my $probe = $self->probe;
+    my $threads = $self->threads;
+    my $optcr = $self->optcr;
     $of << qq{
 MODEL BASE / ALL /;
 
 *** Use the cplex.opt options file---should contain probe(3) to speed solution!
 BASE.OptFile=1;
+
+*** Write the options file
+file opt cplex options file /cplex.opt/;
+put opt;
+put 'probe   $probe'/;
+put 'threads $threads'/;
+put 'optcr   $optcr'/;
+putclose opt;
 
 SOLVE BASE USING MIP MINIMIZING Z;
 DISPLAY D.l;
