@@ -153,12 +153,20 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this._facilityImpactAnalysis = fiaId;
 	this.getTsd().updateUrl( base + 'incidentFacilityImpactAnalysis/show.json?id='+fiaId );
 
+	var fia = this.getTsd()._data;
+
+	var fiaSummary = "incident " + this._incident.cad + "["+this._incident.id+"] analysis "+fiaId+":"+fia.location.freewayDir+"-"+fia.location.freewayId
+
 	// Update XLS link
 	var base = document.getElementById("htmldom").href;
 	dojo.byId('tmcpe_tsd_xls_link').innerHTML = 'Download XLS for facility analysis ' + this._facilityImpactAnalysis;
 	dojo.byId('tmcpe_tsd_xls_link').href = base+'incidentFacilityImpactAnalysis/show.xls?id='+this._facilityImpactAnalysis;
 
-	this.updateVdsSegmentsQuery(); 	
+	dojo.byId('tmcpe_report_problem_link').innerHTML = 'Report problem with this facility analysis';
+	url = "http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Problem%20with%20analysis%20of%20"+fiaSummary+"&issue[description]=Bad%20analysis%20for%20available%20for "+fiaSummary;
+	dojo.byId('tmcpe_report_problem_link').href = url;
+	dojo.byId('tmcpe_report_problem_link').onclick = "return popitup('"+url+"')";
+	this.updateVdsSegmentsQuery();
     },
 
     _constructVdsSegmentsParams: function( theParams ) {
