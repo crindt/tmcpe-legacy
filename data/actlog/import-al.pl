@@ -53,9 +53,6 @@ GetOptions( \%opt,
 	    "dc-dont-use-eq3",
 	    "dc-use-eq4567",
 	    "dc-dont-use-eq4567",
-	    "dc-reslim=i",
-	    "dc-iterlim=i",
-	    "dc-limrow=i",
 	    "dc-bias=f",
 	    "dc-weight-for-distance",
 	    "dc-dont-weight-for-distance",
@@ -70,9 +67,17 @@ GetOptions( \%opt,
 	    "dc-boundary-intersects-within=s",
 	    "dc-limit-to-start-region",
 	    "dc-unknown-evidence-value=f",
-	    "dc-optcr=f",
-	    "dc-threads=i",
-	    "dc-probe=i",
+	    "dc-gams-reslim=i",
+	    "dc-gams-iterlim=i",
+	    "dc-gams-limrow=i",
+	    "dc-cplex-optcr=f",
+	    "dc-cplex-threads=i",
+	    "dc-cplex-probe=i",
+	    "dc-cplex-ppriind=i",
+	    "dc-cplex-mip-emphasis=i",
+	    "dc-cplex-polishafterintsol=i",
+	    "dc-cplex-nodesel=i",
+	    "dc-cplex-varsel=i",
 ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 
@@ -132,48 +137,6 @@ my $tmcpe_db_host = $procopt->{tmcpe_db_host};
 my $tmcpe_db_name = $procopt->{tmcpe_db_name};
 my $tmcpe_db_user = $procopt->{tmcpe_db_user};
 my $tmcpe_db_password = $procopt->{tmcpe_db_password};
-
-
-1;
-# GetOptions ("skip-al-import" => sub { $procopt->{al_import} = 0 },
-# 	    "skip-icad-import" => sub { $icad_import = 0 },
-# 	    "skip-incidents" => sub { $incidents = 0 },
-# 	    "skip-critical-events" => sub { $critical_events = 0 },
-# 	    "only-sigalerts" => \$only_sigalerts,
-# 	    "date-from=s" => \$datefrom,
-# 	    "date-to=s" => \$procopt->{dateto},
-# 	    "use-existing" => \$useexist,
-# 	    "skip-if-existing" => \$procopt->{reprocess_existing},  # don't do a delay analysis if there's already a solution in the db
-# 	    "dont-skip-if-existing" => sub { $procopt->{reprocess_existing} = 0 },  # don't do a delay analysis if there's already a solution in the db
-#             "verbose" => \$verbose,
-# 	    "tmcpe-db-host=s" => \$tmcpe_db_host,
-# 	    "tmcpe-db-name=s" => \$tmcpe_db_name,
-# 	    "tmcpe-db-user=s" => \$tmcpe_db_user,
-# 	    "tmcpe-db-password=s" => \$tmcpe_db_password,
-# 	    "dc-band=f" => sub { $dc->band( $_[1] ) },
-# 	    "dc-prewindow=i" => sub { $dc->prewindow( $_[1] ) },
-# 	    "dc-postwindow=i" => sub { $dc->postwindow( $_[1] ) },
-# 	    "dc-vds-downstream-fudge=f" => sub { $dc->vds_downstream_fudge( $_[1] ) },
-# 	    "dc-vds-upstream-fallback=f" => sub { $dc->vds_upstream_fallback( $_[1] ) },
-# 	    "dc-min-avg-days=i" => sub { $dc->min_avg_days( $_[1] ) },
-# 	    "dc-min-obs-pct=i" => sub { $dc->min_obs_pct( $_[1] ) },
-# 	    "dc-use-eq2" => sub { $dc->use_eq2( 1 ) },
-# 	    "dc-dont-use-eq2" => sub { $dc->use_eq2( 0 ) },
-# 	    "dc-use-eq3" => sub { $dc->use_eq3( 1 ) },
-# 	    "dc-dont-use-eq3" => sub { $dc->use_eq3( 0 ) },
-# 	    "dc-use-eq4567" => sub { $dc->use_eq4567( 1 ) },
-# 	    "dc-dont-use-eq4567" => sub { $dc->use_eq4567( 0 ) },
-# 	    "dc-reslim=i" => sub { $dc->reslim( $_[1] ) },
-# 	    "dc-iterlim=i" => sub { $dc->iterlim( $_[1] ) },
-# 	    "dc-limrow=i" => sub { $dc->limrow( $_[1] ) },
-# 	    "dc-bias=f" => sub { $dc->bias( $_[1] ) },
-# 	    "dc-weight-for-distance" => sub { $dc->lengthweight( 1 ) },
-# 	    "dc-dont-weight-for-distance" => sub { $dc->lengthweight( 0 ) },
-# 	    "dc-limit-loading-shockwave=f" => sub { $dc->use_eq8( 1 ); $dc->max_load_shock_speed( $_[1] ) },
-# 	    "dc-limit-clearing-shockwave=f" => sub { $dc->use_eq8b( 1 ); $dc->max_clear_shock_speed( $_[1] ) },
-# 	    "dc-force=s" => \@forced,
-#     ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
-
 
 
 my $d12 = Caltrans::ActivityLog::Schema->connect(

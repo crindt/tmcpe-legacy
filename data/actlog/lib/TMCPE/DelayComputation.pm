@@ -89,10 +89,7 @@ use Class::MethodMaker
      scalar => [ { -default => 1 }, 'use_eq4567' ],
      scalar => [ { -default => 0 }, 'use_eq8' ],
      scalar => [ { -default => 0 }, 'use_eq8b' ],
-     scalar => [ { -default => 0 }, 'limrow' ],
      scalar => [ { -default => 5 }, 'dt' ],  # number of minutes in a time step
-     scalar => [ { -default => 500000000 }, 'iterlim' ],
-     scalar => [ { -default => 300 }, 'reslim' ],  # 5 minutes
      scalar => [ { -default => 1 }, 'weight_for_distance' ],
      scalar => [ { -default => 20 }, 'limit_loading_shockwave' ],  # 15 mi/hr
      scalar => [ { -default => 60 }, 'limit_clearing_shockwave' ],  # 15 mi/hr
@@ -109,9 +106,17 @@ use Class::MethodMaker
      scalar => [ { -default => 'localhost' }, 'tmcpe_db_host' ],
      scalar => [ { -default => 'postgres' }, 'tmcpe_db_user' ],
      scalar => [ { -default => '' }, 'tmcpe_db_password' ],
-     scalar => [ { -default => '0.1' }, "optcr" ],
-     scalar => [ { -default => '2' }, "threads" ],
-     scalar => [ { -default => '3' }, "probe" ],
+     scalar => [ { -default => 500000000 }, 'gams_iterlim' ],
+     scalar => [ { -default => 0 }, 'gams_limrow' ],
+     scalar => [ { -default => 300 }, 'gams_reslim' ],  # 5 minutes
+     scalar => [ { -default => '0.1' }, "cplex_optcr" ],
+     scalar => [ { -default => '2' }, "cplex_threads" ],
+     scalar => [ { -default => '3' }, "cplex_probe" ],
+     scalar => [ { -default => '0' }, "cplex_ppriind" ],
+     scalar => [ { -default => '0' }, "cplex_mip_emphasis" ],
+     scalar => [ { -default => '0' }, "cplex_polishafterintsol" ],
+     scalar => [ { -default => '1' }, "cplex_nodesel" ],
+     scalar => [ { -default => '0' }, "cplex_varsel" ],
 #     scalar => [ { -type => 'Parse::RecDescent',
 #		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
 #		 }, 'parser' ],
@@ -697,9 +702,9 @@ sub write_gams_program {
 
     print STDERR "WRITING PROGRAM $i to ".$self->get_gams_file."...";
     my $RESLIM="*";
-    $RESLIM = join( " = ", "OPTIONS RESLIM", $self->reslim ) if $self->reslim;
+    $RESLIM = join( " = ", "OPTIONS RESLIM", $self->gams_reslim ) if $self->gams_reslim;
     my $LIMROW = "*";
-    $LIMROW = join( " = ", "OPTIONS LIMROW", $self->limrow ) if $self->limrow;
+    $LIMROW = join( " = ", "OPTIONS LIMROW", $self->gams_limrow ) if $self->gams_limrow;
     
     $of < qq{
 \$ONUELLIST
@@ -1028,9 +1033,6 @@ $startlim $use_boundary_constraint START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1
 	}
     }
     
-    my $probe = $self->probe;
-    my $threads = $self->threads;
-    my $optcr = $self->optcr;
     $of << qq{
 MODEL BASE / ALL /;
 
@@ -1040,9 +1042,23 @@ BASE.OptFile=1;
 *** Write the options file
 file opt cplex options file /cplex.opt/;
 put opt;
-put 'probe   $probe'/;
-put 'threads $threads'/;
-put 'optcr   $optcr'/;
+};
+
+    # write out the cplex options
+    $self->cplex_threads;  # make sure the threads variable gets instantiated with the default
+    foreach my $cplex_opt ( grep { /^cplex/ } keys %{$self} ) {
+	my $optname = $cplex_opt;
+	$optname =~ s/^cplex_//g;
+	$of << "put '".$optname."   ".$self->{$cplex_opt}."'/;\n"
+    }
+
+    $of << "put 'logline   2'/;\n" if $self->debug;
+    $of << "put 'mipdisplay   4'/;\n" if $self->debug;
+    $of << "put 'mipinterval   1'/;\n" if $self->debug;
+    $of << "put 'quality   1'/;\n" if $self->debug;
+    $of << "put 'simdisplay   2'/;\n" if $self->debug;
+
+    $of << qq{
 putclose opt;
 
 SOLVE BASE USING MIP MINIMIZING Z;
@@ -1072,7 +1088,7 @@ sub solve_program {
     
     print "SOLVING...";
     my $RESLIM="";
-    $RESLIM = join( " = ", "RESLIM", $self->reslim ) if $self->reslim;
+    $RESLIM = join( " = ", "RESLIM", $self->gams_reslim ) if $self->gams_reslim;
     print "ssh $gu\@$gh 'cd tmcpe/work && /cygdrive/c/Progra~1/GAMS22.2/gams.exe $gf $RESLIM'";
     system( "ssh $gu\@$gh 'cd tmcpe/work && /cygdrive/c/Progra~1/GAMS22.2/gams.exe $gf $RESLIM'" );
     print "done\n";
