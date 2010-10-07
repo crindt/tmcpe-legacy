@@ -2,7 +2,7 @@ select q.*,	CASE WHEN (
        		     days_in_avg < ?
        		     OR o_pct_obs < ?
 		     )
-		THEN 0.5 
+		THEN (?+0.0)
 		ELSE 
 			CASE WHEN o_spd<a_spd-?*sd_spd
 				THEN 0
