@@ -61,7 +61,7 @@ class TmcLogEntry implements Comparable {
         cal.setTimeZone( java.util.TimeZone.getTimeZone( "America/Los_Angeles" ) )
         cal.set( Calendar.YEAR, stamp.getYear() + 1900)
         cal.set( Calendar.MONTH, stamp.getMonth() )
-        cal.set( Calendar.DAY_OF_MONTH, stamp.getDay() )
+        cal.set( Calendar.DAY_OF_MONTH, stamp.getDate() )
         cal.set( Calendar.HOUR_OF_DAY, stamp.getHours() )
         cal.set( Calendar.MINUTE, stamp.getMinutes() )
         return cal.getTime();

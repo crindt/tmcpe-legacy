@@ -526,6 +526,19 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     	}
     	
     },
+
+    simpleSelectLogEntry: function( event ) {
+	var logEntry = event.grid.getItem( event.rowIndex );
+
+	// Hide existing
+	dojo.query( ".log_tsd_bar" ).forEach(function(node,index,arr){
+	    node.style.visibility = 'hidden';
+	});
+
+	dojo.query( "#logit_"+logEntry.id[0] ).forEach(function(node,index,arr){
+	    node.style.visibility = 'visible';
+	});
+    },
     
     __dummyFunc: function () {}
 });

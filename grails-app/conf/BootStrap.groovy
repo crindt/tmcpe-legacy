@@ -63,6 +63,7 @@ class BootStrap {
 				geom(s.geom)
 				segGeom(s.segGeom)
 				geometry(s.segGeom)
+				postmile(s.absPostmile)
 			}
 		}
 		

@@ -318,7 +318,7 @@
 		 dojoType="dojox.grid.DataGrid" 
 		 sortInfo=2
 		 region="center"
-		 onRowClick="incidentList.simpleSelectIncident"
+		 onRowClick="incidentList.simpleSelectIncident(event)"
 		 style="width:100%;height:4em;"
 		 >
 	    <thead>

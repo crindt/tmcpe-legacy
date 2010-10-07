@@ -165,7 +165,7 @@
 	  <div dojoType="tmcpe.TimeSpaceDiagram" 
 	       jsid="tsd" 
 	       id="tsd" 
-	       style="width:100%;height:100%;"
+	       style="width:100%;height:100%;position:relative;"
 	       themeScale="${band?band:0}"
 	       incident="'${incidentInstance.id}'"
 	       facility="'${incidentInstance.section?.freewayId}'"
@@ -204,14 +204,14 @@
 	<div id="logStore"
              dojoType="dojo.data.ItemFileReadStore" 
 	     url="${resource(dir:'tmcLogEntry', file:'list.json?max=500&cad='+incidentInstance.cad)}" 
-	     jsId="logStore" id="logStoreNode" defaultTimeout="20000"></div>
+	     jsId="logStoreJs" defaultTimeout="20000"></div>
 
 	<table id="logGridNode" 
 	       jsId="logGrid" 
 	       dojoType="dojox.grid.DataGrid" 
 	       region="center"
-	       rowSelector="20px"
-	       store="logStore"
+	       onRowMouseOver="incidentView.simpleSelectLogEntry(event)"
+	       store="logStoreJs"
 	       >
 	  <thead>
 	    <tr>

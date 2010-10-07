@@ -78,6 +78,17 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     //        is an application detail that needs to be taken out of this widget
     direction: null,
 
+    // logStore: Array
+    //        An array of log entries for the incident in question.
+    logStore: null,
+
+    // _tableNodeContainer: DomNode
+    //        The DOM node containing all TSD elements
+    _tableNodeContainer: null,
+
+    // _tableNode: DomNode
+    //        The DOM node containing the TSD table
+    _tableNode: null,
 
     buildRendering: function() {
 	// summary:
@@ -302,12 +313,35 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	//    dojo.byId( "statusText" ).textContent = "Drawing plot...";
 	this._clear();
 
+	// destroy existing
+	if ( this._tableNodeContainer ) {
+	    this._tableNodeContainer.parentNode.removeChild( this._tableNodeContainer );
+	    delete this._tableNodeContainer;
+	    if ( this._tableNode ) delete this._tableNode;
+	}
+
+	// Create the container
+	this._tableNodeContainer = 
+	    dojo.create( "div", { id: "tsdTableNodeContainer", 
+				  style: "padding:0px;margin:0px;spacing:0px;width:100%;position:relative;" 
+				} );
+	this.domNode.appendChild( this._tableNodeContainer );
+
+
 	// Now create the table element  
 	// FIXME: Some of the styling is hardcoded here.  Really should move it into a css file
-	this.domNode.appendChild( dojo.create( "table", { id: "tsdTableNode", ref: [this.incident, this.facility, this.direction].join('-'), style: "border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;"
-							}) );
+	
+	this._tableNode = 
+	    dojo.create( "table", 
+			 { id: "tsdTableNode", 
+			   ref: [this.incident, this.facility, this.direction].join('-'), 
+			   style: "border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;"
+			 }
+		       );
+	this._tableNodeContainer.appendChild( this._tableNode );
+
 	// tt is a local shorthand variable for working with the table node (makes the code cleaner)
-	var tt = this.domNode.firstChild;
+	var tt = this._tableNode;
 
 	// delete all rows (if they exist---I think this might not be necessary but it's inexpensive)
 	if ( tt.rows != null ) {
@@ -335,8 +369,12 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// segments (columns) to plot and computing the total length
 	// of the section.  Standardization required
 	var totlen = 0;
+	var incloc=0;
 	for ( j = 0; j < d.sections.length; ++j )
 	{
+	    if ( this._data.location.id == d.sections[j].vdsid ) {
+		incloc = totlen + d.sections[j].seglen/2;
+	    }
 	    totlen += ( d.sections[j].seglen );
 	}
 	if ( totlen < 0 ) totlen = -totlen;
@@ -422,9 +460,46 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    time: iind,
 		    segment: j,
 		    station: d.sections[j].stnidx,
-		    innerHTML: ""/*i + "(" + iind + ")," + j*/, style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:"+this._colorDataAccessor(iind,j)+";"+borders,
+		    innerHTML: ""/*i + "(" + iind + ")," + j*/, 
+		    style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:"+this._colorDataAccessor(iind,j)+";"+borders,
 		} ) );
 		//console.debug( "this._td["+i+"]["+j+"] = " + this._td[i][j] );
+	    }
+	}
+
+	// Insert vertical line for incident location
+	var locpct = 100-(100*incloc/totlen);
+	this._tableNodeContainer.appendChild( dojo.create( "div", { id: "incloc", style: "border-width:2px;border-color:#0000ff;background-color:#0000ff;width:2px;height:100%;position:absolute;top:0;left:"+locpct+"%;"}));
+
+	// Now insert data for the activity log
+	if ( logStoreJs ) {
+	    var obj = this;
+	    logStoreJs.fetch({
+		queryObj: {id:"*"},
+		onComplete: function(items,request) { obj.updateLogGUI(items,request) }
+	    });
+	}
+    },
+
+    updateLogGUI: function(items,request) {
+	if ( items.length > 0 ) {
+	    var st = Number(new Date(this._data.timesteps[0]));
+	    var et = Number(new Date(this._data.timesteps[this._data.timesteps.length-1]));
+	    var dur = et-st;
+	    var i;
+	    for ( i=0; i < items.length; ++i ) {
+		var item=items[i];
+		var dto=new Date(item.stampDateTime[0]);
+		var dt = Number(dto);
+//		var localOffset = dto.getTimezoneOffset() * 60000;
+//		var localOffset = dto.getTimezoneOffset() * 60000;
+//		dt += localOffset;
+		var cur = dt-st;
+		var frac = 100-100*(cur/dur);
+		if ( frac < 0 ) console.log( "FRAC < 0" );
+		if ( frac > 100 ) console.log( "FRAC > 100" );
+		console.log( this._data.timesteps[0] + ":" + st + ":" + et + ":" + dur + ":" + item.stampDateTime[0] + ":" + cur + ":" + frac );
+		this._tableNodeContainer.appendChild(dojo.create( "div", { id: "logit_"+item.id, class: "log_tsd_bar", style: "border-width:2px;border-color:#0000ff;background-color:#0000ff;width:100%;height:2px;position:absolute;top:"+frac+"%;left:0;visibility:hidden;"}));
 	    }
 	}
     },
@@ -462,25 +537,6 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    }
 	});
 
-	// Make a synchronous call to get the station data FIXME: I
-	// plan to remove this call and consolidate things into a
-	// single call
-	/*
-	dojo.xhrGet({
-	    url: "/tmcpe/data/stations.json",
-	    preventCache: true,
-	    handleAs: "text",
-	    sync: true,
-	    load: function( r ) {
-		caller._processStations( r );
-	    },
-	    error: function(r){ 
-		console.debug("Error: " + r); 
-		this._data = [];
-	    }
-	});
-*/
-
 
 	// Do some processing on the data we obtained above.
 	// Specifically: compute some information about the stretch of
@@ -497,25 +553,6 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 	for ( j = 0; j < sections.length; ++j )
 	{
-/*
-	    var pmstart = sections[j].pmstart+0;
-	    var pmend = sections[j].pmend+0;
-
-	    var stnidx = null;
-	    for ( k = 0; k < sections.length && stnidx == undefined; k = k + 1 )
-	    {
-		var section = sections[k];
-		var pm = ( this.direction == "N" || this.direction == "W" ) ? -section.pm : section.pm;
-
-		//	    console.debug( "checking " + station.fwy + "==" + thefwy +" && "+station.dir+"=="+thedir+" && "+pm+">="+pmstart+" && "+pm+"<="+pmend)
-		if ( station.fwy == this.facility && station.dir == this.direction && pm >= pmstart && pm <= pmend )
-		{
-		    // store the station index for this segment
-		    stnidx = k;
-		    data.sections[j].stnidx = k;
-		}
-	    }
-*/
 	    data.sections[j].stnidx = j;
 	}
     },
