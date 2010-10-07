@@ -42,6 +42,8 @@ GetOptions( \%opt,
 	    "dc-prewindow=i",
 	    "dc-postwindow=i",
 	    "dc-vds-downstream-fudge=f",
+	    "dc-compute-vds-upstream-fallback",
+	    "dc-dont-compute-vds-upstream-fallback",
 	    "dc-vds-upstream-fallback=f",
 	    "dc-min-avg-days=i",
 	    "dc-min-obs-pct=i",
@@ -67,6 +69,7 @@ GetOptions( \%opt,
 	    "dc-reprocess-existing",
 	    "dc-boundary-intersects-within=s",
 	    "dc-limit-to-start-region",
+	    "dc-unknown-evidence-value=f",
 ) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
 
 
@@ -587,30 +590,37 @@ my $lp = new TMCPE::ActivityLog::LocationParser();
 
 eval {
     while ( my $al = $alrs->next ) {
+	    
 	# see if the incident is already in the database
 	my $inc = $tmcpeal->resultset('Incidents')->search(
 	    { cad => $al->cad},
 	    { rows => 1 } )->single;
 
+	# if not, create a new incident object
 	if ( not $inc ) {
-	    # if not, create a new incident object
 	    warn join( "", "ADDING CAD ", $al->cad, " TO CAD TABLE\n" );
-	    $_ = $al->cad;
-	    my $type="UNKNOWN";
-	    if ( /^\d+-\d\d\d\d\d\d$/ || /^\d+-\d\d\d\d\d\d\d\d$/ ) { $type = "INCIDENT" }
-	    elsif ( /^ANGEL.*$/ ) { $type = "ANGEL STADIUM" }
-	    elsif ( /^HONDA.*$/ ) { $type = "HONDA CENTER" }
-	    elsif ( /^C[^-]*-\d\d\d\d\d\d$/ || /^C[^-]*-\d\d\d\d\d\d\d\d$/ || /^CONST-.*/) { $type = "CONSTRUCTION" }
-	    elsif ( /^M[^-]*-\d\d\d\d\d\d$/ || /^M[^-]*-\d\d\d\d\d\d\d\d$/ || /^CONST-.*/) { $type = "MAINTENANCE" }
-	    elsif ( /^FAIR.*$/ || /^OC[\s_]*FAIR.*$/ ) { $type = "OCFAIR" }
-	    elsif ( /^EMERG.*$/ ) { $type = "EMERGENCY" }
-	    
 	    $inc = $tmcpeal->resultset('Incidents')->create( 
-		{ cad => $al->cad,
-		  event_type => $type,
-		  start_time => $al->get_column( 'starttime' )
-		} );
+		{ cad => $al->cad } );
+	} else {
+	    warn join( "", "UPDATING CAD ", $al->cad, " IN CAD TABLE\n" );
 	}
+
+	# Set the start time
+	$inc->start_time( $al->get_column( 'starttime' ) );
+		      
+	# Get and set the event type
+	$_ = $al->cad;
+	my $type="UNKNOWN";
+	if ( /^\d+-\d\d\d\d\d\d$/ || /^\d+-\d\d\d\d\d\d\d\d$/ ) { $type = "INCIDENT" }
+	elsif ( /^ANGEL.*$/ ) { $type = "ANGEL STADIUM" }
+	elsif ( /^HONDA.*$/ ) { $type = "HONDA CENTER" }
+	elsif ( /^C[^-]*-\d\d\d\d\d\d$/ || /^C[^-]*-\d\d\d\d\d\d\d\d$/ || /^CONST-.*/) { $type = "CONSTRUCTION" }
+	elsif ( /^M[^-]*-\d\d\d\d\d\d$/ || /^M[^-]*-\d\d\d\d\d\d\d\d$/ || /^CONST-.*/) { $type = "MAINTENANCE" }
+	elsif ( /^FAIR.*$/ || /^OC[\s_]*FAIR.*$/ ) { $type = "OCFAIR" }
+	elsif ( /^EMERG.*$/ ) { $type = "EMERGENCY" }
+
+	$inc->event_type( $type );
+
 	
 	# OK, now match up the icad entry, if any
 	my $icad = $tmcpeal->resultset('Icad')->search( 
@@ -807,7 +817,9 @@ INCDEL: while( my $inc = $incrs->next ) {
     }
     
     if ( !$inc->cad ) {
-	croak "INCIDENT DOESN'T have a cadid!!!!";
+#	croak "INCIDENT DOESN'T have a cadid!!!!";
+	warn  "INCIDENT DOESN'T have a cadid!!!!";
+	next INCDEL;
     }
     
     my $vdsid = $inc->location_vdsid;

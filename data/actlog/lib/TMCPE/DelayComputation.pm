@@ -68,6 +68,7 @@ use Class::MethodMaker
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".lst" } }, 
 		 'lstfile' ],
      scalar => [ { -default => 0 }, 'debug' ],
+     scalar => [ { -default => 1 }, 'compute_vds_upstream_fallback' ],
      scalar => [ { -default => 10 }, 'vds_upstream_fallback' ],
      scalar => [ { -default => 1 }, 'vds_downstream_fudge' ],
      scalar => [ { -default => '192.168.0.3' }, 'gams_host' ],
@@ -77,6 +78,7 @@ use Class::MethodMaker
      scalar => [ { -default => 20 }, 'min_avg_days' ],
      scalar => [ { -default => 25 }, 'min_avg_pct' ],
      scalar => [ { -default => 5 }, 'min_obs_pct' ],
+     scalar => [ { -default => 0.5 }, 'unknown_evidence_value' ],
      scalar => [ { -default => 1.0 }, 'band' ],
      scalar => [ { -default => 1 }, 'objective' ],
      scalar => [ { -default => 0.0 }, 'bias' ],
@@ -132,23 +134,30 @@ sub get_affected_vds {
     my ( $self ) = @_;
     
     my $vdsrs;
+    my $maxdist = $self->vds_upstream_fallback;
+    if ( $self->compute_vds_upstream_fallback ) {
+	my $maxdur = ($self->calcend - $self->calcstart - $self->prewindow*60 - $self->postwindow*60)/2.0;
+	my $md = ($maxdur/3600.0) * $self->limit_loading_shockwave;
+	$maxdist = $md if ($md < $maxdist);
+    }
+
     $_ = $self->dir;
     if ( /N/ || /E/ ) {
-    # northbound and eastbound facilities increase downstream, so
-    # we want to query between [ incloc - (max dist) ] and incloc
-    $vdsrs = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
-	{
-	    freeway_id => $self->facil,
-	    freeway_dir => $self->dir,
-	    type_id => 'ML',
-	    abs_pm => {
-		-between => [ $self->pm - $self->vds_upstream_fallback,
-			      $self->pm + $self->vds_downstream_fudge
-		    ]
-	    }
-	},
-	{ order_by => 'abs_pm desc' }
-	);
+	# northbound and eastbound facilities increase downstream, so
+	# we want to query between [ incloc - (max dist) ] and incloc
+	$vdsrs = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( 
+	    {
+		freeway_id => $self->facil,
+		freeway_dir => $self->dir,
+		type_id => 'ML',
+		abs_pm => {
+		    -between => [ $self->pm - $maxdist,
+				  $self->pm + $self->vds_downstream_fudge
+			]
+		}
+	    },
+	    { order_by => 'abs_pm desc' }
+	    );
     } else {
 	# southbound and westbound facilities decrease downstream, so
 	# we want to query between incloc and [ incloc + (max dist) ]
@@ -159,7 +168,7 @@ sub get_affected_vds {
 		type_id => 'ML',
 		abs_pm => {
 		    -between => [ $self->pm - $self->vds_downstream_fudge,
-				  $self->pm + $self->vds_upstream_fallback
+				  $self->pm + $maxdist
 			]
 		}
 	    },
@@ -174,16 +183,6 @@ sub get_affected_vds {
 # routine to read data from an existing GAMS program file
 sub get_gams_data {
     my ( $self, @avds ) = @_;
-
-    my @tt = Localtime(str2time($self->logstart));
-    my $incstart = Mktime(@tt[0..5]);
-    my $calcstart = Mktime(Add_Delta_DHMS(@tt[0..5],0,0,-$self->prewindow,0));
-    $self->calcstart( $calcstart );
-    @tt = Localtime(str2time($self->logend));
-    my $incend   = Mktime(@tt[0..5]);
-    my $calcend   = Mktime(Add_Delta_DHMS(@tt[0..5],0,0,$self->postwindow,0));
-    $self->calcend( $calcend );
-
 
     my $if = io ( $self->get_gams_file );
 
@@ -223,6 +222,8 @@ sub get_gams_data {
     # OK, we need to determine the time periods for which we expect
     # data: Basically, it's every five-minute period between calcstart
     # and calcend inclusive.
+    my $calcstart = $self->calcstart;
+    my $calcend = $self->calcend;
     my $cs5 = ($calcstart % 300) ? POSIX::floor( $calcstart/300 ) * 300 : $calcstart;
     my $ce5 = ($calcend % 300) ? POSIX::ceil( $calcend/300 ) * 300 : $calcend;
 
@@ -266,8 +267,8 @@ sub get_gams_data {
 			my ($date,$time) = split(/\s+/, $times[$m]);			
 			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{date} = $date;
 			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{timeofday} = $time;
-			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{days_in_avg} = $pjm[$m] == 0.5 ? 0 : 30;
-			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{avg_pctobs} = $pjm[$m] == 0.5 ? 0 : 100;
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{days_in_avg} = $pjm[$m] == $self->unknown_evidence_value ? 0 : 30;
+			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{avg_pctobs} = $pjm[$m] == $self->unknown_evidence_value ? 0 : 100;
 			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{p_j_m} = $pjm[$m];
 		    }
 
@@ -406,18 +407,9 @@ sub get_gams_data {
     }
 }
 
-
 sub get_pems_data {
     my ( $self, @avds ) = @_;
 
-    my @tt = Localtime(str2time($self->logstart));
-    my $incstart = Mktime(@tt[0..5]);
-    my $calcstart = Mktime(Add_Delta_DHMS(@tt[0..5],0,0,-$self->prewindow,0));
-    $self->calcstart( $calcstart );
-    @tt = Localtime(str2time($self->logend));
-    my $incend   = Mktime(@tt[0..5]);
-    my $calcend   = Mktime(Add_Delta_DHMS(@tt[0..5],0,0,$self->postwindow,0));
-    $self->calcend( $calcend );
 #    @tt = Localtime(postwindow,0);
 
 
@@ -437,6 +429,8 @@ sub get_pems_data {
     # OK, we need to determine the time periods for which we expect
     # data: Basically, it's every five-minute period between calcstart
     # and calcend inclusive.
+    my $calcstart = $self->calcstart;
+    my $calcend = $self->calcend;
     my $cs5 = ($calcstart % 300) ? POSIX::floor( $calcstart/300 ) * 300 : $calcstart;
     my $ce5 = ($calcend % 300) ? POSIX::ceil( $calcend/300 ) * 300 : $calcend;
 
@@ -462,7 +456,7 @@ sub get_pems_data {
 	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{name} = $vds->name;
 	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{seglen} = $vds->length;
 	
-	my @rows = @{ $dbh->selectall_arrayref( $select_data, { Slice=>{} }, $self->min_avg_days, $self->min_obs_pct, $self->band, $vds->id, $ss, $es, $self->min_avg_pct ) };
+	my @rows = @{ $dbh->selectall_arrayref( $select_data, { Slice=>{} }, $self->min_avg_days, $self->min_obs_pct, $self->unknown_evidence_value, $self->band, $vds->id, $ss, $es, $self->min_avg_pct ) };
 	
 	1;
 	
@@ -494,7 +488,7 @@ sub get_pems_data {
 		    avg_occ => undef,
 		    avg_flw => undef,
 		    incflw => undef,
-		    p_j_m => 0.5,
+		    p_j_m => $self->unknown_evidence_value,
 		    days_in_avg => 0,
 		    incden => 0,  # inferred
 		    shockspd => undef   # (0 - a_flw)/(0-a_den) = -a_flw /-a_den = -a_flw / -( a_flw / a_spd ) = a_spd
@@ -638,7 +632,11 @@ sub write_gams_program {
     
     foreach my $iii (1..3)
     {
-	$objective[$iii] = "*"  if ( $self->objective != $iii );
+	if ( $self->objective != $iii ) {
+	    $objective[$iii] = "*";
+	} else {
+	    $objective[$iii] = "";
+	}
     }
     
 
@@ -684,7 +682,7 @@ sub write_gams_program {
 		    incpctobs => 0,
 		    avg_flw => 0,
 		    incflw => 0,
-		    p_j_m => 0.5,
+		    p_j_m => $self->unknown_evidence_value,
 		    incden => 0,  # inferred
 		    shockspd => 0
 		};
@@ -1042,39 +1040,6 @@ $startlim DISPLAY S.l;
     $of->close;
     
     print "(done)\n";
-    
-    # # Print data
-    # printf "    ";
-    # for ( my $j = $J; $j >= 0; --$j )
-    # {
-    # 	printf " %2.2f", $stationdata->[$j]->{abs_pm}
-    # }
-    # printf "\n";
-    # printf "    ";
-    # for ( my $j = $J; $j >= 0; --$j )
-    # {
-    # 	printf " %2.2d", $j;
-    # }
-    # printf "\n";
-    
-    # for ( my $m = 0; $m < $M; ++$m )
-    # {
-    # 	printf "%2.2d: ", $m;
-    # 	for ( my $j = $J; $j >= 0; --$j )
-    # 	{
-    # 	    my $std = $stationdata->[$j];
-    # 	    my $facilkey = join( ":", $std->{fwy}, $std->{dir} );
-    # 	    if ( $m==$prewindow/5 && $data->{$i}->{$facilkey}->{nearest} == $std )
-    # 	    {
-    # 		printf " %1s%1s", "X"," ";
-    # 	    }
-    # 	    else
-    # 	    {
-    # 		printf " %1s%1s", ($cell->[$j]->[$m]->{p_j_m}<0.5?"|":$cell->[$j]->[$m]->{p_j_m}>0.5?"/":" ")," ";
-    # 	    }
-    # 	}
-    # 	printf "\n";
-    # }
 }
 
 sub solve_program {
@@ -1295,7 +1260,7 @@ sub write_to_db {
 		my $tmcpedelay = 0;
 		if ( (defined $secdat->{incspd} && $secdat->{incspd} > 0) && (defined $secdat->{avg_spd} && $secdat->{avg_spd} > 0) ) {
 		    $tmcpedelay = $secdat->{incflw} / $secdat->{incspd} * $station->{seglen} - 
-		    $secdat->{avg_flw} / $secdat->{avg_spd} * $station->{seglen};
+			$secdat->{avg_flw} / $secdat->{avg_spd} * $station->{seglen};
 		}
 		my $stnidx = $j;
 		my $iflag = defined $self->cell->[$stnidx][$m]->{inc} ? $self->cell->[$stnidx][$m]->{inc} + 0 : 0;
@@ -1435,6 +1400,18 @@ sub write_json {
     print STDERR "Wrote to $fn\n";
 }
 
+sub update_time_bounds() {
+    my ( $self ) = @_;
+    my @tt = Localtime(str2time($self->logstart));
+    my $incstart = Mktime(@tt[0..5]);
+    my $calcstart = Mktime(Add_Delta_DHMS(@tt[0..5],0,0,-$self->prewindow,0));
+    $self->calcstart( $calcstart );
+    @tt = Localtime(str2time($self->logend));
+    my $incend   = Mktime(@tt[0..5]);
+    my $calcend   = Mktime(Add_Delta_DHMS(@tt[0..5],0,0,$self->postwindow,0));
+    $self->calcend( $calcend );
+}
+
 sub compute_delay {
     my ( $self ) = @_;
 
@@ -1443,8 +1420,9 @@ sub compute_delay {
     croak "No direction specified for facility $self->facil to analyze for incident $self->cad" if ( !$self->dir );
     croak "No postmile specified for $self->dir-$self->facil to analyze for incident $self->cad" if ( !$self->pm );
 
-    my @avds = $self->get_affected_vds( $self->facil, $self->dir, $self->pm );
+    $self->update_time_bounds();
 
+    my @avds = $self->get_affected_vds( $self->facil, $self->dir, $self->pm );
     
     if ( $self->reprocess_existing && 0 ) {
 	# read old data from the gams program
