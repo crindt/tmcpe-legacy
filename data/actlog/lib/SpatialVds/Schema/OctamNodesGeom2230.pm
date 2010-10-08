@@ -23,8 +23,8 @@ __PACKAGE__->add_unique_constraint("octam_nodes_geom_2230_pkey", ["id"]);
 __PACKAGE__->belongs_to("id", "SpatialVds::Schema::OctamNodes", { id => "id" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-27 17:06:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5Ebt4UTV90FUHI9Kt3KFYw
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-07 16:07:25
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/FgDgzNQ6fNeKfVUcdWZLQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

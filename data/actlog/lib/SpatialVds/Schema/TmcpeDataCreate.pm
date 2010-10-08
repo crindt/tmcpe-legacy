@@ -1,4 +1,4 @@
-package SpatialVds::Schema::VdsGeoview;
+package SpatialVds::Schema::TmcpeDataCreate;
 
 use strict;
 use warnings;
@@ -6,77 +6,75 @@ use warnings;
 use base 'DBIx::Class';
 
 __PACKAGE__->load_components("Core");
-__PACKAGE__->table("vds_geoview");
+__PACKAGE__->table("tmcpe_data_create");
 __PACKAGE__->add_columns(
-  "id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
-  "name",
+  "stamp",
   {
-    data_type => "character varying",
+    data_type => "timestamp without time zone",
     default_value => undef,
     is_nullable => 1,
-    size => 64,
+    size => 8,
   },
-  "freeway_dir",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
-  "lanes",
+  "vdsid",
   { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
-  "length",
+  "days_in_avg",
+  { data_type => "bigint", default_value => undef, is_nullable => 1, size => 8 },
+  "avg_samples",
+  { data_type => "bigint", default_value => undef, is_nullable => 1, size => 8 },
+  "a_pct_obs",
   {
     data_type => "numeric",
     default_value => undef,
     is_nullable => 1,
     size => undef,
   },
-  "cal_pm",
+  "a_vol",
   {
-    data_type => "character varying",
+    data_type => "numeric",
     default_value => undef,
     is_nullable => 1,
-    size => 12,
+    size => undef,
   },
-  "abs_pm",
+  "a_occ",
   {
     data_type => "double precision",
     default_value => undef,
     is_nullable => 1,
     size => 8,
   },
-  "latitude",
+  "a_spd",
+  {
+    data_type => "double precision",
+    default_value => undef,
+    is_nullable => 1,
+    size => 8,
+  },
+  "sd_vol",
   {
     data_type => "numeric",
     default_value => undef,
     is_nullable => 1,
     size => undef,
   },
-  "longitude",
+  "sd_occ",
   {
-    data_type => "numeric",
+    data_type => "double precision",
     default_value => undef,
     is_nullable => 1,
-    size => undef,
+    size => 8,
   },
-  "last_modified",
-  { data_type => "date", default_value => undef, is_nullable => 1, size => 4 },
-  "gid",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
-  "geom",
+  "sd_spd",
   {
-    data_type => "geometry",
+    data_type => "double precision",
     default_value => undef,
     is_nullable => 1,
-    size => undef,
+    size => 8,
   },
 );
 
 
 # Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-07 16:07:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3OT1XvWqSXWiHxCQLGtaXg
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TSZd10qn1j05+D8145uJrg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

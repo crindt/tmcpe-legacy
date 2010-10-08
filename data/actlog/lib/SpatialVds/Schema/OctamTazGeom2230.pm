@@ -22,8 +22,8 @@ __PACKAGE__->set_primary_key("taz_id");
 __PACKAGE__->add_unique_constraint("octam_geom_2230_pkey", ["taz_id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-27 17:06:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:l0hP+sNIoamWFQ1LvW1ZTA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-07 16:07:25
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/uGQ9NkwW1ktmimcrsIXAg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
