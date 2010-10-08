@@ -420,6 +420,12 @@ sub get_pems_data {
 
 #    @tt = Localtime(postwindow,0);
 
+    # run the pems 5min query to get relevant results
+    my $select_query < io("./select-data.sql");
+    
+    my $dbh = DBI->connect('dbi:Pg:database=spatialvds;host=localhost',
+			   'VDSUSER' );
+
     my $data;
 
     my $i = $self->cad;
