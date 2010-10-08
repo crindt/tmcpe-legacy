@@ -106,6 +106,7 @@ use Class::MethodMaker
      scalar => [ { -default => 'localhost' }, 'tmcpe_db_host' ],
      scalar => [ { -default => 'postgres' }, 'tmcpe_db_user' ],
      scalar => [ { -default => '' }, 'tmcpe_db_password' ],
+     scalar => [ { -default => 1 }, 'use_pems_cache' ],
      scalar => [ { -default => 500000000 }, 'gams_iterlim' ],
      scalar => [ { -default => 0 }, 'gams_limrow' ],
      scalar => [ { -default => 300 }, 'gams_reslim' ],  # 5 minutes
@@ -419,15 +420,6 @@ sub get_pems_data {
 
 #    @tt = Localtime(postwindow,0);
 
-
-    # run the pems 5min query to get relevant results
-    my $select_query < io("./select-data.sql");
-    
-    my $dbh = DBI->connect('dbi:Pg:database=spatialvds;host=localhost',
-			   'VDSUSER' );
-    
-    my $select_data = $dbh->prepare( $select_query );
-
     my $data;
 
     my $i = $self->cad;
@@ -449,8 +441,8 @@ sub get_pems_data {
     my $ss = time2str( "%D %T", $cs5 );
     my $es = time2str( "%D %T", $ce5 );
 
-    print STDERR "ANALYZED TIMES BETWEEN $ss AND $es ARE:\n";
-    map { print STDERR "\t$_\n"; } @times;
+    print STDERR "ANALYZED TIMES BETWEEN $ss AND $es ARE:\n" if $self->debug;
+    map { print STDERR "\t$_\n"; } @times if $self->debug;
 
     foreach my $vds ( @avds ) {
 	my $vdsid = $vds->id;
@@ -463,10 +455,85 @@ sub get_pems_data {
 	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{name} = $vds->name;
 	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{seglen} = $vds->length;
 	
-	my @rows = @{ $dbh->selectall_arrayref( $select_data, { Slice=>{} }, $self->min_avg_days, $self->min_obs_pct, $self->unknown_evidence_value, $self->band, $vds->id, $ss, $es, $self->min_avg_pct ) };
-	
-	1;
-	
+	# See if we need to generate some averages
+	my $qq = { 
+		vdsid => $vds->id,
+		stamp => { -between => [$ss,$es] },
+	};
+	# if we're using the pems cache, we only need to compute
+	# averages for rows that don't already have averages computed
+	# (if this is the case, then the days_in_avg record will be
+	# null)
+	$qq->{days_in_avg} = undef if ( $self->use_pems_cache );
+
+	my @bad_rows = $self->vds_db->resultset( 'TmcpeData' )->search(
+	    $qq,
+	    {
+		order_by => 'stamp asc'
+	    });
+
+	# oops, no avg data for some rows, let's compute it now.
+	if ( @bad_rows ) {
+	    print STDERR join("",
+			      "COMPUTING MISSING ANNUAL AVERAGES FOR ",
+			      $vds->name,
+			      ( $self->debug ? ":\n\t".join("\n\t", map {$_->stamp} @bad_rows ) : ":" ),
+			      "\n");
+	    foreach my $br ( @bad_rows ) {
+		print STDERR "\tCREATING FOR ".$br->stamp."...";
+		my @created_rows = $self->vds_db->resultset( 'TmcpeDataCreate' ) ->search(
+		    {
+			vdsid => $vds->id,
+#			stamp => { -in => [ map {$_->stamp} @bad_rows ] }
+			stamp => $br->stamp
+		    });
+		
+		# created_rows will contain the data we want to push into 'Pems5minAnnualAvg'
+		if ( @created_rows ) {
+
+		    croak "TOO MANY ROWS RETURNED WHILE CREATING AVERAGES!!!" if ( @created_rows > 1 );
+
+		    # see if it already exists
+		    my @existing_rows = $self->vds_db->resultset( 'Pems5minAnnualAvg' )->search(
+			{
+			    vdsid => $vds->id,
+			    stamp => $br->stamp
+			});
+
+		    croak "TOO MANY EXISTING ROWS RETURNED WHILE CREATING AVERAGES!!!" if ( @existing_rows > 1 );
+
+		    if ( @existing_rows ) {
+			# just update
+			my $er = shift @existing_rows;
+			map { my $cr = $_; map { $er->set_column( $_ => $cr->get_column( $_ ) ) } $er->result_source->columns; } @created_rows;
+			$er->update;
+
+		    } else {
+			# create a new one
+			$self->vds_db->populate( 'Pems5minAnnualAvg',
+						 [ [ $created_rows[0]->result_source->columns ],
+						   map { my $row = $_; [ map { $row->get_column( $_ ); } $row->result_source->columns ] } @created_rows
+						 ]);
+		    }
+		}
+		print STDERR "done\n";
+	    }
+	} else {
+	    print STDERR "ALL DATA IS CACHED\n";
+	}
+
+	# OK, now grab the data...
+	print STDERR "GRABBING ALL DATA...";
+	my @rows = $self->vds_db->resultset( 'TmcpeData' )->search(
+	    { 
+		vdsid => $vds->id,
+		stamp => { -between => [$ss,$es] },
+	    },
+	    {
+		order_by => 'stamp asc'
+	    });
+	print STDERR "DONE";
+
 	my $tt;
 	# create the array if it's not defined yet
 	if ( not defined( $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data} ) ) {
@@ -509,65 +576,56 @@ sub get_pems_data {
 	    }
 
 	    foreach my $row ( @rows ) {
-		my ($date,$time) = split(/\s+/, $row->{stamp});
-		$row->{date} = $date;
-		$row->{timeofday} = $time;
-
+		my ($date,$time) = split(/\s+/, $row->stamp);
 		
+		my $pjm=$self->unknown_evidence_value;  # default to unknown
+		if ( $row->days_in_avg >= $self->min_avg_days && $row->o_pct_obs >= $self->min_obs_pct ) 
+		{
+		    if ( $row->o_spd < ( $row->a_spd - $self->band * $row->sd_spd ) ) {
+			$pjm = 0;
+		    } else {
+			$pjm = 1;
+		    }
+		}
 		print STDERR join( " : ",
 				   $vdsid,
 				   $date,
 				   $time,
 				   $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name},
-				   sprintf( "%5.0f", $row->{a_vol} * 12  )." vph",
-				   sprintf( "%5.1f", $row->{a_occ}*100 )."%",
-				   sprintf( "%5.1f", $row->{a_spd} )." mph",
-				   sprintf( "%5.1f", $row->{o_spd} )." mph",
-				   $row->{days_in_avg},
-				   $row->{o_pct_obs},
-				   p_j_m => $row->{p_j_m},
+				   sprintf( "%5.0f", $row->a_vol * 12  )." vph",
+				   sprintf( "%5.1f", $row->a_occ * 100 )."%",
+				   sprintf( "%5.1f", $row->a_spd )." mph",
+				   sprintf( "%5.1f", $row->o_spd )." mph",
+				   $row->days_in_avg,
+				   $row->o_pct_obs,
+				   p_j_m => $pjm,
 		    )."\n";
 
 		# This is what we really need to fill!
 		push @{$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}}, { 
 		    date => $date,
 		    timeofday => $time,
-		    avg_spd => $row->{a_spd},
-		    stddev_spd => $row->{sd_spd},
-		    avg_pctobs => $row->{a_pct_obs},   #
-		    incspd => $row->{o_spd},
-		    incpctobs => $row->{o_pct_obs},
-		    incocc => $row->{o_occ},
-		    avg_occ => $row->{a_occ},
-		    avg_flw => $row->{a_vol},
-		    incflw => $row->{o_vol},
-		    p_j_m => $row->{p_j_m},
-		    days_in_avg => $row->{days_in_avg},
+		    avg_spd => $row->a_spd,
+		    stddev_spd => $row->sd_spd,
+		    avg_pctobs => $row->a_pct_obs,   #
+		    incspd => $row->o_spd,
+		    incpctobs => $row->o_pct_obs,
+		    incocc => $row->o_occ,
+		    avg_occ => $row->a_occ,
+		    avg_flw => $row->a_vol,
+		    incflw => $row->o_vol,
+		    p_j_m => $pjm,
+		    days_in_avg => $row->days_in_avg,
 		    incden => 0,  # inferred
-		    shockspd => $row->{a_spd}   # (0 - a_flw)/(0-a_den) = -a_flw /-a_den = -a_flw / -( a_flw / a_spd ) = a_spd
+		    shockspd => $row->a_spd   # (0 - a_flw)/(0-a_den) = -a_flw /-a_den = -a_flw / -( a_flw / a_spd ) = a_spd
 		};
 		
 		############# END THIS SHOULD BE A SUB ##################
 		
 		my $st=$vdsid;
 		
-		# # This is what we really need to fill!
-		# push @{$data->{$i}->{$facilkey}->{stations}->{$st}->{data}}, { 
-		#     timeofday => $row->{timeofday},
-		#     avg_spd => $row->{avg_spd},
-		#     stddev_spd => $row->{stddev_spd},
-		#     avg_pctobs => $row->{avg_pctobs},
-		#     incspd => $row->{incspd},
-		#     incpctobs => $row->{incpctobs},
-		#     avg_flw => $row->{avg_flw},
-		#     incflw => $row->{incflw},
-		#     p_j_m => $row->{p_j_m},
-		#     incden => $row->{incflw}/$row->{incspd},  # inferred
-		#     shockspd => $shockspd
-		# };
-		
-		$self->mintimeofday( $row->{timeofday} ) if ( not defined( $self->mintimeofday ) );
-		$self->mindate( $row->{date} ) if ( not defined( $self->mindate ) );
+		$self->mintimeofday( $time ) if ( not defined( $self->mintimeofday ) );
+		$self->mindate( $date ) if ( not defined( $self->mindate ) );
 		
 		# grab closest
 		if ( ( not defined( $data->{$i}->{$facilkey}->{mindist} ) ) || $row->{st_dist} < $data->{$i}->{$facilkey}->{mindist} )
@@ -605,8 +663,6 @@ sub get_pems_data {
 	}
 	--$j;
     }
-    
-    
 }
 
 sub write_gams_program {

@@ -47,9 +47,9 @@ __PACKAGE__->add_columns(
     size => 2,
   },
   "axle_1_rt_weight",
-  { data_type => "real", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
   "axle_1_lt_weight",
-  { data_type => "real", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
   "axle_2_rt_weight",
   { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
   "axle_2_lt_weight",
@@ -110,8 +110,8 @@ __PACKAGE__->set_primary_key("site_no", "lane", "ts", "veh_no");
 __PACKAGE__->add_unique_constraint("wim_data_pkey", ["site_no", "lane", "ts", "veh_no"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-09-27 17:06:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fJQ0oSyxLRhbeqh6FDAyqQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-07 16:07:25
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4qzDua5RfxP6RkBdFgBBLQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
