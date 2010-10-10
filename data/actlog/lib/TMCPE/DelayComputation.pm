@@ -597,6 +597,9 @@ sub get_pems_data {
 				   sprintf( "%5.0f", $row->a_vol * 12  )." vph",
 				   sprintf( "%5.1f", $row->a_occ * 100 )."%",
 				   sprintf( "%5.1f", $row->a_spd )." mph",
+				   sprintf( "%5.1f", $row->sd_spd )." mph",
+				   sprintf( "%5.1f", $self->band * $row->sd_spd )." mph",
+				   sprintf( "%5.1f", $row->a_spd - $self->band * $row->sd_spd )." mph",
 				   sprintf( "%5.1f", $row->o_spd )." mph",
 				   $row->days_in_avg,
 				   $row->o_pct_obs,
@@ -689,7 +692,7 @@ sub write_gams_program {
     my $eq8 = "*";
     $eq8 = "" if $self->use_eq8;
     my $eq8b = "*";
-    $eq8b = "" if $self->use_eq8;
+    $eq8b = "" if $self->use_eq8b;
     my @objective;
     my $bias = $self->bias || 0;
 
@@ -1069,7 +1072,7 @@ $eq7                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1)));
 ** Loading wave
 $eq8 EQ8(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-($shockdir)*$MAX_LOAD_SHOCK_DIST)), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
 ** Clearing wave
-$eq8b EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+($shockdir)*$MAX_CLEAR_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1+1,M1) - D(J1,M1) );
+$eq8b EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+($shockdir)*$MAX_CLEAR_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1+1,M1) );
 ** REQUIRE THAT IF THERE IS ANY BOUNDARY, IT MUST INCLUDE CELLS WITHIN A CERTAIN DISTANCE OF THE EXPECTED TIME-SPACE LOCATION OF THE DISRUPTION
 $use_boundary_constraint EQ9 .. SUM( J1, SUM( M1, D(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<$BOUNDARY_DT), D(K1,R1)));
 TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) * D(J1,M1) ) );
@@ -1189,7 +1192,15 @@ sub parse_results {
 	}
 	/^\*\*\*\* \d+ ERROR/ && do
 	{
-	    die "CONSULT ".$self->get_lst_file." for details";
+	    die "CONSULT ".$self->get_lst_file." FOR DETAILS";
+	};
+	/EXECERROR/ && do 
+	{
+	    die "EXECERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	};
+	/No solution returned/ && do 
+	{
+	    die "No solution?: CONSULT ".$self->get_lst_file." FOR DETAILS";
 	};
 	
 	/^----\s+VAR Z\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
