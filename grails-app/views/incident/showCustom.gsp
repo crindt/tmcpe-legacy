@@ -145,6 +145,11 @@
 	    </div>
 	    <label id="scaleValue" style="vertical-align:top;float:left;">${band ? band : 0}</label>
 	  </div>
+	  <input id="incidentCheck" dojotype="dijit.form.CheckBox"
+	         name="incidentCheckBox" checked="true"
+		 type="checkbox"
+                 onClick="tsd.toggleIncidentWindow( dojo.byId( 'incidentCheck' ).checked )" />
+	  <label for="incidentCheck">Show Incident?</label> 	    
 	  
 <!--
 	  <input id="activityCheck" dojotype="dijit.form.CheckBox"

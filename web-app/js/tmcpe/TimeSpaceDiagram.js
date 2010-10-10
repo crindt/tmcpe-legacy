@@ -54,10 +54,12 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     // _tr: Array of tr elements
     //        internal variable to hold a reference to the table rows so we can update them as necessary
     _tr: null,
+    _itr: null,
 
     // _td: Array of td elements
     //        internal variable to hold a reference to the table data (cells) so we can update them as necessary
     _td: null,
+    _itd: null,
 
     // incident: String
     //        The incident number to display in the TSD.  Note that this is implementation specific 
@@ -89,6 +91,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     // _tableNode: DomNode
     //        The DOM node containing the TSD table
     _tableNode: null,
+    _incidentTableNode: null,
 
     buildRendering: function() {
 	// summary:
@@ -181,7 +184,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    }
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null && secdat.spd_std != null 
-		 && secdat.p_j_m != 0.5  // fixme: a proxy to indicate that the historical speed estimate is tained
+		 && ( secdat.p_j_m == 0 || secdat.p_j_m == 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
 //		 && secdat.days_in_avg < 30  // fixme: make this a parameter
 //		 && secdat.pct_obs_avg < 30  // fixme: make this a parameter
 	       ) {
@@ -193,7 +196,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null 
-		 && secdat.p_j_m != 0.5  // fixme: a proxy to indicate that the historical speed estimate is tained
+		 && ( secdat.p_j_m == 0 || secdat.p_j_m == 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
 //		 && secdat.days_in_avg < 30  // fixme: make this a parameter
 //		 && secdat.pct_obs_avg < 30  // fixme: make this a parameter
 	       ) {
@@ -215,7 +218,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		
 		var stdlev = (secdat.spd - secdat.spd_avg)/secdat.spd_std;
 		var tmppjm = 1; // no incident probability is default
-		if ( secdat.p_j_m == 0.5 )
+		if ( secdat.p_j_m != 0 && secdat.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
 		    tmppjm = 0.5;
 		else if ( stdlev < 0 && stdlev < -this.themeScale )
 		{
@@ -235,7 +238,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 
 	    if ( secdat != null && secdat.spd != null ) {
-		color = this._getColor( secdat.spd, 10, 75, '#ff0000', '#00ff00' );
+		color = this._getColor( secdat.spd, 15, 50, '#ff0000', '#00ff00' );
 	    }
 	    return color;
 	}
@@ -300,6 +303,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		       } ) );
     },
 
+    toggleIncidentWindow: function(toggle)
+    {
+	this._incidentTableNode.style.visibility = ( toggle ? 'visible' : 'hidden' );
+    },
+
     _redraw: function()
     {
 	// summary:
@@ -335,19 +343,30 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    dojo.create( "table", 
 			 { id: "tsdTableNode", 
 			   ref: [this.incident, this.facility, this.direction].join('-'), 
-			   style: "border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;"
+			   style: "border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;z-index:1;"
 			 }
 		       );
 	this._tableNodeContainer.appendChild( this._tableNode );
 
+	this._incidentTableNode = 
+	    dojo.create( "table", 
+			 { id: "tsdTableNode", 
+			   ref: [this.incident, this.facility, this.direction].join('-'), 
+			   style: "position:absolute;top:0;left:0;border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;z-index:2;"
+			 }
+		       );
+	this._tableNodeContainer.appendChild( this._incidentTableNode );
+
 	// tt is a local shorthand variable for working with the table node (makes the code cleaner)
 	var tt = this._tableNode;
+	var itn = this._incidentTableNode;
 
 	// delete all rows (if they exist---I think this might not be necessary but it's inexpensive)
 	if ( tt.rows != null ) {
 	    for(var i = tt.rows.length; i > 0;i--)
 	    {
 		tt.deleteRow(i -1);
+		itn.deleteRow(i -1);
 	    }
 	}
 
@@ -387,11 +406,13 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// styling.  Here we compute the height of the rows (all
 	// assumed to be the same because we assume a single time
 	// step) as a percentage of the total height of the TSD widget
-	var height = 100.0/numrows;
+	var height = 100.0/(numrows);
 
 	// Create the arrays for holding the row and cell data
 	this._tr = new Array(numrows);
 	this._td = new Array(numrows);
+	this._itr = new Array(numrows);
+	this._itd = new Array(numrows);
 
 	for ( i = 0; i < numrows; ++i )
 	{
@@ -401,14 +422,17 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 	    // add the next row to the table
 	    var tr = tt.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;" } ) );
+	    var itr = itn.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;visibility:inherit;" } ) );
 	    this._tr[i] = tr;
+	    this._itr[i] = itr;
 
 	    // Now loop and create the table cells
 	    this._td[i] = new Array( d.sections.length );
+	    this._itd[i] = new Array( d.sections.length );
 	    //console.debug( "this._td[i].length = " + this._td[i].length );
 	    for ( jind = 0; jind < d.sections.length; ++jind )
 	    {
-		var j = d.sections.length-jind-1;
+		var j = (d.sections.length-jind-1);
 		//console.debug( i + " < " + numrows + ", " + j + " < " + d.sections.length + " ::: " + iind);
 
 		// The width of the cell is proportional to its actual length in the real world
@@ -461,7 +485,16 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    segment: j,
 		    station: d.sections[j].stnidx,
 		    innerHTML: ""/*i + "(" + iind + ")," + j*/, 
-		    style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:"+this._colorDataAccessor(iind,j)+";"+borders,
+		    style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:"+this._colorDataAccessor(iind,j)+";visibility:inherit;",
+		} ) );
+		var opacity = 0.6;
+		if ( targ.inc != 0 ) opacity=0.0;
+		this._itd[i][j] = itr.appendChild( dojo.create( "td", {
+		    id:["itsd",iind,j].join("_"), 
+		    time:iind,
+		    segment: j,
+		    station: d.sections[j].stnidx,
+		    style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:white;"+borders+";opacity:"+opacity+";visibility:inherit;",
 		} ) );
 		//console.debug( "this._td["+i+"]["+j+"] = " + this._td[i][j] );
 	    }
@@ -469,7 +502,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 	// Insert vertical line for incident location
 	var locpct = 100-(100*incloc/totlen);
-	this._tableNodeContainer.appendChild( dojo.create( "div", { id: "incloc", style: "border-width:2px;border-color:#0000ff;background-color:#0000ff;width:2px;height:100%;position:absolute;top:0;left:"+locpct+"%;"}));
+	this._tableNodeContainer.appendChild( dojo.create( "div", { id: "incloc", style: "border-width:2px;border-color:#0000ff;background-color:#0000ff;width:2px;height:100%;position:absolute;top:0;left:"+locpct+"%;z-index:10;"}));
 
 	// Now insert data for the activity log
 	if ( logStoreJs ) {
@@ -499,7 +532,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		if ( frac < 0 ) console.log( "FRAC < 0" );
 		if ( frac > 100 ) console.log( "FRAC > 100" );
 		console.log( this._data.timesteps[0] + ":" + st + ":" + et + ":" + dur + ":" + item.stampDateTime[0] + ":" + cur + ":" + frac );
-		this._tableNodeContainer.appendChild(dojo.create( "div", { id: "logit_"+item.id, class: "log_tsd_bar", style: "border-width:2px;border-color:#0000ff;background-color:#0000ff;width:100%;height:2px;position:absolute;top:"+frac+"%;left:0;visibility:hidden;"}));
+		this._tableNodeContainer.appendChild(dojo.create( "div", { id: "logit_"+item.id, class: "log_tsd_bar", style: "border-width:2px;border-color:#0000ff;background-color:#0000ff;width:100%;height:2px;position:absolute;top:"+frac+"%;left:0;visibility:hidden;z-index:10;"}));
 	    }
 	}
     },

@@ -231,11 +231,17 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var tsd = this._tsd;
 	var sections = tsd._data.sections;
 	var td = tsd._td;
+	var itd = tsd._itd;
 	for ( var i = 0; i < td.length; ++i ) {
-	    dojo.connect( tsd._tr[ i ], "onmouseover", this, "_hoverTime" );
+	    var tr = tsd._tr[i];
+	    var itr = tsd._itr[i];
+	    dojo.connect( tr, "onmouseover", this, "_hoverTime" );
+	    dojo.connect( itr, "onmouseover", this, "_hoverTime" );
 	    for ( var j = 0; j < td[i].length; ++j ) {
 		dojo.connect( td[i][j], "onmouseover", this, "_hoverStation" );
 		dojo.connect( td[i][j], "onclick", this, "_clickTimeSpaceCell" );
+		dojo.connect( itd[i][j], "onmouseover", this, "_hoverStation" );
+		dojo.connect( itd[i][j], "onclick", this, "_clickTimeSpaceCell" );
 	    }
 	}
 
@@ -500,6 +506,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	}
 	var el = document.getElementById('tmcpe_tsd_cellinfo');
 	var str = station.vdsid + ":" + station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "], " + this._tsd._data.timesteps[timeind];
+	var dd = station.analyzedTimesteps[timeind];
+	str += " | O:" + dd.spd.toFixed(1) + "-mph, A:" + dd.spd_avg.toFixed(1) + "-mph +/- " + dd.spd_std.toFixed(1) + "-mph | OCC: " + (100*dd.occ).toFixed(1) + '%';
 	if ( station.analyzedTimesteps[timeidx].p_j_m == 0.5 ) str += ' <span style="color:#ff0000;font-weight:bold">&lt;UNRELIABLE&gt;</span>';
 	el.innerHTML = str;
     },
