@@ -483,6 +483,9 @@ sub get_pems_data {
 			      "\n");
 	    foreach my $br ( @bad_rows ) {
 		print STDERR "\tCREATING FOR ".$br->stamp."...";
+		
+		# tmcpe_data_create is a view that generates the
+		# averages.  Here, we compute the stats for this row
 		my @created_rows = $self->vds_db->resultset( 'TmcpeDataCreate' ) ->search(
 		    {
 			vdsid => $vds->id,
@@ -490,32 +493,52 @@ sub get_pems_data {
 			stamp => $br->stamp
 		    });
 		
-		# created_rows will contain the data we want to push into 'Pems5minAnnualAvg'
+		# created_rows will contain the data we want to push
+		# into 'Pems5minAnnualAvg'
 		if ( @created_rows ) {
 
 		    croak "TOO MANY ROWS RETURNED WHILE CREATING AVERAGES!!!" if ( @created_rows > 1 );
 
-		    # see if it already exists
+		    # see if it already exists, which can occur if
+		    # we're updating the cache
 		    my @existing_rows = $self->vds_db->resultset( 'Pems5minAnnualAvg' )->search(
 			{
 			    vdsid => $vds->id,
 			    stamp => $br->stamp
 			});
 
-		    croak "TOO MANY EXISTING ROWS RETURNED WHILE CREATING AVERAGES!!!" if ( @existing_rows > 1 );
-
 		    if ( @existing_rows ) {
 			# just update
+
+			croak "TOO MANY EXISTING ROWS RETURNED WHILE CREATING AVERAGES!!!" 
+			    if ( @existing_rows > 1 );
+
 			my $er = shift @existing_rows;
-			map { my $cr = $_; map { $er->set_column( $_ => $cr->get_column( $_ ) ) } $er->result_source->columns; } @created_rows;
+
+			# this loops over all the columns in the
+			# created row and updates the existing row accordingly
+			map { my $cr = $_; 
+			      map { 
+				  $er->set_column( $_ => $cr->get_column( $_ ) ) 
+			      } $er->result_source->columns; 
+			} @created_rows;
+
+			# Push the changes to the database
 			$er->update;
 
 		    } else {
-			# create a new one
-			$self->vds_db->populate( 'Pems5minAnnualAvg',
-						 [ [ $created_rows[0]->result_source->columns ],
-						   map { my $row = $_; [ map { $row->get_column( $_ ); } $row->result_source->columns ] } @created_rows
-						 ]);
+			# create a new one 
+			$self->vds_db->populate( 
+			    'Pems5minAnnualAvg',
+			    [ [ $created_rows[0]->result_source->columns ],
+
+			      # create an array containing the data corresponding to the columns
+			      map { 
+				  my $row = $_; 
+				  [ map { $row->get_column( $_ ); } $row->result_source->columns ] 
+			      } @created_rows
+
+			    ]);
 		    }
 		}
 		print STDERR "done\n";
