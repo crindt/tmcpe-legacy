@@ -1,4 +1,32 @@
+=head1 NAME
+
+TMCPE::DelayComputation - Performs TMCPE delay computation
+
+=head1 SYNOPSIS
+
+    use $dc = new TMCPE::DelayComputation();
+    $dc->cad( '12345' ); # set the CAD id to compute delay for
+    $dc->incid( 123 );   # set the database incident id
+
+    # now we define the approximate location of the incident to analyze
+    $dc->facil( 5 );       # set the facility number
+    $dc->dir( 'N' );       # set the facility direction
+    $dc->pm( 12.34 );      # set the postmile
+    $dc->vdsid( 1234567 ); # set the vdsid of the nearest vds station
+    $dc->logstart( $somestarttime ); # Set the start time of the log
+    $dc->logend( $someendtime );     # Set the start time of the log
+
+    $dc->compute_delay();  # compute the delay
+    $dc->write_to_db();    # write the results to the database
+
+=head1 DESCRIPTION
+
+C<TMCPE::DelayComputation> encapsulates the delay computation task of
+the TMC Performance Evaulation project.  
+
+=cut
 package TMCPE::DelayComputation;
+
 
 use strict;
 use warnings;
@@ -13,6 +41,9 @@ use TMCPE::Schema;
 use TBMAP::Schema;
 use Date::Format;
 use POSIX;
+use Devel::Comments '###', '###';
+
+our $VERSION = '0.3.4';
 
 use Class::MethodMaker
     [
@@ -39,10 +70,10 @@ use Class::MethodMaker
      scalar => [ { -type => 'TMCPE::Schema',
 		   -default_ctor => sub {
 		       my $self = shift;
-		       die "TMCPE DB NOT SPECIFIED!" if not $self->tmcpe_db_name;
-		       die "TMCPE DB HOST NOT SPECIFIED!" if not $self->tmcpe_db_host;
-		       die "TMCPE DB USER SPECIFIED!" if not $self->tmcpe_db_user;
-		       warn join(",", $self->tmcpe_db_name,$self->tmcpe_db_host,$self->tmcpe_db_user,$self->tmcpe_db_password);
+		       croak "TMCPE DB NOT SPECIFIED!" if not $self->tmcpe_db_name;
+		       croak "TMCPE DB HOST NOT SPECIFIED!" if not $self->tmcpe_db_host;
+		       croak "TMCPE DB USER SPECIFIED!" if not $self->tmcpe_db_user;
+		       carp join(",", $self->tmcpe_db_name,$self->tmcpe_db_host,$self->tmcpe_db_user,$self->tmcpe_db_password);
 		       TMCPE::Schema->connect(
 			   join("", "dbi:Pg:dbname=",$self->tmcpe_db_name,";","host=",$self->tmcpe_db_host),
 			   $self->tmcpe_db_user, $self->tmcpe_db_password,
@@ -124,6 +155,14 @@ use Class::MethodMaker
      new    => [ qw/ new / ]
     ];
 
+
+=head1 METHODS
+
+=head2 get_gams_file
+
+    Returns a unique gams input filename based upon the CAD id and facility
+
+=cut
 sub get_gams_file {
      my $self = shift; 
      my $fn = $self->cad."-".$self->facil."=".$self->dir.".gms";
@@ -131,6 +170,11 @@ sub get_gams_file {
      return $fn;
 }
 
+=head2 get_lst_file
+
+    Returns a unique gams output (lst) filename based upon the CAD id and facility
+
+=cut
 sub get_lst_file {
     my $self = shift; 
     my $fn = $self->cad."-".$self->facil."=".$self->dir.".lst";
@@ -138,6 +182,12 @@ sub get_lst_file {
     return $fn;
 }
 
+=head2 get_affected_vds
+
+    Compute and return the set of vds associated with freeway sections
+    possibly affected by the incident.
+
+=cut
 sub get_affected_vds {
     my ( $self ) = @_;
     
@@ -188,7 +238,12 @@ sub get_affected_vds {
     
 }
 
-# routine to read data from an existing GAMS program file
+=head2 get_gams_data
+
+    Load the results from an existing gams solution.  Useful for
+    re-parsing results if the result parser has changed.
+
+=cut
 sub get_gams_data {
     my ( $self, @avds ) = @_;
 
@@ -211,13 +266,16 @@ sub get_gams_data {
     my $fcnt;
     my $afcnt;
     my $seccnt;
-    my $facilkey = join( ":", $self->facil, $self->dir );
     my $i = $self->cad;
     my $data;
 
+    my $facilkey = join( ":", $self->facil, $self->dir );
+
     foreach my $vds ( @avds ) {
+
+	### require: $self->facil eq $vds->freeway_id && $self->dir eq $vds->freeway_dir
+
 	my $vdsid = $vds->id;
-	my $facilkey = join( ":", $vds->freeway_id, $vds->freeway_dir );
 	
 	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{vds} = $vds;
 	$data->{$i}->{$facilkey}->{stations}->{$vds->id}->{abs_pm} = $vds->abs_pm;
@@ -248,13 +306,14 @@ sub get_gams_data {
   LINE:
     while( my $line = $if->getline() ) {
 	$_ = $line;
+
 	if ( $inparams ) {
 	    if ( $inseclen ) {
 		# read sections
-		/^\s*\/\s*$/ && do { if ( ++$delimcount > 1 ) { 
+		/^\s*\/\s*$/x && do { if ( ++$delimcount > 1 ) { 
 		    $inseclen = 0 }; 
 		};
-		/^\*\s+S(\d+)\s=\s(\d+)\s(.*?)\s*$/ && do {
+		/^\*\s+S(\d+)\s=\s(\d+)\s(.*?)\s*$/x && do {
 		    my ( $secnum, $vdsid, $vdsname ) = ($1,$2,$3);
 		    $seccnt++;
 		    # store seclens here
@@ -272,7 +331,7 @@ sub get_gams_data {
 		    croak "BAD VDSID IN PJM READ" if not $vdsid;
 		    for my $m (0..$#pjm) {
 			# do the date/time here too
-			my ($date,$time) = split(/\s+/, $times[$m]);			
+			my ($date,$time) = split(/\s+/, $times[$m]);
 			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{date} = $date;
 			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{timeofday} = $time;
 			$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}->[$m]->{days_in_avg} = $pjm[$m] == $self->unknown_evidence_value ? 0 : 30;
@@ -397,7 +456,9 @@ sub get_gams_data {
     my $J = keys %{$data->{$i}->{$facilkey}->{stations}};
     $J -= 1;
     my $M = 0;
-    map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$data->{$i}->{$facilkey}->{stations}};
+    map { 
+	$M = @{$_->{data}} if $M < @{$_->{data}}; 
+    } values %{$data->{$i}->{$facilkey}->{stations}};
 
     my $j = $J;
 
@@ -413,19 +474,37 @@ sub get_gams_data {
 	}
 	--$j;
     }
+
+    return;
 }
 
+
+sub fmt_unit {
+    my ( $val, $unit, $fmt ) = @_;
+    $val = defined $val ? $val : '<undef>';
+    if ( $fmt ) {
+	$fmt = "%s" if ( $val eq '<undef>' );
+	return sprintf( $fmt, $val, $unit );
+    } else {
+	return join( "", $val, $unit );
+    }
+}
+
+=head2 get_pems_data( @avds )
+
+    Read the relevant PEMS data observed and statistics from the
+    database for the given list of vds stations.  Unless otherwise
+    specified, this method will read data from the PEMS statistics
+    cache table, rather than compute the statistics on the fly.  If
+    the statistics don't exist, or if use of the cache is disabled,
+    this method will generate the statistics and insert them into the
+    cache table for later use.
+
+=cut
 sub get_pems_data {
     my ( $self, @avds ) = @_;
 
-#    @tt = Localtime(postwindow,0);
-
-    # run the pems 5min query to get relevant results
-
-    my $data;
-
     my $i = $self->cad;
-
 
     # OK, we need to determine the time periods for which we expect
     # data: Basically, it's every five-minute period between calcstart
@@ -443,10 +522,13 @@ sub get_pems_data {
     my $ss = time2str( "%D %T", $cs5 );
     my $es = time2str( "%D %T", $ce5 );
 
-    print STDERR "ANALYZED TIMES BETWEEN $ss AND $es ARE:\n" if $self->debug;
-    map { print STDERR "\t$_\n"; } @times if $self->debug;
+    #### ANALYZED TIMES BETWEEN $ss AND $es ARE:
+    #map { print STDERR "\t$_\n"; } @times if $self->debug;
 
-    foreach my $vds ( @avds ) {
+    my $data = {}; # the data structure we'll fill
+
+    foreach my $vds ( @avds ) {  ### Getting PEMS data...     done
+
 	my $vdsid = $vds->id;
 	my $facilkey = join( ":", $vds->freeway_id, $vds->freeway_dir );
 	
@@ -475,13 +557,14 @@ sub get_pems_data {
 	    });
 
 	# oops, no avg data for some rows, let's compute it now.
-	if ( @bad_rows ) {
-	    print STDERR join("",
-			      "COMPUTING MISSING ANNUAL AVERAGES FOR ",
-			      $vds->name,
-			      ( $self->debug ? ":\n\t".join("\n\t", map {$_->stamp} @bad_rows ) : ":" ),
-			      "\n");
-	    foreach my $br ( @bad_rows ) {
+	if ( @bad_rows ) {  ### COMPUTING MISSING ANNUAL AVERAGES FOR $vds->name
+#	    print STDERR join("",
+#			      "COMPUTING MISSING ANNUAL AVERAGES FOR ",
+#			      $vds->name,
+#			      ( $self->debug ? ":\n\t".join("\n\t", map {$_->stamp} @bad_rows ) : ":" ),
+#			      "\n");
+
+	    foreach my $br ( @bad_rows ) {   ### Processing |===[%]   | 
 		print STDERR "\tCREATING FOR ".$br->stamp."...";
 		
 		# tmcpe_data_create is a view that generates the
@@ -497,7 +580,7 @@ sub get_pems_data {
 		# into 'Pems5minAnnualAvg'
 		if ( @created_rows ) {
 
-		    croak "TOO MANY ROWS RETURNED WHILE CREATING AVERAGES!!!" if ( @created_rows > 1 );
+		    # require: @created_rows == 1
 
 		    # see if it already exists, which can occur if
 		    # we're updating the cache
@@ -508,31 +591,32 @@ sub get_pems_data {
 			});
 
 		    if ( @existing_rows ) {
-			# just update
+			#### Row exists for ($vds->id,$br->stamp), updating it
 
-			croak "TOO MANY EXISTING ROWS RETURNED WHILE CREATING AVERAGES!!!" 
-			    if ( @existing_rows > 1 );
+			# require: @existing_rows == 1
 
 			my $er = shift @existing_rows;
 
 			# this loops over all the columns in the
 			# created row and updates the existing row accordingly
-			map { my $cr = $_; 
-			      map { 
-				  $er->set_column( $_ => $cr->get_column( $_ ) ) 
-			      } $er->result_source->columns; 
-			} @created_rows;
+			foreach my $cr ( @created_rows ) {
+			    foreach my $col ( $er->result_source->columns ) {
+				$er->set_column( $_ => $cr->get_column( $_ ) ) 
+			    }
+			}
 
 			# Push the changes to the database
 			$er->update;
 
 		    } else {
-			# create a new one 
+
+			# Row doesn't exist for ($vds->id,$br->stamp), create a new one 
 			$self->vds_db->populate( 
 			    'Pems5minAnnualAvg',
 			    [ [ $created_rows[0]->result_source->columns ],
 
-			      # create an array containing the data corresponding to the columns
+			      # create an array containing the data
+			      # corresponding to the columns
 			      map { 
 				  my $row = $_; 
 				  [ map { $row->get_column( $_ ); } $row->result_source->columns ] 
@@ -541,14 +625,12 @@ sub get_pems_data {
 			    ]);
 		    }
 		}
-		print STDERR "done\n";
 	    }
 	} else {
-	    print STDERR "ALL DATA IS CACHED\n";
+	    #### CACHED: "ALL DATA IS CACHED FOR ".$vds->id." between $ss and $es"
 	}
 
-	# OK, now grab the data...
-	print STDERR "GRABBING ALL DATA...";
+	#### GRABBING DATA FOR $vds->id between $ss and $es
 	my @rows = $self->vds_db->resultset( 'TmcpeData' )->search(
 	    { 
 		vdsid => $vds->id,
@@ -557,21 +639,15 @@ sub get_pems_data {
 	    {
 		order_by => 'stamp asc'
 	    });
-	print STDERR "DONE";
 
-	my $tt;
 	# create the array if it's not defined yet
 	if ( not defined( $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data} ) ) {
 	    $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data} = [];
 	}
 	
 	if ( !@rows ) {
-	    # no DATA
-	    print STDERR join( "",
-			       "NO DATA FOR $vdsid ",
-			       $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name},
-			       "!!!\n"
-		);
+	    ### NO DATA FOR $vdsid $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name}!!!
+
 	    # CREATE SOME DUMMY DATA FOR THIS STATION
 	    foreach ( @times ) {
 		my ($date,$time) = split(/\s+/);
@@ -596,9 +672,7 @@ sub get_pems_data {
 	    1;
 	    
 	} else {
-	    if ( @rows != @times ) {
-		croak "# ROWS DOESN'T EQUAL # TIMES---CHUCKING" if ( @rows != @times  );
-	    }
+	    ### require: @rows == @times
 
 	    foreach my $row ( @rows ) {
 		my ($date,$time) = split(/\s+/, $row->stamp);
@@ -606,28 +680,35 @@ sub get_pems_data {
 		my $pjm=$self->unknown_evidence_value;  # default to unknown
 		if ( $row->days_in_avg >= $self->min_avg_days && $row->o_pct_obs >= $self->min_obs_pct ) 
 		{
-		    if ( $row->o_spd < ( $row->a_spd - $self->band * $row->sd_spd ) ) {
-			$pjm = 0;
+		    if ( not defined $row->o_spd ) {
+			# this means there's no valid data for this period, mark it bad
+			$pjm = 0.5;
 		    } else {
-			$pjm = 1;
+			if ( $row->o_spd < ( $row->a_spd - $self->band * $row->sd_spd ) ) {
+			    $pjm = 0;
+			} else {
+			    $pjm = 1;
+			}
 		    }
 		}
-		print STDERR join( " : ",
-				   $vdsid,
-				   $date,
-				   $time,
-				   $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name},
-				   sprintf( "%5.0f", $row->a_vol * 12  )." vph",
-				   sprintf( "%5.1f", $row->a_occ * 100 )."%",
-				   sprintf( "%5.1f", $row->a_spd )." mph",
-				   sprintf( "%5.1f", $row->sd_spd )." mph",
-				   sprintf( "%5.1f", $self->band * $row->sd_spd )." mph",
-				   sprintf( "%5.1f", $row->a_spd - $self->band * $row->sd_spd )." mph",
-				   sprintf( "%5.1f", $row->o_spd )." mph",
-				   $row->days_in_avg,
-				   $row->o_pct_obs,
-				   p_j_m => $pjm,
-		    )."\n";
+
+		my $diag = join( " : ",
+				 $vdsid,
+				 $date,
+				 $time,
+				 $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name},
+				 fmt_unit( $row->a_vol * 12, " vph", "%5.0f" ),
+				 fmt_unit( $row->a_occ * 100 , "%", "%5.1f" ),
+				 fmt_unit( $row->a_spd , " mph", "%5.1f" ),
+				 fmt_unit( $row->sd_spd , " mph", "%5.1f" ),
+				 fmt_unit( $self->band * $row->sd_spd , " mph", "%5.1f" ),
+				 fmt_unit( $row->a_spd - $self->band * $row->sd_spd , " mph", "%5.1f" ),
+				 fmt_unit( $row->o_spd , " mph", "%5.1f" ),
+				 $row->days_in_avg,
+				 $row->o_pct_obs,
+				 $pjm,
+		    );
+		#### rec: $diag
 
 		# This is what we really need to fill!
 		push @{$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}}, { 
@@ -647,8 +728,6 @@ sub get_pems_data {
 		    incden => 0,  # inferred
 		    shockspd => $row->a_spd   # (0 - a_flw)/(0-a_den) = -a_flw /-a_den = -a_flw / -( a_flw / a_spd ) = a_spd
 		};
-		
-		############# END THIS SHOULD BE A SUB ##################
 		
 		my $st=$vdsid;
 		
@@ -675,7 +754,9 @@ sub get_pems_data {
     my $J = keys %{$data->{$i}->{$facilkey}->{stations}};
     $J -= 1;
     my $M = 0;
-    map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$data->{$i}->{$facilkey}->{stations}};
+    map { 
+	$M = @{$_->{data}} if $M < @{$_->{data}} 
+    } values %{$data->{$i}->{$facilkey}->{stations}};
 
     my $j = $J;
 
@@ -691,6 +772,8 @@ sub get_pems_data {
 	}
 	--$j;
     }
+
+    return;
 }
 
 sub write_gams_program {
@@ -738,10 +821,16 @@ sub write_gams_program {
 
     my $of = io ( $self->get_gams_file );
 
+    # compute number of sections
     my $J = keys %{$data->{$i}->{$facilkey}->{stations}};
     $J -= 1;
+
+    # compute number of time steps
     my $M = 0;
-    map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$data->{$i}->{$facilkey}->{stations}};
+    map { 
+	$M = @{$_->{data}} if $M < @{$_->{data}}
+    } values %{$data->{$i}->{$facilkey}->{stations}};
+
     my $R = 1;
     my $RR = 2*$J*$M; # maximum number of upstream + time cells
 #       my $mintime = $tmp->{data}->{timeofday};
@@ -757,13 +846,13 @@ sub write_gams_program {
     my $m;
     my $d;
     $self->cell( [] );
-    foreach my $st ( @stations )
-    {
-	for ( $m = 0; $m < $M; ++$m )    
-	{
+    foreach my $st ( @stations ) {
+
+	for ( $m = 0; $m < $M; ++$m ) {
 	    $d = $st->{data}->[$m];
+
 	    if ( not defined $d ) {
-		warn "BAD data for $st, $m";
+		carp "BAD data for $st, $m";
 		$self->cell->[$j]->[$m] = { 
 		    timeofday => 0,
 		    avg_spd => 0,
@@ -777,6 +866,7 @@ sub write_gams_program {
 		    incden => 0,  # inferred
 		    shockspd => 0
 		};
+
 	    } else {
 		$self->cell->[$j]->[$m] = $d;
 	    }
@@ -784,7 +874,8 @@ sub write_gams_program {
 	$j++;
     }
 
-    print STDERR "WRITING PROGRAM $i to ".$self->get_gams_file."...";
+    ### .: join( "", "WRITING PROGRAM $i to ", $self->get_gams_file, "..." )
+
     my $RESLIM="*";
     $RESLIM = join( " = ", "OPTIONS RESLIM", $self->gams_reslim ) if $self->gams_reslim;
     my $LIMROW = "*";
@@ -818,12 +909,17 @@ PARAMETERS
 };
 
     $j = 0;
-    foreach my $st ( @stations )
-    {
+    foreach my $st ( @stations ) {    ### Writing postmiles...       done
 	$of << sprintf( "*		S%s = %s %s\n", 
-			$st->{vds}->id, 
-			$st->{name} );
-	$of << sprintf( "		S%s	%f\n", $j, $st->{abs_pm} );
+			map { defined $_ ? $_ : '<undef>' } (
+			    $j,
+			    $st->{vds}->id, 
+			    $st->{name} ) );
+	$of << sprintf( "		S%s	%f\n", 
+			map { defined $_ ? $_ : '<undef>' } (
+			    $j, $st->{abs_pm} 
+			)
+	    );
 
 	$j++;
     }
@@ -838,11 +934,12 @@ PARAMETERS
 };
 
     $j = 0;
-    foreach my $st ( @stations )
-    {
+    foreach my $st ( @stations ) {    ### Writing section lengths...       done
 	$of << sprintf( "*		S%s = %s %s\n", 
-			$j, $st->{vds}->id, 
-			$st->{name} );
+			map { defined $_ ? $_ : '<undef>' } (
+			    $j,
+			    $st->{vds}->id, 
+			    $st->{name} ) );
 	$of << sprintf( "		S%s	%f\n", $j, $st->{seglen} );
 	
 	$j++;
@@ -864,8 +961,7 @@ PARAMETERS
     
 
     $j = 0;
-    foreach my $st ( @stations )
-    {
+    foreach my $st ( @stations ) {    ### Writing evidence...       done
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -891,8 +987,7 @@ PARAMETERS
     $of << "\n";
     
     $j = 0;
-    foreach my $st ( @stations )
-    {
+    foreach my $st ( @stations ) {    ### Writing observed speeds...       done
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -917,8 +1012,7 @@ PARAMETERS
     $of << "\n";
     
     $j = 0;
-    foreach my $st ( @stations )
-    {
+    foreach my $st ( @stations ) {    ### Writing mean speeds...       done
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -943,8 +1037,7 @@ PARAMETERS
     $of << "\n";
     
     $j = 0;
-    foreach my $st ( @stations )
-    {
+    foreach my $st ( @stations ) {    ### Writing observed flows...       done
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -970,8 +1063,7 @@ PARAMETERS
     $of << "\n";
     
     $j = 0;
-    foreach my $st ( @stations )
-    {
+    foreach my $st ( @stations ) {    ### Writing mean flows...       done
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -988,12 +1080,15 @@ PARAMETERS
     my $MAX_LOAD_SHOCK_DIST = $self->limit_loading_shockwave/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     my $MAX_CLEAR_SHOCK_DIST = $self->limit_clearing_shockwave/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     
-    my ($BOUNDARY_DX, $BOUNDARY_DT) = split(/,/, $self->boundary_intersects_within );
     my $use_boundary_constraint = "*";
-    if ( defined( $BOUNDARY_DX ) && defined( $BOUNDARY_DT ) ) {
-	$use_boundary_constraint = "";
-    }
     my $startlim = $self->limit_to_start_region ? "" : "*";
+    my ($BOUNDARY_DX, $BOUNDARY_DT) = (10000,10000);  # set these to not bind
+    if ( $self->limit_to_start_region && $self->boundary_intersects_within ) {
+	($BOUNDARY_DX, $BOUNDARY_DT) = split(/,/, $self->boundary_intersects_within );
+	if ( defined( $BOUNDARY_DX ) && defined( $BOUNDARY_DT ) ) {
+	    $use_boundary_constraint = "";
+	}
+    }
     
     
     my $shockdir=1;
@@ -1053,6 +1148,7 @@ $startlim $use_boundary_constraint START_CONSTRAINT
 	}
     }
 	
+    ### WRITING EQUATIONS
     $of << qq{
 ;
 
@@ -1215,15 +1311,15 @@ sub parse_results {
 	}
 	/^\*\*\*\* \d+ ERROR/ && do
 	{
-	    die "CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    croak "CONSULT ".$self->get_lst_file." FOR DETAILS";
 	};
 	/EXECERROR/ && do 
 	{
-	    die "EXECERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    croak "EXECERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
 	};
 	/No solution returned/ && do 
 	{
-	    die "No solution?: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    croak "No solution?: CONSULT ".$self->get_lst_file." FOR DETAILS";
 	};
 	
 	/^----\s+VAR Z\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
@@ -1563,3 +1659,10 @@ sub compute_delay {
 }
 
 1;
+__END__
+
+=head1 AUTHOR
+
+Craig Rindt.
+
+=cut

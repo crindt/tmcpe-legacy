@@ -19,6 +19,8 @@ use Parse::RecDescent;
 use SQL::Abstract;
 use TMCPE::ActivityLog::LocationParser;
 use TMCPE::DelayComputation;
+use Pod::Usage;
+use Devel::Comments '###', '###';
 
 my %opt = ();
 
@@ -80,8 +82,11 @@ GetOptions( \%opt,
 	    "dc-cplex-polishafterintsol=i",
 	    "dc-cplex-nodesel=i",
 	    "dc-cplex-varsel=i",
-) || die "usage: import-al.pl [--skip-al] [--skip-icad]\n";
-
+	    "help",
+	    "man"
+    ) || pod2usage(2);
+pod2usage(1)  if ($opt{help});
+pod2usage(-verbose => 2)  if ($opt{help});
 
 my $procopt = {
     al_import => 1,
@@ -111,7 +116,7 @@ foreach my $o ( keys %opt ) {
     while ( $_ = shift @p ) {
 	if ( /^dc$/ ) {
 	    $dc="dc";
-	} elsif ( ( /^skip$/ || /^dont$/ ) && not @vv ) { 
+	} elsif ( ( /^skip$/ || /^dont$/ ) && ! @vv ) { 
 	    $neg++; 
 	} else {
 	    push @vv, $_;
@@ -134,7 +139,7 @@ foreach my $o ( keys %opt ) {
 }
 
 
-my $verbose if $procopt->{verbose};
+my $verbose = $procopt->{verbose} || 0;
 my $tmcpe_db_host = $procopt->{tmcpe_db_host};
 my $tmcpe_db_name = $procopt->{tmcpe_db_name};
 my $tmcpe_db_user = $procopt->{tmcpe_db_user};
@@ -180,7 +185,7 @@ my $loclogfile = io ( 'location-parse.log' );
 $loclogfile < "IMPORT RUN AT ".time2str( "%D %T", localtime() )."\n";
 
 
-my $lanesparser = new Parse::RecDescent( q(
+my $lanesparser = Parse::RecDescent->new( q(
 lanes: 'LANES:' <leftop: laneid ',' laneid> /.*?$/ { $return = [$item[2], $item[3]]; }
 
 laneid: lanetype /\d/ { $return = $item[1].$item[2]; }
@@ -389,7 +394,7 @@ sub load_al_entries {
 			});
 		};
 		if ( $@ ) {
-		    warn "ERROR ".$@->{msg};
+		    carp "ERROR ".$@->{msg};
 		    $logfile << "ERROR ".$@->{msg};
 		}
 		warn "INSERTED ENTRY ".$t->keyfield."\n" if $verbose;
@@ -403,6 +408,8 @@ sub load_al_entries {
     croak "ERROR ".$@->{msg} if $@;
 
     print STDERR "done\n";
+
+    return;
 }
 
 # loop over the icad records 
@@ -759,7 +766,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 	}
     }
 
-    warn "SOLVING ".$inc->cad."\n";
+    print join( "", "COMPUTING DELAY FOR ", $inc->id, " [", $inc->cad || "<undef>", "]" );
 
     my $dc = new TMCPE::DelayComputation();
 
@@ -830,5 +837,8 @@ INCDEL: while( my $inc = $incrs->next ) {
 
 
 
-DONE:
+ DONE:
 
+    1;
+
+__END__
