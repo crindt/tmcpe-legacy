@@ -527,7 +527,7 @@ sub get_pems_data {
 
     my $data = {}; # the data structure we'll fill
 
-    foreach my $vds ( @avds ) {  ### Getting PEMS data...     done
+    foreach my $vds ( @avds ) {  ### Getting PEMS data (% done)
 
 	my $vdsid = $vds->id;
 	my $facilkey = join( ":", $vds->freeway_id, $vds->freeway_dir );
@@ -909,7 +909,7 @@ PARAMETERS
 };
 
     $j = 0;
-    foreach my $st ( @stations ) {    ### Writing postmiles...       done
+    foreach my $st ( @stations ) {    ### Writing postmiles (% done)
 	$of << sprintf( "*		S%s = %s %s\n", 
 			map { defined $_ ? $_ : '<undef>' } (
 			    $j,
@@ -934,7 +934,7 @@ PARAMETERS
 };
 
     $j = 0;
-    foreach my $st ( @stations ) {    ### Writing section lengths...       done
+    foreach my $st ( @stations ) {    ### Writing section lengths (% done)
 	$of << sprintf( "*		S%s = %s %s\n", 
 			map { defined $_ ? $_ : '<undef>' } (
 			    $j,
@@ -961,7 +961,7 @@ PARAMETERS
     
 
     $j = 0;
-    foreach my $st ( @stations ) {    ### Writing evidence...       done
+    foreach my $st ( @stations ) {    ### Writing evidence (% done)
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -987,7 +987,7 @@ PARAMETERS
     $of << "\n";
     
     $j = 0;
-    foreach my $st ( @stations ) {    ### Writing observed speeds...       done
+    foreach my $st ( @stations ) {    ### Writing observed speeds (% done)
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -1012,7 +1012,7 @@ PARAMETERS
     $of << "\n";
     
     $j = 0;
-    foreach my $st ( @stations ) {    ### Writing mean speeds...       done
+    foreach my $st ( @stations ) {    ### Writing mean speeds (% done)
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -1037,7 +1037,7 @@ PARAMETERS
     $of << "\n";
     
     $j = 0;
-    foreach my $st ( @stations ) {    ### Writing observed flows...       done
+    foreach my $st ( @stations ) {    ### Writing observed flows (% done)
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -1063,7 +1063,7 @@ PARAMETERS
     $of << "\n";
     
     $j = 0;
-    foreach my $st ( @stations ) {    ### Writing mean flows...       done
+    foreach my $st ( @stations ) {    ### Writing mean flows (% done)
 	$of << sprintf( "%5s", sprintf( "S%d", $j ) );
 	
 	for ( $m = 0; $m < $M; ++$m )    
@@ -1203,7 +1203,7 @@ $startlim IFSTART_THEN_D(J1,M1) .. D(J1,M1) =G= S(J1,M1);
 $startlim START_BOUNDARY(J1,M1) .. SUM( K1, D( K1, M1-1 ) ) + SUM( R1, D( J1 + 1, R1 ) ) 
 $startlim                  =l= CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( S( J1, M1 ) );
 ** REQUIRE THAT IF THERE IS ANY BOUNDARY, IT MUST INCLUDE CELLS WITHIN A CERTAIN DISTANCE OF THE EXPECTED TIME-SPACE LOCATION OF THE DISRUPTION
-$startlim $use_boundary_constraint START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<$BOUNDARY_DT), S(K1,R1)));
+$startlim $use_boundary_constraint START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<=$BOUNDARY_DT), S(K1,R1)));
 };
     if ( $self->force ) {
 	foreach my $k ( keys %{$self->force} ) {
@@ -1509,112 +1509,6 @@ sub write_to_db {
 	}
 	$j++;
     }
-}
-
-sub write_json {
-    my ( $self, $outdir ) = @_;
-
-    my $i = $self->cad;
-    my $fwy = $self->facil;
-    my $dir = $self->dir;
-    my $cell = $self->cell;
-
-    my $facilkey = join( ":", $fwy, $dir );
-
-    my $J = keys %{$self->data->{$i}->{$facilkey}->{stations}};
-    $J--;  # crindt: FIXME: hack
-    my $M = 0;
-    map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$self->data->{$i}->{$facilkey}->{stations}};
-
-    my $mindate = $self->mindate;
-    $mindate =~ s|-|/|g;
-
-    my $mintimeofday = $self->mintimeofday;
-
-    my @calcdur = Delta_DHMS( Time_to_Date( $self->calcstart ), Time_to_Date( $self->calcend ) );
-
-    my $opts = {
-	band => $self->band,
-	mindate => $mindate,  # NOTE: swaps 2007-01-01 for 2007/01/01
-	mintimeofday => $mintimeofday,
-	mintimestamp => $mindate." ".$mintimeofday,
-	prewindow => $self->prewindow,
-	postwindow => ($calcdur[1]*60+$calcdur[2]), #$postwindow, # postwindow is time from incident onset to end of calcs
-	fwy => join( '-', $fwy, $dir ),
-	cad => $i,
-	tot_delay => $self->tot_delay,
-	avg_delay => $self->avg_delay,
-	net_delay => $self->net_delay
-    };
-
-    my $segments = [
-	map { 
-	    my $pm1 = $self->stationdata->[$_+1]->{abs_pm};
-	    my $pm2 = $self->stationdata->[$_]->{abs_pm};
-	    my $pm3 = $self->stationdata->[$_-1]->{abs_pm};
-	    
-	    $pm1 = $pm2 if not defined $pm1;
-	    $pm3 = $pm2 if not defined $pm3;
-
-	    { pmstart => ($pm1+$pm2)/2.0, pmend => ($pm3+$pm2)/2.0 }
-	} ( reverse 0..$J )
-    ];
-
-    my $incspd;
-    my $stdspd;
-    my $avgspd;
-    my $pjm;
-    my $inc;
-    my $cnt = 0;
-    my $j = $J;
-    foreach my $st ( sort { $self->data->{$i}->{$facilkey}->{stations}->{$a}->{abs_pm} <=> $self->data->{$i}->{$facilkey}->{stations}->{$b}->{abs_pm} } 
-		     keys %{ $self->data->{$i}->{$facilkey}->{stations} } )
-    {
-	for ( my $m = 0; $m < $M; ++$m )    
-	{
-	    my $d = $self->st->{data}->[$m];
-	    my $ddd = $d->{incspd};
-	    $incspd->[$m][$cnt] = $d->{incspd}+0;
-	    $stdspd->[$m][$cnt] = $d->{stddev_spd}+0;
-	    $avgspd->[$m][$cnt] = $d->{avg_spd}+0;
-	    $pjm->[$m][$cnt] = $d->{p_j_m}+0;
-	    $inc->[$m][$cnt] = 0; #$d->{inc}+0;
-	    $inc->[$m][$cnt] = $self->cell->[$m][$cnt]->{inc}+0 if defined $self->cell->[$m][$cnt]->{inc};  #$d->{inc}+0;
-	    --$j;
-	}
-	$cnt++
-    }
-
-    my $events = {};
-
-    my @actlog = $self->actlog_db->resultset( 'Al' )->search(
-	{ cad => $self->cad },
-	{ order_by => 'ts asc' }
-	);
-
-    my $fn = "$outdir/$i-$fwy-$dir.json";
-    my $jsonf = io( "$fn" );
-    my @dhash = map { 
-	my $tt = $_;
-	my $ttt = { stampdate => $tt->stampdate, 
-		    stamptime => $tt->stamptime, 
-		    status=>$tt->status, 
-		    activitysubject=>$tt->activitysubject,
-		    memo=>$tt->memo };
-    } ( @actlog );
-    $jsonf < to_json( { opts => $opts, 
-			segments => $segments, 
-			incspd => $incspd, 
-			stdspd => $stdspd, 
-			avgspd => $avgspd, 
-			pjm => $pjm, 
-			inc => $inc,
-			events => $events,
-			band => $self->band,
-			actlog => [ @dhash ]
-		      }, 
-		   { pretty => 1 } );
-    print STDERR "Wrote to $fn\n";
 }
 
 sub update_time_bounds() {
