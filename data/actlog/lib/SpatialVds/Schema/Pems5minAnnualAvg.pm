@@ -85,8 +85,8 @@ __PACKAGE__->set_primary_key("stamp", "vdsid");
 __PACKAGE__->add_unique_constraint("pems_5min_annual_avg_pkey", ["stamp", "vdsid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-07 16:07:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lU7JXAf2CESf8oRRwGaoqg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 14:56:26
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:h1GmYId7PN9hwJFfCB3FBA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

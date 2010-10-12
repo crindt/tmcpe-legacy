@@ -19,6 +19,29 @@ CREATE TABLE actlog.d12_activity_log (
 CREATE INDEX idx_d12_activity_log_cad ON actlog.d12_activity_log( cad );
 CREATE INDEX idx_d12_activity_log_stamp ON actlog.d12_activity_log( stamp );
 
+DROP TABLE IF EXISTS actlog.d12_comm_log CASCADE;
+CREATE TABLE actlog.d12_comm_log (
+    keyfield integer PRIMARY KEY,
+    cad character varying(60) DEFAULT NULL::character varying,
+    unitin text DEFAULT NULL::text,
+    unitout text DEFAULT NULL::text,
+    via text DEFAULT NULL::text,
+    op text DEFAULT NULL::text,
+    device_number integer,
+    device_extra text DEFAULT NULL::text,
+    device_direction character(1) DEFAULT NULL::bpchar,
+    device_fwy integer,
+    device_name text DEFAULT NULL::text,
+    status text DEFAULT NULL::text,
+    activitysubject text DEFAULT NULL::text,
+    memo text DEFAULT NULL::text,
+    imms text DEFAULT NULL::text,
+    made_contact char(1) DEFAULT NULL,
+    stamp timestamp without time zone
+);
+CREATE INDEX idx_d12_comm_log_cad ON actlog.d12_comm_log( cad );
+CREATE INDEX idx_d12_comm_log_stamp ON actlog.d12_comm_log( stamp );
+
 
 DROP TABLE IF EXISTS actlog.icad CASCADE;
 CREATE TABLE actlog.icad (

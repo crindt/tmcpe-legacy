@@ -34,8 +34,8 @@ __PACKAGE__->set_primary_key("gid");
 __PACKAGE__->add_unique_constraint("voronoi_polys_joined_pkey", ["gid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-07 16:07:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ppVJK8l0KlcUEx7t1arpTQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 14:56:26
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WOf65WodEA8wIlseT57o6w
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

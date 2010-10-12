@@ -27,8 +27,8 @@ __PACKAGE__->set_primary_key("orig");
 __PACKAGE__->add_unique_constraint("route_type_mapping_pkey", ["orig"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-07 16:07:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ro1tjUixkVrWmWFUMzsxmQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 14:56:26
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:uPf6Nv+97HbG7hzypTEtaA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

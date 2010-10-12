@@ -77,7 +77,6 @@ class TmcLogEntry implements Comparable {
         def pieces = memo.split(/:DOSEP:/)
         def hash = [:]
         if ( pieces.size() == 0 ) return hash
-        System.err.println( "PIECES: " + pieces )
         hash['memo'] = pieces[0]
         pieces.eachWithIndex() { obj,i ->
             if ( i == 0 ) {
@@ -91,7 +90,6 @@ class TmcLogEntry implements Comparable {
                 }
             }
         }
-        System.err.println( "MEMO: " + hash )
         return hash
     }
 

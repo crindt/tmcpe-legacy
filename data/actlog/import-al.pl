@@ -26,6 +26,7 @@ my %opt = ();
 
 GetOptions( \%opt, 
 	    "skip-al-import",
+	    "skip-rl-import",
 	    "skip-icad-import",
 	    "skip-incidents",
 	    "skip-critical-events",
@@ -90,6 +91,7 @@ pod2usage(-verbose => 2)  if ($opt{help});
 
 my $procopt = {
     al_import => 1,
+    rl_import => 1,
     icad_import => 1,
     incidents => 1,
     critical_events => 1,
@@ -195,7 +197,9 @@ lanetype: 'HOV' | '#'
     );
 
 
-goto ICAD if not $procopt->{al_import};
+goto RLOG if not $procopt->{al_import};
+
+# FIXME: load to current year
 
 foreach my $table ( ( map { "CtAlBackup$_" } ( 2003..2010 ) ) , "CtAlTransaction" )
 {
@@ -329,7 +333,7 @@ sub process_performance_measures {
 		detail => $detail
 	    };
 	    $data->{blocklanes} = $lanes;
-	    $log->create_related( 'performance_measures', $data );
+	    $log->create_related( 'performance_measures_log_ids', $data );
 	}
     }
     return $data;
@@ -342,7 +346,7 @@ sub process_performance_measures {
 sub load_al_entries {
     my ( $table ) = @_;
 
-    print STDERR "LOADING FROM $table...";
+    print STDERR "LOADING ACTIVITY LOG ENTRIES FROM $table...";
 
     # BLOCK DB UPDATES DURING THIS OPERATION?
     
@@ -354,6 +358,12 @@ sub load_al_entries {
 	$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
 	
 	$condition->{stampdate} = $datecond if $datecond;
+
+	# only load for specific CAD
+	my @include = grep { not /^not-/ } @ARGV;
+	my @exclude = grep { /^not-/ } @ARGV;
+	$condition->{cad}->{'-in'} = [ @include ] if @include;
+	$condition->{cad}->{'-not_in'} = [ map { $_ =~ s/^not-//g; $_ } @exclude ] if @exclude;
 	
 	$rs = $d12->resultset($table)->search(
 	    $condition,
@@ -411,6 +421,96 @@ sub load_al_entries {
 
     return;
 }
+
+# loop over the radio log records
+RLOG:;
+
+goto ICAD if not $procopt->{rl_import};
+
+# FIXME: load to current year
+
+foreach my $table ( ( map { "CommRlBackup$_" } ( 2009..2010 ) ) , "CtAlTransaction" )
+{
+    load_rl_entries( $table );
+}
+
+sub load_rl_entries {
+    my ( $table ) = @_;
+
+    print STDERR "LOADING COMM LOG ENTRIES FROM $table...";
+    
+    # BLOCK DB UPDATES DURING THIS OPERATION?
+    my $rs;
+    eval {
+	my $condition = {};
+	my $datecond;
+	$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
+	$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
+	
+	$condition->{stampdate} = $datecond if $datecond;
+
+	# load for specific CAD
+	my @include = grep { not /^not-/ } @ARGV;
+	my @exclude = grep { /^not-/ } @ARGV;
+	$condition->{cad}->{'-in'} = [ @include ] if @include;
+	$condition->{cad}->{'-not_in'} = [ map { $_ =~ s/^not-//g; $_ } @exclude ] if @exclude;
+
+	
+	$rs = $d12->resultset($table)->search(
+	    $condition,
+	    { order_by => 'keyfield asc' }
+	    );
+	
+	# loop over all the new records, and shove them into the postgres db
+	while ( my $t = $rs->next ) {  ### Looping over CommLog entries (% done)
+
+	    # push data in.
+	    my $rec;
+	    
+	    my $date = $t->stampdate;
+	    $date =~ s/-/\//g;
+	    my $stamp = join(" ", $date, $t->stamptime );
+	    
+	    my $exist = $tmcpeal->resultset('D12CommLog')->find( $t->keyfield );
+	    
+	    if ( not $exist ) {
+		eval { 
+		    $rec = $tmcpeal->resultset('D12CommLog')->create(
+			{
+			    keyfield => $t->keyfield,
+			    stamp => $stamp,
+			    cad => $t->cad,
+			    unitin => $t->unitin,
+			    unitout => $t->unitout,
+			    via => $t->via,
+			    op => $t->op,
+			    device_number => $t->device_number,
+			    device_direction => $t->device_direction,
+			    device_fwy => $t->device_fwy,
+			    device_name => $t->device_name,
+			    status => $t->status,
+			    activitysubject => $t->activitysubject,
+			    memo => $t->memo,
+			    imms => $t->imms,
+			    made_contact => $t->madecontact
+			});
+		};
+		if ( $@ ) {
+		    carp "ERROR ".($@->{msg} || $@);
+		    $logfile << "ERROR ".($@->{msg} || $@ );
+		} else {
+		    warn "INSERTED ENTRY ".$t->keyfield."\n" if $verbose;
+		}
+		1;
+	    }
+	}
+    };
+
+    print STDERR "done\n";
+
+    return;
+}
+
 
 # loop over the icad records 
 

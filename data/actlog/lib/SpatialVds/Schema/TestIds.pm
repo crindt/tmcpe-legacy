@@ -22,8 +22,8 @@ __PACKAGE__->set_primary_key("gid");
 __PACKAGE__->add_unique_constraint("test_ids_pkey", ["gid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-07 16:07:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eQyV9Td0zBdpfR+0n5E96w
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 14:56:26
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:OOgQ9YW0LXl+QJ671U1U5g
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
