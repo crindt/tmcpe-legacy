@@ -173,7 +173,7 @@ class Incident {
         cal.setTimeZone( java.util.TimeZone.getTimeZone( "America/Los_Angeles" ) )
         cal.set( Calendar.YEAR, startTime.getYear() + 1900)
         cal.set( Calendar.MONTH, startTime.getMonth() )
-        cal.set( Calendar.DAY_OF_MONTH, startTime.getDay() )
+        cal.set( Calendar.DAY_OF_MONTH, startTime.getDate() )
         cal.set( Calendar.HOUR_OF_DAY, startTime.getHours() )
         cal.set( Calendar.MINUTE, startTime.getMinutes() )
         return cal.getTime();
