@@ -278,16 +278,19 @@
 	  </table>
 	</div> <!-- Form -->
       </div> <!-- Query Pane -->
-      <!-- Map Pane -->
+      <!-- Map and Details Pane -->
       <div dojoType="dijit.layout.BorderContainer" id="mapgrid" region="center" design="sidebar" style="background:green;" splitter="false" liveSplitters="false">
+	<!-- Map Pane -->
 	<div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
 	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
 	</div>
 	<!-- Incident Details Pane -->
 	<div dojoType="dijit.layout.BorderContainer" gutters="false" region="right" style="width: 300px;background:white;">
+	  <!-- Detail Box -->
 	  <div dojoType="dijit.layout.ContentPane" id="incidentDetailPane" gutters="true" region="center" >
 	    <div id="incidentDetails" style="margin-top:3em;">Select an incident on the map to view its details here.</div>
 	  </div>
+	  <!-- Detail Button Box -->
 	  <div dojoType="dijit.layout.ContentPane" id="incidentDetailsControllerPane" gutters="true" region="bottom">
 	    <div id="incidentDetailsController" class="centered-div centered" style="width:12em;visibility:hidden;">
 	      <button id="previousIncident" 
@@ -323,13 +326,13 @@
 		 >
 	    <thead>
 	      <tr>
-		<th field="cad" tooltip="Check" dataType="String" styles="padding-left:5px;padding-right:5px;" width="10%">CAD ID</th>
-		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" formatter="myFormatDate" width="10%">Timestamp</th>
-		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="20%">Section</th>
+		<th field="cad" tooltip="Check" dataType="String" styles="padding-left:5px;padding-right:5px;" width="6%">CAD ID</th>
+		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" formatter="myFormatDate" width="7%">Timestamp</th>
+		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="15%">Section</th>
 		<th field="memo" dataType="String" styles="padding-left:5px;padding-right:5px;" width="35%">Description</th>
-		<th field="delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">Delay</th>
+		<th field="d12_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">D<sub>35</sub></th>
+		<th field="tmcpe_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">D<sub>tmcpe</sub></th>
 		<th field="savings" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">TMC Savings</th>
-		<th field="analysesCount" dataType="Integer" styles="padding-left:5px;padding-right:5px;text-align:center;" width="5%">Analyses</th>
 	      </tr>
 	    </thead>
 	  </table>
@@ -337,7 +340,7 @@
 	<div dojoType="dijit.layout.ContentPane" id="gridSummaryContainer" region="bottom" style="background:purple;" splitter="false" liveSplitters="false" style="padding:0px;">
 	  <div dojoType="dojo.data.ItemFileReadStore" 
 	       data="{items:[
-		     {'cad':'','timestamp':'',locString:'','memo':'Totals for Analyzed:','delay':'234.45','savings':'567.89',analysesCount:'',dummy:''},
+		     {'cad':'','timestamp':'',locString:'','memo':'Totals for Analyzed:','d12_delay':'0','tmcpe_delay':'0','savings':'0'},
 		     ]}" 
 	       jsId="incidentSummaryStore" 
 	       id="incidentSummaryStoreNode"
@@ -352,13 +355,13 @@
 		 >
 	    <thead>
 	      <tr>
-		<th field="cad" dataType="String" styles="padding-left:5px;padding-right:5px;" width="10%">CAD ID</th>
-		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" width="10%">Timestamp</th>
-		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="20%">Section</th>
-		<th field="memo" dataType="String" width="35%" styles="padding-left:5px;padding-right:5px;text-align:right;font-weight:bold;">Description</th>
-		<th field="delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">Delay (veh-hr)</th>
+		<th field="cad" dataType="String" styles="padding-left:5px;padding-right:5px;" width="6%">CAD ID</th>
+		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" width="7%">Timestamp</th>
+		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="15%">Section</th>
+		<th field="memo" dataType="String" styles="padding-left:5px;padding-right:5px;text-align:right;font-weight:bold;" width="35%">Description</th>
+		<th field="d12_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">Delay (veh-hr)</th>
+		<th field="tmcpe_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">Delay (veh-hr)</th>
 		<th field="savings" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">TMC Savings (veh-hr)</th>
-		<th field="analysesCount" dataType="Integer" styles="padding-left:5px;padding-right:5px;text-align:center;" width="5%">Analyses</th>
 		<th field="dummy" dataType="Integer" width="19px"></th>
 	      </tr>
 	    </thead>

@@ -36,6 +36,7 @@ GetOptions( \%opt,
 	    "date-to=s",
 	    "use-existing",
 	    "replace-existing",
+	    "ignore-unprocessed",
 	    "dont-replace-existing",
             "verbose",
 	    "tmcpe-db-host=s",
@@ -85,6 +86,8 @@ GetOptions( \%opt,
 	    "dc-cplex-polishafterintsol=i",
 	    "dc-cplex-nodesel=i",
 	    "dc-cplex-varsel=i",
+	    "dc-d12-delay-speed=f",
+	    "extend-if-bounded",
 	    "help",
 	    "man"
     ) || pod2usage(2);
@@ -106,6 +109,7 @@ my $procopt = {
     tmcpe_db_user => "postgres",
     tmcpe_db_password => "",
     replace_existing => 1,
+    ignore_unprocessed => 0,
     reprocess_existing => 1,
     forced => []
 };
@@ -867,16 +871,20 @@ INCDEL: while( my $inc = $incrs->next ) {
     # skip incidents if cadids are specified and they don't match.
     next INCDEL if ( !( $inc->sigalert_begin ) && $procopt->{only_sigalerts} );
     
-    if ( not $procopt->{replace_existing} ) {
+    my $ia;
+    my @existing = $tmcpe->resultset( 'IncidentImpactAnalysis' )->search(
+	{ incident_id => $inc->id });
+
+    if ( ! $procopt->{replace_existing} && @existing) {
 	# don't do the computation if one exists (should tweak to use confirm parameters are identical
-	my $ia;
-	my @existing = $tmcpe->resultset( 'IncidentImpactAnalysis' )->search(
-	    { incident_id => $inc->id });
-	
-	if ( @existing ) {
-	    warn "SKIPPING DELAY COMPUTATION FOR ".$inc->cad." BECAUSE ONE ALREADY EXISTS";
-	    next INCDEL;
-	}
+	warn "SKIPPING DELAY COMPUTATION FOR ".$inc->cad." BECAUSE ONE ALREADY EXISTS";
+	next INCDEL;
+    }
+
+    if ( $procopt->{ignore_unprocessed} && ! @existing ) {
+	# Don't compute unless a computation has already been performed
+	warn "SKIPPING DELAY COMPUTATION FOR ".$inc->cad." BECAUSE PARAMETERS SAY TO SKIP UNPROCESSED";
+	next INCDEL;
     }
 
     print join( "", "COMPUTING DELAY FOR ", $inc->id, " [", $inc->cad || "<undef>", "]" );

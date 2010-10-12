@@ -32,8 +32,8 @@ __PACKAGE__->belongs_to(
 __PACKAGE__->belongs_to("vds_id", "SpatialVds::Schema::Vds", { id => "vds_id" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 23:55:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:guFwRQSyzRSj1n+Ja8mM5Q
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-12 11:55:19
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:xxiACspkbWPLiS8ftUVpFg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

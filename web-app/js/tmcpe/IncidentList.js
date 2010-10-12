@@ -421,6 +421,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    console.debug( "Updating the incidents Summary" );
 	    var totAnalyzed = 0;
 	    var tot = 0;
+	    var d12Delay = 0;
 	    var totDelay = 0;
 	    var totSavings = 0;
 	    
@@ -431,13 +432,15 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		if ( item.attributes.analysesCount ) {
 		    totAnalyzed++;
 		}
-		if ( item.attributes.delay ) {
-		    //		    totDelay += store.getAttribute( item, 'delay', 0 );
-		    totDelay += item.attributes.delay;
-		    console.log( totDelay + ' += ' + item.attributes.delay );
+		if ( item.attributes.d12_delay ) {
+		    d12Delay += item.attributes.d12_delay;
+		    console.log( totDelay + ' += ' + item.attributes.d12_delay );
+		}
+		if ( item.attributes.tmcpe_delay ) {
+		    totDelay += item.attributes.tmcpe_delay;
+		    console.log( totDelay + ' += ' + item.attributes.tmcpe_delay );
 		}
 		if ( item.attributes.savings ) {
-		    //		    totSavings = store.getAttribute( item, 'savings', 0 );
 		    totDelay += item.attributes.savings;
 		}
 
@@ -449,7 +452,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		     timestamp: '',
 		     locString: '',
 		     memo:'Totals for Analyzed:',
-		     delay: totDelay,
+		     d12_delay: d12Delay,
+		     tmcpe_delay: totDelay,
 		     savings: totSavings,
 		     analysesCount: '',
 		     dummy: ''}
@@ -533,7 +537,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		      + '<tr><th style="width:8em;">Start Time</th><td>' + f.attributes.timestamp + "</td></tr>"
 		      + "<tr><th>Location</th><td>" + f.attributes.locString + "</td></tr>"
 		      + "<tr><th>Memo</th><td>" + memo + "</td></tr>"
-		      + "<tr><th>Delay</th><td>" + f.attributes.delay + " veh-hr</td></tr>"
+		      + "<tr><th>D<sub>35</sub></th><td>" + f.attributes.d12_delay + " veh-hr</td></tr>"
+		      + "<tr><th>D<sub>tmcpe</sub></th><td>" + f.attributes.tmcpe_delay + " veh-hr</td></tr>"
 		      + "<tr><th>Savings</th><td>" + f.attributes.savings + " veh-hr</td></tr>"
 		      + '<tr><td colspan=2 style="text-align:center;"><button id="'+buttonId+'"></button></td></tr>'
 		      + "</table>"
@@ -593,11 +598,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		{ title: "INCIDENT " + cad,
 		  content: '<table class="incidentSummary">' 
 		  + "<tr><th>CAD</th><td>" + f.attributes.cad + "</td></tr>"
-		  + '<tr><th style="width:8em;">Start Time</th><td>' + f.attributes.timestamp + "</td></tr>"
+		  + '<tr><th style="width:8em;">Start Time</th><td>' + myFormatDate( f.attributes.timestamp ) + "</td></tr>"
 		  + "<tr><th>Location</th><td>" + f.attributes.locString + "</td></tr>"
 		  + "<tr><th>Memo</th><td>" + memo + "</td></tr>"
-		  + "<tr><th>Delay</th><td>" + f.attributes.delay + " veh-hr</td></tr>"
-		  + "<tr><th>Savings</th><td>" + f.attributes.savings + " veh-hr</td></tr>"
+		  + "<tr><th>D<sub>35</sub></th><td>" + myFormatNumber( f.attributes.d12_delay ) + " veh-hr</td></tr>"
+		  + "<tr><th>D<sub>tmcpe</sub></th><td>" + myFormatNumber( f.attributes.tmcpe_delay ) + " veh-hr</td></tr>"
 		  + '<tr><td colspan=2 style="text-align:center;"><button id="'+buttonId+'"></button></td></tr>'
 		  + "</table>"
 		  //+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'

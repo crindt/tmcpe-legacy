@@ -28,10 +28,12 @@
     </head>
     <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
       <!-- layouts/main.gsp body -->
-        <div id="spinner" class="spinner" style="display:none;">
+        <div id="spinner" class="spinner" style="visibility:visible;z-index:-1;">
             <img src="${resource(dir:'images',file:'spinner.gif')}" alt="Spinner" />
         </div>	
+	<!-- Main Window -->
 	<div dojoType="dijit.layout.BorderContainer" id="main" design="headline" gutters="false">
+	  <!-- Banner -->
 	  <div dojoType="dijit.layout.ContentPane" id="banner" region="top" class="nav">
 	    <div style="float:left;font-size:30px;padding-left:10px;">
 	      TMC Performance Evaluation

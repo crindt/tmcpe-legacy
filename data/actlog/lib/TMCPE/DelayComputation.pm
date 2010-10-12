@@ -132,7 +132,7 @@ use Class::MethodMaker
      scalar => [ qw/ logstart logend / ],
      scalar => [ qw/ calcstart calcend / ],
      scalar => [ qw/ mintimeofday mindate / ],
-     scalar => [ qw/ bad_solution tot_delay avg_delay net_delay / ],
+     scalar => [ qw/ bad_solution d12_delay tot_delay avg_delay net_delay / ],
      scalar => [ { -default => 'tmcpe_test' }, 'tmcpe_db_name' ],
      scalar => [ { -default => 'localhost' }, 'tmcpe_db_host' ],
      scalar => [ { -default => 'postgres' }, 'tmcpe_db_user' ],
@@ -149,6 +149,7 @@ use Class::MethodMaker
      scalar => [ { -default => '0' }, "cplex_polishafterintsol" ],
      scalar => [ { -default => '1' }, "cplex_nodesel" ],
      scalar => [ { -default => '0' }, "cplex_varsel" ],
+     scalar => [ { -default => 35.0 }, "d12_delay_speed" ],
 #     scalar => [ { -type => 'Parse::RecDescent',
 #		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
 #		 }, 'parser' ],
@@ -1377,11 +1378,12 @@ sub parse_results {
 	    my ($nada, $val ) = split( /\s+/, $3 );
 	    $val = 0 if ( $val eq '.' || $val != 1 );
 	    $cell->[$1]->[$2]->{inc} = $val;
-	    print "INC: ($1,$2) = $val\n" if $self->debug;
+	    #print "INC: ($1,$2) = $val\n" if $self->debug;
 	};
     }
     print STDERR "done\n";
 
+    $self->d12_delay( 0 ); # not computed by GAMS
     $self->tot_delay( $tot_delay );
     $self->net_delay( $net_delay );
     $self->avg_delay( $avg_delay );
@@ -1446,6 +1448,7 @@ sub write_to_db {
 					end_time => time2str( "%D %T", $self->calcend ),
 					band => $self->band,
 					location_id => $loc->id,
+					d12delay => 0,
 					total_delay => $self->tot_delay,
 					net_delay => $self->net_delay,
 					avg_delay => $self->avg_delay,
@@ -1464,6 +1467,7 @@ sub write_to_db {
     map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$self->data->{$i}->{$facilkey}->{stations}};
 
     my $j = 0;
+    my $d12delaysum = 0;
     foreach my $station ( @stations ) {
 	my $as;
 	eval { $as = $ifa->create_related( 'analyzed_sections', { section_id=> $station->{vds}->id } ); };
@@ -1475,12 +1479,17 @@ sub write_to_db {
 	    my $at;
 	    eval { 
 		my $tmcpedelay = 0;
-		if ( (defined $secdat->{incspd} && $secdat->{incspd} > 0) && (defined $secdat->{avg_spd} && $secdat->{avg_spd} > 0) ) {
-		    $tmcpedelay = $secdat->{incflw} / $secdat->{incspd} * $station->{seglen} - 
-			$secdat->{avg_flw} / $secdat->{avg_spd} * $station->{seglen};
-		}
+		my $d12delay = 0;
 		my $stnidx = $j;
 		my $iflag = defined $self->cell->[$stnidx][$m]->{inc} ? $self->cell->[$stnidx][$m]->{inc} + 0 : 0;
+		if ( (defined $secdat->{incspd} && $secdat->{incspd} > 0) && (defined $secdat->{avg_spd} && $secdat->{avg_spd} > 0) ) {
+		    $tmcpedelay = $iflag * $station->{seglen} * ( 1.0 / $secdat->{incspd} - 1.0 / $secdat->{avg_spd} ) * $secdat->{incflw};
+		    $tmcpedelay = 0 if $tmcpedelay < 0;
+		    $d12delay   = $iflag * $station->{seglen} * ( 1.0 / $secdat->{incspd} - 1.0 / $self->d12_delay_speed ) * $secdat->{incflw};
+		    $d12delay = 0 if $d12delay < 0;
+		    
+		    $d12delaysum += $d12delay;
+		}
 		printf STDERR "\t* ".join( ' ', '(',$j,$m,')', $secdat->{date}, $secdat->{timeofday}, $iflag,
 		    $secdat->{incspd}, $secdat->{avg_spd}) . "\n";
 		$at = $as->create_related( 'incident_section_datas', 
@@ -1499,7 +1508,7 @@ sub write_to_db {
 					       
 					       incident_flag => $iflag,
 					       tmcpe_delay => $tmcpedelay * $iflag,
-					       #d12_delay => ,
+					       d12_delay => $d12delay * $iflag,
 					   } );
 	    };
 	    if ( $@ ) {
@@ -1509,6 +1518,8 @@ sub write_to_db {
 	}
 	$j++;
     }
+    $ifa->d12delay( $d12delaysum );
+    $ifa->update();
 }
 
 sub update_time_bounds() {

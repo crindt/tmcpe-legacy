@@ -63,6 +63,13 @@ __PACKAGE__->add_columns(
   },
   "version",
   { data_type => "bigint", default_value => undef, is_nullable => 1, size => 8 },
+  "d12delay",
+  {
+    data_type => "double precision",
+    default_value => undef,
+    is_nullable => 1,
+    size => 8,
+  },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("incident_facility_impact_analysis_pkey", ["id"]);
@@ -78,8 +85,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 23:55:42
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hm9rQGBtnkmv7XTGKY4u/A
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-12 11:54:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:M9aFN6vmAyXsSUM5R7byTw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

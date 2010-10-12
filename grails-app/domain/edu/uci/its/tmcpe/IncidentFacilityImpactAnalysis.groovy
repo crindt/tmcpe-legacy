@@ -25,6 +25,7 @@ class IncidentFacilityImpactAnalysis implements Comparable {
 
 
     ///////// OUTPUTS ////////
+    Double d12Delay
     Double totalDelay
     Double netDelay
     Double avgDelay

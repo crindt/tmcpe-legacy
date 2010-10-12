@@ -20,6 +20,12 @@ class IncidentImpactAnalysis implements Comparable {
     Incident incident;
     static belongsTo = [incident:Incident]
 
+    Float d12Delay() {
+        def f = 0
+        incidentFacilityImpactAnalyses?.collect{ f += (it?.d12Delay?: 0) }
+        return f
+    }
+
     Float netDelay() {
         def f = 0
         incidentFacilityImpactAnalyses?.collect{ f += (it?.netDelay?: 0) }
