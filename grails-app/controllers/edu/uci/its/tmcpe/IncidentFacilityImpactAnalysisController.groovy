@@ -133,16 +133,18 @@ class IncidentFacilityImpactAnalysisController {
                                rcount++
                             }
 
-                            def ccount = firstcol
+                            def ccount = 0
                             def pm_col = sheet.createRow((short)(firstrow-3))
                             def seglen_col = sheet.createRow((short)(firstrow-2))
                             def nlanes_col = sheet.createRow((short)(firstrow-1))
+                            def tcnt = incidentFacilityImpactAnalysisInstance.analyzedSections.size()
                             for ( it2 in incidentFacilityImpactAnalysisInstance.analyzedSections ) {
+                                def colnum = tcnt-ccount+firstcol
                                 if ( dt != "q" ) {
                                     // create col header for everything but the "q" page
-                                    pm_col.createCell((short)(ccount)).setCellValue(it2.section.absPostmile)
-                                    seglen_col.createCell((short)(ccount)).setCellValue(it2.section.segmentLength)
-                                    nlanes_col.createCell((short)(ccount)).setCellValue(it2.section.lanes)
+                                    pm_col.createCell((short)(colnum)).setCellValue(it2.section.absPostmile)
+                                    seglen_col.createCell((short)(colnum)).setCellValue(it2.section.segmentLength)
+                                    nlanes_col.createCell((short)(colnum)).setCellValue(it2.section.lanes)
                                 }
                                 
                                 // now put in all timestamps
@@ -152,60 +154,60 @@ class IncidentFacilityImpactAnalysisController {
                                     if ( row == null ) { row = sheet.createRow((short)rcount) }
 
                                     if ( dt == "spdkm" ) {
-                                        def cs1 = new CellReference("spd",rcount,ccount,false,false);
+                                        def cs1 = new CellReference("spd",rcount,colnum,false,false);
                                         def form = "1.6093*"+cs1.formatAsString()
-                                        row.createCell((short)(ccount)).setCellFormula( form )
+                                        row.createCell((short)(colnum)).setCellFormula( form )
 
                                     } else if ( dt == "alpha" ) {
-                                        def co1 = new CellReference("occ",rcount,ccount,false,false);
-                                        def cv1 = new CellReference("vol",rcount,ccount,false,false);
+                                        def co1 = new CellReference("occ",rcount,colnum,false,false);
+                                        def cv1 = new CellReference("vol",rcount,colnum,false,false);
                                         def form = "1000*100*"+co1.formatAsString()+"/(12*"+cv1.formatAsString()+")"
-                                        row.createCell((short)(ccount)).setCellFormula( form )
+                                        row.createCell((short)(colnum)).setCellFormula( form )
 
                                     } else if ( dt == "E(v^2)" ) {
                                         def p1 = new CellReference("E(v^2)",firstrow-firstrow,1,true,true);
                                         def p2 = new CellReference("E(v^2)",firstrow-firstrow,2,true,true);
                                         def p3 = new CellReference("E(v^2)",firstrow-firstrow,3,true,true);
-                                        def cs1 = new CellReference("spdkm",rcount,ccount,false,false);
+                                        def cs1 = new CellReference("spdkm",rcount,colnum,false,false);
                                         // =1.22*spdkm!B3^2-15.21*spdkm!B3+207.95
                                         def form = "min("+p1.formatAsString()+"*"+cs1.formatAsString()+"^2"+
                                             "+"+p2.formatAsString()+"*"+cs1.formatAsString()+
                                             "+"+p3.formatAsString()+","+cs1.formatAsString()+")"
-                                        row.createCell((short)(ccount)).setCellFormula( form )
+                                        row.createCell((short)(colnum)).setCellFormula( form )
 
                                     } else if ( dt == "SMS(mph)" ) {
                                         //=(3*spdkm!B3+(9*spdkm!B3^2-8*'ev2'!B3)^0.5)/4
-                                        def ev2 = new CellReference("E(v^2)",rcount,ccount,false,false);
-                                        def cs1 = new CellReference("spdkm",rcount,ccount,false,false);
+                                        def ev2 = new CellReference("E(v^2)",rcount,colnum,false,false);
+                                        def cs1 = new CellReference("spdkm",rcount,colnum,false,false);
                                         def form = "(3*"+cs1.formatAsString()+
                                             "+(9*"+cs1.formatAsString()+"^2-8*"+ev2.formatAsString()+")^0.5)/4/1.6093"
-                                        row.createCell((short)(ccount)).setCellFormula( form )
+                                        row.createCell((short)(colnum)).setCellFormula( form )
 
                                     } else if ( dt == "den(vplm)" ) {
                                         //=12*vol!B3/SMS!B3
-                                        def cv1 = new CellReference("vol",rcount,ccount,false,false);
-                                        def nl = new CellReference("den(vplm)",firstrow-1,ccount,false,true);
-                                        def SMS = new CellReference("SMS(mph)",rcount,ccount,false,false);
+                                        def cv1 = new CellReference("vol",rcount,colnum,false,false);
+                                        def nl = new CellReference("den(vplm)",firstrow-1,colnum,false,true);
+                                        def SMS = new CellReference("SMS(mph)",rcount,colnum,false,false);
                                         def form = "12*"+cv1.formatAsString()+"/"+nl.formatAsString()+"/"+SMS.formatAsString()
-                                        row.createCell((short)(ccount)).setCellFormula( form )
+                                        row.createCell((short)(colnum)).setCellFormula( form )
 
                                     } else if ( dt == "cap" ) {
-                                        def if1 = new CellReference("incident_flag",rcount,ccount,false,false);
-                                        def if2 = new CellReference("incident_flag",rcount,ccount-1,false,false)
-                                        def v = new CellReference("vol",rcount,ccount-1,false,false)
+                                        def if1 = new CellReference("incident_flag",rcount,colnum,false,false);
+                                        def if2 = new CellReference("incident_flag",rcount,colnum-1,false,false)
+                                        def v = new CellReference("vol",rcount,colnum-1,false,false)
                                         //=if(and(incident_flag!C5=1,incident_flag!B5=0),vol!B5,0)
-                                        row.createCell((short)(ccount)).setCellFormula( "if(and("+if1.formatAsString()+"=1,"+if2.formatAsString()+"=0),"+v.formatAsString()+",0)" )
+                                        row.createCell((short)(colnum)).setCellFormula( "if(and("+if1.formatAsString()+"=1,"+if2.formatAsString()+"=0),"+v.formatAsString()+",0)" )
 
                                     } else if ( dt == "dem" ) {
-                                        def if1 = new CellReference("incident_flag",rcount,ccount,false,false);
-                                        def if2 = new CellReference("incident_flag",rcount,ccount-1,false,false)
-                                        def v = new CellReference("vol",rcount,ccount,false,false)
+                                        def if1 = new CellReference("incident_flag",rcount,colnum,false,false);
+                                        def if2 = new CellReference("incident_flag",rcount,colnum-1,false,false)
+                                        def v = new CellReference("vol",rcount,colnum,false,false)
                                         //=if(and(incident_flag!C5=1,incident_flag!B5=0),vol!B5,0)
-                                        row.createCell((short)(ccount)).setCellFormula( "if(and("+if1.formatAsString()+"=0,"+if2.formatAsString()+"=1),"+v.formatAsString()+",0)" )
+                                        row.createCell((short)(colnum)).setCellFormula( "if(and("+if1.formatAsString()+"=0,"+if2.formatAsString()+"=1),"+v.formatAsString()+",0)" )
                                     } else if ( dt == "q" ) {
                                         // do nothing
                                     } else {
-                                        row.createCell((short)(ccount)).setCellValue( it3."$dt" )
+                                        row.createCell((short)(colnum)).setCellValue( it3."$dt" )
                                     }
                                     rcount++
                                 }
