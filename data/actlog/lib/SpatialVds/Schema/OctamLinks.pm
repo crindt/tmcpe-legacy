@@ -35,8 +35,8 @@ __PACKAGE__->belongs_to("tonode", "SpatialVds::Schema::OctamNodes", { id => "ton
 __PACKAGE__->belongs_to("frnode", "SpatialVds::Schema::OctamNodes", { id => "frnode" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 14:56:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:28YTp4jmqzo2SULkTDgMgg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 23:55:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YO0vT6o9zqbqw4Q9xhXIZA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

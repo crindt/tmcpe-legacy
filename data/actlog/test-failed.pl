@@ -9,13 +9,17 @@ use Getopt::Long;
 
 $::RD_ERRORS=1;
 
+my $use_osm = 0;
 GetOptions ( "trace" => \$::RD_TRACE,
 	     "err" => \$::RD_ERRORS,
-	     "warn=i" => \$::RD_WARN );
+	     "warn=i" => \$::RD_WARN,
+	     "use-osm-geom" => \$use_osm
+    );
 
 my $f = io( $ARGV[0] || 'location-parse.log' );
 
 my $lp = new TMCPE::ActivityLog::LocationParser();
+$lp->use_osm_geom( $use_osm );
 
 #$::RD_HINT = 1;
 

@@ -36,8 +36,8 @@ __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("octam_nodes_test_pkey", ["id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 14:56:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:N99Mx+wCEITvfgnu6vZyOg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 23:55:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Mnee5WoRalycBocQro57/Q
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

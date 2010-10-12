@@ -47,8 +47,8 @@ __PACKAGE__->add_unique_constraint(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 14:56:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ALWsbwWCd6EDVYOZMbiK7A
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 23:55:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Kj2yutKw4joAb8ksZVhrYw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

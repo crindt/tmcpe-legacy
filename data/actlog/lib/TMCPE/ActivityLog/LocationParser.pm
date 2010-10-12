@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Parse::RecDescent;
 use SpatialVds::Schema;
+use OSM::Schema;
 
 use Class::MethodMaker
     [
@@ -20,9 +21,19 @@ use Class::MethodMaker
 			   );
 		   }
 		 }, 'vds_db' ],
+     scalar => [ { -type => 'OSM::Schema',
+		   -default_ctor => sub {
+		       SpatialVds::Schema->connect(
+			   "dbi:Pg:dbname=spatialvds;host=localhost",
+			   "VDSUSER", "VDSPASSWORD",
+			   { AutoCommit => 1 },
+			   );
+		   }
+		 }, 'osm_db' ],
      scalar => [ { -type => 'Parse::RecDescent',
 		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
 		 }, 'parser' ],
+     scalar => [ qw/ use_osm_geom / ],
      new    => [ qw/ new / ]
     ];
 
@@ -92,24 +103,43 @@ sub get_vds_ramp {
     my $rstreet = $ramp->{street}->{stname} || croak join( "NO RAMP STREET NAME IN VDS LOOKUP" );
     my $rtype   = $ramp->{ramptype} || croak join ( "NO RAMP TYPE SPECIFIED" );
 
-    $rtype = 'OR' if $rtype =~ /ON/;
-    $rtype = 'FR' if $rtype =~ /OFF/;
+    my $rstname = join( " ", grep { defined $_ } ( $rstreet, $ramp->{street}->{sttype} ) );
+
+    $rtype = 'OR' if $rtype =~ /ON/ || $rtype =~ /ONR/;
+    $rtype = 'FR' if $rtype =~ /OFF/ || $rtype =~ /OFR/;
+
+    # ignore the above, we'll always select the mainline
+    $rtype = 'ML';
+
+    my $geom;
+    if ( not defined( $icad_geom ) ) {
+	if ( $self->use_osm_geom ) {
+	    $geom = join( '',
+			  "GEOMFROMEWKT('",
+			  $self->get_osm_geom( $facdir, $rstname ),
+			  "')" );
+	} else {
+	    $geom = "GEOMFROMTEXT('POINT(0,0)')";
+	}
+    } else {
+	$geom = ${$icad_geom};
+    }
 
     my $crit;
     my $order;
-    if ( $icad_geom ) {
+    if ( $geom ) {
 	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => $rtype,
 	    freeway_id => $facdir->{facility}->{ref},
 	    freeway_dir => $facdir->{dir},
 	    -or => {
-		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $rstreet ] ], # using trigram similiarity
-	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".${$icad_geom}.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
+		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $rstname ] ], # using trigram similiarity
+	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".$geom.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
             }
         };
         $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
-		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".$geom.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
 		   'similarity desc' ];
     } else {
 	$crit =	{
@@ -117,7 +147,7 @@ sub get_vds_ramp {
 	    type_id => $rtype,
 	    freeway_id => $facdir->{facility}->{ref},
 	    freeway_dir => $facdir->{dir},
-	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $rstreet ] ] # using trigram similiarity
+	    -nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $rstname ] ] # using trigram similiarity
         };
         $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 'similarity desc' ];
     }
@@ -135,7 +165,7 @@ sub get_vds_ramp {
 	    as     => [ qw/ id name freeway_id freeway_dir abs_pm similarity dirmatch/ ],
             order_by => $order
 	}
-	);
+    );
 
     # At this point, @res should contain a list of similar vds with names similar to the specified cross street
     if ( @res ) {
@@ -147,7 +177,12 @@ sub get_vds_ramp {
 
 	return $vds;
     } else {
-	croak "NO VDS FOUND TO MATCH $facdir->{dir}B $facdir->{facility}->{net}-$facdir->{facility}->{ref} @ $rstreet"
+	croak join( "", 
+                    grep { defined $_ }
+                     ( "NO VDS FOUND TO MATCH ",
+		       $facdir->{dir},"B ",
+		       $facdir->{facility}->{net},"-",
+		       $facdir->{facility}->{ref}," @ ",$rstreet ) );
     }
     
 
@@ -178,9 +213,26 @@ sub get_vds_fw {
     $xfac =~ s/\bSR[-\s]*241\b/GYPSUM 1/g;
     $xfac =~ s/\b241\b/GYPSUM 1/g;
 
+
+    my $geom;
+
+    if ( not defined( $icad_geom ) ) {
+	if ( $self->use_osm_geom ) {
+	    $geom = join( '',
+			  "GEOMFROMEWKT('",
+			  $self->get_osm_geom( $facdir, $xfac ),
+			  "')" );
+	} else {
+	    $geom = "GEOMFROMTEXT('POINT(0,0)')";
+	}
+    } else {
+	$geom = ${$icad_geom};
+    }
+
+
     my $crit;
     my $order;
-    if ( $icad_geom ) {
+    if ( $geom ) {
 	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => 'ML',
@@ -188,11 +240,11 @@ sub get_vds_fw {
 	    freeway_dir => $facdir->{dir},
 	    -or => {
 		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xfac ] ], # using trigram similiarity
-	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".${$icad_geom}.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
+	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".$geom.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
             }
         };
         $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
-		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".$geom.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
 		   'similarity desc' ];
     } else {
 	$crit =	{
@@ -258,12 +310,27 @@ sub get_vds_xs {
 	croak join( "NO XSTREET IN VDS LOOKUP" ); 
     };
 
-
     my $xstreetname = $xstreet->{stname};
     $xstreetname =~ s/^\s*(.*?)\s*/$1/g;
+
+    my $geom;
+
+    if ( not defined( $icad_geom ) ) {
+	if ( $self->use_osm_geom ) {
+	    $geom = join( '',
+			  "GEOMFROMEWKT('",
+			  $self->get_osm_geom( $facdir, $xstreetname ),
+			  "')" );
+	} else {
+	    $geom = "GEOMFROMTEXT('POINT(0,0)')";
+	}
+    } else {
+	$geom = ${$icad_geom};
+    }
+
     my $crit;
     my $order;
-    if ( $icad_geom ) {
+    if ( $geom ) {
 	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => 'ML',
@@ -271,11 +338,11 @@ sub get_vds_xs {
 #	    freeway_dir => $facdir->{dir},
 	    -or => {
 		-nest => \[ 'SIMILARITY( name, ? ) > 0.3', [ plain_value => $xstreetname ] ], # using trigram similiarity
-	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".${$icad_geom}.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
+	        -nest => \[ "ST_DWITHIN( ST_TRANSFORM( ".$geom.", 2230 ) , ST_TRANSFORM( geom, 2230 ), 1.5*5280 )" ]
             }
         };
         $order = [ "freeway_dir = \'$facdir->{dir}\' desc", 
-		   "ST_DISTANCE( ST_TRANSFORM( ".${$icad_geom}.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
+		   "ST_DISTANCE( ST_TRANSFORM( ".$geom.", 2230 ), ST_TRANSFORM( geom, 2230 ) ) asc", 
 		   'similarity desc' ];
     } else {
 	$crit =	{
@@ -291,7 +358,6 @@ sub get_vds_xs {
     # Do to some degenerate cases, we no longer match on the basis of
     # freeway direction.  Instead, we prioritize on freeway direction
     # matches.  If that fails, then we sort it out below...
-    my $geom = $icad_geom ? ${$icad_geom} : "POINT(0,0)";
     my @res = $self->vds_db->resultset( 'VdsGeoviewFull' )->search( $crit,
 	{
 	    select => [ 'id', 
@@ -351,6 +417,39 @@ sub get_vds_xs {
 }
 
 
+sub get_osm_geom {
+    my ( $self, $facdir, $xs ) = @_;
+
+    my $dbh = DBI->connect('dbi:Pg:database=osm;host=localhost',
+		       'VDSUSER' );
+    
+    my $qstr = qq{
+    select distinct w.id,h.v hw,n.v as name,similarity( n.v, ? ) as sim,asewkt(st_intersection( q.rr,w.linestring)) as ii,st_distance(geomfromewkt('srid=4326;point(-117.830 33.693)'::text),st_intersection( q.rr,w.linestring)) as ocdist from ways w join way_tags h on (h.k='highway' AND h.way_id = w.id) left join way_tags n on ( n.way_id = w.id AND n.k='name' ) join ( select linestring rr from ways w join relation_members rm on ( w.id = rm.member_id ) where rm.relation_id in ( select id from routes r WHERE r.ref=? AND r.dir in (?,?) order by version desc limit 1) ) q on ( st_intersects( q.rr, w.linestring ) ) 
+where n.v IS NOT NULL order by sim desc,ocdist desc limit 3;
+};
+    
+    my $select_data = $dbh->prepare( $qstr );
+    
+    my $row;
+    my @rows;
+    eval {
+	my $longdir;
+	$_ = $facdir->{dir};
+	/N/ && ( $longdir = 'north' );
+	/S/ && ( $longdir = 'south' );
+	/E/ && ( $longdir = 'east' );
+	/W/ && ( $longdir = 'west' );
+	( $row, @rows ) = @{ $dbh->selectall_arrayref( $select_data, { Slice=>{} }, $xs, $facdir->{facility}->{ref}, $facdir->{dir}, $longdir ) };
+    };
+    
+    if ( $row ) {
+	return $row->{ii};
+    } else {
+	return undef;
+    }
+}
+
+
 
 sub create_parser {
 
@@ -364,7 +463,7 @@ memo: embeddedloc[ $arg[0], $arg[ 2 ] ] {
           print STDERR "SUCCESSFULLY IDENTIFIED VDS ".$item{embeddedloc}->id." [".$item{embeddedloc}->name."] AS LOCATION\n" if $::RD_TRACE; 
 	  ${$arg[1]} = $item{embeddedloc};
       } |
-      /^.*$/ {print STDERR "FAILED  ON: [".$item[1]."]\n" if $::RD_TRACE }
+      /^.*$/ {print STDERR "FAILED  ON: [".$item[1]."]\n" if $::RD_TRACE; ${$arg[1]} = undef; }
 
 embeddedloc: incloc[ $arg[0], $arg[ 1 ] ] { $return = $item{incloc} } |
        incloc[ $arg[0], $arg[ 2 ] ] /[-,\.]+/ { $return = $item{incloc} } |
@@ -373,15 +472,16 @@ embeddedloc: incloc[ $arg[0], $arg[ 1 ] ] { $return = $item{incloc} } |
 
 conto: connector to
 
-incloc: facdir[ $arg[0] ] hov connector to facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > | 
-        facdir[ $arg[0] ] connector to facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > | 
-        facdir[ $arg[0] ] to facdir[ $arg[0] ] connector { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
-        facdir[ $arg[0] ] connector facdir[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > | 
+incloc: facdir[ $arg[0] ] hov connector to facdir2[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > | 
+        facdir[ $arg[0] ] connector to facdir2[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( $arg[ 1 ], %item ); } } <reject: $@ > | 
+        facdir[ $arg[0] ] to facdir2[ $arg[0] ] connector { eval{ $return = $arg[0]->get_vds_fw( $arg[ 1 ], %item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] connector facdir2[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > | 
         ramp to facorst[ $arg[0] ]  { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
         facdir[ $arg[0] ] relloc facdir2[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( $arg[ 1 ], %item ); } } <reject: $@ > |
         facdir[ $arg[0] ] relloc facility[ $arg[0] ] { eval{ $return = $arg[0]->get_vds_fw( $arg[ 1 ], %item); } } <reject: $@ > |
         facdir[ $arg[0] ] relloc street { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
         facdir[ $arg[0] ] relloc ramp { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
+        facdir[ $arg[0] ] ramp { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); } } <reject: $@ > |
         facdir[ $arg[0] ] on ramp  { eval{ $return = $arg[0]->get_vds_ramp( $arg[ 1 ], %item ); } } <reject: $@ >
 
 force:  facdir[ $arg[0] ] relloc street { eval{ $return = $arg[0]->get_vds_xs( $arg[ 1 ], %item ); }; return 1; } <reject: $@ >
@@ -403,8 +503,8 @@ ramp: street ramptype { $return = { street => $item{street}, ramptype => $item{r
 
 ramptype: onramp | offramp
 
-onramp: 'ON-RAMP' | 'ONRAMP' | 'ON/RAMP' | 'ON/R'  
-offramp: 'OFF-RAMP' | 'OFFRAMP' | 'OFF/RAMP' | 'OFF/R' 
+onramp: 'ON-RAMP' | 'ONRAMP' | 'ON/RAMP' | 'ON/R' | 'ONR'
+offramp: 'OFF-RAMP' | 'OFFRAMP' | 'OFF/RAMP' | 'OFF/R' | 'OFR'
 route: 'route' | 'rte' |  'RTE'
 
 
@@ -422,7 +522,8 @@ eng_street: stdir stname sttype dir(?) {
                $return = { stname => $item{stname}, 
                            sttype => $item{sttype},
                }; 
-            } |            sttype dir(?) {  # need separate production for things like "SOUTH ST"
+            } |
+            sttype dir(?) {  # need separate production for things like "SOUTH ST"
                $return = { stname => $item{stname}, 
                            sttype => $item{sttype},
                            dir    => ($item{dir} && @{$item{dir}} ? $item{dir}[0] : undef )
@@ -434,7 +535,15 @@ eng_street: stdir stname sttype dir(?) {
                            dir    => ($item{dir} && @{$item{dir}} ? $item{dir}[0] : undef )
                };
             } |
-            stname dir(?) { $return = { stname => $item{stname} } ; } |
+            stname sttype dir(?) { 
+               $return = { stname => $item{stname},
+                           sttype => $item{sttype},
+                           dir    => ($item{dir} && @{$item{dir}} ? $item{dir}[0] : undef )
+               } ; 
+            } |
+            stname dir(?) { 
+               $return = { stname => $item{stname} } ; 
+            }
 
 span_street: sp_sttype stname dir(?)  { 
                $return = { stname => join ( " ", $item{sp_sttype}, $item{stname} ),
@@ -520,12 +629,14 @@ to: /\bTO\b/
 
 on: /\bON\b/
 
-dir: /\b([NSEW])B\b/ { my $val = $item[1]; $val =~ s/B//g; $return = $val; } | 
-     /\b([NSEW])\b/ { my $val = $item[1]; $val =~ s/B//g; $return = $val; } | 
+dir: /\b([NSEW])B\b/ PERIOD(?) { my $val = $item[1]; $val =~ s/B//g; $return = $val; } | 
+     /\b([NSEW])\b/ PERIOD(?) { my $val = $item[1]; $val =~ s/B//g; $return = $val; } | 
      /\bNORTH\b/ { $return = 'N'; } |
      /\bSOUTH\b/ { $return = 'S'; } |
      /\bEAST\b/ { $return = 'E'; } |
      /\bWEST\b/ { $return = 'W'; }
+
+PERIOD: /\./
 
 )) || die "Bad Grammar!";
     return $mparser;

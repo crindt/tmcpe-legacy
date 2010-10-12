@@ -30,6 +30,7 @@ GetOptions( \%opt,
 	    "skip-icad-import",
 	    "skip-incidents",
 	    "skip-critical-events",
+	    "skip-delay-comp",
 	    "only-sigalerts",
 	    "date-from=s",
 	    "date-to=s",
@@ -41,6 +42,7 @@ GetOptions( \%opt,
 	    "tmcpe-db-name=s",
 	    "tmcpe-db-user=s",
 	    "tmcpe-db-password=s",
+	    "use-osm-geom",
 	    "dc-band=f",
 	    "dc-prewindow=i",
 	    "dc-postwindow=i",
@@ -95,7 +97,7 @@ my $procopt = {
     icad_import => 1,
     incidents => 1,
     critical_events => 1,
-    dodelaycomp => 1,
+    delay_comp => 1,
     only_sigalerts => 0,
     verbose => 0,
     useexist => 0,
@@ -180,10 +182,10 @@ my $tbmapdb = TBMAP::Schema->connect(
     );
 
 
-my $logfile = io( 'import.log' );
+my $logfile = io( "import-$$.log" );
 $logfile < "IMPORT RUN AT ".time2str( "%D %T", localtime() )."\n";
 
-my $loclogfile = io ( 'location-parse.log' );
+my $loclogfile = io ( "location-parse-$$.log" );
 $loclogfile < "IMPORT RUN AT ".time2str( "%D %T", localtime() )."\n";
 
 
@@ -351,7 +353,7 @@ sub load_al_entries {
     # BLOCK DB UPDATES DURING THIS OPERATION?
     
     my $rs;
-    eval {
+    my $res = eval {
 	my $condition = {};
 	my $datecond;
 	$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
@@ -384,7 +386,7 @@ sub load_al_entries {
 	    
 	    if ( not $exist ) {
 		
-		eval { 
+		my $res = eval { 
 		    $rec = $tmcpeal->resultset('D12ActivityLog')->create(
 			{
 			    keyfield => $t->keyfield,
@@ -403,7 +405,7 @@ sub load_al_entries {
 			    memo => $t->memo
 			});
 		};
-		if ( $@ ) {
+		if ( $@ || $res ) {
 		    carp "ERROR ".$@->{msg};
 		    $logfile << "ERROR ".$@->{msg};
 		}
@@ -415,7 +417,7 @@ sub load_al_entries {
 	    }
 	}
     };
-    croak "ERROR ".$@->{msg} if $@;
+    croak "ERROR ".$@->{msg} if $@ || $res;
 
     print STDERR "done\n";
 
@@ -662,6 +664,7 @@ my $alrs = $tmcpeal->resultset('D12ActivityLog')->search( $condition, {
 							} );
 
 my $lp = new TMCPE::ActivityLog::LocationParser();
+$lp->use_osm_geom( $procopt->{use_osm_geom} );
 
 eval {
     while ( my $al = $alrs->next ) {
@@ -760,7 +763,7 @@ eval {
 			$locdata = $lp->get_location( uc($locstr), $inc->location_geom ) ;
 			if ( !$locdata ) {
 			    warn "FAILED TO PARSE R/D/L: $locstr";
-			    $loclogfile << $locstr."\n";
+			    $loclogfile << "FAIL [" << $inc->cad << "]: " << $locstr."\n";
 			} else {
 			    warn "SUCCESS TO PARSE R/D/L: $locstr: vds=".join( "",
 					    $locdata->id,
@@ -771,6 +774,16 @@ eval {
 					    " @ ",
 					    $locdata->name,
 					    "]\n" );
+			    $loclogfile << "SUCC [" << $inc->cad << "]" << $locstr << " = " 
+				<< join( "",
+					 $locdata->id,
+					 " [",
+					 $locdata->freeway_id,
+					 "-",
+					 $locdata->freeway_dir,
+					 " @ ",
+					 $locdata->name,
+					 "]\n");
 			}
 		    }
 		} elsif ( /Performance_Measures:(.*)/ ) {
@@ -823,10 +836,10 @@ if ( $@ ) {
 
 # next, we should parse the new entries to identify critical events,
 # including incidents to analyze
-CRITEVENTS: goto DONE if not $procopt->{critical_events};
+CRITEVENTS: goto DELAYCOMP if not $procopt->{critical_events};
 
 
-DELAYCOMP: goto DONE if not $procopt->{dodelaycomp};
+DELAYCOMP: goto DONE if not $procopt->{delay_comp};
 
 my $datecond;
 $datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
@@ -835,7 +848,7 @@ $datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
 my $condition;
 
 $condition->{start_time} = $datecond if $datecond;
-$condition->{location_vdsid} = { '!=' => undef };
+$condition->{location_vdsid} = { '!=' => undef };   # require a location_vdsid to analyze
 my @include = grep { not /^not-/ } @ARGV;
 my @exclude = grep { /^not-/ } @ARGV;
 $condition->{cad}->{'-in'} = [ @include ] if @include;

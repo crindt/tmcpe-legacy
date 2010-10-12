@@ -22,8 +22,8 @@ __PACKAGE__->set_primary_key("sampling_no");
 __PACKAGE__->add_unique_constraint("design_hvy_long_d7812_pkey", ["sampling_no"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 14:56:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7gs08FBmfx2ZOtdG2UvyGw
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-11 23:55:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:s4JACAWu0alSCQw30zTS8w
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
