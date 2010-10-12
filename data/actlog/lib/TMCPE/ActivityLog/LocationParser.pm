@@ -174,6 +174,10 @@ sub get_vds_fw {
     # no direction) to '<dir> OF <xfreeway>' notation
     $xfac = join( ' ', $facdir->{dir}, 'OF', $xfac );
 
+    # Some hardcoded transformations...
+    $xfac =~ s/\bSR[-\s]*241\b/GYPSUM 1/g;
+    $xfac =~ s/\b241\b/GYPSUM 1/g;
+
     my $crit;
     my $order;
     if ( $icad_geom ) {
