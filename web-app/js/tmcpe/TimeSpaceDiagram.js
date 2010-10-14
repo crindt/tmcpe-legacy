@@ -96,6 +96,8 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     _incidentTableNode: null,
     _evidenceTableNode: null,
 
+    _flip: true,
+
     buildRendering: function() {
 	// summary:
 	// 		method called to draw the widget, overridden from _Widget
@@ -133,6 +135,23 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	return this._colorAccessors._getColor( val, min, max, minval, maxval );
     },
     
+    _doEvidence: function( ii,j ) {
+	var numrows = this._data.timesteps.length;
+	var i = this._flip ? numrows-1-ii : ii;
+	var secdat = this._data.sections[j].analyzedTimesteps[i];
+	var stdlev = (secdat.spd - secdat.spd_avg)/secdat.spd_std;
+	var tmppjm = 1; // no incident probability is default
+	if ( secdat.p_j_m != 0 && secdat.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
+	    tmppjm = 0.5;
+	else if ( stdlev < 0 && stdlev < -this.themeScale )
+	{
+	    tmppjm = 0.0;
+	}
+	var opacity = 0.85;
+	if ( tmppjm != 0 ) opacity=0.0;
+	this._ptd[ii][j].style.opacity = opacity;
+    },
+
     _colorAccessors: {
 	
 	_getColor: function( /*float*/ val, /*float*/ min, /*float*/ max, /*float*/ minval, /*float*/ maxval ) {
@@ -178,7 +197,9 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    return val;
 	},
 
-	stdspd: function( i,j,secdata ) { 
+	stdspd: function( ii,j,secdata ) { 
+	    var numrows = this._data.timesteps.length;
+	    var i = this._flip ? numrows-1-ii : ii;
 	    var secdat;
 	    if ( secdata == null ) {
 		    secdat = this._data.sections[j].analyzedTimesteps[i];
@@ -193,9 +214,14 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	       ) {
 		color = this._getColor( (secdat.spd-secdat.spd_avg)/secdat.spd_std, -this.themeScale, 0, '#ff0000','#00ff00' );
 	    }
-	    return color;
+	    this._td[ii][j].style.backgroundColor = color;
+
+	    this._doEvidence( ii, j );
+
 	},
-	avgspd: function( i,j ) { 
+	avgspd: function( ii,j ) { 
+	    var numrows = this._data.timesteps.length;
+	    var i = this._flip ? numrows-1-ii : ii;
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null 
@@ -205,15 +231,25 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	       ) {
 		color = this._getColor( (secdat.spd-secdat.spd_avg), -this.themeScale*10, 0, '#ff0000','#00ff00' );
 	    }
-	    return color
+	    this._td[ii][j].style.backgroundColor = color;
+
+	    this._doEvidence( ii, j );
 	},
-	inc: function( i,j ) { 
+
+	inc: function( ii,j ) { 
+	    var numrows = this._data.timesteps.length;
+	    var i = this._flip ? numrows-1-ii : ii;
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
-	    var color = this._colorAccessors[ 'stdspd' ](i,j,secdat);
+	    var color = this._colorAccessors[ 'stdspd' ](ii,j,secdat);
 	    if ( secdat != null && secdat.inc ) color = '#0000ff'; 
-	    return color; 
+	    this._td[ii][j].style.backgroundColor = color;
+
+	    this._doEvidence( ii, j );
 	},
-	pjm: function( i,j ) { 
+
+	pjm: function( ii,j ) { 
+	    var numrows = this._data.timesteps.length;
+	    var i = this._flip ? numrows-1-ii : ii;
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 	    if ( secdat != null && secdat.spd != null && secdat.spd_avg != null && secdat.spd_std != null ) {
@@ -234,16 +270,23 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    // grey if no/bad data
 		    color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 	    }
-	    return color;
+	    this._td[ii][j].style.backgroundColor = color;
+
+	    this._doEvidence( ii, j );
 	},
-	spd: function( i,j ) { 
+
+	spd: function( ii,j ) { 
+	    var numrows = this._data.timesteps.length;
+	    var i = this._flip ? numrows-1-ii : ii;
 	    var secdat = this._data.sections[j].analyzedTimesteps[i];
 	    var color = "#"+[ this._toColorHex( 153 ), this._toColorHex( 153 ), this._toColorHex( 153 ) ].join("");
 
 	    if ( secdat != null && secdat.spd != null ) {
 		color = this._getColor( secdat.spd, 15, 50, '#ff0000', '#00ff00' );
 	    }
-	    return color;
+	    this._td[ii][j].style.backgroundColor = color;
+
+	    this._doEvidence( ii, j );
 	}
     },
 
@@ -264,39 +307,61 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	
 	for ( i = 0; i < numrows; ++i ) {
 	    // iind is used to flip the diagram so time increases going up
-	    var iind = numrows-1-i;
 	    for ( j = 0; j < this._data.sections.length; ++j ) {
-		this._td[i][j].style.backgroundColor = this._colorDataAccessor(iind,j);
+		//this._td[i][j].style.backgroundColor = this._colorDataAccessor(i,j);
+		this._colorDataAccessor(i,j);
 	    }
 	}
     },
 
-    _clear: function()
+    _clear: function( domNode )
     {
 	// Remove any existing table in the widget's dom node
-	if ( this.domNode.hasChildNodes() )
+	if ( domNode && domNode.hasChildNodes() )
 	{
-	    while ( this.domNode.childNodes.length >= 1 )
+	    while ( domNode.childNodes.length >= 1 )
 	    {
-		this.domNode.removeChild( this.domNode.firstChild );       
+		if ( domNode.firstChild != this._loading ) {// keep the loading element
+		    domNode.removeChild( domNode.firstChild );       
+		}
 	    } 
 	}
     },
 
+    _loading: null,
     _displayLoading: function()
     {
-	this._clear();
-	this.domNode.appendChild
-	( dojo.create( "span", 
-		       { id: "loadingAnalysisDiv",
-			 class: "dijitContentPaneLoading",
-			 innerHTML: "Loading..."
-		       } ) );
+	if ( this._loading == null ) {
+	    this._loading = dojo.create( "div", 
+					 { id: "loadingAnalysisDiv",
+					   style: "margin:0px;spacing:0px;font-weight:bold;width:100%;height:100%;background-color:white;opacity:0.75;z-index:100;position:absolute;top:0;left:0;"
+					 } );
+	    this.domNode.appendChild( this._loading );
+
+	    var tt = dojo.create( "div",
+				  { style: "text-align:center;position:absolute;top:40%;left:0;margin:0px;spacing:0px;font-weight:bold;width:100%;opacity:inherit;",
+				    innerHTML: '<span class="dijitContentPaneLoading" style="font-weight:bold;float:both;">Loading...</a>'
+				  } );
+
+	    this._loading.appendChild( tt );
+/*
+	    tt.appendChild( 
+		dojo.create( "span",
+			     { class: "dijitContentPaneLoading",
+			       innerHTML: "Loading...",
+			       style: "font-weight:bold:float:both;"
+			     } ) );
+			     */
+	}
+	this._loading.style.visibility = 'visible';
+    },
+    _hideLoading: function()
+    {
+	if ( this._loading ) this._loading.style.visibility = 'hidden';
     },
 
     _displayNoAnalysis: function()
     {
-	this._clear();
 	var url = 'http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Perform%20analysis%20of%20Incident ' + this.incident + '&issue[description]=No%20analysis%20is%20available%20for%20incident ' + this.incident + '.  Need to explore why this is not in the database.';
 	this.domNode.appendChild
 	( dojo.create( "div",
@@ -316,7 +381,22 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this._evidenceTableNode.style.visibility = ( toggle ? 'visible' : 'hidden' );
     },
 
-    _redraw: function()
+    toggleTsdFlipWindow: function(toggle)
+    {
+	this._flip = !toggle;
+	this._redraw();
+    },
+
+    _redraw: function() {
+	this._displayLoading();
+	var obj = this;
+	window.setTimeout( function() { 	
+	    obj._redrawTable();
+	    obj._hideLoading();
+	}, 100 );
+    },
+
+    _redrawTable: function()
     {
 	// summary:
 	//		method to actually create the TimeSpaceDiagram table in the widget's div
@@ -327,11 +407,12 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this._colorDataAccessor = this._colorAccessors[ this.colorDataAccessor ];
 
 	//    dojo.byId( "statusText" ).textContent = "Drawing plot...";
-	this._clear();
+	this._clear( this._tableNodeContainer );
 
-	// destroy existing
 	if ( this._tableNodeContainer ) {
-	    this._tableNodeContainer.parentNode.removeChild( this._tableNodeContainer );
+	    if ( this._tableNodeContainer.parentNode ) {
+		this._tableNodeContainer.parentNode.removeChild( this._tableNodeContainer );
+	    }
 	    delete this._tableNodeContainer;
 	    if ( this._tableNode ) delete this._tableNode;
 	}
@@ -440,7 +521,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	{
 	    //console.debug( "ROW " + i );
 	    // iind is used to flip the diagram so time increases going up
-	    var iind = numrows-1-i;
+	    var iind = this._flip ? numrows-1-i : i;
 
 	    // add the next row to the table
 	    var tr = tt.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;" } ) );
@@ -490,7 +571,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    var later = d.sections[j].analyzedTimesteps[iind-1]
 		    if ( later && targ.inc != later.inc )
 		    {
-			borders += "border-bottom-width:3px;border-bottom-style:solid;border-bottom-color:cyan;";
+			if ( this._flip ) {
+			    borders += "border-bottom-width:3px;border-bottom-style:solid;border-bottom-color:cyan;";
+			} else {
+			    borders += "border-top-width:3px;border-top-style:solid;border-top-color:cyan;";
+			}
 		    }
 		}
 		// bottom = earlier
@@ -498,7 +583,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    var earlier = d.sections[j].analyzedTimesteps[iind+1]
 		    if ( earlier && targ.inc != earlier.inc )
 		    {
-			borders += "border-top-width:3px;border-top-style:solid;border-top-color:cyan;";
+			if ( this._flip ) {
+			    borders += "border-top-width:3px;border-top-style:solid;border-top-color:cyan;";
+			} else {
+			    borders += "border-bottom-width:3px;border-bottom-style:solid;border-bottom-color:cyan;";
+			}
 		    }
 		}
 
@@ -510,8 +599,9 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    segment: j,
 		    station: d.sections[j].stnidx,
 		    innerHTML: ""/*i + "(" + iind + ")," + j*/, 
-		    style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:"+this._colorDataAccessor(iind,j)+";visibility:inherit;",
+		    style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:gray;visibility:inherit;",
 		} ) );
+
 		var opacity = 0.75;
 		if ( targ.inc != 0 ) opacity=0.0;
 		this._itd[i][j] = itr.appendChild( dojo.create( "td", {
@@ -531,6 +621,9 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    style: "width:" + width + "%;background-image: url('/tmcpe/images/stripe.png');border-width:1px;border-color:gray;border-style:dotted;background-color:transparent;"+borders+";opacity:"+opacity+";visibility:inherit;",
 		} ) );
 		//console.debug( "this._td["+i+"]["+j+"] = " + this._td[i][j] );
+
+		// update the theme
+		this._colorDataAccessor(i,j);
 	    }
 	}
 
@@ -565,7 +658,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		var dto=new Date(item.stampDateTime[0]);
 		var dt = Number(dto);
 		var cur = dt-st;
-		var frac = 100-100*(cur/dur);
+		var frac = this._flip ? 100-100*(cur/dur) : 100*(cur/dur); // flip, if necessary
 		if ( frac < 0 ) console.log( "FRAC < 0" );
 		if ( frac > 100 ) console.log( "FRAC > 100" );
 		var wid = "2px";

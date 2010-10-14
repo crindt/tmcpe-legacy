@@ -148,13 +148,18 @@
 	  <input id="incidentCheck" dojotype="dijit.form.CheckBox"
 	         name="incidentCheckBox" checked="true"
 		 type="checkbox"
-                 onClick="tsd.toggleIncidentWindow( dojo.byId( 'incidentCheck' ).checked )" />
+                 onChange="tsd.toggleIncidentWindow( dojo.byId( 'incidentCheck' ).checked )" />
 	  <label for="incidentCheck">Show Incident?</label> 	    
 	  <input id="evidenceCheck" dojotype="dijit.form.CheckBox"
 	         name="evidenceCheckBox" checked="false"
 		 type="checkbox"
-                 onClick="tsd.toggleEvidenceWindow( dojo.byId( 'evidenceCheck' ).checked )" />
+                 onChange="tsd.toggleEvidenceWindow( dojo.byId( 'evidenceCheck' ).checked )" />
 	  <label for="evidenceCheck">Show Evidence?</label> 	    
+	  <input id="tsdFlipCheck" dojotype="dijit.form.CheckBox"
+	         name="tsdFlipCheckBox" checked="false"
+		 type="checkbox"
+                 onChange="tsd.toggleTsdFlipWindow( dojo.byId( 'tsdFlipCheck' ).checked )" />
+	  <label for="tsdFlipCheck">Flip time axis?</label> 	    
 	  
 <!--
 	  <input id="activityCheck" dojotype="dijit.form.CheckBox"
