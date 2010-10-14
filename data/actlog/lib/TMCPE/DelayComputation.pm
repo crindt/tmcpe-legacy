@@ -121,7 +121,8 @@ use Class::MethodMaker
      scalar => [ { -default => 0 }, 'use_eq8' ],
      scalar => [ { -default => 0 }, 'use_eq8b' ],
      scalar => [ { -default => 5 }, 'dt' ],  # number of minutes in a time step
-     scalar => [ { -default => 1 }, 'weight_for_distance' ],
+     scalar => [ { -default => 1 }, 'weight_for_length' ],
+     scalar => [ { -default => 0 }, 'weight_for_distance' ],  # value is exponent of weighting function
      scalar => [ { -default => 20 }, 'limit_loading_shockwave' ],  # 15 mi/hr
      scalar => [ { -default => 60 }, 'limit_clearing_shockwave' ],  # 15 mi/hr
      scalar => [ qw/ boundary_intersects_within / ], # =[dx,dt]: require incident boundary to include at least 
@@ -807,8 +808,19 @@ sub write_gams_program {
     my @objective;
     my $bias = $self->bias || 0;
 
-    if ( $self->weight_for_distance ) { $self->objective( 1 ) }
-    
+    my $weight_for_length = "L( J1 )";
+    $weight_for_length = "1" if ( not $self->weight_for_length );
+
+
+    my $incstart_index = $self->prewindow/5;
+    my $incpm = $self->pm;
+    my $dt = $self->dt;
+
+    my $weight_for_distance = 1;
+    if ( $self->weight_for_distance ) {
+	my $wfd_exponent = $self->weight_for_distance;
+	$weight_for_distance = "1.0/power(1 + sqrt(sqr(5*(ORD(M1)-$incstart_index)/60.0)+sqr(PM(J1)-$incpm)),$wfd_exponent)";
+    }
     foreach my $iii (1..3)
     {
 	if ( $self->objective != $iii ) {
@@ -1101,11 +1113,6 @@ PARAMETERS
     if ( /S/ || /W/ ) {
 	$shockdir=-1;
     }
-
-    my $incstart_index = $self->prewindow/5;
-    my $incpm = $self->pm;
-    my $dt = $self->dt;
-
     
     
     $of << qq{
@@ -1113,6 +1120,8 @@ VARIABLES
 	Z		objective
 	D(J1,M1)	incident state
 	S(J1,M1)	start point
+	CW(J1,M1)	cell weight
+	CV(J1,M1)	cell val
 	Y		total incident delay
 	A		average delay
 	N		net delay
@@ -1134,15 +1143,17 @@ $eq6 EQ6
 $eq7 EQ7
 $eq8 EQ8
 $eq8b EQ8b
-$use_boundary_constraint EQ9
 TOTDELAY
 AVGDELAY
 NETDELAY
+CWEIGHT
+CVALUE
 $startlim ONESTART
 $startlim NOSTART_NOREGION
 $startlim IFSTART_THEN_D
 $startlim START_BOUNDARY
-$startlim $use_boundary_constraint START_CONSTRAINT
+$startlim$use_boundary_constraint START_CONSTRAINT
+$startlim$use_boundary_constraint START_CONSTRAINT2
 };
 
     if ( $self->force ) {
@@ -1157,9 +1168,9 @@ $startlim $use_boundary_constraint START_CONSTRAINT
     $of << qq{
 ;
 
-$objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-($bias)) * L( J1 ) * P( J1, M1 ) * D( J1, M1 ) + L( J1 ) * ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
-$objective[2] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, (1-($bias)) *           P( J1, M1 ) * D( J1, M1 ) +           ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
-$objective[3] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 0.1*P(J1,M1) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ); 
+$objective[1] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, $weight_for_distance * (1-($bias)) * $weight_for_length * ( P( J1, M1 ) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ) ); 
+$objective[2] OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 1.0/power(1 + sqrt(sqr(5*(ORD(M1)-$incstart_index)/60.0)+sqr(PM(J1)-$incpm)),3) * (1-($bias)) * $weight_for_length * ( P( J1, M1 ) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ) ); 
+
 ***             if j1,m1 is a boundary in space (-, upstream) at time m1, the sum of all D's upstream at time M1 must be <= 0
 $eq1 EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
 ***             if j1,m1 is a boundary in time (+, later) at J1, the sum of all D's later than M1 at section J1 must be <= 0
@@ -1197,18 +1208,20 @@ $eq7                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1)));
 $eq8 EQ8(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-($shockdir)*$MAX_LOAD_SHOCK_DIST)), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
 ** Clearing wave
 $eq8b EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+($shockdir)*$MAX_CLEAR_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1+1,M1) );
-** REQUIRE THAT IF THERE IS ANY BOUNDARY, IT MUST INCLUDE CELLS WITHIN A CERTAIN DISTANCE OF THE EXPECTED TIME-SPACE LOCATION OF THE DISRUPTION
-$use_boundary_constraint EQ9 .. SUM( J1, SUM( M1, D(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<$BOUNDARY_DT), D(K1,R1)));
 TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) * D(J1,M1) ) );
 AVGDELAY ..	A=E=SUM( J1, SUM( M1, L( J1 ) / AV(J1,M1) * AF( J1, M1 ) * D(J1,M1) ) );
 NETDELAY ..	N=E=Y-A;
+CWEIGHT(J1,M1) .. CW(J1,M1)=E=$weight_for_distance;
+CVALUE(J1,M1) .. CV(J1,M1)=E=$weight_for_distance * (1-($bias)) * $weight_for_length * ( P( J1, M1 ) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) );
 $startlim ONESTART .. (SUM(J1,SUM(M1,S(J1,M1)))) =L= 1;
 $startlim NOSTART_NOREGION .. SUM(J1,SUM(M1,D(J1,M1))) =L= CARD(M1)*CARD(J1)*(SUM(J1,SUM(M1,S(J1,M1))));
 $startlim IFSTART_THEN_D(J1,M1) .. D(J1,M1) =G= S(J1,M1);
 $startlim START_BOUNDARY(J1,M1) .. SUM( K1, D( K1, M1-1 ) ) + SUM( R1, D( J1 + 1, R1 ) ) 
 $startlim                  =l= CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( S( J1, M1 ) );
 ** REQUIRE THAT IF THERE IS ANY BOUNDARY, IT MUST INCLUDE CELLS WITHIN A CERTAIN DISTANCE OF THE EXPECTED TIME-SPACE LOCATION OF THE DISRUPTION
-$startlim $use_boundary_constraint START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<=$BOUNDARY_DT), S(K1,R1)));
+$startlim$use_boundary_constraint START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<=$BOUNDARY_DT), S(K1,R1)));
+** REQUIRE THAT THE START IS ON A CELL WITH POSITIVE EVIDENCE FOR AN INCIDENT
+$startlim$use_boundary_constraint START_CONSTRAINT2(J1,M1) .. S(J1,M1) =l= (1 - P(J1,M1));
 };
     if ( $self->force ) {
 	foreach my $k ( keys %{$self->force} ) {
@@ -1249,6 +1262,8 @@ putclose opt;
 SOLVE BASE USING MIP MINIMIZING Z;
 DISPLAY D.l;
 $startlim DISPLAY S.l;
+DISPLAY CW.l;
+DISPLAY CV.l;
 };
     
     $of->close;
@@ -1353,6 +1368,11 @@ sub parse_results {
 	/^----\s+VAR D/ && do
 	{
 	    $found = 1;
+	    next LINE;
+	};
+	/^----\s+VAR C[WV]/ && do
+	{
+	    $found = 0;
 	    next LINE;
 	};
 	/^\*\*\*\* REPORT SUMMARY\s*([^\s].*)/ && do

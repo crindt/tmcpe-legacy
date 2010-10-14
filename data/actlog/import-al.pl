@@ -60,7 +60,7 @@ GetOptions( \%opt,
 	    "dc-use-eq4567",
 	    "dc-dont-use-eq4567",
 	    "dc-bias=f",
-	    "dc-weight-for-distance",
+	    "dc-weight-for-distance=f",  # value is exponent of weighting function
 	    "dc-dont-weight-for-distance",
 	    "dc-limit-loading-shockwave=f",
 	    "dc-limit-clearing-shockwave=f",
@@ -90,6 +90,7 @@ GetOptions( \%opt,
 	    "dc-cplex-preind=i",
 	    "dc-cplex-mipemphasis=i",
 	    "dc-d12-delay-speed=f",
+	    "dc-objective=i",
 	    "extend-if-bounded",
 	    "help",
 	    "man"
@@ -855,7 +856,9 @@ $datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
 
 my $condition;
 
-$condition->{start_time} = $datecond if $datecond;
+# use the date condition if it was given AND a specific cad was NOT given
+$condition->{start_time} = $datecond if ( $datecond && !@ARGV );
+
 $condition->{location_vdsid} = { '!=' => undef };   # require a location_vdsid to analyze
 my @include = grep { not /^not-/ } @ARGV;
 my @exclude = grep { /^not-/ } @ARGV;
