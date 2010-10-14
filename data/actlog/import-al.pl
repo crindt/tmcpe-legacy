@@ -856,14 +856,14 @@ $datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
 
 my $condition;
 
-# use the date condition if it was given AND a specific cad was NOT given
-$condition->{start_time} = $datecond if ( $datecond && !@ARGV );
-
 $condition->{location_vdsid} = { '!=' => undef };   # require a location_vdsid to analyze
 my @include = grep { not /^not-/ } @ARGV;
 my @exclude = grep { /^not-/ } @ARGV;
 $condition->{cad}->{'-in'} = [ @include ] if @include;
 $condition->{cad}->{'-not_in'} = [ map { $_ =~ s/^not-//g; $_ } @exclude ] if @exclude;
+
+# use the date condition if it was given AND a specific (set of) cad was NOT given
+$condition->{start_time} = $datecond if ( $datecond && !@include );
 
 
 my $incrs = $tmcpeal->resultset('Incidents')->search(
@@ -894,7 +894,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 	next INCDEL;
     }
 
-    print join( "", "COMPUTING DELAY FOR ", $inc->id, " [", $inc->cad || "<undef>", "]" );
+    ### =: join( "", "COMPUTING DELAY FOR ", $inc->id, " [", $inc->cad || "<undef>", "]" );
 
     my $dc = new TMCPE::DelayComputation();
 

@@ -1505,9 +1505,9 @@ sub write_to_db {
 	eval { $as = $ifa->create_related( 'analyzed_sections', { section_id=> $station->{vds}->id } ); };
 	croak $@->{msg} if $@;
 
-	printf STDERR "CREATING ". $station->{vds}->id . ":\n";
 	my $m = 0;
-	foreach my $secdat ( sort { $a->{timeofday} cmp $b->{timeofday} } @{$station->{data}} ) {
+	my @statdat = sort { $a->{timeofday} cmp $b->{timeofday} } @{$station->{data}};
+	foreach my $secdat ( @statdat ) { ### CREATING $station->{vds}->id DATA |===[%]        |
 	    my $at;
 	    eval { 
 		my $tmcpedelay = 0;
