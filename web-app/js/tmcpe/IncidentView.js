@@ -257,21 +257,13 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var vsl = this._vdsSegmentLines;
 	for ( var j = 0; j < tsd._data.sections.length; ++j ) {
 	    var station = tsd._data.sections[ tsd._data.sections[ j ].stnidx ];
-	    var feature = null;
-	    // Loop over the lines until we find the correct station
-	    for ( var k = 0; k < vsl.features.length && !feature; ++k )
-	    {
-		var ff = vsl.features[ k ];
-		if ( station ) {
-		    // console.log( [station.vdsid,' =?= ', ff.attributes[ 'id' ]
-			// ].join( '') );
-		    if ( station && station.vdsid == ff.attributes[ 'id' ] ) {
-			feature = ff;
-		    }
+
+	    if ( station ) {
+		var feature = this._getFeatureForStation( station.vdsid )
+
+		if ( feature && feature.layer && station ) {
+		    station.feature = feature;
 		}
-	    }
-	    if ( feature && feature.layer && station ) {
-		station.feature = feature;
 	    }
 	}
     },
@@ -461,27 +453,57 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     
     _hoverStation: function( e ) {
     	var stationnm = e.target.getAttribute( 'station' );
+	var timeidx   = e.currentTarget.getAttribute( 'timeidx' );
+	var timeind   = e.currentTarget.getAttribute( 'time' );
+
     	var station = this._tsd._data.sections[ stationnm ];
-    	/* console.debug( "station:" + station.vdsid ); */
+    	console.debug( "station:" + station.vdsid );
     	
     	// HACK: highlight the corresponding station in the map
     	var vsl = this._vdsSegmentLines;
     	if ( vsl && station ) {
     	    var feature = station.feature;
-   	    // Loop over the lines until we find the correct station 
-	    var feature = null; 
-	    for ( var j = 0; j < vsl.features.length && !feature; ++j ) {
-    		var ff = vsl.features[ j ]; if ( station.vdsid == ff.attributes[ 'id' ] ) {
-    		    feature = ff; 
-		} 
-	    }
-    		
-    	    // OK, found the feature. Highlight it? select it
+
+	    if ( feature == null ) feature = this._getFeatureForStation( station.vdsid );
+    	    
+    	    // OK, found the feature. Highlight it? 
     	    if ( feature ) {
     		this._hoverVds.unselectAll();
+
+		if ( timeidx != null ) {
+		    var tdc = this._tsd._td[timeidx][stationnm];
+
+		    if ( tdc != null ) {
+			// looks like we're hovering over a time-space cell
+			this._hoverVds.selectStyle.strokeColor = tdc.style.backgroundColor;
+		    }
+		}
+
     		this._hoverVds.select( feature );
+		
     	    }
     	}
+    },
+
+    _getFeatureForStation: function( vdsid ) {
+	var feature = null;
+
+	var vsl = this._vdsSegmentLines;
+	if ( vsl ) {
+
+	    // Loop over the lines until we find the correct station
+	    var feature = null;
+	    for ( var k = 0; k < vsl.features.length && !feature; ++k )
+	    {
+		var ff = vsl.features[ k ];
+		var f_vdsid = ff.attributes[ 'id' ];
+		if ( vdsid == f_vdsid ) {
+		    feature = ff;
+		}
+	    }
+	}
+	    
+	return feature;
     },
     
     _hoverTime: function( e ) {
@@ -499,20 +521,13 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		var tdc = this._tsd._td[timeidx][j];
 		var si = tdc.getAttribute('station');
 		var station = this._tsd._data.sections[ si ];
-		
-		// Loop over the lines until we find the correct station
-		var feature = null;
-		for ( var k = 0; k < vsl.features.length && !feature; ++k )
-		{
-		    var ff = vsl.features[ k ];
-		    var vdsid = ff.attributes[ 'id' ];
-		    if ( station.vdsid == vdsid ) {
-			feature = ff;
-		    }
-		}
 
 		if ( station ) {
+
 		    var feature = station.feature;
+
+		    if ( feature == null ) feature = this._getFeatureForStation( station.vdsid );
+
 		    // OK, found the feature. alter the style
 		    if ( feature ) {
 			feature.style.strokeColor = tdc.style.backgroundColor;
