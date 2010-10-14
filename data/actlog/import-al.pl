@@ -86,6 +86,9 @@ GetOptions( \%opt,
 	    "dc-cplex-polishafterintsol=i",
 	    "dc-cplex-nodesel=i",
 	    "dc-cplex-varsel=i",
+	    "dc-cplex-predual=i",
+	    "dc-cplex-preind=i",
+	    "dc-cplex-mipemphasis=i",
 	    "dc-d12-delay-speed=f",
 	    "extend-if-bounded",
 	    "help",
@@ -360,8 +363,8 @@ sub load_al_entries {
     my $res = eval {
 	my $condition = {};
 	my $datecond;
-	$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
-	$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
+	$datecond->{'>='} = $procopt->{date_from} if $procopt->{date_from};
+	$datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
 	
 	$condition->{stampdate} = $datecond if $datecond;
 
@@ -409,9 +412,9 @@ sub load_al_entries {
 			    memo => $t->memo
 			});
 		};
-		if ( $@ || $res ) {
-		    carp "ERROR ".$@->{msg};
-		    $logfile << "ERROR ".$@->{msg};
+		if ( $@ ) {
+		    carp "ERROR ".$@;
+		    $logfile << "ERROR ".$@;
 		}
 		warn "INSERTED ENTRY ".$t->keyfield."\n" if $verbose;
 		1;
@@ -421,7 +424,7 @@ sub load_al_entries {
 	    }
 	}
     };
-    croak "ERROR ".$@->{msg} if $@ || $res;
+    croak "ERROR: ".$@ if $@;
 
     print STDERR "done\n";
 
@@ -450,8 +453,8 @@ sub load_rl_entries {
     eval {
 	my $condition = {};
 	my $datecond;
-	$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
-	$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
+	$datecond->{'>='} = $procopt->{date_from} if $procopt->{date_from};
+	$datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
 	
 	$condition->{stampdate} = $datecond if $datecond;
 
@@ -530,13 +533,13 @@ my $rs;
 eval {
     my $condition = {};
     my $datecond;
-    $datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
-    $datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
+    $datecond->{'>='} = $procopt->{date_from} if $procopt->{date_from};
+    $datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
     
     $condition->{logtime} = $datecond if $datecond;
 
     my $txt1 = "STR_TO_DATE( logtime, '%m/%d/%Y %h:%i:%s %p' )";
-    my $txt2 = "STR_TO_DATE('$procopt->{datefrom}','%Y-%m-%d')";
+    my $txt2 = "STR_TO_DATE('$procopt->{date_from}','%Y-%m-%d')";
     
     $rs = $d12->resultset('UciAtIcad')->search(	
 	{
@@ -624,7 +627,7 @@ while ( my $t = $rs->next ) {
 	# now, push 'em into the db in order
 	foreach my $det ( sort { str2time( $a->{stamp} ) cmp str2time( $b->{stamp} ) } @dets )
 	{
-	    eval { $rec->create_related( 'icad_details', { stamp => $det->{stamp}, detail => $det->{detail} } ); };
+	    eval { $rec->create_related( 'icad_detail_icads', { stamp => $det->{stamp}, detail => $det->{detail} } ); };
 	    croak join( "", "ERROR: ", ( $@->{msg} ? $@->{msg} : $@ ) ) if ( $@ );
 	}
 
@@ -649,8 +652,8 @@ INCIDENTS:
 
 # Add to/update incidents
 my $datecond;
-$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
-$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
+$datecond->{'>='} = $procopt->{date_from} if $procopt->{date_from};
+$datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
 
 my $condition;
 
@@ -665,7 +668,8 @@ my $alrs = $tmcpeal->resultset('D12ActivityLog')->search( $condition, {
     'select' => [ 'cad', { min => 'stamp', -as => 'starttime' }	],
     'as'       => [ qw/ cad starttime / ],
     group_by => [ qw/ cad / ],
-							} );
+    order_by => 'starttime asc'
+							  } );
 
 my $lp = new TMCPE::ActivityLog::LocationParser();
 $lp->use_osm_geom( $procopt->{use_osm_geom} );
@@ -846,8 +850,8 @@ CRITEVENTS: goto DELAYCOMP if not $procopt->{critical_events};
 DELAYCOMP: goto DONE if not $procopt->{delay_comp};
 
 my $datecond;
-$datecond->{'>='} = $procopt->{datefrom} if $procopt->{datefrom};
-$datecond->{'<='} = $procopt->{dateto}   if $procopt->{dateto};
+$datecond->{'>='} = $procopt->{date_from} if $procopt->{date_from};
+$datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
 
 my $condition;
 
@@ -950,7 +954,10 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->write_to_db;
     };
     if ( $@ ) {
-	warn $@;
+	$_ = ref $@;
+	if    ( /SCALAR/ ) { warn $@; }
+	elsif ( /HASH/ )   { warn $@->{msg}; }
+	else               { warn "UNKNOWN PROBLEM COMPUTING DELAY"; }
 	next INCDEL;
     }
 

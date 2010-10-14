@@ -55,11 +55,13 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     //        internal variable to hold a reference to the table rows so we can update them as necessary
     _tr: null,
     _itr: null,
+    _ptr: null,
 
     // _td: Array of td elements
     //        internal variable to hold a reference to the table data (cells) so we can update them as necessary
     _td: null,
     _itd: null,
+    _ptd: null,
 
     // incident: String
     //        The incident number to display in the TSD.  Note that this is implementation specific 
@@ -92,6 +94,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     //        The DOM node containing the TSD table
     _tableNode: null,
     _incidentTableNode: null,
+    _evidenceTableNode: null,
 
     buildRendering: function() {
 	// summary:
@@ -308,6 +311,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this._incidentTableNode.style.visibility = ( toggle ? 'visible' : 'hidden' );
     },
 
+    toggleEvidenceWindow: function(toggle)
+    {
+	this._evidenceTableNode.style.visibility = ( toggle ? 'visible' : 'hidden' );
+    },
+
     _redraw: function()
     {
 	// summary:
@@ -350,16 +358,27 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 	this._incidentTableNode = 
 	    dojo.create( "table", 
-			 { id: "tsdTableNode", 
+			 { id: "tsdIncidentTableNode", 
 			   ref: [this.incident, this.facility, this.direction].join('-'), 
 			   style: "position:absolute;top:0;left:0;border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;z-index:2;"
 			 }
 		       );
 	this._tableNodeContainer.appendChild( this._incidentTableNode );
 
+	var vis = dojo.byId( 'evidenceCheck' ).checked ? 'visible' : 'hidden';
+	this._evidenceTableNode = 
+	    dojo.create( "table", 
+			 { id: "tsdEvidenceTableNode", 
+			   ref: [this.incident, this.facility, this.direction].join('-'), 
+			   style: "position:absolute;top:0;left:0;border-width:1px;border-color:#000000;cellpadding:0px;cellspacing:0px;border-collapse:collapse;width:100%;height:100%;z-index:3;visibility:"+vis+";"
+			 }
+		       );
+	this._tableNodeContainer.appendChild( this._evidenceTableNode );
+
 	// tt is a local shorthand variable for working with the table node (makes the code cleaner)
 	var tt = this._tableNode;
 	var itn = this._incidentTableNode;
+	var ptn = this._evidenceTableNode;
 
 	// delete all rows (if they exist---I think this might not be necessary but it's inexpensive)
 	if ( tt.rows != null ) {
@@ -367,6 +386,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    {
 		tt.deleteRow(i -1);
 		itn.deleteRow(i -1);
+		ptn.deleteRow(i -1);
 	    }
 	}
 
@@ -413,6 +433,8 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this._td = new Array(numrows);
 	this._itr = new Array(numrows);
 	this._itd = new Array(numrows);
+	this._ptr = new Array(numrows);
+	this._ptd = new Array(numrows);
 
 	for ( i = 0; i < numrows; ++i )
 	{
@@ -423,12 +445,15 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    // add the next row to the table
 	    var tr = tt.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;" } ) );
 	    var itr = itn.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;visibility:inherit;" } ) );
+	    var ptr = ptn.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;visibility:inherit;" } ) );
 	    this._tr[i] = tr;
 	    this._itr[i] = itr;
+	    this._ptr[i] = ptr;
 
 	    // Now loop and create the table cells
 	    this._td[i] = new Array( d.sections.length );
 	    this._itd[i] = new Array( d.sections.length );
+	    this._ptd[i] = new Array( d.sections.length );
 	    //console.debug( "this._td[i].length = " + this._td[i].length );
 	    for ( jind = 0; jind < d.sections.length; ++jind )
 	    {
@@ -487,7 +512,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    innerHTML: ""/*i + "(" + iind + ")," + j*/, 
 		    style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:"+this._colorDataAccessor(iind,j)+";visibility:inherit;",
 		} ) );
-		var opacity = 0.6;
+		var opacity = 0.75;
 		if ( targ.inc != 0 ) opacity=0.0;
 		this._itd[i][j] = itr.appendChild( dojo.create( "td", {
 		    id:["itsd",iind,j].join("_"), 
@@ -496,13 +521,28 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    station: d.sections[j].stnidx,
 		    style: "width:" + width + "%;border-width:1px;border-color:gray;border-style:dotted;background-color:white;"+borders+";opacity:"+opacity+";visibility:inherit;",
 		} ) );
+		opacity = 0.85;
+		if ( targ.p_j_m != 0 ) opacity=0.0;
+		this._ptd[i][j] = ptr.appendChild( dojo.create( "td", {
+		    id:["ptsd",iind,j].join("_"), 
+		    time:iind,
+		    segment: j,
+		    station: d.sections[j].stnidx,
+		    style: "width:" + width + "%;background-image: url('/tmcpe/images/stripe.png');border-width:1px;border-color:gray;border-style:dotted;background-color:transparent;"+borders+";opacity:"+opacity+";visibility:inherit;",
+		} ) );
 		//console.debug( "this._td["+i+"]["+j+"] = " + this._td[i][j] );
 	    }
 	}
 
 	// Insert vertical line for incident location
 	var locpct = 100-(100*incloc/totlen);
-	this._tableNodeContainer.appendChild( dojo.create( "div", { id: "incloc", style: "border-width:2px;border-color:#0000ff;background-color:#0000ff;width:2px;height:100%;position:absolute;top:0;left:"+locpct+"%;z-index:10;"}));
+	var wid = "4px"; // Make the first entry (incident start) bigger
+	this._tableNodeContainer.appendChild( 
+	    dojo.create( "div", { 
+		id: "incloc", 
+		style: "border-width:"+wid+";border-color:#0000ff;background-color:#0000ff;"
+		+"width:"+wid+";height:100%;position:absolute;top:0;left:"+locpct+"%;z-index:10;"
+	    }));
 
 	// Now insert data for the activity log
 	if ( logStoreJs ) {
@@ -524,15 +564,23 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		var item=items[i];
 		var dto=new Date(item.stampDateTime[0]);
 		var dt = Number(dto);
-//		var localOffset = dto.getTimezoneOffset() * 60000;
-//		var localOffset = dto.getTimezoneOffset() * 60000;
-//		dt += localOffset;
 		var cur = dt-st;
 		var frac = 100-100*(cur/dur);
 		if ( frac < 0 ) console.log( "FRAC < 0" );
 		if ( frac > 100 ) console.log( "FRAC > 100" );
-		console.log( this._data.timesteps[0] + ":" + st + ":" + et + ":" + dur + ":" + item.stampDateTime[0] + ":" + cur + ":" + frac );
-		this._tableNodeContainer.appendChild(dojo.create( "div", { id: "logit_"+item.id, class: "log_tsd_bar", style: "border-width:2px;border-color:#0000ff;background-color:#0000ff;width:100%;height:2px;position:absolute;top:"+frac+"%;left:0;visibility:hidden;z-index:10;"}));
+		var wid = "2px";
+		if ( i == 0 ) wid = "4px";  // Make the first entry (incident start) bigger
+		this._tableNodeContainer.appendChild(
+		    dojo.create( "div", 
+				 { id: "logit_"+item.id, 
+				   class: "log_tsd_bar", 
+				   style: "border-width:"+wid+";border-color:#0000ff;background-color:#0000ff"
+				          +";width:100%;height:"+wid+";position:absolute;top:"+frac+"%;"
+				          +"left:0;visibility:"+(
+					      i==0?"visible"   // Only show the first entry
+						  :"hidden")
+				          +";z-index:10;"
+				 }));
 	    }
 	}
     },

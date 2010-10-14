@@ -179,7 +179,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	}
 
 	theParams[ 'type' ] = 'ML';
-	theParams[ 'bbox' ] = [this.getMap().getExtent().toBBOX()];
+
+	// Don't apply a bounding box for this layer---load them all
+	//theParams[ 'bbox' ] = [this.getMap().getExtent().toBBOX()];
 	theParams[ 'proj' ] = "EPSG:900913";/* map.projection */
 
 	var sectionParams = {idIn:[]};
@@ -223,7 +225,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		    format: new OpenLayers.Format.GeoJSON({})
 		});
 	}
-	vdsSegmentLines.refresh({force: true, params:theParams});    
+	vdsSegmentLines.refresh({force: true, params:theParams});
+
     },
 
     _linkFeaturesToCells: function() {
@@ -232,16 +235,21 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var sections = tsd._data.sections;
 	var td = tsd._td;
 	var itd = tsd._itd;
+	var ptd = tsd._ptd;
 	for ( var i = 0; i < td.length; ++i ) {
 	    var tr = tsd._tr[i];
 	    var itr = tsd._itr[i];
+	    var ptr = tsd._ptr[i];
 	    dojo.connect( tr, "onmouseover", this, "_hoverTime" );
 	    dojo.connect( itr, "onmouseover", this, "_hoverTime" );
+	    dojo.connect( ptr, "onmouseover", this, "_hoverTime" );
 	    for ( var j = 0; j < td[i].length; ++j ) {
 		dojo.connect( td[i][j], "onmouseover", this, "_hoverStation" );
 		dojo.connect( td[i][j], "onclick", this, "_clickTimeSpaceCell" );
 		dojo.connect( itd[i][j], "onmouseover", this, "_hoverStation" );
 		dojo.connect( itd[i][j], "onclick", this, "_clickTimeSpaceCell" );
+		dojo.connect( ptd[i][j], "onmouseover", this, "_hoverStation" );
+		dojo.connect( ptd[i][j], "onclick", this, "_clickTimeSpaceCell" );
 	    }
 	}
 
@@ -285,7 +293,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
             protocol: new OpenLayers.Protocol.HTTP({
             	url: base + "incident/list.geojson",//theurl,
             	params: theParams,
-            	style: {strokeWidth: 2, strokeColor: "#ff0000", strokeOpacity: 0.25, fillColor: "#ff0000" },
+            	style: {strokeWidth: 2, strokeColor: "#0000ff", strokeOpacity: 0.50, fillColor: "#0000ff" },
             	format: new OpenLayers.Format.GeoJSON({})
             }),
             reportError: true
@@ -326,12 +334,37 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     },
 
+    _first_vds_render: true,
+
+    recenterMap: function() {
+	var bb = this.getIncidentExtent();
+	this.getMap().zoomToExtent( bb );
+//	var zoom = this.getMap().getZoomForExtent();
+//	this.getMap().moveTo( bb.getCenterLonLat(), zoom-1 );
+	
+    },
+
+    getIncidentExtent: function() {
+	var maxExtent = this._vdsSegmentLines.getDataExtent();
+	if ( maxExtent == null ) maxExtent = new OpenLayers.Bounds();
+	var unrendered = this._vdsSegmentLines.unrenderedFeatures;
+	for ( var i in unrendered ) {
+	    var feat = unrendered[i];
+	    var geom = feat.geometry;
+	    if ( geom ) {
+		maxExtent.extend( geom.getBounds() );
+	    }
+	}
+	return maxExtent;
+    },
+
     initVdsSegmentsLayer: function( theParams ) {
 
 	var myParams = this._constructVdsSegmentsParams( theParams );
 
 	var base = document.getElementById("htmldom").href;
 
+	var obj = this;
 	this._vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
@@ -340,15 +373,17 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
   		url: base + "vds/list.geojson",
 		params: myParams,
 		format: new OpenLayers.Format.GeoJSON({})
-	    })
+	    }),
 	});
 	
 	var obj = this;
-	var first_vds_render = true;
 	this._vdsSegmentLines.events.on({
-	    "featuresadded": function() { 
-		// OK, call linkfeaturestocells when features change on the layer
+	    "loadend": function() { 
 		obj._linkFeaturesToCells(); 
+		if ( obj._first_vds_render ) {
+		    obj.recenterMap();
+		    obj._first_vds_render = false;
+		}
 	    },
 	    "featuresremoved": function() { obj._linkFeaturesToCells(); },
 	    "moveend": function() { obj.updateVdsSegmentsQuery( {} ); }
@@ -359,8 +394,6 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 
 	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
-// fillColor: "cyan",
-// strokeColor: "cyan",
 	    strokeWidth: 8,
 	    strokeOpacity: 1
 	}, OpenLayers.Feature.Vector.style["select"]);
@@ -370,11 +403,6 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
  	    highlightOnly: true,
             renderIntent: "temporary",
 	    selectStyle: hoverSelectStyle,
-	    // eventListeners: {
-	    // beforefeaturehighlighted: report,
-	    // featurehighlighted: report,
-	    // featureunhighlighted: report
-	    // }
 	});
 	this.getMap().addControl(this._hoverVds);
 	this._hoverVds.activate();
@@ -383,6 +411,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var selectStyle = OpenLayers.Util.applyDefaults({
 	// fillColor: "blue",
 // strokeColor: "blue"
+	    strokeWidth: 8,
+	    strokeOpacity: 1
 	}, OpenLayers.Feature.Vector.style["select"]);
 
 	this._selectVds = new OpenLayers.Control.SelectFeature(this._vdsSegmentLines,{
@@ -417,7 +447,10 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     	if ( station ) {
     		var feature = station.feature;
     		if ( feature ) {
-    			this.getMap().zoomToExtent( feature.geometry.getBounds() );
+		    var bb = feature.geometry.getBounds();
+		    var zz = this.getMap().getZoomForExtent( bb );
+		    // center on section, but don't zoom in quite all the way.
+		    this.getMap().setCenter( bb.getCenterLonLat(), zz-3 );
     		}
     	} else
     		alert( "Unable to find feature in layer" );
@@ -434,25 +467,20 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     	// HACK: highlight the corresponding station in the map
     	var vsl = this._vdsSegmentLines;
     	if ( vsl && station ) {
-    		var feature = station.feature;
-    		/*
-    		 * // Loop over the lines until we find the correct station var feature =
-    		 * null; for ( var j = 0; j < vsl.features.length && !feature; ++j ) {
-    		 * var ff = vsl.features[ j ]; if ( station.vdsid == ff.attributes[ 'id' ] ) {
-    		 * feature = ff; } }
-    		 */
-    		/*
-    		 * if ( feature ) { feature.style.strokeColor =
-    		 * tdc.style.backgroundColor; feature.style.strokeWidth = 8;
-    		 * feature.style.strokeOpacity = 1;
-    		 * this._vdsSegmentLines.drawFeature( feature ); }
-    		 */
+    	    var feature = station.feature;
+   	    // Loop over the lines until we find the correct station 
+	    var feature = null; 
+	    for ( var j = 0; j < vsl.features.length && !feature; ++j ) {
+    		var ff = vsl.features[ j ]; if ( station.vdsid == ff.attributes[ 'id' ] ) {
+    		    feature = ff; 
+		} 
+	    }
     		
-    		// OK, found the feature. Highlight it? select it
-    		if ( feature ) {
-    			this._hoverVds.unselectAll();
-    			this._hoverVds.select( feature );
-    		}
+    	    // OK, found the feature. Highlight it? select it
+    	    if ( feature ) {
+    		this._hoverVds.unselectAll();
+    		this._hoverVds.select( feature );
+    	    }
     	}
     },
     
@@ -493,7 +521,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		}
 	    }
 	}
-// this._hoverStation( e ); // highlight the station we're hovering over
+	this._hoverStation( e ); // highlight the station we're hovering over
 	var stationnm = e.target.getAttribute( 'station' );
 	var station = this._tsd._data.sections[ stationnm ];
 	if ( ! station ) {
@@ -507,8 +535,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var el = document.getElementById('tmcpe_tsd_cellinfo');
 	var str = station.vdsid + ":" + station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "], " + this._tsd._data.timesteps[timeind];
 	var dd = station.analyzedTimesteps[timeind];
-	str += " | O:" + dd.spd.toFixed(1) + "-mph, A:" + dd.spd_avg.toFixed(1) + "-mph +/- " + dd.spd_std.toFixed(1) + "-mph | OCC: " + (100*dd.occ).toFixed(1) + '%';
-	if ( station.analyzedTimesteps[timeidx].p_j_m == 0.5 ) str += ' <span style="color:#ff0000;font-weight:bold">&lt;UNRELIABLE&gt;</span>';
+	str += "<br/>O:" + (dd.spd!=null?dd.spd.toFixed(1):"<undef>") + "-mph, A:" + (dd.spd_avg!=null?dd.spd_avg.toFixed(1):"<undef>") + "-mph +/- " + (dd.spd_std!=null?dd.spd_std.toFixed(1):"<undef>") + "-mph | OCC: " + (dd.occ!=null?(100*dd.occ).toFixed(1):"<undef") + '%';
+	if ( Math.abs(station.analyzedTimesteps[timeidx].p_j_m-0.5) < 0.25 ) str += ' <span style="color:#ff0000;font-weight:bold">&lt;UNRELIABLE&gt;</span>';
 	el.innerHTML = str;
     },
     
@@ -548,7 +576,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	// Hide existing
 	dojo.query( ".log_tsd_bar" ).forEach(function(node,index,arr){
-	    node.style.visibility = 'hidden';
+	    if ( index != 0 ) {  // Always show the first entry
+		node.style.visibility = 'hidden';
+	    }
 	});
 
 	dojo.query( "#logit_"+logEntry.id[0] ).forEach(function(node,index,arr){

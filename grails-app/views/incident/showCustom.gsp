@@ -150,6 +150,11 @@
 		 type="checkbox"
                  onClick="tsd.toggleIncidentWindow( dojo.byId( 'incidentCheck' ).checked )" />
 	  <label for="incidentCheck">Show Incident?</label> 	    
+	  <input id="evidenceCheck" dojotype="dijit.form.CheckBox"
+	         name="evidenceCheckBox" checked="false"
+		 type="checkbox"
+                 onClick="tsd.toggleEvidenceWindow( dojo.byId( 'evidenceCheck' ).checked )" />
+	  <label for="evidenceCheck">Show Evidence?</label> 	    
 	  
 <!--
 	  <input id="activityCheck" dojotype="dijit.form.CheckBox"
@@ -191,9 +196,9 @@
 	</div>
 	<!-- TSD INFO PANE -->
 	<div dojoType="dijit.layout.ContentPane" region="bottom"  style="padding:0px;margin:0px" splitter="false">
-	  <div dojoType="dijit.layout.BorderContainer" id="tsdInfoPane" style="padding:0px;margin:0px;height:2em;" design="headline" >	
+	  <div dojoType="dijit.layout.BorderContainer" id="tsdInfoPane" style="padding:0px;margin:0px;height:4em;" design="headline" >	
 	    <div dojoType="dijit.layout.ContentPane" region="top" style="padding:0px;margin:0px" >
-	      <div class="tmcpe_tsd_cellinfo" id="tmcpe_tsd_cellinfo">Mouseover time-space diagram for location/time information.</div>
+	      <div class="tmcpe_tsd_cellinfo" id="tmcpe_tsd_cellinfo" style="height:2.5em";>Mouseover time-space diagram for location/time information.</div>
 	    </div>
 	    <div dojoType="dijit.layout.ContentPane" region="bottom" style="padding:0px;margin:0px" >
 	       <a id="tmcpe_tsd_xls_link"></a>

@@ -149,6 +149,10 @@ use Class::MethodMaker
      scalar => [ { -default => '0' }, "cplex_polishafterintsol" ],
      scalar => [ { -default => '1' }, "cplex_nodesel" ],
      scalar => [ { -default => '0' }, "cplex_varsel" ],
+     scalar => [ { -default => '0' }, "cplex_predual" ],
+     scalar => [ { -default => '1' }, "cplex_preind" ],
+     scalar => [ { -default => '1' }, "cplex_preslvnd" ],
+     scalar => [ { -default => '0' }, "cplex_mipemphasis" ],
      scalar => [ { -default => 35.0 }, "d12_delay_speed" ],
 #     scalar => [ { -type => 'Parse::RecDescent',
 #		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
@@ -875,7 +879,7 @@ sub write_gams_program {
 	$j++;
     }
 
-    ### .: join( "", "WRITING PROGRAM $i to ", $self->get_gams_file, "..." )
+    ### =: join( "", "WRITING PROGRAM $i to ", $self->get_gams_file, "..." )
 
     my $RESLIM="*";
     $RESLIM = join( " = ", "OPTIONS RESLIM", $self->gams_reslim ) if $self->gams_reslim;
@@ -1249,42 +1253,40 @@ $startlim DISPLAY S.l;
     
     $of->close;
     
-    print "(done)\n";
+    ### DONE WRITING EQUATIONS
 }
 
 sub solve_program {
     my ( $self ) = @_;
 
-    # OK, now solve it.
-    print "SYNCING OVER...";
-#    my $resf = io( "/usr/local/src/lp_solve_5.5/lp_solve/lp_solve -presolve -wmps $mpsname < $self->fname|" );
+    ### SOLVING PROGRAM...
 
     my $gf = $self->get_gams_file;
     my $gu = $self->gams_user;
     my $gh = $self->gams_host;
-    
-    print "FNAME: $gf\n";
-    print "rsync -avz $gf $gu\@$gh:tmcpe/work\n";
+    my $rsynccmd = "rsync -avz $gf $gu\@$gh:tmcpe/work\n";
+    ### =: "SYNCING...$rsynccmd"
+
     system( "rsync -avz $gf $gu\@$gh:tmcpe/work" );
     
-    print "SOLVING...";
     my $RESLIM="";
     $RESLIM = join( " = ", "RESLIM", $self->gams_reslim ) if $self->gams_reslim;
-    print "ssh $gu\@$gh 'cd tmcpe/work && /cygdrive/c/Progra~1/GAMS22.2/gams.exe $gf $RESLIM'";
-    system( "ssh $gu\@$gh 'cd tmcpe/work && /cygdrive/c/Progra~1/GAMS22.2/gams.exe $gf $RESLIM'" );
-    print "done\n";
+    my $gamscmd = "ssh $gu\@$gh 'cd tmcpe/work && /cygdrive/c/Progra~1/GAMS22.2/gams.exe $gf $RESLIM'";
+    ### =: "SOLVING...$gamscmd"
+    system( $gamscmd );
     
-    print "SYNCING BACK...".$self->get_lst_file;
+    my $lf = $self->get_lst_file;
+    $rsynccmd = "rsync -avz $gu\@$gh:tmcpe/work/$lf .";
+    ### =: "SYNCING BACK...$rsynccmd"
+    system( $rsynccmd );
 
-    system( "rsync -avz $gu\@$gh:tmcpe/work/".$self->get_lst_file." ." );
-    
-    print "DONE\nPROCESSING...";
+    ### DONE SOLVING PROGRAM
 }
 
+# Read and parse the results returned from GAMS
 sub parse_results {
     my ( $self ) = @_;
 
-    # Now read and parse the results returned from GAMS
     my $resf = io( $self->get_lst_file );
     my $found = 0;
     my $error = 0;
@@ -1296,8 +1298,7 @@ sub parse_results {
     my $net_delay;
 
   LINE: 
-    while( my $line = $resf->getline() )
-    {
+    while( my $line = $resf->getline() ) { ### PROCESSING RESULTS |===[%]         |
 	$_ = $line;
 	/^Error Messages/ && do
 	{
@@ -1391,6 +1392,7 @@ sub parse_results {
     $self->cell( $cell );
 }
 
+# Write the solution to the database
 sub write_to_db {
     my ( $self, $overwrite ) = @_;
 
@@ -1401,7 +1403,11 @@ sub write_to_db {
 
     my $facilkey = join( ":", $fwy, $dir );
 
-    # This gives us the FacilitySection associated with the incident location on this facility
+    # Don't write if the solution is bad
+    croak {msg => join(":", "BAD SOLUTION: ", $self->bad_solution ) } if $self->bad_solution;
+
+    # This gives us the FacilitySection associated with the incident
+    # location on this facility
     my $loc;
     eval { 
 	my @locs = $self->tbmap_db->resultset( 'VdsView' )->search( {id => $self->vdsid} );
@@ -1409,9 +1415,14 @@ sub write_to_db {
     };
     croak $@ if $@;
     croak "BAD VDSID ".$self->vdsid if not $loc;
+    
 
+    # shorthand for the solution data
     my $data = $self->data;
 
+    # sort the stations to go from upstream to down stream based upon
+    # the postmile and facility direction.  Caltrans absolute
+    # postmiles increase going northbound and eastbound.
     my @stations = sort { $a->{abs_pm} <=> $b->{abs_pm} } ( values %{$data->{$i}->{$facilkey}->{stations}} );
     $_ = $self->dir;
     @stations = reverse @stations if ( /S/ || /W/ );
@@ -1435,13 +1446,14 @@ sub write_to_db {
 	    $ex->delete;	    
 	}
 
-	croak {msg => join(":", "BAD SOLUTION: ", $self->bad_solution ) } if $self->bad_solution;
-
+	# create a new incident impact analysis to store this result
 	$ia = $self->tmcpe_db->resultset( 'IncidentImpactAnalysis' )->create(
 	    {
 		analysis_name => "Default",
 		incident_id => $self->incid
 	    });
+
+	
 	$ifa = $ia->create_related( 'incident_facility_impact_analyses',
 				    {
 					start_time => time2str( "%D %T", $self->calcstart ),

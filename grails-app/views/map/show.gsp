@@ -36,7 +36,11 @@
       };
 
       var myFormatNumber = function( inNum ) {
-        return dojo.number.format(inNum, {places:0});
+        if ( inNum != null ) {
+           return dojo.number.format(inNum, {places:0});
+        } else {
+           return null;
+        }
       };
 
       var myFormatDateOnly = function( inDate ) {
@@ -285,7 +289,7 @@
 	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
 	</div>
 	<!-- Incident Details Pane -->
-	<div dojoType="dijit.layout.BorderContainer" gutters="false" region="right" style="width: 300px;background:white;">
+	<div dojoType="dijit.layout.BorderContainer" gutters="false" region="right" style="width: 500px;background:white;">
 	  <!-- Detail Box -->
 	  <div dojoType="dijit.layout.ContentPane" id="incidentDetailPane" gutters="true" region="center" >
 	    <div id="incidentDetails" style="margin-top:3em;">Select an incident on the map to view its details here.</div>

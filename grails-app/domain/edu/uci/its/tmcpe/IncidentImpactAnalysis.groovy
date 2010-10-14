@@ -22,8 +22,16 @@ class IncidentImpactAnalysis implements Comparable {
 
     Float d12Delay() {
         def f = 0
-        incidentFacilityImpactAnalyses?.collect{ f += (it?.d12Delay?: 0) }
-        return f
+        def defined = false
+        incidentFacilityImpactAnalyses?.collect{ 
+           if ( it?.d12Delay != null ) { defined = true }
+           f += (it?.d12Delay?: 0) 
+        }
+        if ( defined ) {
+           return f
+        } else {
+           return null
+        }
     }
 
     Float netDelay() {
