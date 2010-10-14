@@ -112,6 +112,7 @@ use Class::MethodMaker
      scalar => [ { -default => 0.5 }, 'unknown_evidence_value' ],
      scalar => [ { -default => 1.0 }, 'band' ],
      scalar => [ { -default => 1 }, 'objective' ],
+     scalar => [ { -default => 0 }, 'bound_incident_time' ],
      scalar => [ { -default => 0.0 }, 'bias' ],
      scalar => [ { -default => 0 }, 'reprocess_existing' ],
      scalar => [ { -default => 1 }, 'use_eq1' ],
@@ -155,6 +156,7 @@ use Class::MethodMaker
      scalar => [ { -default => '1' }, "cplex_preslvnd" ],
      scalar => [ { -default => '0' }, "cplex_mipemphasis" ],
      scalar => [ { -default => 35.0 }, "d12_delay_speed" ],
+     scalar => [ { -default => 60.0 }, "max_incident_speed" ],  # the speed over which a section is always classified as clear
 #     scalar => [ { -type => 'Parse::RecDescent',
 #		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
 #		 }, 'parser' ],
@@ -563,15 +565,11 @@ sub get_pems_data {
 	    });
 
 	# oops, no avg data for some rows, let's compute it now.
-	if ( @bad_rows ) {  ### COMPUTING MISSING ANNUAL AVERAGES FOR $vds->name
-#	    print STDERR join("",
-#			      "COMPUTING MISSING ANNUAL AVERAGES FOR ",
-#			      $vds->name,
-#			      ( $self->debug ? ":\n\t".join("\n\t", map {$_->stamp} @bad_rows ) : ":" ),
-#			      "\n");
+	if ( @bad_rows ) {  
+	    ### =: "COMPUTING MISSING ANNUAL AVERAGES FOR ".$vds->name
 
 	    foreach my $br ( @bad_rows ) {   ### Processing |===[%]   | 
-		print STDERR "\tCREATING FOR ".$br->stamp."...";
+		#### =: join( "", "CREATING FOR ",$br->stamp,"..." )
 		
 		# tmcpe_data_create is a view that generates the
 		# averages.  Here, we compute the stats for this row
@@ -586,7 +584,7 @@ sub get_pems_data {
 		# into 'Pems5minAnnualAvg'
 		if ( @created_rows ) {
 
-		    # require: @created_rows == 1
+		    ### require: @created_rows == 1
 
 		    # see if it already exists, which can occur if
 		    # we're updating the cache
@@ -597,9 +595,9 @@ sub get_pems_data {
 			});
 
 		    if ( @existing_rows ) {
-			#### Row exists for ($vds->id,$br->stamp), updating it
+			#### =: join( '', 'Row exists for (',$vds->id,',',$br->stamp,'), updating it' )
 
-			# require: @existing_rows == 1
+			### require: @existing_rows == 1
 
 			my $er = shift @existing_rows;
 
@@ -616,7 +614,7 @@ sub get_pems_data {
 
 		    } else {
 
-			# Row doesn't exist for ($vds->id,$br->stamp), create a new one 
+			#### =: join( '', Row doesn't exist for (',$vds->id,',',$br->stamp,'), create a new one' )
 			$self->vds_db->populate( 
 			    'Pems5minAnnualAvg',
 			    [ [ $created_rows[0]->result_source->columns ],
@@ -633,7 +631,7 @@ sub get_pems_data {
 		}
 	    }
 	} else {
-	    #### CACHED: "ALL DATA IS CACHED FOR ".$vds->id." between $ss and $es"
+	    #### =: "ALL DATA IS CACHED FOR ".$vds->id." between $ss and $es"
 	}
 
 	#### GRABBING DATA FOR $vds->id between $ss and $es
@@ -652,7 +650,7 @@ sub get_pems_data {
 	}
 	
 	if ( !@rows ) {
-	    ### NO DATA FOR $vdsid $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name}!!!
+	    ### =: "NO DATA FOR $vdsid $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name}!!!"
 
 	    # CREATE SOME DUMMY DATA FOR THIS STATION
 	    foreach ( @times ) {
@@ -688,9 +686,14 @@ sub get_pems_data {
 		{
 		    if ( not defined $row->o_spd ) {
 			# this means there's no valid data for this period, mark it bad
-			$pjm = 0.5;
+			$pjm = $self->unknown_evidence_value;
 		    } else {
-			if ( $row->o_spd < ( $row->a_spd - $self->band * $row->sd_spd ) ) {
+			if ( $row->o_spd < ( $row->a_spd - $self->band * $row->sd_spd ) 
+
+			     # we won't flag speeds over some maximum as incidents,
+			     # regardless of their relationship to averages
+			     && ( $row->o_spd <= $self->max_incident_speed ) 
+			    ) {
 			    $pjm = 0;
 			} else {
 			    $pjm = 1;
@@ -1094,9 +1097,23 @@ PARAMETERS
 	$j++;
     }
 
+    # Shockwave contraint parameters
     my $MAX_LOAD_SHOCK_DIST = $self->limit_loading_shockwave/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     my $MAX_CLEAR_SHOCK_DIST = $self->limit_clearing_shockwave/12.0;  # maximum dist a shockwave can travel in 5 minutes...[(0-2200)/(150-35)=15mi/hr=1.25mi/5min]
     
+    my $shockdir=1;
+    $_ = $self->dir;
+    if ( /S/ || /W/ ) {
+	$shockdir=-1;
+    }
+    
+    # Require start region comps if eq8 is used
+    if ( ! $self->limit_to_start_region && $self->use_eq8 ) {
+	### OVERRIDING GAMS PARAMETERS TO COMPUTE START CELL IN SUPPORT OF EQ8
+	$self->limit_to_start_region( 1 );
+    }
+
+    # Start region constraint parameters
     my $use_boundary_constraint = "*";
     my $startlim = $self->limit_to_start_region ? "" : "*";
     my ($BOUNDARY_DX, $BOUNDARY_DT) = (10000,10000);  # set these to not bind
@@ -1107,12 +1124,8 @@ PARAMETERS
 	}
     }
     
-    
-    my $shockdir=1;
-    $_ = $self->dir;
-    if ( /S/ || /W/ ) {
-	$shockdir=-1;
-    }
+    # bound incident time
+    my $bound_incident_time = $self->bound_incident_time ? "" : "*";
     
     
     $of << qq{
@@ -1142,6 +1155,7 @@ $eq5 EQ5
 $eq6 EQ6
 $eq7 EQ7
 $eq8 EQ8
+$eq8 EQ8_START
 $eq8b EQ8b
 TOTDELAY
 AVGDELAY
@@ -1154,6 +1168,7 @@ $startlim IFSTART_THEN_D
 $startlim START_BOUNDARY
 $startlim$use_boundary_constraint START_CONSTRAINT
 $startlim$use_boundary_constraint START_CONSTRAINT2
+$bound_incident_time BOUND_INCIDENT_TIME
 };
 
     if ( $self->force ) {
@@ -1203,9 +1218,11 @@ $eq6                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1
 $eq7 EQ7(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) < ORD( M1 ) ), D( K1, R1 ) ) ) 
 $eq7                  =l= (2+CARD(M1))*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) )
 $eq7                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1)));
-** SHOCKWAVE CONSTRAINT
-** Loading wave
+***** SHOCKWAVE CONSTRAINT
+*** Loading wave
 $eq8 EQ8(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-($shockdir)*$MAX_LOAD_SHOCK_DIST)), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
+* Enforce the loading wave constraint at the start too
+$eq8 EQ8_START(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) < ($shockdir)*(PM(J1)-($shockdir)*$MAX_LOAD_SHOCK_DIST)), D(K1,M1) ) =l= CARD(M1) - CARD(M1)*( S(J1,M1) );
 ** Clearing wave
 $eq8b EQ8b(J1,M1) .. SUM( K1\$(($shockdir) * PM( K1 ) > ($shockdir)*(PM(J1)+($shockdir)*$MAX_CLEAR_SHOCK_DIST)), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1+1,M1) );
 TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) * D(J1,M1) ) );
@@ -1222,6 +1239,9 @@ $startlim                  =l= CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( S(
 $startlim$use_boundary_constraint START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-$incpm)<=$BOUNDARY_DX), SUM( R1\$(ABS(ORD(R1)-$incstart_index)*$dt<=$BOUNDARY_DT), S(K1,R1)));
 ** REQUIRE THAT THE START IS ON A CELL WITH POSITIVE EVIDENCE FOR AN INCIDENT
 $startlim$use_boundary_constraint START_CONSTRAINT2(J1,M1) .. S(J1,M1) =l= (1 - P(J1,M1));
+
+** Incident time bound constraint: All cells with time index less than the incident start time must be zero
+$bound_incident_time BOUND_INCIDENT_TIME .. SUM( J1, SUM( M1\$(ORD(M1)<$incstart_index+1), D(J1,M1) ) ) =L= 0;
 };
     if ( $self->force ) {
 	foreach my $k ( keys %{$self->force} ) {
@@ -1313,7 +1333,7 @@ sub parse_results {
     my $net_delay;
 
   LINE: 
-    while( my $line = $resf->getline() ) { ### PROCESSING RESULTS |===[%]         |
+    while( my $line = $resf->getline() ) { ### PROCESSING RESULTS |===[%]              |
 	$_ = $line;
 	/^Error Messages/ && do
 	{
@@ -1507,7 +1527,8 @@ sub write_to_db {
 
 	my $m = 0;
 	my @statdat = sort { $a->{timeofday} cmp $b->{timeofday} } @{$station->{data}};
-	foreach my $secdat ( @statdat ) { ### CREATING $station->{vds}->id DATA |===[%]        |
+	my $vdsid = $station->{vds}->id;
+	foreach my $secdat ( @statdat ) { ### CREATING VDS $vdsid DATA |===[%]            |
 	    my $at;
 	    eval { 
 		my $tmcpedelay = 0;
@@ -1522,8 +1543,8 @@ sub write_to_db {
 		    
 		    $d12delaysum += $d12delay;
 		}
-		printf STDERR "\t* ".join( ' ', '(',$j,$m,')', $secdat->{date}, $secdat->{timeofday}, $iflag,
-		    $secdat->{incspd}, $secdat->{avg_spd}) . "\n";
+#		printf STDERR "\t* ".join( ' ', '(',$j,$m,')', $secdat->{date}, $secdat->{timeofday}, $iflag,
+#		    $secdat->{incspd}, $secdat->{avg_spd}) . "\n";
 		$at = $as->create_related( 'incident_section_datas', 
 					   {
 					       fivemin => join( ' ', $secdat->{date}, $secdat->{timeofday} ),

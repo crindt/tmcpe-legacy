@@ -91,6 +91,7 @@ GetOptions( \%opt,
 	    "dc-cplex-mipemphasis=i",
 	    "dc-d12-delay-speed=f",
 	    "dc-objective=i",
+	    "dc-bound-incident-time",
 	    "extend-if-bounded",
 	    "help",
 	    "man"
@@ -894,7 +895,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 	next INCDEL;
     }
 
-    ### =: join( "", "COMPUTING DELAY FOR ", $inc->id, " [", $inc->cad || "<undef>", "]" );
+    ### =: join( "", "COMPUTING DELAY FOR ", $inc->id, " [", $inc->cad || "<undef>", "]" )
 
     my $dc = new TMCPE::DelayComputation();
 
