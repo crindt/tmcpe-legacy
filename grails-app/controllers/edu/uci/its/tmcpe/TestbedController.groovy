@@ -59,7 +59,7 @@ class TestbedController {
                 json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, 
                         //properties: it
                         properties: [ locString: "Incident " + it.cad + ": " + it.section.toString(), 
-                                      memo: '<p>it.memo</p><p><a href="http://parsons.its.uci.edu/tmcpe-0.2/incident/showCustom/'+it.id+'">Click to see the incident analysis on the TMCPE Website</a>']  
+                                      memo: '<p>it.memo</p><p><a href="http://parsons.its.uci.edu/tmcpe-devel/incident/showCustom/'+it.id+'">Click to see the incident analysis on the TMCPE Website</a>']  
                         ] ) 
             }
         }
@@ -134,7 +134,7 @@ class TestbedController {
                         //properties: it
                         properties: [ locString: "Incident " + it.cad + ": " + it.section.toString(), 
                                       //memo: '[it.memo](http://parsons.its.uci.edu/tmcpe-devel/incident/showCustom/'+it.id+')'
-                                      memo: '<a href="http://parsons.its.uci.edu/tmcpe-0.3/incident/showCustom/'+it.id+'">detail:'+memo+'</a>'
+                                      memo: '<a href="http://parsons.its.uci.edu/tmcpe-devel/incident/showCustom/'+it.id+'">detail:'+memo+'</a>'
                                     ]
                         ] ) 
         }

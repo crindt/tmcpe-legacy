@@ -34,6 +34,15 @@ class LoginController {
 		}
 	}
 
+        def casAuth = {
+            def conf = SpringSecurityUtils.securityConfig
+            if (!conf || !conf.active) {
+                redirect action: auth, params: params
+            }
+            
+            redirect(url:conf.cas.serverUrlPrefix + conf.cas.loginUri+"?"+"service="+conf.cas.serviceUrl)
+        }
+
 	/**
 	 * Show the login page.
 	 */
