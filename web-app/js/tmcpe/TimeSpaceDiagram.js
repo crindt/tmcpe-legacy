@@ -35,6 +35,11 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     //        A scaling parameter used by the colorDataAccessor.  This is generally controlled by the user interface
     themeScale: 1.5,
 
+    // maxIncidentSpeed: Float
+    //        The maximum speed that can be associated with an incident (should be a parameter and should be pulled
+    //        in from the incident facility analysis
+    maxIncidentSpeed: 60.0,
+
     // colorDataAccessor: String
     //        The name of the standard accessor to use.  This should be set by the user interface.
     //        In the current implementation (which is a bit application specific), standard color 
@@ -143,7 +148,10 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	var tmppjm = 1; // no incident probability is default
 	if ( secdat.p_j_m != 0 && secdat.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
 	    tmppjm = 0.5;
-	else if ( stdlev < 0 && stdlev < -this.themeScale )
+	else if ( stdlev < 0 
+		  && stdlev < -this.themeScale 
+		  && secdat.spd < this.maxIncidentSpeed
+		)
 	{
 	    tmppjm = 0.0;
 	}
@@ -259,7 +267,10 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		var tmppjm = 1; // no incident probability is default
 		if ( secdat.p_j_m != 0 && secdat.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
 		    tmppjm = 0.5;
-		else if ( stdlev < 0 && stdlev < -this.themeScale )
+		else if ( stdlev < 0 
+			  && stdlev < -this.themeScale 
+			  && secdat.spd < this.maxIncidentSpeed
+			)
 		{
 		    tmppjm = 0.0;
 		}

@@ -92,6 +92,7 @@ GetOptions( \%opt,
 	    "dc-d12-delay-speed=f",
 	    "dc-objective=i",
 	    "dc-bound-incident-time",
+	    "dc-max-incident-speed=f",
 	    "extend-if-bounded",
 	    "help",
 	    "man"
