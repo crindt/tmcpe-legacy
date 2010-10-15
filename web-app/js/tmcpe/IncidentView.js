@@ -187,6 +187,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var sectionParams = {idIn:[]};
 
 	// Get the station indexes of all segments
+	var i;
 	for ( i = 0; i < tsd._data.sections.length; ++i )
 	{
 	    var station = tsd._data.sections[i];
@@ -236,14 +237,16 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var td = tsd._td;
 	var itd = tsd._itd;
 	var ptd = tsd._ptd;
-	for ( var i = 0; i < td.length; ++i ) {
+	var i; 
+	var j;
+	for ( i = 0; i < td.length; i++ ) {
 	    var tr = tsd._tr[i];
 	    var itr = tsd._itr[i];
 	    var ptr = tsd._ptr[i];
 	    dojo.connect( tr, "onmouseover", this, "_hoverTime" );
 	    dojo.connect( itr, "onmouseover", this, "_hoverTime" );
 	    dojo.connect( ptr, "onmouseover", this, "_hoverTime" );
-	    for ( var j = 0; j < td[i].length; ++j ) {
+	    for ( j = 0; j < td[i].length; j++ ) {
 		dojo.connect( td[i][j], "onmouseover", this, "_hoverStation" );
 		dojo.connect( td[i][j], "onclick", this, "_clickTimeSpaceCell" );
 		dojo.connect( itd[i][j], "onmouseover", this, "_hoverStation" );
@@ -255,7 +258,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	// Loop over the stations to connect them to features
 	var vsl = this._vdsSegmentLines;
-	for ( var j = 0; j < tsd._data.sections.length; ++j ) {
+	for ( j = 0; j < tsd._data.sections.length; ++j ) {
 	    var station = tsd._data.sections[ tsd._data.sections[ j ].stnidx ];
 
 	    if ( station ) {
@@ -340,7 +343,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var maxExtent = this._vdsSegmentLines.getDataExtent();
 	if ( maxExtent == null ) maxExtent = new OpenLayers.Bounds();
 	var unrendered = this._vdsSegmentLines.unrenderedFeatures;
-	for ( var i in unrendered ) {
+	var i;
+	for ( i in unrendered ) {
 	    var feat = unrendered[i];
 	    var geom = feat.geometry;
 	    if ( geom ) {
@@ -493,7 +497,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	    // Loop over the lines until we find the correct station
 	    var feature = null;
-	    for ( var k = 0; k < vsl.features.length && !feature; ++k )
+	    var k;
+	    for ( k = 0; k < vsl.features.length && !feature; ++k )
 	    {
 		var ff = vsl.features[ k ];
 		var f_vdsid = ff.attributes[ 'id' ];
@@ -504,6 +509,13 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	}
 	    
 	return feature;
+    },
+
+    flipTimeSpaceDiagram: function( toggle ) {
+	this._tsd.toggleTsdFlipWindow( toggle );
+
+	// relink the features
+	this._linkFeaturesToCells();
     },
     
     _hoverTime: function( e ) {
@@ -516,7 +528,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	if ( vsl ) {
 
 	    var tt = this._tsd._td[ timeidx ].length;
-	    for ( var j = 0; j < tt; ++j )
+	    var j;
+	    for ( j = 0; j < tt; ++j )
 	    {
 		var tdc = this._tsd._td[timeidx][j];
 		var si = tdc.getAttribute('station');

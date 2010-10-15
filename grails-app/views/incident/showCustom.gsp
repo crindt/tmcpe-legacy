@@ -158,7 +158,7 @@
 	  <input id="tsdFlipCheck" dojotype="dijit.form.CheckBox"
 	         name="tsdFlipCheckBox" checked="false"
 		 type="checkbox"
-                 onChange="tsd.toggleTsdFlipWindow( dojo.byId( 'tsdFlipCheck' ).checked )" />
+                 onChange="incidentView.flipTimeSpaceDiagram( dojo.byId( 'tsdFlipCheck' ).checked )" />
 	  <label for="tsdFlipCheck">Flip time axis?</label> 	    
 	  
 <!--
