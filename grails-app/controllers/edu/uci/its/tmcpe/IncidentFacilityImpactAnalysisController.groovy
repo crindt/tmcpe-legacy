@@ -48,7 +48,7 @@ class IncidentFacilityImpactAnalysisController {
                     return [incidentFacilityImpactAnalysisInstance: incidentFacilityImpactAnalysisInstance]
                 }
                 json {
-                    def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+                    def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
                     def timesteps = null
                     incidentFacilityImpactAnalysisInstance.analyzedSections.collect {
                         if ( it.analyzedTimestep != null && ( timesteps == null || ( it.analyzedTimestep.size() > timesteps.size() ) ) ) {
@@ -111,7 +111,7 @@ class IncidentFacilityImpactAnalysisController {
                             }
                             
                             // create row header
-                            def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+                            def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
                             def rcount = firstrow
                             for ( it4 in timesteps ) { 
                                 def hrow = sheet.createRow((short)rcount)

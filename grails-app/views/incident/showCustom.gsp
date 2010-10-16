@@ -187,16 +187,6 @@
 	       direction="'${incidentInstance.section?.freewayDir}'"
 	       colorDataAccessor="stdspd"
 	       >
-<!--
-	    <div id="loadingAnalysisDiv" style="padding-top:3em;text-align:center;font-weight:bold;float:left;width:100%;z-index:0;">Loading Time-Space Diagram...</div>
-	    <div id="noAnalysisDiv" style="padding-top:3em;text-align:center;font-weight:bold;color:red;float:left;width:100%;visibility:hidden;z-index:0;">No analyses of this incident has been performed.
-	      <p>
-		<a href="http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3" onclick="return popitup('http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Perform%20analysis%20of%20Incident ${incidentInstance.cad} (id=${incidentInstance.id})&issue[description]=No%20analysis%20is%20available%20for%20incident ${incidentInstance.cad} (id=${incidentInstance.id}).  Need to explore why this is not in the database.')">
-		  Click here to request support in finding out why.
-		</a>
-	      </p>
-	    </div>
-	    -->
 	  </div>
 	</div>
 	<!-- TSD INFO PANE -->

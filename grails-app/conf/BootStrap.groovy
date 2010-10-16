@@ -89,7 +89,7 @@ class BootStrap {
 		}
 		
 		grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.TmcLogEntry, cc++ ){ le, json ->
-			def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+			def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
 			json.build{
 				"class(TmcLogEntry)"
 				id(le.id)
@@ -104,7 +104,7 @@ class BootStrap {
 		}
 		
 		grails.converters.JSON.registerObjectMarshaller(edu.uci.its.testbed.Vds, cc++ ){ vds, json ->
-			def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+			def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
 			json.build{
 				"class(Vds)"
 				id(vds.id)

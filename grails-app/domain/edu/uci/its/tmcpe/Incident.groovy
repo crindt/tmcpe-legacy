@@ -215,7 +215,6 @@ class Incident {
     }
     
     def toJSON( json ) {
-        def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
         return json.build{
             "class(Incident)"
             id(id)

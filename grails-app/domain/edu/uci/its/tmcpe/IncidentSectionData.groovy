@@ -34,7 +34,7 @@ class IncidentSectionData implements Comparable {
     }
 
     String toString() {
-        def df = new java.text.SimpleDateFormat("yyyy-MMM-dd HH:mm")
+        def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
         return df.format( fivemin ) + ":[" + [ vol, spd, occ, incident_flag, tmcpe_delay, d12_delay ].join( ", " ) + "]"
     }
 
