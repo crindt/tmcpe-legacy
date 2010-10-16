@@ -96,7 +96,6 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var base = document.getElementById("htmldom").href;
 	var caller = this;
 	var url = base + 'incident/show.json?id=' + this.incidentId;
-	console.log( "LOADING DATA FOR INCIDENT " + url );
 	dojo.xhrGet({
 	    url: url,
 	    preventCache: true,
@@ -115,7 +114,6 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var base = document.getElementById("htmldom").href;
 	var caller = this;
 	var url = base + 'incident/showAnalyses?id=' + this.incidentId;
-	console.log( "LOADING ANALYSES FOR INCIDENT " + url );
 	if ( this._incident && this._incident.id != null ) {
 	    dojo.xhrGet({
 		url: url,
@@ -243,16 +241,18 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    var tr = tsd._tr[i];
 	    var itr = tsd._itr[i];
 	    var ptr = tsd._ptr[i];
-	    dojo.connect( tr, "onmouseover", this, "_hoverTime" );
-	    dojo.connect( itr, "onmouseover", this, "_hoverTime" );
-	    dojo.connect( ptr, "onmouseover", this, "_hoverTime" );
-	    for ( j = 0; j < td[i].length; j++ ) {
-		dojo.connect( td[i][j], "onmouseover", this, "_hoverStation" );
-		dojo.connect( td[i][j], "onclick", this, "_clickTimeSpaceCell" );
-		dojo.connect( itd[i][j], "onmouseover", this, "_hoverStation" );
-		dojo.connect( itd[i][j], "onclick", this, "_clickTimeSpaceCell" );
-		dojo.connect( ptd[i][j], "onmouseover", this, "_hoverStation" );
-		dojo.connect( ptd[i][j], "onclick", this, "_clickTimeSpaceCell" );
+
+	    var row = [tr, itr, ptr];
+	    for ( var r in row ) {
+		dojo.connect( row[r], "onmouseover", this, "_hoverTime" );
+	    }
+
+	    var tab = [td, itd, ptd];
+	    for ( var t in tab ) {
+		for ( j = 0; j < td[i].length; j++ ) {
+		    dojo.connect( tab[t][i][j], "onmouseover", this, "_hoverStation" );
+		    dojo.connect( tab[t][i][j], "onclick", this, "_clickTimeSpaceCell" );
+		}
 	    }
 	}
 
@@ -439,7 +439,6 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     	var station = this._tsd._data.sections[ stationnm ];
     	
     	// CENTER THE MAP ON THE VDS SECTION WE CLICKED ON
-    	console.log( "Centering on feature" );
     	if ( station ) {
     		var feature = station.feature;
     		if ( feature ) {
@@ -457,11 +456,10 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     
     _hoverStation: function( e ) {
     	var stationnm = e.target.getAttribute( 'station' );
-	var timeidx   = e.currentTarget.getAttribute( 'timeidx' );
-	var timeind   = e.currentTarget.getAttribute( 'time' );
+	var timeidx   = e.target.getAttribute( 'timeidx' );
+	var timeind   = e.target.getAttribute( 'time' );
 
     	var station = this._tsd._data.sections[ stationnm ];
-    	console.debug( "station:" + station.vdsid );
     	
     	// HACK: highlight the corresponding station in the map
     	var vsl = this._vdsSegmentLines;
@@ -483,7 +481,10 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		    }
 		}
 
-    		this._hoverVds.select( feature );
+		// For some reason, district 8 vds features don't have a layer, but they're drawn???
+		if ( feature.layer != null ) {
+    		    this._hoverVds.select( feature );
+		}
 		
     	    }
     	}
@@ -513,15 +514,12 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     flipTimeSpaceDiagram: function( toggle ) {
 	this._tsd.toggleTsdFlipWindow( toggle );
-
-	// relink the features
-	this._linkFeaturesToCells();
     },
     
     _hoverTime: function( e ) {
 	// HACK: alter the segment colors to match tsd
-	var timeidx = e.currentTarget.getAttribute( 'timeidx' );
-	var timeind = e.currentTarget.getAttribute( 'time' );
+	var timeidx = e.target.getAttribute( 'timeidx' );
+	var timeind = e.target.getAttribute( 'time' );
 	var d = this._tsd._data;
 
 	var vsl = this._vdsSegmentLines;
