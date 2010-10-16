@@ -1354,6 +1354,10 @@ sub parse_results {
 	{
 	    croak "EXECERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
 	};
+	/Error solving MIP subprogram/ && do 
+	{
+	    croak "Error solving MIP: CONSULT ".$self->get_lst_file." FOR DETAILS (and possibly the CPLEX subdir)";
+	};
 	/No solution returned/ && do 
 	{
 	    croak "No solution?: CONSULT ".$self->get_lst_file." FOR DETAILS";
