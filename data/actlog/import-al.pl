@@ -867,6 +867,9 @@ $condition->{cad}->{'-not_in'} = [ map { $_ =~ s/^not-//g; $_ } @exclude ] if @e
 # use the date condition if it was given AND a specific (set of) cad was NOT given
 $condition->{start_time} = $datecond if ( $datecond && !@include );
 
+# only process sigalerts if option is specified AND we haven't specified @include
+$condition->{sigalert_begin}->{'!='} = undef if ( $procopt->{only_sigalerts} && !@include );
+
 
 my $incrs = $tmcpeal->resultset('Incidents')->search(
     $condition, 
@@ -877,9 +880,6 @@ my $incrs = $tmcpeal->resultset('Incidents')->search(
 
 INCDEL: while( my $inc = $incrs->next ) {
 
-    # skip incidents if cadids are specified and they don't match.
-    next INCDEL if ( !( $inc->sigalert_begin ) && $procopt->{only_sigalerts} );
-    
     my $ia;
     my @existing = $tmcpe->resultset( 'IncidentImpactAnalysis' )->search(
 	{ incident_id => $inc->id });
