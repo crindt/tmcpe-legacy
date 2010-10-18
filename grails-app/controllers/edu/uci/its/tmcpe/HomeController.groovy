@@ -16,7 +16,7 @@ class HomeController {
         def df = new java.text.SimpleDateFormat( "MM/dd/yyyy" )
 
         types.each() { typ ->
-            log.info( typ + " ::::: " + typ.class )
+//            log.info( typ + " ::::: " + typ.class )
             def tt = Incident.executeQuery( "select distinct count(i.cad),min( i.startTime ), max( i.startTime ) from Incident i where i.eventType = '" + typ + "'" )
 //            def ta = Incident.executeQuery("select distinct count(i.cad),min( i.startTime ), max( i.startTime ) from Incident i where i.eventType = '" + typ + "' AND i.analyses.size > 0" )
             def ta = IncidentFacilityImpactAnalysis.executeQuery("select count(ifia.incidentImpactAnalysis.incident),min( ifia.incidentImpactAnalysis.incident.startTime ), max( ifia.incidentImpactAnalysis.incident.startTime ),sum(ifia.netDelay) from IncidentFacilityImpactAnalysis ifia where ifia.incidentImpactAnalysis.incident.eventType = '" + typ + "'" )
