@@ -1503,6 +1503,7 @@ sub write_to_db {
 					start_time => time2str( "%D %T", $self->calcstart ),
 					end_time => time2str( "%D %T", $self->calcend ),
 					band => $self->band,
+					max_incident_speed => $self->max_incident_speed,
 					location_id => $loc->id,
 					d12delay => 0,
 					total_delay => $self->tot_delay,

@@ -145,6 +145,36 @@
 	    </div>
 	    <label id="scaleValue" style="vertical-align:top;float:left;">${band ? band : 0}</label>
 	  </div>
+	  <div id="maxIncSpeedSliderBox" style="float:left" visibility="true">
+	    <label class="secondLabel" for="maxIncSpeedSlider" style="float:left">IncSpeed</label>
+	    <div dojoType="dijit.form.HorizontalSlider" jsid="maxIncSpeedSlider" id="maxIncSpeedSlider" name="school"
+		 minimum="0"
+		 value="${maxIncidentSpeed ? maxIncidentSpeed : 60}"
+		 maximum="80"
+		 showButtons="false"
+		 discreteValues="17"
+		 style="width:200px; height: 40px; float:left;"
+		 onLoad="maxIncSpeedSlider.setValue( dojo.byId( 'maxIncSpeedValue' ) ); tsd.setMaxIncSpeed( dojo.byId( 'maxIncSpeedValue' ) );"
+		 onChange="dojo.byId( 'maxIncSpeedValue' ).textContent=arguments[0]; tsd.setMaxIncSpeed( arguments[ 0 ] );"
+		 >
+	      <div dojoType="dijit.form.HorizontalRule" container="bottomDecoration"
+		   count=9 style="height:5px;">
+	      </div>
+	      <ol dojoType="dijit.form.HorizontalRuleLabels" container="bottomDecoration"
+		  style="height:1em;font-size:75%;color:gray;">
+		<li>0</li>
+		<li>10</li>
+		<li>20</li>
+		<li>30</li>
+		<li>40</li>
+		<li>50</li>
+		<li>60</li>
+		<li>70</li>
+		<li>80</li>
+	      </ol>
+	    </div>
+	    <label id="maxIncSpeedValue" style="vertical-align:top;float:left;">${maxIncidentSpeed ? maxIncidentSpeed : 60}</label>
+	  </div>
 	  <input id="incidentCheck" dojotype="dijit.form.CheckBox"
 	         name="incidentCheckBox" checked="true"
 		 type="checkbox"

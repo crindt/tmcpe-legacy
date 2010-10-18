@@ -15,6 +15,7 @@ class IncidentFacilityImpactAnalysis implements Comparable {
 
     //////// PARAMETERS ////////
     Double band
+    Double maxIncidentSpeed
 
     // Treat this as a sorted set.  IncidentSectionData has an induced ordering upstream to downstream by absolute postmile
     SortedSet       analyzedSections

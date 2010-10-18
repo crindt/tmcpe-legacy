@@ -250,8 +250,14 @@ class IncidentController {
             if ( fia != null ) fiaid=fia.id
             def band =null
             if ( fia != null ) band=fia.band
+            def maxIncidentSpeed = null;
+            if ( fia != null ) maxIncidentSpeed=fia.maxIncidentSpeed
             System.err.println( "############# II: " + ii );
-            render( view:"showCustom", model: [ incidentInstance: ii, iiJson: ii as JSON, band: band ] )
+            render( view:"showCustom", model: [ incidentInstance: ii, 
+                        iiJson: ii as JSON, 
+                        band: band,
+                        maxIncidentSpeed: maxIncidentSpeed
+                    ] )
         }
     }
 

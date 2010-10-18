@@ -139,10 +139,23 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     _getColor: function( /*float*/ val, /*float*/ min, /*float*/ max, /*float*/ minval, /*float*/ maxval ) {
 	return this._colorAccessors._getColor( val, min, max, minval, maxval );
     },
+
+    setMaxIncSpeed: function( val ) {
+	this.maxIncidentSpeed = val;
+	var numrows = this._data.timesteps.length;
+
+	for ( i = 0; i < numrows; ++i ) {
+	    // iind is used to flip the diagram so time increases going up
+	    for ( j = 0; j < this._data.sections.length; ++j ) {
+		
+		this._doEvidence(i,j);
+	    }
+	}
+    },
     
     _doEvidence: function( ii,j ) {
 	var numrows = this._data.timesteps.length;
-	var i = this._flip ? numrows-1-ii : ii;
+	var i = ii;
 	var secdat = this._data.sections[j].analyzedTimesteps[i];
 	var stdlev = (secdat.spd - secdat.spd_avg)/secdat.spd_std;
 	var tmppjm = 1; // no incident probability is default
