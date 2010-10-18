@@ -37,12 +37,46 @@ class TmcLogEntryController {
           firstResult( params.offset ?:0 )
       }
 
+      def comm_cc = CommLogEntry.createCriteria()
+      def comm_rtot = comm_cc.list {
+          and { 
+              isNotNull( "cad" )
+              ne( "cad", "" )
+              params.cad ? eq ( "cad", params.cad ) : true 
+          }
+      }
+	
+      Integer comm_abc = comm_rtot.size()
+      def comm_c = CommLogEntry.createCriteria()
+      def comm_results = comm_c.list {
+          and { 
+              isNotNull( "cad" )
+              ne( "cad", "" )
+              params.cad ? eq ( "cad", params.cad ) : true 
+          }
+          order( "cad", "asc" )
+          order( "stamp", "asc" )
+          order( "id", "asc" )
+          maxResults( params.max )
+          firstResult( params.offset ?:0 )
+      }
+
+      def merged = [ ]
+      results.each()      { merged.push( it ) }
+      comm_results.each() { 
+          merged.push( it ) 
+          System.err.println( "YEAH, COMM ENTRY: " + it )
+      }
+
+
+      merged.sort{ a,b-> a.getStampDateTime().compareTo( b.getStampDateTime() ) }.each() { System.err.println( "ENTRY: " + it ) }
+
       withFormat {
          html { return [ tmcLogEntryInstanceList: results, tmcLogEntryInstanceTotal: abc ] }
          json { 
 //            log.debug( results )
-            def json = [ items: results ]
-            render json  as JSON 
+              def json = [ items: merged.sort{ a,b-> a.getStampDateTime().compareTo( b.getStampDateTime() ) } ]
+              render json  as JSON 
          }
       }
     }

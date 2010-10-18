@@ -425,3 +425,12 @@ table.tmcpeTsd td.tsdEvidence {
     top:0;
     z-index:10;
 }
+
+
+#logGridNode .commLog {
+    background-color:rgba(255,0,0,0.5);
+}
+
+#logGridNode .activityLog {
+    background-color:rgba(0,255,0,0.5);
+}

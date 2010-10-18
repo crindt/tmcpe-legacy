@@ -3,7 +3,7 @@ package edu.uci.its.tmcpe
 import java.sql.Time
 import java.text.DateFormat
 
-class TmcLogEntry implements Comparable {
+class CommLogEntry implements Comparable {
 
     Integer id
     String cad
@@ -19,6 +19,8 @@ class TmcLogEntry implements Comparable {
     String status
     String activitysubject
     String memo
+    String imms
+    Boolean madeContact
     Date   stamp
 
     static hasMany = [ pMeas: TmcPerformanceMeasures ]
@@ -28,7 +30,7 @@ class TmcLogEntry implements Comparable {
 
     static mapping = {
 //        table 'ct_al_backup_2007'
-        table name: 'd12_activity_log', schema: 'actlog'
+        table name: 'd12_comm_log', schema: 'actlog'
         id column: 'keyfield'
 //        cache usage:'read-only'
         // turn off optimistic locking, i.e., versioning
@@ -39,16 +41,13 @@ class TmcLogEntry implements Comparable {
     }
 
     String toString() {
-        return DateFormat.getDateTimeInstance().format(stamp) + ": " + getDeviceSummary() + ": " + activitysubject + " | " + memo 
+        return DateFormat.getDateTimeInstance().format(stamp) + ": " + getDeviceSummary() + ":" + activitysubject + " | " + memo 
     }
 
     String getDeviceSummary() {
         def ret = ""
-        if ( device_number && device_number != "" ) ret += "#" + device_number
-        if ( device_fwy && device_fwy != "" ) {
-            ret += " (" + device_fwy
-            if ( device_name && device_name != "" ) ret += " @ " + device_name
-            ret += ")"
+        if ( unitin && unitin != "" && unitout && unitout != "" ) {
+            ret += "COMM: " + unitin + " ==[" + (via && via != "" ? via : "??" ) + "]==> " + unitout
         }
         return ret
     }

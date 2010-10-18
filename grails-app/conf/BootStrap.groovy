@@ -100,6 +100,23 @@ class BootStrap {
 				activitySubject( le.activitysubject )
 				memo(le.memo)
 				memoOnly(le.memoOnly)
+                                type("activityLog")
+			}
+		}
+		
+		grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.CommLogEntry, cc++ ){ le, json ->
+			def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
+			json.build{
+				"class(CommLogEntry)"
+				id(le.id)
+				cad(le.cad)
+				deviceSummary( le.getDeviceSummary() )
+				stampDateTime( le.getStampDateTime() )
+				status(le.status)
+				activitySubject( le.activitysubject )
+				memo(le.memo)
+				memoOnly(le.memoOnly)
+                                type("commLog")
 			}
 		}
 		

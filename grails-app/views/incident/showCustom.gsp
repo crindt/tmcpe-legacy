@@ -248,15 +248,38 @@
 	       onRowMouseOver="incidentView.simpleSelectLogEntry(event)"
 	       store="logStoreJs"
 	       >
+	  <script type="dojo/method" event="onStyleRow" args="row">
+            //The row object has 4 parameters, and you can set two others to provide your own styling
+            //These parameters are :
+            // -- index : the row index
+            // -- selected: wether the row is selected
+            // -- over : wether the mouse is over this row
+            // -- odd : wether this row index is odd.
+	    console.log( "STYLING " + row.index );
+            var item = logGrid.getItem(row.index);
+            if (item) {
+               var type = logStoreJs.getValue(item, "type", null);
+	       console.log( "GOT ITEM WITH TYPE:" + ( type ? type : "<UNDEF" ) );
+               if (type == "commLog") {
+		  //row.customStyles += "background-color:rgba(255,0,0,0.5);";
+                  row.customClasses += " commLog";
+               } else {
+                  //row.customStyles += "background-color:rgba(0,255,0,0.5);";
+                  row.customClasses += " activityLog";
+  	       }
+            }
+            logGrid.focus.styleRow(row);
+            logGrid.edit.styleRow(row);
+	  </script>
 	  <thead>
 	    <tr>
 	      <!--
 		  <th field="stampDateTime" dataType="Date" formatter="myFormatDate" width="10em">Timestamp</th>
 		  -->
-	      <th field="id" dataType="Integer" width="10em">Id</th>
-	      <th field="stampDateTime" dataType="Date" formatter="myFormatDate" width="15em">Date</th>
+	      <!--<th field="id" dataType="Integer" width="6em">Id</th>-->
+	      <th field="stampDateTime" dataType="Date" formatter="myFormatDate" width="10em">Date</th>
 	      <th field="status" dataType="String" width="10em">Status</th>
-	      <th field="deviceSummary" dataType="String" width="15em">Device</th>
+	      <th field="deviceSummary" dataType="String" width="25em">Resource</th>
 	      <th field="activitySubject" dataType="String" width="15em">Subject</th>
 	      <th field="memoOnly" dataType="String" width="auto">Memo</th>
 	    </tr>
