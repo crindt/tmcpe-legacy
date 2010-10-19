@@ -68,6 +68,12 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     _itd: null,
     _ptd: null,
 
+    // _trh: Array of th elements holding the row headers
+    _trh: null,
+    _itrh: null,
+    _ptrh: null,
+
+
     // incident: String
     //        The incident number to display in the TSD.  Note that this is implementation specific 
     //        and is used in the interface.  A more general version of this widget would not know 
@@ -168,9 +174,16 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	{
 	    tmppjm = 0.0;
 	}
-	var opacity = 0.85;
-	if ( tmppjm != 0 ) opacity=0.0;
-	this._ptd[ii][j].style.opacity = opacity;
+
+	var curclass = this._td[ii][j].className;  // if any
+	var newclasses = "";
+	if ( tmppjm != 0 && curclass.search( "tsdEvidence" ) > 0 ) { // already have an evidence class...
+	    newclasses = curclass.replace( "tsdEvidence", "notTsdEvidence" );
+	    this._td[ii][j].className = newclasses;
+	} else if ( tmppjm == 0 && curclass.search( "notTsdEvidence" ) > 0 ) {
+	    newclasses = curclass.replace( "notTsdEvidence", "tsdEvidence" );
+	    this._td[ii][j].className = newclasses;
+	}
     },
 
     _colorAccessors: {
@@ -404,12 +417,19 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
     toggleIncidentWindow: function(toggle)
     {
-	this._incidentTableNode.style.visibility = ( toggle ? 'visible' : 'hidden' );
+	var clazz = this._tableNode.className;
+	var from = toggle ? 'hideIncident' : 'showIncident';
+	var to = toggle ? 'showIncident' : 'hideIncident';
+	var nc = clazz.replace( from, to );
+	this._tableNode.className = nc;
     },
 
     toggleEvidenceWindow: function(toggle)
     {
-	this._evidenceTableNode.style.visibility = ( toggle ? 'visible' : 'hidden' );
+	var clazz = this._tableNode.className;
+	var from = toggle ? 'hideEvidence' : 'showEvidence';
+	var to = toggle ? 'showEvidence' : 'hideEvidence';
+	this._tableNode.className = clazz.replace( from, to );
     },
 
     toggleTsdFlipWindow: function(toggle)
@@ -419,7 +439,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     },
 
     _flipIt: function() {
-	var tab = [this._tableNode, this._incidentTableNode, this._evidenceTableNode ];
+	var tab = [this._tableNode ];
 	
 	for ( t in tab ) {
 	    var tt = tab[t];
@@ -498,51 +518,30 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// Now create the table element  
 	// FIXME: Some of the styling is hardcoded here.  Really should move it into a css file
 	
-	var fliptime = this._flip ? "fliptime" : "";
+	var supp_classes = [ "tmcpeTsd" ];
+	if ( this._flip == "fliptime" ) supp_classes.push( "fliptime" );
+	supp_classes.push( dojo.byId( 'incidentCheck' ).checked ? 'showIncident' : 'hideIncident' );
+	supp_classes.push( dojo.byId( 'evidenceCheck' ).checked ? 'showEvidence' : 'hideEvidence' );
+
+	// update style
 	this._tableNode = 
 	    dojo.create( "table", 
 			 { id: "tsdTableNode", 
-			   class: "tmcpeTsd " + fliptime,
+			   class: supp_classes.join( " " ),
 			   ref: [this.incident, this.facility, this.direction].join('-'), 
 			   style: "z-index:1;"
 			 }
 		       );
 	this._tableNodeContainer.appendChild( this._tableNode );
 
-	var vis = dojo.byId( 'incidentCheck' ).checked ? 'inherit' : 'hidden';
-	this._incidentTableNode = 
-	    dojo.create( "table", 
-			 { id: "tsdIncidentTableNode", 
-			   class: "tmcpeTsd incidentTable " + fliptime,
-			   ref: [this.incident, this.facility, this.direction].join('-'), 
-			   style: "z-index:2;visibility:"+vis+";"
-			 }
-		       );
-	this._tableNodeContainer.appendChild( this._incidentTableNode );
-
-	vis = dojo.byId( 'evidenceCheck' ).checked ? 'inherit' : 'hidden';
-	this._evidenceTableNode = 
-	    dojo.create( "table", 
-			 { id: "tsdEvidenceTableNode", 
-			   class: "tmcpeTsd evidenceTable " + fliptime,
-			   ref: [this.incident, this.facility, this.direction].join('-'), 
-			   style: "z-index:3;visibility:"+vis+";"
-			 }
-		       );
-	this._tableNodeContainer.appendChild( this._evidenceTableNode );
-
 	// tt is a local shorthand variable for working with the table node (makes the code cleaner)
 	var tt = this._tableNode;
-	var itn = this._incidentTableNode;
-	var ptn = this._evidenceTableNode;
 
 	// delete all rows (if they exist---I think this might not be necessary but it's inexpensive)
 	if ( tt.rows != null ) {
 	    for(var i = tt.rows.length; i > 0;i--)
 	    {
 		tt.deleteRow(i -1);
-		itn.deleteRow(i -1);
-		ptn.deleteRow(i -1);
 	    }
 	}
 
@@ -587,10 +586,14 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// Create the arrays for holding the row and cell data
 	this._tr = new Array(numrows);
 	this._td = new Array(numrows);
-	this._itr = new Array(numrows);
-	this._itd = new Array(numrows);
-	this._ptr = new Array(numrows);
-	this._ptd = new Array(numrows);
+
+	// Headers
+	this._trh = new Array(numrows);
+
+
+	var timesteps = d.timesteps;
+	var fheight = height;
+	var height_style = "height:" + fheight + "%;"+"min-height:" + fheight + "%;";
 
 	for ( i = 0; i < numrows; ++i )
 	{
@@ -599,25 +602,66 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 //	    var iind = this._flip ? numrows-1-i : i;
 	    var iind = i;
 
+
 	    // add the next row to the table
-	    this._tr[i] = tt.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;" } ) );
-	    this._itr[i] = itn.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;visibility:inherit;" } ) );
-	    this._ptr[i] = ptn.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "height:" + height + "%;visibility:inherit;" } ) );
+	    this._tr[i] = tt.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "min-height:" + fheight + "%;" } ) );
 
 	    var tr = this._tr[i];
-	    var itr = this._itr[i];
-	    var ptr = this._ptr[i];
+
+	    // width of the table row header in pct
+	    var dt = 5;
+	    var trh_width = 5;
+	    var trh_length = 15; // number of minutes per header
+	    var trh_length_cnt = trh_length/dt;
+	    if ( trh_length_cnt != Math.floor( trh_length_cnt ) ) 
+		alert( "trh_length [" + trh_length + "] in TSD is not a multiple of " + dt );
+
+	    // Create the table row headers (to hold time)
+	    
+	    if ( ( i < numrows ) && i % trh_length_cnt == 0 ) { // we don't label every row...
+
+		tr.className += " timeHeader";
+
+		this._trh[i] = tr.appendChild( dojo.create( "th", { 
+		    id:["trh",iind].join("_"), 
+		    class: "timeHeader",
+		    timeidx: i,
+		    time: iind,
+		    rowspan: trh_length_cnt,
+		    style: "width:"+trh_width+"%;"
+		} ) );
+
+		var date = new Date(this._data.timesteps[i]);
+		var timeStrArray = date.toLocaleTimeString().split(":");
+		timeStr = "";
+
+		if ( timeStrArray.length > 1 )
+		timeStr = [timeStrArray[0],timeStrArray[1]].join(":");
+		
+		this._trh[i].innerHTML = timeStr;
+
+/*
+		this._trh[i].appendChild( dojo.create( "div", {
+		    class: "timeHeader",
+		    style: "position:relative;top:0px;left:0px;width:100%;height:100%;",
+		    innerHTML: timeStr
+		}));	    
+		this._tableNodeContainer.appendChild( dojo.create( "div", {
+		    class: "timeHeader",
+		    style: "position:absolute;top:"+(i*fheight)+"%;left:0px;width:5%;height:",
+		    innerHTML: timeStr
+		}));	    
+*/
+	    }
 
 	    // Now loop and create the table cells
 	    this._td[i] = new Array( d.sections.length );
-	    this._itd[i] = new Array( d.sections.length );
-	    this._ptd[i] = new Array( d.sections.length );
 	    for ( jind = 0; jind < d.sections.length; ++jind )
 	    {
 		var j = (d.sections.length-jind-1);
 
 		// The width of the cell is proportional to its actual length in the real world
-		var width = 100 * (d.sections[j].seglen)/totlen;
+		var width = (100-trh_width) * (d.sections[j].seglen)/totlen;
 		if ( width < 0 ) width = -width;
 
 		// compute borders---This is specific to display the extent of an incident
@@ -673,40 +717,25 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 		//console.debug( "d.sections["+j+"].stnidx = " + d.sections[j].stnidx );
 		// Actually create the cell in the appropriate table row
+		if ( targ.inc != 0 ) 
+		    tdClass.push( "incident" );
+		else
+		    tdClass.push( "notIncident" );
+		if ( targ.p_j_m == 0 ) 
+		    tdClass.push( "tsdEvidence" );
+		else
+		    tdClass.push( "notTsdEvidence" );
+
 		this._td[i][j] = tr.appendChild( dojo.create( "td", { 
 		    id:["tsd",iind,j].join("_"), 
+		    class: tdClass.join( " " ),
 		    timeidx: i,
 		    time: iind,
 		    segment: j,
 		    station: d.sections[j].stnidx,
 		    innerHTML: ""/*i + "(" + iind + ")," + j*/, 
-		    style: "width:" + width + "%;",
+		    style: "width:" + width.toFixed(3) + "%;"+height_style,
 		} ) );
-
-		if ( targ.inc != 0 ) tdClass.push( "incident" );
-		this._itd[i][j] = itr.appendChild( dojo.create( "td", {
-		    id:["itsd",iind,j].join("_"), 
-		    class: tdClass.join( " " ),
-		    timeidx: i,
-		    time:iind,
-		    segment: j,
-		    station: d.sections[j].stnidx,
-		    style: "width:" + width + "%;visibility:inherit;",
-		} ) );
-
-		// reset class
-		tdClass = new Array();
-		if ( targ.p_j_m == 0 ) tdClass.push( "tsdEvidence" );
-		this._ptd[i][j] = ptr.appendChild( dojo.create( "td", {
-		    id:["ptsd",iind,j].join("_"),
-		    class: tdClass.join( " " ),
-		    timeidx: i,
-		    time:iind,
-		    segment: j,
-		    station: d.sections[j].stnidx,
-		    style: "width:" + width + "%;"
-		} ) );
-		//console.debug( "this._td["+i+"]["+j+"] = " + this._td[i][j] );
 
 		// update the theme
 		this._colorDataAccessor(i,j);

@@ -233,21 +233,17 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var tsd = this._tsd;
 	var sections = tsd._data.sections;
 	var td = tsd._td;
-	var itd = tsd._itd;
-	var ptd = tsd._ptd;
 	var i; 
 	var j;
 	for ( i = 0; i < td.length; i++ ) {
 	    var tr = tsd._tr[i];
-	    var itr = tsd._itr[i];
-	    var ptr = tsd._ptr[i];
 
-	    var row = [tr, itr, ptr];
+	    var row = [tr];
 	    for ( var r in row ) {
 		dojo.connect( row[r], "onmouseover", this, "_hoverTime" );
 	    }
 
-	    var tab = [td, itd, ptd];
+	    var tab = [td];
 	    for ( var t in tab ) {
 		for ( j = 0; j < td[i].length; j++ ) {
 		    dojo.connect( tab[t][i][j], "onmouseover", this, "_hoverStation" );
@@ -288,7 +284,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
             protocol: new OpenLayers.Protocol.HTTP({
             	url: base + "incident/list.geojson",//theurl,
             	params: theParams,
-            	style: {strokeWidth: 2, strokeColor: "#0000ff", strokeOpacity: 0.50, fillColor: "#0000ff" },
+            	style: {strokeWidth: 4, strokeColor: "#0000ff", strokeOpacity: 0.60, fillColor: "#0000ff" },
             	format: new OpenLayers.Format.GeoJSON({})
             }),
             reportError: true
@@ -364,7 +360,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this._vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
-	    style: {strokeWidth: 4, strokeColor: "#00ff00", strokeOpacity: 0.75 },
+	    style: {strokeWidth: 6, strokeColor: "#00ff00", strokeOpacity: 0.75 },
             protocol: new OpenLayers.Protocol.HTTP({
   		url: base + "vds/list.geojson",
 		params: myParams,
@@ -550,20 +546,16 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this._hoverStation( e ); // highlight the station we're hovering over
 	var stationnm = e.target.getAttribute( 'station' );
 	var station = this._tsd._data.sections[ stationnm ];
-	if ( ! station ) {
-	    station = {
-		fwy: "?",
-		dir: "?",
-		pm: "?",
-		name: "?stationnm?"
-	    };
-	}
-	var el = document.getElementById('tmcpe_tsd_cellinfo');
-	var str = station.vdsid + ":" + station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "], " + this._tsd._data.timesteps[timeind];
+	if ( ! station ) return;
+
 	var dd = station.analyzedTimesteps[timeind];
-	str += "<br/>O:" + (dd.spd!=null?dd.spd.toFixed(1):"<undef>") + "-mph, A:" + (dd.spd_avg!=null?dd.spd_avg.toFixed(1):"<undef>") + "-mph +/- " + (dd.spd_std!=null?dd.spd_std.toFixed(1):"<undef>") + "-mph | OCC: " + (dd.occ!=null?(100*dd.occ).toFixed(1):"<undef") + '%';
-	if ( Math.abs(station.analyzedTimesteps[timeidx].p_j_m-0.5) < 0.25 ) str += ' <span style="color:#ff0000;font-weight:bold">&lt;UNRELIABLE&gt;</span>';
-	el.innerHTML = str;
+	if ( dd != null ) {
+	    var el = document.getElementById('tmcpe_tsd_cellinfo');
+	    var str = station.vdsid + ":" + station.fwy + "-" + station.dir + " @ " + station.pm + " [" + station.name + "], " + this._tsd._data.timesteps[timeind];
+	    str += "<br/>O:" + (dd.spd!=null?dd.spd.toFixed(1):"<undef>") + "-mph, A:" + (dd.spd_avg!=null?dd.spd_avg.toFixed(1):"<undef>") + "-mph +/- " + (dd.spd_std!=null?dd.spd_std.toFixed(1):"<undef>") + "-mph | OCC: " + (dd.occ!=null?(100*dd.occ).toFixed(1):"<undef") + '%';
+	    if ( Math.abs(station.analyzedTimesteps[timeidx].p_j_m-0.5) < 0.25 ) str += ' <span style="color:#ff0000;font-weight:bold">&lt;UNRELIABLE&gt;</span>';
+	    el.innerHTML = str;
+	}
     },
     
     // //////// TABLE FUNCTIONS

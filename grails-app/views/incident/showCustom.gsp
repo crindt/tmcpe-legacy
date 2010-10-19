@@ -260,12 +260,13 @@
             if (item) {
                var type = logStoreJs.getValue(item, "type", null);
 	       console.log( "GOT ITEM WITH TYPE:" + ( type ? type : "<UNDEF" ) );
+               var selected = ( row.selected ? "_selected" : "" );
                if (type == "commLog") {
-		  //row.customStyles += "background-color:rgba(255,0,0,0.5);";
-                  row.customClasses += " commLog";
+		  //row.customStyles += "background-color:rgba(255,0,"+selectBlue+",0.5);";
+                  row.customClasses += " commLog" + selected;
                } else {
-                  //row.customStyles += "background-color:rgba(0,255,0,0.5);";
-                  row.customClasses += " activityLog";
+                  //row.customStyles += "background-color:rgba(0,255,"+selectBlue+",0.5);";
+                  row.customClasses += " activityLog" + selected;
   	       }
             }
             logGrid.focus.styleRow(row);

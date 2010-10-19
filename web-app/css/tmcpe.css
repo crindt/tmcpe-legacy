@@ -300,91 +300,113 @@ table.tmcpeTsd {
     position:absolute;
     top:0;
     left:0;
-    border-width:1px;
+    border-width:3px;
     border-color:#000000;
-    cellpadding:0px;
-    cellspacing:0px;
-    border-collapse:collapse;
+/*    border-collapse:collapse;*/
     width:100%;
     height:100%;
 }
 
 table.tmcpeTsd td {
-    border-width:1px;
-    border-color:gray;
-    border-style:dotted;
-    background-color:gray;
     visibility:inherit;
     opacity:ihherit;
+    background: none;
+    padding:3px;
+    border: 1px;
+    border-style: solid;
+    border-color: rgba(0,0,0,.15);
 }
 
-
-table.tmcpeTsd .incidentTable {
-    opacity: 0.00;
+table.tmcpeTsd th {
+    visibility:inherit;
+    opacity:ihherit;
+    background: none;
+    padding:0px;
 }
 
-table.incidentTable td {
-    background-color: white;
-    opacity: 0.75;
+.tsdTableNodeContainer th, .tsdTableNodeContainer td {
+    overflow:hidden;
 }
 
-table.tmcpeTsd td.incident {
-    border-width:0px;
-    border-style:none;
-    border-color:cyan;
-    opacity: 0.00;
+.tsdTableNodeContainer table.tmcpeTsd tr.timeHeader {
+    border-top: 3px;
+    border-top-style:solid;
+    border-bottom: 0px;
+    border-bottom-style: none;
+    border-color: rgba(0,0,0,.15);
 }
 
-table.tmcpeTsd td.borderDownstream {
+.tsdTableNodeContainer table.tmcpeTsd tr:not(.timeHeader) {
+    border-top: 1px;
+    border-top-style: solid;
+    border-bottom: 0px;
+    border-bottom-style: none;
+    border-color: rgba(0,0,0,.15);
+}
+
+.tsdTableNodeContainer.fliptime tr.timeHeader {
+}
+
+.tsdTableNodeContainer.fliptime .timeHeader th {
+    border-top: 0px;
+    border-top-style: none;
+    border-bottom: 1px;
+    border-bottom-style: solid;
+}
+
+table.tmcpeTsd.showIncident td.incident {
+}
+
+table.tmcpeTsd.showIncident td:not(.incident) {
+    opacity: 0.5;
+}
+
+/* Default is nothing */
+table.tmcpeTsd.hideIncident td.incident {
+}
+
+table.tmcpeTsd.showIncident td.borderDownstream {
     border-left-width:3px;
     border-left-style:solid;
-    border-left-color:cyan;
+    border-left-color:rgba(0,0,255,0.75);
 }
 
-table.tmcpeTsd td.borderUpstream {
+table.tmcpeTsd.showIncident td.borderUpstream {
     border-right-width:3px;
     border-right-style:solid;
-    border-right-color:cyan;
+    border-right-color:rgba(0,0,255,0.75);
 }
 
-table.tmcpeTsd.fliptime td.borderLater {
+table.tmcpeTsd.showIncident.fliptime td.borderLater {
     border-top-width:3px;
     border-top-style:solid;
-    border-top-color:cyan;
+    border-top-color:rgba(0,0,255,0.75);
 }
 
-table.tmcpeTsd.fliptime td.borderEarlier {
+table.tmcpeTsd.showIncident.fliptime td.borderEarlier {
     border-bottom-width:3px;
     border-bottom-style:solid;
-    border-bottom-color:cyan;
+    border-bottom-color:rgba(0,0,255,0.75);
 }
 
-table.tmcpeTsd:not(.fliptime) td.borderLater {
+table.tmcpeTsd:not(.fliptime).showIncident td.borderLater {
     border-bottom-width:3px;
     border-bottom-style:solid;
-    border-bottom-color:cyan;
+    border-bottom-color:rgba(0,0,255,0.75);
 }
 
-table.tmcpeTsd:not(.fliptime) td.borderEarlier  {
+table.tmcpeTsd:not(.fliptime).showIncident td.borderEarlier  {
     border-top-width:3px;
     border-top-style:solid;
-    border-top-color:cyan;
+    border-top-color:rgba(0,0,255,0.75);
 }
 
 table.tmcpeTsd td.tsdDataSuspect {
     background-color:gray;
 }
 
-table.tmcpeTsd .evidenceTable {
-    opacity: 0.00;
-    border-style: none;
-}
-
-table.tmcpeTsd td.tsdEvidence {
-    border-color: cyan;
-    opacity: 0.85;
+table.tmcpeTsd.showEvidence td.tsdEvidence {
     background-image: url('/tmcpe/images/stripe.png');
-    background-color:transparent;
 }
 
 .tsdTableNodeContainer {
@@ -398,28 +420,35 @@ table.tmcpeTsd td.tsdEvidence {
 
 /* A horizontal bar displayed in the TSD view to indicate log entries */
 .log_tsd_bar {
-    border-color:#0000ff;
-    background-color:#0000ff;
+    border-top-color:rgba(255,0,255,0.85);
+    border-top-style:solid;
+    background-color:rgba(255,255,0,0.85);
+    border-bottom-color:rgba(255,0,255,0.75);
+    border-bottom-style:solid;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
     width:100%;
     position:absolute;
     left:0;
     z-index:10;
-    border-width: 2px;
-    height: 2px;
+    height: 4px;
     visibility: hidden;
 }
 
 .log_tsd_bar.startlog {
-    border-width: 4px;
-    height: 4px;
+    border-width: 2px;
+    height: 2px;
     visibility: visible;
+    border-color:blue;
+    background-color:blue;
+    z-index:5;
 }
 
 .incloc {
     border-width:4px;
     width:4px;
-    border-color:#0000ff;
-    background-color:#0000ff;
+    border-color:blue;
+    background-color:blue;
     height:100%;
     position:absolute;
     top:0;
@@ -428,9 +457,15 @@ table.tmcpeTsd td.tsdEvidence {
 
 
 #logGridNode .commLog {
-    background-color:rgba(255,0,0,0.5);
+    background-color:rgba(255,255,0,0.5);
+}
+#logGridNode .commLog_selected {
+    background-color:rgba(255,255,128,0.5);
 }
 
 #logGridNode .activityLog {
-    background-color:rgba(0,255,0,0.5);
+    background-color:rgba(255,255,255,0.5);
+}
+#logGridNode .activityLog_selected {
+    background-color:rgba(255,255,128,0.5);
 }

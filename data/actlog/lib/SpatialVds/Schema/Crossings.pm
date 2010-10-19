@@ -62,8 +62,8 @@ __PACKAGE__->add_unique_constraint(
 __PACKAGE__->add_unique_constraint("crossings_pkey", ["id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-12 11:55:19
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+z8SCf/rgxvwh/zY/BsRWA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:58
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:P7oZZe6LXwKmG5L1zKzlYw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

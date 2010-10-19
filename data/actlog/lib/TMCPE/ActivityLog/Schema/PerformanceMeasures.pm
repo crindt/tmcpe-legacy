@@ -55,6 +55,11 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("performance_measures_pkey", ["id"]);
+__PACKAGE__->has_many(
+  "d12_comm_log_performance_measures",
+  "TMCPE::ActivityLog::Schema::D12CommLogPerformanceMeasures",
+  { "foreign.tmc_performance_measures_id" => "self.id" },
+);
 __PACKAGE__->belongs_to(
   "log_id",
   "TMCPE::ActivityLog::Schema::D12ActivityLog",
@@ -67,8 +72,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-12 11:54:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wgqTcA9cEhyILqLn2lY9hw
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:31
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:NP/suzo8nxX7FeGC2SVP9g
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
