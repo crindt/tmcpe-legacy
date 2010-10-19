@@ -8,24 +8,33 @@
     <meta name="layout" content="main" />
 
     <!-- Load the map javascript and css -->
-    <tmcpe:openlayers />
+    <tmcpe:tmcpe_styles />
+
+    <tmcpe:openlayers_latest />
     <tmcpe:tmcpe />
 
     <g:javascript>
-      <!-- Here are the custom widgets -->
-      dojo.require("tmcpe.IncidentView"); <!-- This is the application (behavioral) widget -->
-      dojo.require("tmcpe.TestbedMap");
-      dojo.require("tmcpe.TimeSpaceDiagram");
-      
-      <!-- Here are all the dojo widgets we use -->
-      dojo.require("dojo.data.ItemFileReadStore");
-      dojo.require("dijit.form.FilteringSelect");
-      dojo.require("dijit.form.HorizontalSlider");
-      dojo.require("dijit.form.HorizontalRule");
-      dojo.require("dijit.form.HorizontalRuleLabels");
-      dojo.require("dijit.form.CheckBox");
-      dojo.require("dojox.grid.DataGrid");
-      dojo.require("dojo.date.locale");
+         <!-- Here are the custom widgets -->
+         dojo.require("tmcpe.IncidentView"); <!-- This is the application (behavioral) widget -->
+         dojo.require("tmcpe.TestbedMap");
+         dojo.require("tmcpe.TimeSpaceDiagram");
+         
+         <!-- Here are all the dojo widgets we use -->
+         dojo.require("dojo.data.ItemFileReadStore");
+         dojo.require("dijit.form.FilteringSelect");
+         dojo.require("dijit.form.HorizontalSlider");
+         dojo.require("dijit.form.HorizontalRule");
+         dojo.require("dijit.form.HorizontalRuleLabels");
+         dojo.require("dijit.form.CheckBox");
+         dojo.require("dojox.grid.DataGrid");
+         dojo.require("dojo.date.locale");
+
+
+      var fireItUp = function() {
+
+         incidentView = new tmcpe.IncidentView( {jsId: 'incidentView', incidentId: ${incidentInstance.id}} );
+         incidentView.startup();
+      };
 
       var incidentView;
 
@@ -37,10 +46,8 @@
 
       <!-- Fire up the application -->
       dojo.addOnLoad(function(){ 
-         incidentView = new tmcpe.IncidentView( {jsId: 'incidentView', incidentId: ${incidentInstance.id}} );
-         incidentView.startup();
-      }
-      );
+         fireItUp();
+      });
 
       function popitup(url) {
 	newwindow=window.open(url,'name','height=200,width=150');

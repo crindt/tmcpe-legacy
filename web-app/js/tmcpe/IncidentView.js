@@ -140,7 +140,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    // Here, we set the default displayed TSD to that
 	    // corresponding to the primary disrupted facility
 	    var ff = this._incident.section.freewayId + '-' + this._incident.section.freewayDir;
-	    facilityCombo.set( 'displayedValue', ff );
+	    facilityCombo.attr( 'displayedValue', ff );
 	} else {
 	    this.getTsd()._displayNoAnalysis();
 	}

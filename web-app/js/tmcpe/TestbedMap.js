@@ -52,10 +52,10 @@ dojo.declare("tmcpe.TestbedMap", [ dijit._Widget ], {
             }
 	);
 
-	var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true, numZoomLevels:20});
+	//var gmap = new OpenLayers.Layer.Google("Google", {sphericalMercator:true, numZoomLevels:20});
 
 
-	this._map.addLayers([ mapnik, osma, gmap]);
+	this._map.addLayers([ mapnik, osma/*, gmap*/]);
 
 	this._map.addControl(new OpenLayers.Control.LayerSwitcher());
 
