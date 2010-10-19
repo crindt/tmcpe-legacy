@@ -171,4 +171,45 @@ ldap.mapper.userDetailsClass = 'inetOrgPerson'
 // Search for explicit validation tags on classes that aren't domain classes
 grails.validateable.packages = ['edu.uci.its.auth']
 
+compress {
+    // just in case for some reason you want to disable the filter
+    enabled = true
+    debug = true
+    statsEnabled = true
+    compressionThreshold = 256
+    // filter's url-patterns
+    urlPatterns = ["/*"]
+    // include and exclude are mutually exclusive
+    includePathPatterns = []
+    excludePathPatterns = [".*\\.gif", ".*\\.ico", ".*\\.jpg", ".*\\.swf"]
+    // include and exclude are mutually exclusive
+    includeContentTypes = []
+    excludeContentTypes = ["image/png"]
+    // include and exclude are mutually exclusive
+    includeUserAgentPatterns = []
+    excludeUserAgentPatterns = [".*MSIE 4.*"]
+    // probably don't want these, but their available if needed
+    javaUtilLogger = ""
+    jakartaCommonsLogger = ""
+
+    development {
+        debug = true
+        compressionThreshold = 2048
+    }
+    production {
+        statsEnabled = false
+    }
+}
+
+uiperformance {
+    enabled = true
+    debug = true
+    statsEnabled = true
+    html.compress = true
+    html.debug = true
+       
+}
+uiperformance.html.includePathPatterns = [".*\\.geojson"]
+uiperformance.html.includeContentTypes = [ "text/geojson", "application/json" ]
+
 
