@@ -627,7 +627,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    class: "timeHeader",
 		    timeidx: i,
 		    time: iind,
-		    rowspan: trh_length_cnt,
+		    rowspan: (trh_length_cnt>numrows-i?numrows-i:trh_length_cnt),
 		    style: "width:"+trh_width+"%;"
 		} ) );
 
