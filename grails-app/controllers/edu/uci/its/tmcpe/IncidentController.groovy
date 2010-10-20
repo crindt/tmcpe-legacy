@@ -18,7 +18,9 @@ class IncidentController {
         System.err.println("=============LISTING FACILITIES: " + params )
         // should order by distance from center of viewport
         def items =
-            Incident.executeQuery( "SELECT distinct i.section.freewayId,i.section.freewayDir from Incident i order by i.section.freewayId,i.section.freewayDir" ).collect() { 
+            Incident.executeQuery( 
+		"SELECT distinct i.section.freewayId,i.section.freewayDir from Incident"
+		+" i order by i.section.freewayId,i.section.freewayDir" ).collect() { 
             [facdir: it[0]+'-'+it[1]]
         }
         items.reverse
@@ -31,7 +33,7 @@ class IncidentController {
 
     def listEventTypes = {
         def items = 
-            Incident.executeQuery( "select distinct i.eventType from Incident i" ).collect { [evtype: it] };
+	Incident.executeQuery( "select distinct i.eventType from Incident i" ).collect { [evtype: it] };
         items.reverse
         items.push( [evtype: '<Show All>'] )
         items.reverse
@@ -41,20 +43,26 @@ class IncidentController {
     }
 
     def list = {
-        System.err.println("=============LISTING: " + params )
+        log.debug("=============LISTING: " + params )
         // NOTE, 10000 is the max we'll allow to be returned here
         def maxl = Math.min( params.max ? params.max.toInteger() : 10,  10000)
-        def _params = params
         def now = new java.util.Date();
+
+	// construct the sql where clause from parameters
         def incidentCriteria = {
             and {
-                if ( params.id ) {
-                    eq( "id", params.id.toInteger() )
-                }
-                if ( params.cad ) {
-                    eq( "cad", params.cad )
-                }
 
+		// Use the database id or CAD id if they're provided
+                if ( params.id )  { eq( "id", params.id.toInteger() ) }
+                if ( params.cad ) { eq( "cad", params.cad )           }
+		
+		// the idIn parameter lets you specify a
+		// comma-delimited list of incident ids
+		if ( params.idIn && params.type != '' ) {
+		    'in'( "id", params.idIn.split(',')*.toInteger() )
+		}
+
+		// Limit the section to particular facility/directions
                 section {
                     if ( params.freeway && params.freeway != '' ) {
                         eq( "freewayId", params.freeway.toInteger() )
@@ -64,73 +72,109 @@ class IncidentController {
                     }
                 }
       
+		// Limit to particular date range
                 if ( params.fromDate || params.toDate ) {
-                    def from = Date.parse( "yyyy-MM-dd", params.fromDate ? params.fromDate : '0000-00-00' )
-                    def to = params.toDate ? Date.parse( "yyyy-MM-dd", params.toDate ) : new Date()
-                    System.err.println("============DATES: " + from + " <<>> "  + to )
+		    def early = params.fromDate ? params.fromDate : '0000-00-00'
+                    def from = Date.parse( "yyyy-MM-dd", early )
+                    def to = ( params.toDate 
+			       ? Date.parse( "yyyy-MM-dd", params.toDate ) 
+			       : new Date() )
+                    log.debug("============DATES: " + from + " <<>> "  + to )
+
                     between( 'startTime', from, to )
                 }
       
+		// Limit to particular time of day
                 if ( params.earliestTime || params.latestTime ) {
-                    def from = java.sql.Time.parse( "HH:mm", params.earliestTime ? params.earliestTime : '00:00' )
-                    def to = java.sql.Time.parse( "HH:mm", params.latestTime ? params.latestTime : '23:59' )
-                    System.err.println("============TIMES: " + from + " <<>> "  + to )
+		    def early = params.earliestTime ? params.earliestTime : '00:00'
+		    def late  = params.latestTime ? params.latestTime : '23:59'
+                    def from = java.sql.Time.parse( "HH:mm", early )
+                    def to = java.sql.Time.parse( "HH:mm", late )
                     log.debug("============TIMES: " + from + " <<>> "  + to )
+
                     between( 'startTime', from, to )
                 }
 
+		// Limit depending on whether the incident has been analyzed
                 if ( params.Analyzed == "onlyAnalyzed" ) {
-                   not {
-                       sizeEq("analyses", 0)
-                   }
+		    // Limit to analyzed...
+		    not { sizeEq("analyses", 0) }
+	    
                 } else if ( params.Analyzed == "unAnalyzed" ) {
-                  sizeEq("analyses", 0)
+		    // ...or unanalyzed incidents
+		    sizeEq("analyses", 0)
                 }
       
+		// Limit spatially if the bbox and projection are specified
+		// along with the "geographic" toggle
                 if ( params.bbox && params.proj && params.geographic ) {
                     def bbox = params.bbox.split(",")
-                    def valid = 0;
                     log.debug("============BBOX: " + bbox.join(","))
-                    def proj = ( params.proj =~ /^EPSG\:(\d+)/ )
+
+		    // Parse out the projection
+                    def proj_re_res = ( params.proj =~ /^EPSG\:(\d+)/ )
+		    def proj = proj[0][1]
+
                     or {
-                        // This does a bounding box query around the iCAD location
-                        addToCriteria(Restrictions.sqlRestriction
-                                      ( "( st_transform(best_geom,"+proj[0][1]+") && st_setsrid( ST_MAKEBOX2D(ST_MAKEPOINT(" + bbox[0] + ", " + bbox[1] + "),ST_MAKEPOINT( "  + bbox[2] + ", " + bbox[3] + ")), "+proj[0][1]+") )") )
+                        // This does a bounding box query around the iCAD
+			// location. Note: postgresql specific implementation
+			// here
+                        addToCriteria(
+			    Restrictions.sqlRestriction( 
+				"""( st_transform( best_geom, $proj ) &&
+                                     st_setsrid( 
+                                        st_makebox2d(
+                                           st_makepoint( ${bbox[0]}, ${bbox[1]} ), 
+                                           st_makepoint( ${bbox[2]}, ${bbox[3]} ) 
+                                           ), 
+                                        $proj ) 
+                                   )"""
+			    ) )
                     }
                 }
       
+		// Limit to given days of the week, specified as comma delimited
+		// string. (0=Sunday...6=Saturday)
                 if ( params.dow ) {
-                    // validate
+
+		    // grep out anything that's not 0..6
                     def dow = params.dow.split(",").grep{ 
                         try {
                             def val = it.toInteger(); 
                             if ( val >= 0 && val <= 6 ) return true
+
                         } catch ( java.lang.NumberFormatException e ) {
+			    // oops, coverting to integer failed
                             log.warn( "Invalid DayOfWeek '${it}' passed as query argument" )
                             return false
                         }
                         return false
                     }
       
-                    if ( _params.idIn && _params.type != '' ) {
-                        'in'( "id", _params.idIn.split(',')*.toInteger() )
-                    }
-      
+		    // if there's anything left after the grep, add to criteria.
+		    // Note, postgresql specific implementation here
                     if ( dow.size() > 0 ) {
-                        addToCriteria(Restrictions.sqlRestriction( "extract( dow from start_time ) IN (" + dow.join(",") + ")" ) )
+                        addToCriteria( 
+			    Restrictions.sqlRestriction( 
+				"extract( dow from start_time ) IN ( ${dow.join(',')} )"
+			    ) )
                     }
                 }
 
+		// Limit to particular event types
                 if ( params.eventType && params.eventType != '<Show All>' ) {
                     eq( 'eventType', params.eventType )
                 }
 
                 if ( params.located == '1' ) {
+		    // limit to incidents that have been located
                     or {
                         isNotNull( 'locationGeom' )
                         isNotNull( 'section' )
                     }
+
                 } else if ( params.located == '0' ) {
+		    // limit to incidents that have no (known) location
                     and {
                         isNull( 'locationGeom' )
                         isNull( 'section' )
@@ -138,52 +182,51 @@ class IncidentController {
                 } 
             }
         }
-     
-//        maxResults(maxl)
-     
-        // Get the total number...
-        def c = Incident.createCriteria()
-        int totalCount = c.get {
-            projections {
-                count( 'id' )
-            }
-            or( incidentCriteria )
-        }
 
         // now get the page...
-        c = Incident.createCriteria()
+        def c = Incident.createCriteria()
+	log.info( "===================PERFORMING QUERY" )
         def theList = c.list {
             maxResults(maxl)
             if ( params.offset ) { firstResult( params.offset.toInteger() ) }
             or( incidentCriteria )
             order( 'startTime', 'asc' )
         }
+	log.info( "===================QUERY DONE" )
+	
+	// now emit for various formats
+	withFormat {
+	    html {
+		// Get the total number for paging
+		c = Incident.createCriteria()
+		int totalCount = c.get {
+		    projections {
+			count( 'id' )
+		    }
+		    or( incidentCriteria )
+		}
 
-       System.err.println( "============COUNT: " + totalCount )
+		log.debug( "============COUNT: $totalCount" )
+
+		def html = [ incidentInstanceList: theList, incidentInstanceTotal: totalCount ]
+		return html
+	    }
 	
-       withFormat {
-           html {
-               def html = [ incidentInstanceList: theList, incidentInstanceTotal: totalCount ]
-               return html
-           }
+	    json { 
+		// renders to json compatible with dojo::ItemFileReadStore 
+		def json = [ items: theList ]
+		render json as JSON 
+	    }
 	
-           kml  {
-               return [ incidentInstanceList: theList, incidentInstanceTotal: totalCount ]
-           }
-	
-           json { 
-               // renders to json compatible with dojo::ItemFileReadStore 
-               def json = [ items: theList ]
-               render json as JSON 
-           }
-	
-           geojson {
-               def json = [];
-               theList.each() { json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, properties: it ] ) }
-               def fjson = [ type: "FeatureCollection", features: json ]
-               render fjson as JSON
-           }
-       }
+	    geojson {
+		log.info( "===========RENDERING GEOJSON" );
+		def json = [];
+		theList.each() { json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, properties: it ] ) }
+		def fjson = [ type: "FeatureCollection", features: json ]
+		log.info( "===========EMITTING GEOJSON" );
+		render fjson as JSON
+	    }
+	}
 
     }
 
@@ -243,21 +286,22 @@ class IncidentController {
             redirect(action: "list")
         }
         else {
-            System.err.println( "####################SHOWING CUSTOM: " + params.id + " : " + ii.cad )
+            log.debug( "####################SHOWING CUSTOM: $params.id : $ii.cad" )
             def fia = ( ii.analyses.size() > 0) ? ( ii.analyses.first().incidentFacilityImpactAnalyses.size() > 0
-                                                          ? ii.analyses.first().incidentFacilityImpactAnalyses.first() : null ) : null
+						    ? ii.analyses.first().incidentFacilityImpactAnalyses.first() : null ) : null
             def fiaid = null
             if ( fia != null ) fiaid=fia.id
             def band =null
             if ( fia != null ) band=fia.band
             def maxIncidentSpeed = null;
             if ( fia != null ) maxIncidentSpeed=fia.maxIncidentSpeed
-            System.err.println( "############# II: " + ii );
-            render( view:"showCustom", model: [ incidentInstance: ii, 
-                        iiJson: ii as JSON, 
-                        band: band,
-                        maxIncidentSpeed: maxIncidentSpeed
-                    ] )
+            log.debug( "############# II: $ii" )
+            render( view:"showCustom", 
+		    model: [ incidentInstance: ii, 
+			     iiJson: ii as JSON, 
+			     band: band,
+			     maxIncidentSpeed: maxIncidentSpeed
+			   ] )
         }
     }
 
@@ -267,13 +311,15 @@ class IncidentController {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
         } else {
-            def analyses = 
-                ii.analyses.collect { ia -> 
+            def analyses = ii.analyses.collect { ia -> 
                 [
                     id: ia.id, 
                     name: ia.analysisName,
                     facilityAnalyses:ia.incidentFacilityImpactAnalyses.collect { fia ->
-                        [ id: fia.id, fwy: fia.location?.freewayId, dir: fia.location?.freewayDir, fwydir: "" + fia.location?.freewayId + "-" + fia.location?.freewayDir]
+                        [ id: fia.id, 
+			  fwy: fia.location?.freewayId, 
+			  dir: fia.location?.freewayDir, 
+			  fwydir: "${fia.location?.freewayId}-${fia.location?.freewayDir}" ]
                     }
                 ]  
             }

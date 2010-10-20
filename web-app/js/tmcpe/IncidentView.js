@@ -51,6 +51,33 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	this.inherited( arguments );
 
+	// connect some styling features to the log grid
+	dojo.connect( logGrid, "onStyleRow", function(row) { 
+            //The row object has 4 parameters, and you can set two others to provide your own styling
+            //These parameters are :
+            // -- index : the row index
+            // -- selected: wether the row is selected
+            // -- over : wether the mouse is over this row
+            // -- odd : wether this row index is odd.
+	    console.log( "STYLING " + row.index );
+
+            var item = logGrid.getItem(row.index);
+            if (item) {
+               var type = logStoreJs.getValue(item, "type", null);
+
+               if (type == "commLog") {
+		  //row.customStyles += "background-color:rgba(255,0,"+selectBlue+",0.5);";
+                   row.customClasses += " commLog";
+               } else {
+                  //row.customStyles += "background-color:rgba(0,255,"+selectBlue+",0.5);";
+                   row.customClasses += " activityLog";
+  	       }
+
+            }
+            logGrid.focus.styleRow(row);
+            logGrid.edit.styleRow(row);
+	});
+
 	// This should draw the location of the incident on the map (if available)
 	this._incidentsLayerInit( {} );
     },
@@ -112,9 +139,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     _loadAnalyses: function() {
 	var base = document.getElementById("htmldom").href;
-	var caller = this;
-	var url = base + 'incident/showAnalyses?id=' + this.incidentId;
 	if ( this._incident && this._incident.id != null ) {
+	    var url = base + 'incident/showAnalyses?id=' + this._incident.id;
+	    var caller = this;
 	    dojo.xhrGet({
 		url: url,
 		preventCache: true,
@@ -123,6 +150,24 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		load: function( r ) {
 		    var inc = caller._incident;
 		    inc.analyses = dojox.json.ref.fromJson( r );
+
+		    // Now update the facilityStore
+		    if ( inc.analyses.length > 0 ) {
+			// sets the displayed analysis to the default (0) and
+			// loads the facility analyses into the filteringselect
+			if ( inc.analyses[ 0 ].facilityAnalyses.length > 0 ) {
+			    facilityStore.url = base + 'incidentImpactAnalysis/showAnalyses.json?id=' + inc.analyses[ 0 ].id;
+			    
+			    // Here, we set the default displayed TSD to that
+			    // corresponding to the primary disrupted facility
+			    var ff = inc.section.freewayId + '-' + inc.section.freewayDir;
+			    facilityCombo.attr( 'displayedValue', ff );
+			} else {
+			    alert( "No facility analyses for incident analysis: " + inc.analyses[ 0 ].id );
+			}
+		    } else {
+			caller.getTsd()._displayNoAnalysis();
+		    }
 		},
 		error: function( r ) {
 		    alert( 'Error loading analyses for ' + caller._incident.cad + ': ' + r)
@@ -131,40 +176,32 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	} else {
 	    alert( "Asked to load analyses for NULL incident" );
 	}
-
-	if ( this._incident.analyses.length > 0 ) {
-	    // sets the displayed analysis to the default (0) and
-	    // loads the facility analyses into the filteringselect
-	    facilityStore.url = base + 'incidentImpactAnalysis/showAnalyses?id=' + this._incident.analyses[ 0 ].id;
-
-	    // Here, we set the default displayed TSD to that
-	    // corresponding to the primary disrupted facility
-	    var ff = this._incident.section.freewayId + '-' + this._incident.section.freewayDir;
-	    facilityCombo.attr( 'displayedValue', ff );
-	} else {
-	    this.getTsd()._displayNoAnalysis();
-	}
     },
 
     updateFacilityImpactAnalysis: function( fiaId ) {
 	var base = document.getElementById("htmldom").href;
-	this._facilityImpactAnalysis = fiaId;
-	this.getTsd().updateUrl( base + 'incidentFacilityImpactAnalysis/show.json?id='+fiaId );
 
-	var fia = this.getTsd()._data;
+	if ( fiaId == null || fiaId == "" ) {
+	    alert ( 'NO FIAID!!' );
+	} else {
+	    this._facilityImpactAnalysis = fiaId;
+	    this.getTsd().updateUrl( base + 'incidentFacilityImpactAnalysis/show.json?id='+fiaId );
 
-	var fiaSummary = "incident " + this._incident.cad + "["+this._incident.id+"] analysis "+fiaId+":"+fia.location.freewayDir+"-"+fia.location.freewayId
+	    var fia = this.getTsd()._data;
 
-	// Update XLS link
-	var base = document.getElementById("htmldom").href;
-	dojo.byId('tmcpe_tsd_xls_link').innerHTML = 'Download XLS for facility analysis ' + this._facilityImpactAnalysis;
-	dojo.byId('tmcpe_tsd_xls_link').href = base+'incidentFacilityImpactAnalysis/show.xls?id='+this._facilityImpactAnalysis;
+	    var fiaSummary = "incident " + this._incident.cad + "["+this._incident.id+"] analysis "+fiaId+":"+fia.location.freewayDir+"-"+fia.location.freewayId
 
-	dojo.byId('tmcpe_report_problem_link').innerHTML = 'Report problem with this facility analysis';
-	url = "http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Problem%20with%20analysis%20of%20"+fiaSummary+"&issue[description]=Bad%20analysis%20for%20available%20for "+fiaSummary;
-	dojo.byId('tmcpe_report_problem_link').href = url;
-	dojo.byId('tmcpe_report_problem_link').onclick = "return popitup('"+url+"')";
-	this.updateVdsSegmentsQuery();
+	    // Update XLS link
+	    var base = document.getElementById("htmldom").href;
+	    dojo.byId('tmcpe_tsd_xls_link').innerHTML = 'Download XLS for facility analysis ' + this._facilityImpactAnalysis;
+	    dojo.byId('tmcpe_tsd_xls_link').href = base+'incidentFacilityImpactAnalysis/show.xls?id='+this._facilityImpactAnalysis;
+
+	    dojo.byId('tmcpe_report_problem_link').innerHTML = 'Report problem with this facility analysis';
+	    url = "http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Problem%20with%20analysis%20of%20"+fiaSummary+"&issue[description]=Bad%20analysis%20for%20available%20for "+fiaSummary;
+	    dojo.byId('tmcpe_report_problem_link').href = url;
+	    dojo.byId('tmcpe_report_problem_link').onclick = "return popitup('"+url+"')";
+	    this.updateVdsSegmentsQuery();
+	}
     },
 
     _constructVdsSegmentsParams: function( theParams ) {

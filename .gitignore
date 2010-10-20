@@ -10,7 +10,6 @@ new-activity-log-data/*
 *.json
 target
 plugins/
-web-app/js/openlayers
 web-app/js/dojo-src
 web-app/js/dojo
 web-app/js/dojo-link

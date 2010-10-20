@@ -6,10 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 -->
 
-    <!-- Load the map javascript and css -->
-    <!-- <tmcpe:openlayers_latest /> --> <!--  brings in the openlayers stuff -->
-    <tmcpe:tmcpe_styles />
-    <tmcpe:openlayers_latest />  
+    <!-- Load the css, then the js -->
+    <tmcpe:tmcpe_styles />       <!-- Loads openlayers from the common project source -->
+    <tmcpe:openlayers />         <!-- Loads openlayers from the common project source -->
+    <tmcpe:init_g_map_api />     <!-- Init the google map api key -->
     <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
 
     <g:javascript>

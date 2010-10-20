@@ -34,20 +34,39 @@ class IncidentImpactAnalysisController {
     }
     def showAnalyses = {
         def iia = IncidentImpactAnalysis.get(params.id.toInteger())
+
+	withFormat {
+	    html {
+		if (!iia) {
+		    flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+		    redirect(action: "list")
+		} else {
+		    flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+		    // fixme
+		}
+	    }
+	    json {
+		if ( !iia ) {
+		    log.info( "INCIDENT ANALYSES FOUND MATCHING ID: ${params.id.toInteger()}" )
+		    return [] as JSON
+		} else {
+		    def analyses = 
+		    [
+			identifier: "id",
+			label: "fwydir",
+			items: iia.incidentFacilityImpactAnalyses.collect { fia ->
+			    [ id: fia.id, fwy: fia.location?.freewayId, dir: fia.location?.freewayDir, fwydir: "" + fia.location?.freewayId + "-" + fia.location?.freewayDir]
+			}
+		    ]  
+		    
+		    render analyses as JSON
+		}
+	    }
+	}
         if (!iia) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")
         } else {
-            def analyses = 
-                [
-                    identifier: "id",
-                    label: "fwydir",
-                    items: iia.incidentFacilityImpactAnalyses.collect { fia ->
-                        [ id: fia.id, fwy: fia.location?.freewayId, dir: fia.location?.freewayDir, fwydir: "" + fia.location?.freewayId + "-" + fia.location?.freewayDir]
-                    }
-                ]  
-
-            render analyses as JSON
         }
     }
 

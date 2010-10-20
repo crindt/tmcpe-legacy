@@ -88,6 +88,7 @@ CREATE TABLE actlog.incidents (
 SELECT AddGeometryColumn( 'actlog', 'incidents', 'location_geom', 4326, 'POINT', 2 );
 CREATE INDEX idx_incidents_cad ON actlog.incidents( cad );
 CREATE INDEX idx_incidents_start_time ON actlog.incidents( start_time );
+CREATE INDEX idx_incidents_dow ON actlog.incidents( extract( 'dow' from start_time ) );
 
 DROP TABLE IF EXISTS actlog.critical_events;
 CREATE TABLE actlog.critical_events (
