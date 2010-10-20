@@ -434,11 +434,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		}
 		if ( item.attributes.d12_delay ) {
 		    d12Delay += item.attributes.d12_delay;
-		    console.log( totDelay + ' += ' + item.attributes.d12_delay );
+		    //console.log( totDelay + ' += ' + item.attributes.d12_delay );
 		}
 		if ( item.attributes.tmcpe_delay ) {
 		    totDelay += item.attributes.tmcpe_delay;
-		    console.log( totDelay + ' += ' + item.attributes.tmcpe_delay );
+		    //console.log( totDelay + ' += ' + item.attributes.tmcpe_delay );
 		}
 		if ( item.attributes.savings ) {
 		    totDelay += item.attributes.savings;

@@ -222,10 +222,13 @@ class Incident {
             //timestamp( df.format( stampDateTime() ) )
             timestamp( stampDateTime() )
             locString( section?.toString() )
-            memo(firstCall ? firstCall.memoOnly:sigalertBegin?sigalertBegin.memoOnly : "<NO MEMO>")
-            section(section)
+            memo(firstCall ? firstCall.memoOnly:sigalertBegin?sigalertBegin.memoOnly : "<NO MEMO>" )
+            section( [ id:section.id, 
+		       // the following are used to in the facility analysis selector
+		       freewayId:section.freewayId, freewayDir: section.freewayDir 
+		     ] )
             location( bestGeom )
-            geometry( section?.segGeom )
+            //geometry( section?.segGeom )
             d12_delay( analyses?.size() ? analyses?.first()?.d12Delay() : null )
             tmcpe_delay( analyses?.size() ? analyses?.first()?.netDelay() : null )
             savings( 0 ) // FIXME: update this.

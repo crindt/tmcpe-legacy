@@ -112,7 +112,7 @@ log4j = {
 	
 	//    info  'org.codehaus.groovy.grails.web.servlet', // controllers
 	//	  'org.codehaus.groovy.grails.web.pages', //  GSP
-	info   'edu.uci.its.tmcpe'
+	//info   'edu.uci.its.tmcpe'
 	
 	warn   'org.mortbay.log'
 }
@@ -203,10 +203,10 @@ compress {
 
 uiperformance {
     enabled = true
-    debug = true
+    //    debug = true
     statsEnabled = true
     html.compress = true
-    html.debug = true
+    //    html.debug = true
        
 }
 uiperformance.html.includePathPatterns = [".*\\.geojson"]

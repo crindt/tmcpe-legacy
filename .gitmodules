@@ -1,3 +1,6 @@
 [submodule "osm"]
 	path = osm
 	url = /home/crindt/Desktop/osm
+[submodule "web-app/js/openlayers"]
+	path = web-app/js/openlayers
+	url = /home/crindt/openlayers

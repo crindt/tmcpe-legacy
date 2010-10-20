@@ -7,11 +7,11 @@
     <!-- This layout adds the menu and inserts the body defined below into a content pane -->
     <meta name="layout" content="main" />
 
-    <!-- Load the map javascript and css -->
-    <tmcpe:tmcpe_styles />
-
-    <tmcpe:openlayers_latest />
-    <tmcpe:tmcpe />
+    <!-- Load the css, then the js -->
+    <tmcpe:tmcpe_styles />       <!-- Loads openlayers from the common project source -->
+    <tmcpe:openlayers />         <!-- Loads openlayers from the common project source -->
+    <tmcpe:init_g_map_api />     <!-- Init the google map api key -->
+    <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
 
     <g:javascript>
          <!-- Here are the custom widgets -->
@@ -255,30 +255,6 @@
 	       onRowMouseOver="incidentView.simpleSelectLogEntry(event)"
 	       store="logStoreJs"
 	       >
-	  <script type="dojo/method" event="onStyleRow" args="row">
-            //The row object has 4 parameters, and you can set two others to provide your own styling
-            //These parameters are :
-            // -- index : the row index
-            // -- selected: wether the row is selected
-            // -- over : wether the mouse is over this row
-            // -- odd : wether this row index is odd.
-	    console.log( "STYLING " + row.index );
-            var item = logGrid.getItem(row.index);
-            if (item) {
-               var type = logStoreJs.getValue(item, "type", null);
-	       console.log( "GOT ITEM WITH TYPE:" + ( type ? type : "<UNDEF" ) );
-               var selected = ( row.selected ? "_selected" : "" );
-               if (type == "commLog") {
-		  //row.customStyles += "background-color:rgba(255,0,"+selectBlue+",0.5);";
-                  row.customClasses += " commLog" + selected;
-               } else {
-                  //row.customStyles += "background-color:rgba(0,255,"+selectBlue+",0.5);";
-                  row.customClasses += " activityLog" + selected;
-  	       }
-            }
-            logGrid.focus.styleRow(row);
-            logGrid.edit.styleRow(row);
-	  </script>
 	  <thead>
 	    <tr>
 	      <!--
