@@ -196,6 +196,7 @@ class IncidentController {
         }
 
 	// Store the query if params.storeQuery was set
+	/*
 	if ( params.storeQuery ) {
 	    def pairs = params.collect { key, value -> "$key:$value" }
 	    log.info( "COOKIE IS " + pairs.join("|") );
@@ -204,6 +205,7 @@ class IncidentController {
 	    cookie.path = '/tmcpe'  // FIXME: hardcoded path!
 	    response.addCookie( cookie )
 	    }
+	*/
 	
 	log.info( "===================QUERY DONE" )
 	

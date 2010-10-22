@@ -38,9 +38,18 @@ dojo.declare("tmcpe.MyDateTextBox", dijit.form.DateTextBox, {
 	this.value = dojo.date.locale.parse(datestr, this.myFormat);
 	this.attr( 'value',  this.value );
     },
+    parseDateFromString: function( datestr ) {
+	return dojo.date.locale.parse(datestr, this.myFormat);
+    },
 
-    // To write back to the server in Oracle format, override the serialize method:
+/*
+    parse: function( datestr ) {
+	return dojo.date.locale.parse( datestr, this.myFormat);
+    },
+*/
+
+    // To write back to the server in postgres format, override the serialize method:
     serialize: function(dateObject, options) {
         return dojo.date.locale.format(dateObject, this.myFormat).toUpperCase();
-    }
+    },
 });

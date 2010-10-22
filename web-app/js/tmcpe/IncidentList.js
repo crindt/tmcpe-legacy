@@ -68,6 +68,38 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	return this._incidentDetails;
     },
 
+    _storeIncidentsParams: function( theParams ) {
+	if ( !theParams || theParams == undefined ) {
+	    theParams = {};
+	}
+
+	// Loop over all the form inputs
+	var inputs = dojo.query( '#queryForm input' );
+	for ( var i = 0; i < inputs.length; ++i ) {
+	    var input = inputs[ i ];
+	    if (  input.id != null && input.id != "" ) {
+		var djt = dijit.byId( input.id );
+		theParams[ input.id ] = { 
+		    value: djt.get( 'value' ), 
+		    checked: djt.get( 'checked' ) 
+		};
+	    }
+	}
+	theParams[ 'extents' ] = this.getMap().getExtent().toArray();
+	dojo.cookie( 'tmcpeHackParams', JSON.stringify( theParams ) );
+    },
+
+    _restoreIncidentsParams: function () {
+	var cookstr = dojo.cookie( 'tmcpeHackParams' );
+	if ( cookstr ) {
+	    theParams = JSON.parse( cookstr );
+	} else {
+	    theParams = new Array();
+	}
+
+	return theParams;
+    },
+
     _constructIncidentsParams: function( theParams ) {
 	var w = 0;
 	if ( !theParams || theParams == undefined ) {
@@ -80,23 +112,23 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	}
 
 	// get params from the search form...
-	if ( dijit.byId( 'startDate' ).getValue() ) {
-	    var value = dijit.byId( 'startDate' ).getValue();
+	if ( dijit.byId( 'startDate' ).get( 'value' ) ) {
+	    var value = dijit.byId( 'startDate' ).get( 'value' );
 	    theParams[ 'startDate' ] = dijit.byId( 'startDate' ).serialize( value );//myFormatDateOnly( value );
 	};
-	if ( dijit.byId( 'endDate' ).getValue() ) {
-	    var value = dijit.byId( 'endDate' ).getValue();
+	if ( dijit.byId( 'endDate' ).get( 'value' ) ) {
+	    var value = dijit.byId( 'endDate' ).get( 'value' );
 	    theParams['endDate'] = dijit.byId( 'endDate' ).serialize( value );//myFormatDateOnly( value );
 	};
-	if ( dijit.byId( 'earliestTime' ).getValue() ) {
-	    var value = dijit.byId( 'earliestTime' ).getValue();
+	if ( dijit.byId( 'earliestTime' ).get( 'value' ) ) {
+	    var value = dijit.byId( 'earliestTime' ).get( 'value' );
 	    theParams['earliestTime'] = dijit.byId( 'earliestTime' ).serialize( value );//myFormatDateOnly( value );
 	};
-	if ( dijit.byId( 'latestTime' ).getValue() ) {
-	    var value = dijit.byId( 'latestTime' ).getValue();
+	if ( dijit.byId( 'latestTime' ).get( 'value' ) ) {
+	    var value = dijit.byId( 'latestTime' ).get( 'value' );
 	    theParams['latestTime'] = dijit.byId( 'latestTime' ).serialize( value );//myFormatDateOnly( value );
 	};
-	if ( dijit.byId( 'fwydir' ).getValue() && dijit.byId( 'fwydir' ).getValue() != '<Show All>' ) {
+	if ( dijit.byId( 'fwydir' ).get( 'value' ) && dijit.byId( 'fwydir' ).get( 'value' ) != '<Show All>' ) {
 	    var store = facilityStore;//dijit.byId( 'facilityStore' );
 	    var val = dijit.byId( 'fwydir' ).item;
 	    var vv = facilityStore.getValue( val, "facdir" );
@@ -104,7 +136,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    theParams['freeway'] = vals[0];//myFormatDateOnly( value );
 	    theParams['direction'] = vals[1];//myFormatDateOnly( value );
 	};
-	if ( dijit.byId( 'eventType' ).getValue() && dijit.byId( 'eventType' ).getValue() != '<Show All>' ) {
+	if ( dijit.byId( 'eventType' ).get( 'value' ) && dijit.byId( 'eventType' ).get( 'value' ) != '<Show All>' ) {
 	    var store = eventTypeStore;//dijit.byId( 'eventTypeStore' );
 	    var val = dijit.byId( 'eventType' ).item;
 	    var vv = eventTypeStore.getValue( val, "evtype" );
@@ -125,8 +157,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		} else {
 		    theParams['dow'] += "," + dowWid.get('value');
 		}
-	    }
-	}
+	    }	
+}
 	//    alert( "PARAMS: " + theParams['dow'] );
 
 	//    alert( "THE PARAMS MAX" + theParams['max'] );
@@ -138,6 +170,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	// set the storeQuery parameter so the controller will save this query in cookies
 	theParams['storeQuery'] = true;
+
+	this._storeIncidentsParams( );
 
 	return theParams;
 
@@ -154,6 +188,33 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     },
 
     _updateQueryFormFromParams: function( theParams ) {
+	var inputs = dojo.query( '#queryForm input' );
+	for ( var i = 0; i < inputs.length; ++i ) {
+	    var input = inputs[ i ];
+	    if (  input.id != null && input.id != "" ) {
+		var tp = theParams[ input.id ];;
+		if ( tp != null && tp.value != null   && tp.value != "" )   {
+		    var djt = dijit.byId( input.id );
+		    //input.value = tp.value
+		    if ( djt instanceof tmcpe.MyDateTextBox ) {
+			djt.attr( 'value', new Date( tp.value ) );
+		    } else {
+			djt.attr( 'value', tp.value );
+		    }
+		}
+		if ( tp != null && tp.checked != null ) {
+		    var djt = dijit.byId( input.id );
+		    djt.attr( 'checked', tp.checked );
+		}
+		var jj = 1;
+	    }
+	}
+
+	if ( theParams[ 'extents' ] != null )
+	    this.getMap().zoomToExtent( new OpenLayers.Bounds.fromArray( theParams[ 'extents' ] ) );
+
+	return;
+
 	if ( theParams[ 'startDate' ] != null ) {
 	    var wid = dijit.byId( 'startDate' );
 	    wid.setDateFromString( theParams[ 'startDate' ] );
@@ -165,32 +226,15 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     },
 
     setLastQuery: function() {
-	var qcook = dojo.cookie('tmcpeQuery');
-
-	// HACK: remove leading and training quotes...
-	var start = 0;
-	var end = qcook.length-1;
-	if ( qcook.charAt( 0 ) == '"' ) start++;
-	if ( qcook.charAt( end ) == '"' ) end--;
-	qcook = qcook.substring( start, end )
-
-	var theParams = [];
-	if ( qcook ) {
-	    var qparam = qcook.split( '|' );
-	    for ( var i in qparam ) {
-		var paramstr = qparam[ i ];
-		var keyval = paramstr.split( ':' );
-		theParams[ keyval[ 0 ] ] = keyval[ 1 ];
-	    }
-	}
-
-	this._updateQueryFormFromParams( theParams );
+	this._updateQueryFormFromParams( this._restoreIncidentsParams() );
     },
 
     _incidentsLayerInit: function() {
 
-	// should validate
+	// Set query parameters from cookie
+	this.setLastQuery();
 
+	// should validate
 	if ( !this._progressDialog ) {
 	    this._progressDialog = new dijit.Dialog({//dojox.widget.Dialog({
 		//		title: "Loading",
@@ -223,27 +267,68 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             fillOpacity: 0.5,
             strokeColor: "blue",
             strokeWidth: 2,
-            strokeOpacity: 0.8
+            strokeOpacity: 0.8,
+	    graphicZIndex:1
         }, {
             context: {
                 getPointRadius: function(feature) {
-		    return Math.min(feature.cluster.length*2,10) + 5;
+		    var len = feature.cluster ? feature.cluster.length : 1;
+		    return Math.min(len*2,10) + 5;
                 },
             }
         });
 
+	var hoverSelectStyle = new OpenLayers.Style({
+            pointRadius: "${getPointRadius}",
+            fillColor: "yellow",
+            fillOpacity: 0.5,
+            strokeColor: "blue",
+            strokeWidth: 2,
+            strokeOpacity: 0.8,
+	    graphicZIndex:5
+        }, {
+            context: {
+                getPointRadius: function(feature) {
+		    var len = feature.cluster ? feature.cluster.length : 1;
+		    return Math.min(len*2,10) + 5;
+                },
+            }
+        });
+
+	var selectStyle = new OpenLayers.Style({
+            pointRadius: "${getPointRadius}",
+            fillColor: "yellow",
+            fillOpacity: 0.7,
+            strokeColor: "blue",
+            strokeWidth: 5,
+            strokeOpacity: 0.9,
+	    graphicZIndex:10
+        }, {
+            context: {
+                getPointRadius: function(feature) {
+		    var len = feature.cluster ? feature.cluster.length : 1;
+		    return Math.min(len*2,10) + 10;
+                },
+            }
+        });
+
+
+	var obj = this;
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
-            projection: this.getMap().displayProjection,
+            projection: obj.getMap().displayProjection,
 	    //            strategies: [new OpenLayers.Strategy.Fixed()],
 	    strategies: [new OpenLayers.Strategy.BBOX({resFactor: 1.1}),new OpenLayers.Strategy.Cluster()],
             protocol: new OpenLayers.Protocol.HTTP({
             	url: base + "incident/list.geojson",//theurl,
-            	params: this._constructIncidentsParams(),
+            	params: obj._constructIncidentsParams(),
             	format: new OpenLayers.Format.GeoJSON({})
             }),
             styleMap: new OpenLayers.StyleMap({
-		"default": style
+		"default": style,
+		"select": selectStyle,
+		"temporary": hoverSelectStyle
 	    }),
+	    rendererOptions: {zIndexing: true},
             reportError: true
 	});
 
@@ -290,81 +375,59 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    "featuresremoved": function( feat ) { 
 		console.log( feat.features.length + " features removed" );
 	    },
+	    "move": function() {
+		obj._map.hideTooltip();    // Hide any tooltips that linger
+	    },
 	    "moveend": function() { 
-/*
-		var geo = dijit.byId( 'geographic' );
-		if ( geo && geo.checked ) {
-		    // Only update the query if we're doing geographic queries
-		    console.log( "updating because of movement" );
-		    obj.updateIncidentsQuery(); 
-		}
-*/
-	    }
+		/*
+		  var geo = dijit.byId( 'geographic' );
+		  if ( geo && geo.checked ) {
+		  // Only update the query if we're doing geographic queries
+		  console.log( "updating because of movement" );
+		  obj.updateIncidentsQuery(); 
+		  }
+		*/
+		obj._storeIncidentsParams( );  // the viewport will have changed
+		obj.updateIncidentsTable();
+	    },
 	});
 
 	//    map.events.register("moveend", null, function() { alert("updating query"); updateIncidentsQuery(); } )
 	this.getMap().addLayers([this._incidentsLayer]);
 
-	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
-            pointRadius: 10,
-            fillColor: "yellow",
-            fillOpacity: 0.5,
-            strokeColor: "blue",
-            strokeWidth: 2,
-            strokeOpacity: 0.8
-
-	}, OpenLayers.Feature.Vector.style["default"]);
-
-	// for event closure
-	var obj = this;
-
 	this._hoverIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer,{ 
  	    hover: true,
- 	    highlightOnly: true,
-            renderIntent: "temporary",
-	    selectStyle: hoverSelectStyle,
-	    eventListeners: {
-		//    beforefeaturehighlighted: report,
-	        featurehighlighted: function( evt ) {
-		    var feature = evt.feature
-		    if ( feature && feature.cluster ) {
-			var xy = obj.getMap().getControl('ll_mouse').lastXy || new OpenLayers.Pixel(0,0);
-			var loc = feature.cluster[0].attributes.locString;
-			var txt = loc + ': <span style="font-weight:bold;">' + feature.cluster.length + " event" + ( feature.cluster.length == 1 ? "" : "s" ) + "</span>";
-			obj._map.showTooltip( txt, xy.x, xy.y );
-		    }
-		},
-		featureunhighlighted: function( feature ) {
-//		    alert( "unhighlighted" );
-		    obj._map.hideTooltip();
-		}
-	    }
-	});
+	    highlightOnly: true,
+	    renderIntent: "temporary"	});
 	this.getMap().addControl(this._hoverIncident);
 	this._hoverIncident.activate();
 	
 
-	var selectStyle = OpenLayers.Util.applyDefaults({
-            pointRadius: 15,
-            fillColor: "blue",
-            fillOpacity: 0.5,
-            strokeColor: "red",
-            strokeWidth: 2,
-            strokeOpacity: 0.8
-
-	}, OpenLayers.Feature.Vector.style["default"]);
-
 	this._selectIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer, {
-	    selectStyle: selectStyle,
+	    renderIntent: "select",
 	    eventListeners: {
-		// featureselected...?
+		"featurehighlighted": function( evt ) {
+		    var feature = evt.feature
+		    if ( feature && feature.cluster ) {
+			// create tooltip when we hover
+			var xy = obj.getMap().getControl('ll_mouse').lastXy || new OpenLayers.Pixel(0,0);
+			var loc = feature.cluster[0].attributes.locString;
+			var txt = 
+			    loc + ': <span style="font-weight:bold;">' + 
+			    feature.cluster.length + " event" + 
+			    ( feature.cluster.length == 1 ? "" : "s" ) + "</span>";
+			obj._map.showTooltip( txt, xy.x, xy.y );
+		    }
+		},
+		"featureunhighlighted": function( feature ) {
+		    // hide tooltip when we unhighlight
+		    obj._map.hideTooltip();
+		}
 	    }
+
 	});
 	this.getMap().addControl(this._selectIncident);
 	this._selectIncident.activate();
-
-	// Set query parameters from cookie
-	this.setLastQuery();
 
 	this.updateIncidentsQuery();
     },
