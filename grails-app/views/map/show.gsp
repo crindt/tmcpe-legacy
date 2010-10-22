@@ -51,7 +51,9 @@
         return ret;
       };
 
-      dojo.addOnLoad(function(){ incidentList ? incidentList.initApp() : alert( "NO INCIDENT LIST!" );});
+      dojo.addOnLoad(function(){ 
+         incidentList ? incidentList.initApp() : alert( "NO INCIDENT LIST!" );
+      });
     </g:javascript>
   </head>
 

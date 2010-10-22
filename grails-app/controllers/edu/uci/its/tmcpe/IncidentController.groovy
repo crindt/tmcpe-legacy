@@ -2,6 +2,7 @@ package edu.uci.its.tmcpe
 
 import grails.converters.*
 import org.hibernate.criterion.*
+import javax.servlet.http.Cookie 
 
 import grails.plugins.springsecurity.Secured
 
@@ -73,11 +74,11 @@ class IncidentController {
                 }
       
 		// Limit to particular date range
-                if ( params.fromDate || params.toDate ) {
-		    def early = params.fromDate ? params.fromDate : '0000-00-00'
+                if ( params.startDate || params.endDate ) {
+		    def early = params.startDate ? params.startDate : '0000-00-00'
                     def from = Date.parse( "yyyy-MM-dd", early )
-                    def to = ( params.toDate 
-			       ? Date.parse( "yyyy-MM-dd", params.toDate ) 
+                    def to = ( params.endDate 
+			       ? Date.parse( "yyyy-MM-dd", params.endDate ) 
 			       : new Date() )
                     log.debug("============DATES: " + from + " <<>> "  + to )
 
@@ -193,6 +194,17 @@ class IncidentController {
             or( incidentCriteria )
             order( 'startTime', 'asc' )
         }
+
+	// Store the query if params.storeQuery was set
+	if ( params.storeQuery ) {
+	    def pairs = params.collect { key, value -> "$key:$value" }
+	    log.info( "COOKIE IS " + pairs.join("|") );
+	    def cookie = new Cookie( 'tmcpeQuery', pairs.join("|") )
+	    cookie.maxAge = 90*24*3600  // make the age 90 days
+	    cookie.path = '/tmcpe'  // FIXME: hardcoded path!
+	    response.addCookie( cookie )
+	    }
+	
 	log.info( "===================QUERY DONE" )
 	
 	// now emit for various formats

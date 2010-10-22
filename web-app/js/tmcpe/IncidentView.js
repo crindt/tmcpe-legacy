@@ -299,13 +299,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	for ( j = 0; j < tsd._data.sections.length; ++j ) {
 	    var station = tsd._data.sections[ tsd._data.sections[ j ].stnidx ];
 
-	    if ( station ) {
-		var feature = this._getFeatureForStation( station.vdsid )
-
-		if ( feature && feature.layer && station ) {
-		    station.feature = feature;
-		}
-	    }
+	    // this call builds the station->feature cache.  We do this now so
+	    // that the UI isn't slow initially
+	    var feature = this._getFeatureForStation( station )
 	}
     },
 
@@ -418,14 +414,35 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var base = document.getElementById("htmldom").href;
 
 	var obj = this;
+
+	var cnt = 0;
+
+	var style = new OpenLayers.Style({
+	    strokeWidth: 6, 
+	    strokeColor: "${getStrokeColor}", 
+	    strokeOpacity: 0.75, 
+	    graphicZIndex:300 
+	}, {
+	    context: { 
+		getStrokeColor: function( feature ) {
+		    // set the color to the associated tdc cell OR to green
+		    var color = feature.tdc ? feature.tdc.style.backgroundColor : "#0000ff";
+		    console.log( feature.attributes.name + ":" + color );
+		    return color;
+		}
+	    }
+	});
+
+
+	var hoverSelectStyle = style.clone();
+	hoverSelectStyle.strokeWidth = 10;
+
 	this._vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
 	    styleMap: new OpenLayers.StyleMap({
-		strokeWidth: 6, 
-		strokeColor: "#00ff00", 
-		strokeOpacity: 0.75, 
-		graphicZIndex:300 
+		"default": style,
+		"hover": hoverSelectStyle
 	    }),
             protocol: new OpenLayers.Protocol.HTTP({
   		url: base + "vds/list.geojson",
@@ -452,17 +469,11 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	this.getMap().addLayers([this._vdsSegmentLines]);
 
-
-	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
-	    strokeWidth: 8,
-	    strokeOpacity: 1
-	}, OpenLayers.Feature.Vector.style["select"]);
-
 	this._hoverVds = new OpenLayers.Control.SelectFeature(this._vdsSegmentLines,{ 
  	    hover: true,
  	    highlightOnly: true,
             renderIntent: "temporary",
-	    selectStyle: hoverSelectStyle,
+	    selectStyle: hoverSelectStyle
 	});
 	this.getMap().addControl(this._hoverVds);
 	this._hoverVds.activate();
@@ -504,13 +515,16 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     	
     	// CENTER THE MAP ON THE VDS SECTION WE CLICKED ON
     	if ( station ) {
-    		var feature = station.feature;
-    		if ( feature ) {
+    	    var feature = this._getFeatureForStation( station )
+    	    if ( feature ) {
+		if ( feature.geometry ) {
 		    var bb = feature.geometry.getBounds();
+
 		    var zz = this.getMap().getZoomForExtent( bb );
 		    // center on section, but don't zoom in quite all the way.
 		    this.getMap().setCenter( bb.getCenterLonLat(), zz-3 );
-    		}
+		}
+    	    }
     	} else
     		alert( "Unable to find feature in layer" );
     	
@@ -528,9 +542,8 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     	// HACK: highlight the corresponding station in the map
     	var vsl = this._vdsSegmentLines;
     	if ( vsl && station ) {
-    	    var feature = station.feature;
 
-	    if ( feature == null ) feature = this._getFeatureForStation( station.vdsid );
+	    feature = this._getFeatureForStation( station );
     	    
     	    // OK, found the feature. Highlight it? 
     	    if ( feature ) {
@@ -539,13 +552,11 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		if ( timeidx != null ) {
 		    var tdc = this._tsd._td[timeidx][stationnm];
 
-		    if ( tdc != null ) {
-			// looks like we're hovering over a time-space cell
-			this._hoverVds.selectStyle.strokeColor = tdc.style.backgroundColor;
-		    }
+		    feature.tdc = this._tsd._td[timeidx][stationnm];
 		}
 
-		// For some reason, district 8 vds features don't have a layer, but they're drawn???
+		// For some reason, district 8 vds features don't have a layer,
+		// but they're drawn???
 		if ( feature.layer != null ) {
     		    this._hoverVds.select( feature );
 		}
@@ -554,11 +565,18 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     	}
     },
 
-    _getFeatureForStation: function( vdsid ) {
-	var feature = null;
+    _getFeatureForStation: function( station ) {
+	if ( station == null ) return null;
+	var vdsid = station.vdsid;
+	// use the existing feature if it's still valid (in which case it
+	// will have a layer)
+	var feature = ( 
+	    station.feature && station.feature.layer 
+		? station.feature
+		: null );
 
 	var vsl = this._vdsSegmentLines;
-	if ( vsl ) {
+	if ( feature == null && vsl ) {
 
 	    // Loop over the lines until we find the correct station
 	    var feature = null;
@@ -569,6 +587,10 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		var f_vdsid = ff.attributes[ 'id' ];
 		if ( vdsid == f_vdsid ) {
 		    feature = ff;
+
+		    if ( feature && feature.layer )
+			// store the mapping for later use
+			station.feature = feature; 
 		}
 	    }
 	}
@@ -599,27 +621,26 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 		if ( station ) {
 
-		    var feature = station.feature;
+		    var feature = this._getFeatureForStation( station );
 
-		    if ( feature == null ) feature = this._getFeatureForStation( station.vdsid );
-
-		    // OK, found the feature. alter the style
 		    if ( feature ) {
-			if ( feature.style ) {
-			    feature.style.strokeColor = tdc.style.backgroundColor;
-			} else {
-			    var newstyle = OpenLayers.Util.applyDefaults({
-				strokeColor: tdc.style.backgroundColor
-			    }, feature.layer.styleMap.styles.default.defaultStyle );
+			// OK, found the feature. Redraw it to update the style
+			// from the stylemap
+			feature.tdc = tdc;
 
-			    feature.style = newstyle;
+			if ( this._vdsSegmentLines ) {
+			    // reset the style, which will force the layer to
+			    // recompute
+			    feature.style = null;
+			    this._vdsSegmentLines.drawFeature( feature );
 			}
-			this._vdsSegmentLines.drawFeature( feature );
 		    }
 		}
 	    }
 	}
 	this._hoverStation( e ); // highlight the station we're hovering over
+
+	// Now, update the cell info
 	var stationnm = e.target.getAttribute( 'station' );
 	var station = this._tsd._data.sections[ stationnm ];
 	if ( ! station ) return;

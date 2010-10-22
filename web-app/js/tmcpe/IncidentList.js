@@ -9,6 +9,7 @@ dojo.require("dijit.ProgressBar");
 dojo.require("dijit.layout.StackContainer");
 dojo.require("dijit.layout.ContentPane");
 dojo.require("dojox.json.ref");
+dojo.require("dojo.cookie");
 
 dojo.require("tmcpe.TestbedMap");
 dojo.require("tmcpe.ItemVectorLayerReadStore");
@@ -81,11 +82,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	// get params from the search form...
 	if ( dijit.byId( 'startDate' ).getValue() ) {
 	    var value = dijit.byId( 'startDate' ).getValue();
-	    theParams[ 'fromDate' ] = dijit.byId( 'startDate' ).serialize( value );//myFormatDateOnly( value );
+	    theParams[ 'startDate' ] = dijit.byId( 'startDate' ).serialize( value );//myFormatDateOnly( value );
 	};
 	if ( dijit.byId( 'endDate' ).getValue() ) {
 	    var value = dijit.byId( 'endDate' ).getValue();
-	    theParams['toDate'] = dijit.byId( 'endDate' ).serialize( value );//myFormatDateOnly( value );
+	    theParams['endDate'] = dijit.byId( 'endDate' ).serialize( value );//myFormatDateOnly( value );
 	};
 	if ( dijit.byId( 'earliestTime' ).getValue() ) {
 	    var value = dijit.byId( 'earliestTime' ).getValue();
@@ -135,6 +136,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	}
 	//    alert( "THE PARAMS MAX" + theParams[ 'max' ] );
 
+	// set the storeQuery parameter so the controller will save this query in cookies
+	theParams['storeQuery'] = true;
+
 	return theParams;
 
     },
@@ -149,7 +153,42 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	//	this._loadEnd(); 
     },
 
+    _updateQueryFormFromParams: function( theParams ) {
+	if ( theParams[ 'startDate' ] != null ) {
+	    var wid = dijit.byId( 'startDate' );
+	    wid.setDateFromString( theParams[ 'startDate' ] );
+	}
+	if ( theParams[ 'endDate' ] != null ) {
+	    var wid = dijit.byId( 'endDate' );
+	    wid.setDateFromString( theParams[ 'endDate' ] );
+	}
+    },
+
+    setLastQuery: function() {
+	var qcook = dojo.cookie('tmcpeQuery');
+
+	// HACK: remove leading and training quotes...
+	var start = 0;
+	var end = qcook.length-1;
+	if ( qcook.charAt( 0 ) == '"' ) start++;
+	if ( qcook.charAt( end ) == '"' ) end--;
+	qcook = qcook.substring( start, end )
+
+	var theParams = [];
+	if ( qcook ) {
+	    var qparam = qcook.split( '|' );
+	    for ( var i in qparam ) {
+		var paramstr = qparam[ i ];
+		var keyval = paramstr.split( ':' );
+		theParams[ keyval[ 0 ] ] = keyval[ 1 ];
+	    }
+	}
+
+	this._updateQueryFormFromParams( theParams );
+    },
+
     _incidentsLayerInit: function() {
+
 	// should validate
 
 	if ( !this._progressDialog ) {
@@ -179,7 +218,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var base = document.getElementById("htmldom").href;
 
 	var style = new OpenLayers.Style({
-            pointRadius: 10,
+            pointRadius: "${getPointRadius}",
             fillColor: "red",
             fillOpacity: 0.5,
             strokeColor: "blue",
@@ -187,8 +226,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             strokeOpacity: 0.8
         }, {
             context: {
-                radius: function(feature) {
-		    return Math.min(feature.cluster.length, 0)*2 + 5;
+                getPointRadius: function(feature) {
+		    return Math.min(feature.cluster.length*2,10) + 5;
                 },
             }
         });
@@ -323,6 +362,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	});
 	this.getMap().addControl(this._selectIncident);
 	this._selectIncident.activate();
+
+	// Set query parameters from cookie
+	this.setLastQuery();
 
 	this.updateIncidentsQuery();
     },
