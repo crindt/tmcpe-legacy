@@ -109,8 +109,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    var vv = eventTypeStore.getValue( val, "evtype" );
 	    theParams['eventType'] = vv;
 	}	
-	if ( dijit.byId( 'queryForm' ).attr('value').Analyzed ) {
-	    var value = dijit.byId( 'queryForm' ).attr('value').Analyzed
+	if ( dijit.byId( 'queryForm' ).get('value').Analyzed ) {
+	    var value = dijit.byId( 'queryForm' ).get('value').Analyzed
 	    theParams['Analyzed'] = value;
 	}
 	var days = [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ];
@@ -120,9 +120,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    if ( dowWid && dowWid.checked ) {
 		//	    alert( "DOW " + days[dow] + " CHECKED" );
 		if ( theParams['dow'] == undefined ) {
-		    theParams['dow'] = dowWid.attr('value');
+		    theParams['dow'] = dowWid.get('value');
 		} else {
-		    theParams['dow'] += "," + dowWid.attr('value');
+		    theParams['dow'] += "," + dowWid.get('value');
 		}
 	    }
 	}
@@ -170,14 +170,29 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 							 style: "width:250px",
 							 indeterminate: false
 						       } );
-	    this._progressDialog.attr( 'content', this._progressBar ); 
+	    this._progressDialog.set( 'content', this._progressBar ); 
 	}
 
 	var obj = this;
 
 	// Create the incidents layer.  The URL is hardcoded here...
 	var base = document.getElementById("htmldom").href;
-	
+
+	var style = new OpenLayers.Style({
+            pointRadius: 10,
+            fillColor: "red",
+            fillOpacity: 0.5,
+            strokeColor: "blue",
+            strokeWidth: 2,
+            strokeOpacity: 0.8
+        }, {
+            context: {
+                radius: function(feature) {
+		    return Math.min(feature.cluster.length, 0)*2 + 5;
+                },
+            }
+        });
+
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
             projection: this.getMap().displayProjection,
 	    //            strategies: [new OpenLayers.Strategy.Fixed()],
@@ -185,13 +200,17 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             protocol: new OpenLayers.Protocol.HTTP({
             	url: base + "incident/list.geojson",//theurl,
             	params: this._constructIncidentsParams(),
-            	style: {strokeWidth: 2, strokeColor: "#0000ff", strokeOpacity: 0.25 },
             	format: new OpenLayers.Format.GeoJSON({})
             }),
+            styleMap: new OpenLayers.StyleMap({
+		"default": style
+	    }),
             reportError: true
 	});
 
 	var obj = this;
+	var loaded;
+	var toadd;
 	this._incidentsLayer.events.on({
             "featureselected": obj.onFeatureSelectIncident,
             "featureunselected": obj.onFeatureUnselectIncident,
@@ -199,7 +218,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    "loadstart": function() {
 		// notify IncidentList "app" that we're starting to load
 		obj._loadStart();
-		obj._progressBar.update( { 'maximum': 100, 'progress': 0 } );
+		loaded = 0;
+		obj._progressBar.update( { 'maximum': 100, 'progress': loaded } );
 	    },
 	    "loadend": function() {
 		// notify IncidentList "app" that we've finished loading
@@ -213,24 +233,33 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    "beforefeaturesadded": function (feat) { 
 		console.log( "before features added" );
 		console.log( "ADDING " + feat.features.length + " FEATURES" );
+		toadd = feat.features.length;
+		obj._progressBar.update( { 'maximum': toadd, 'progress': 0 } );
 	    },
 	    "featureadded": function( feat ) { 
+		console.log( "feature added" );
+		loaded++;
+
+		// Update every 10%
+		if ( ( Math.floor( 100 * ( loaded / toadd ) ) % 20 ) == 0 ) {
+		    obj._progressBar.update( { progress: loaded } );
+		}
 	    },
-	    "featuresadded": function() { 
-		console.log( "features added" );
-		obj.updateIncidentsTable(); 
+	    "featuresadded": function( feat ) { 
+		console.log( feat.features.length + " features added" );
 	    },
-	    "featuresremoved": function() { 
-		console.log( "features removed" );
-		obj.updateIncidentsTable();
+	    "featuresremoved": function( feat ) { 
+		console.log( feat.features.length + " features removed" );
 	    },
 	    "moveend": function() { 
+/*
 		var geo = dijit.byId( 'geographic' );
 		if ( geo && geo.checked ) {
 		    // Only update the query if we're doing geographic queries
 		    console.log( "updating because of movement" );
 		    obj.updateIncidentsQuery(); 
 		}
+*/
 	    }
 	});
 
@@ -238,10 +267,14 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this.getMap().addLayers([this._incidentsLayer]);
 
 	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
-	    fillColor: "yellow",
-	    strokeColor: "yellow"
-	}, OpenLayers.Feature.Vector.style["select"]);
+            pointRadius: 10,
+            fillColor: "yellow",
+            fillOpacity: 0.5,
+            strokeColor: "blue",
+            strokeWidth: 2,
+            strokeOpacity: 0.8
 
+	}, OpenLayers.Feature.Vector.style["default"]);
 
 	// for event closure
 	var obj = this;
@@ -271,7 +304,23 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this.getMap().addControl(this._hoverIncident);
 	this._hoverIncident.activate();
 	
-	this._selectIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer);
+
+	var selectStyle = OpenLayers.Util.applyDefaults({
+            pointRadius: 15,
+            fillColor: "blue",
+            fillOpacity: 0.5,
+            strokeColor: "red",
+            strokeWidth: 2,
+            strokeOpacity: 0.8
+
+	}, OpenLayers.Feature.Vector.style["default"]);
+
+	this._selectIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer, {
+	    selectStyle: selectStyle,
+	    eventListeners: {
+		// featureselected...?
+	    }
+	});
 	this.getMap().addControl(this._selectIncident);
 	this._selectIncident.activate();
 
@@ -415,6 +464,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	// Point the store to the incidents layer
 	var store = new tmcpe.ItemVectorLayerReadStore( {vectorLayer: this._incidentsLayer} );
 	this.getIncidentGrid().setStore( store );
+
+	// we only want features that are on screen
+	var geo = dijit.byId( 'geographic' );
+	if ( geo ) this.getIncidentGrid().setQuery( { onScreen: 'true' } );
 
 	var updateIncidentsSummary = function( items, request ) {
 	    // Update the summary statistics:
@@ -736,9 +789,14 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
     _loadEnd: function() {
 	this._jobs--;
-	//	this._progressDialog.attr( "content", "finished" ); 
+	//	this._progressDialog.set( "content", "finished" ); 
 	console.log( "LOAD END: " + this._jobs );
-	if ( this._jobs <= 0 && this._progressDialog != null ) { this._progressDialog.hide(); }
+	if ( this._jobs <= 0 && this._progressDialog != null ) { 
+
+	    // All reads from the server are done so we can update the table
+	    this.updateIncidentsTable();
+	    this._progressDialog.hide(); 
+	}
     },
 
     _loadCancel: function() {

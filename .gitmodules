@@ -4,3 +4,12 @@
 [submodule "web-app/js/openlayers"]
 	path = web-app/js/openlayers
 	url = /home/crindt/openlayers
+[submodule "web-app/js/dojo-src/dojo"]
+	path = web-app/js/dojo-src/dojo
+	url = /home/crindt/dojo-src/dojo
+[submodule "web-app/js/dojo-src/dojox"]
+	path = web-app/js/dojo-src/dojox
+	url = /home/crindt/dojo-src/dojox
+[submodule "web-app/js/dojo-src/dijit"]
+	path = web-app/js/dojo-src/dijit
+	url = /home/crindt/dojo-src/dijit

@@ -8,13 +8,32 @@ dojo.declare("tmcpe.MyDateTextBox", dijit.form.DateTextBox, {
         datePattern: 'yyyy-MM-dd',
         locale: 'en-us'
     },
-    value: "",
+
+    value: "", /*dojo.date.add( new Date(), "month", -3 ),*/
+
     // prevent parser from trying to convert to Date object
     postMixInProperties: function() { // change value string to Date object
         this.inherited(arguments);
+
+	if ( this.value ) {
+	    // split value to see if it's specifid something like -3 months
+	    var diff = this.value.split(" ");
+	    if ( diff.length > 1 ) {
+		var intvl = diff[ 1 ];
+		// remove plural
+		if ( intvl.toLowerCase().charAt( intvl.length-1 ) == 's' ) {
+		    intvl = intvl.substring( 0, intvl.length-1 );
+		}
+		amount = parseInt( diff[ 0 ] );
+		this.value = dojo.date.add( new Date(), intvl, amount );
+	    } else {
+		this.value = dojo.date.locale.parse(this.value, this.myFormat);
+	    }
+	}
+
         // convert value to Date object
-        this.value = dojo.date.locale.parse(this.value, this.myFormat);
     },
+
     // To write back to the server in Oracle format, override the serialize method:
     serialize: function(dateObject, options) {
         return dojo.date.locale.format(dateObject, this.myFormat).toUpperCase();

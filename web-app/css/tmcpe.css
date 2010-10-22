@@ -264,6 +264,11 @@ strong {
 
 // Move to TestbedMap.css
 
+#map {
+    width:80%;
+    height:100%;
+}
+
 .popup {
     position: absolute;
     padding: 5px;
@@ -297,12 +302,12 @@ sub {
 
 /* TIME SPACE DIAGRAM */
 table.tmcpeTsd {
-    position:absolute;
+    position:relative;
     top:0;
     left:0;
-    border-width:3px;
-    border-color:#000000;
-/*    border-collapse:collapse;*/
+/*    border-width:3px;
+    border-color:#000000; */
+/*    border-collapse:collapse; */
     width:100%;
     height:100%;
 }
@@ -311,10 +316,14 @@ table.tmcpeTsd td {
     visibility:inherit;
     opacity:ihherit;
     background: none;
-    padding:3px;
-    border: 1px;
+/* Causes problems in ffox
+    border-bottom: 0px;
+    border-top: 0px;
+    border-right: 0px;
+    border-left: 1px;
     border-style: solid;
     border-color: rgba(0,0,0,.15);
+*/
 }
 
 table.tmcpeTsd th {
@@ -333,7 +342,7 @@ table.tmcpeTsd th {
     border-top-style:solid;
     border-bottom: 0px;
     border-bottom-style: none;
-    border-color: rgba(0,0,0,.15);
+    border-top-color: rgba(0, 0, 200, 0.246094);
 }
 
 .tsdTableNodeContainer table.tmcpeTsd tr:not(.timeHeader) {
@@ -341,7 +350,7 @@ table.tmcpeTsd th {
     border-top-style: solid;
     border-bottom: 0px;
     border-bottom-style: none;
-    border-color: rgba(0,0,0,.15);
+    border-top-color: rgba(0, 0, 200, 0.126094);
 }
 
 .tsdTableNodeContainer.fliptime tr.timeHeader {
@@ -366,37 +375,37 @@ table.tmcpeTsd.hideIncident td.incident {
 }
 
 table.tmcpeTsd.showIncident td.borderDownstream {
-    border-left-width:3px;
+    border-left-width:5px;
     border-left-style:solid;
     border-left-color:rgba(0,0,255,0.75);
 }
 
 table.tmcpeTsd.showIncident td.borderUpstream {
-    border-right-width:3px;
+    border-right-width:5px;
     border-right-style:solid;
     border-right-color:rgba(0,0,255,0.75);
 }
 
 table.tmcpeTsd.showIncident.fliptime td.borderLater {
-    border-top-width:3px;
+    border-top-width:5px;
     border-top-style:solid;
     border-top-color:rgba(0,0,255,0.75);
 }
 
 table.tmcpeTsd.showIncident.fliptime td.borderEarlier {
-    border-bottom-width:3px;
+    border-bottom-width:5px;
     border-bottom-style:solid;
     border-bottom-color:rgba(0,0,255,0.75);
 }
 
 table.tmcpeTsd:not(.fliptime).showIncident td.borderLater {
-    border-bottom-width:3px;
+    border-bottom-width:5px;
     border-bottom-style:solid;
     border-bottom-color:rgba(0,0,255,0.75);
 }
 
 table.tmcpeTsd:not(.fliptime).showIncident td.borderEarlier  {
-    border-top-width:3px;
+    border-top-width:5px;
     border-top-style:solid;
     border-top-color:rgba(0,0,255,0.75);
 }
@@ -416,10 +425,16 @@ table.tmcpeTsd.showEvidence td.tsdEvidence {
     width:100%;
     height:100%;
     position:relative;
+    border: solid black 2px;
 }
 
 /* A horizontal bar displayed in the TSD view to indicate log entries */
 .log_tsd_bar {
+    width:100%;
+    position:absolute;
+    left:0;
+}
+.log_tsd_bar:not(.startlog) {
     border-top-color:rgba(255,0,255,0.85);
     border-top-style:solid;
     background-color:rgba(255,255,0,0.85);
@@ -427,17 +442,14 @@ table.tmcpeTsd.showEvidence td.tsdEvidence {
     border-bottom-style:solid;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    width:100%;
-    position:absolute;
-    left:0;
-    z-index:10;
     height: 4px;
+    z-index:10;
     visibility: hidden;
 }
 
 .log_tsd_bar.startlog {
     border-width: 2px;
-    height: 2px;
+    height: 6px;
     visibility: visible;
     border-color:blue;
     background-color:blue;

@@ -51,6 +51,11 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	this.inherited( arguments );
 
+	var obj = this;
+	dojo.connect( logGrid, "onRowMouseOver", function( event ) { 
+	    obj.simpleSelectLogEntry( event );
+	});
+
 	// connect some styling features to the log grid
 	dojo.connect( logGrid, "onStyleRow", function(row) { 
             //The row object has 4 parameters, and you can set two others to provide your own styling
@@ -161,7 +166,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 			    // Here, we set the default displayed TSD to that
 			    // corresponding to the primary disrupted facility
 			    var ff = inc.section.freewayId + '-' + inc.section.freewayDir;
-			    facilityCombo.attr( 'displayedValue', ff );
+			    facilityCombo.set( 'displayedValue', ff );
 			} else {
 			    alert( "No facility analyses for incident analysis: " + inc.analyses[ 0 ].id );
 			}
@@ -314,6 +319,22 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var theParams = {};
 
 	theParams[ 'id' ] = this.incidentId;
+
+	var style = new OpenLayers.Style({
+            pointRadius: 10,
+            fillColor: "red",
+            fillOpacity: 0.5,
+            strokeColor: "blue",
+            strokeWidth: 2,
+            strokeOpacity: 0.8,
+	    graphicZIndex: 500
+        }, {
+            context: {
+                radius: function(feature) {
+		    return Math.min(feature.attributes.count, 0)*2 + 5;
+                },
+            }
+        });
 	
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
             projection: this.getMap().displayProjection,
@@ -321,9 +342,12 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
             protocol: new OpenLayers.Protocol.HTTP({
             	url: base + "incident/list.geojson",//theurl,
             	params: theParams,
-            	style: {strokeWidth: 4, strokeColor: "#0000ff", strokeOpacity: 0.60, fillColor: "#0000ff" },
             	format: new OpenLayers.Format.GeoJSON({})
             }),
+            styleMap: new OpenLayers.StyleMap({
+		"default": style
+	    }),
+	    rendererOptions: {zIndexing: true},
             reportError: true
 	});
 
@@ -397,12 +421,19 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this._vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
-	    style: {strokeWidth: 6, strokeColor: "#00ff00", strokeOpacity: 0.75 },
+	    styleMap: new OpenLayers.StyleMap({
+		strokeWidth: 6, 
+		strokeColor: "#00ff00", 
+		strokeOpacity: 0.75, 
+		graphicZIndex:300 
+	    }),
             protocol: new OpenLayers.Protocol.HTTP({
   		url: base + "vds/list.geojson",
 		params: myParams,
 		format: new OpenLayers.Format.GeoJSON({})
 	    }),
+	    rendererOptions: {zIndexing: true},
+            reportError: true
 	});
 	
 	var obj = this;
@@ -574,7 +605,15 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 		    // OK, found the feature. alter the style
 		    if ( feature ) {
-			feature.style.strokeColor = tdc.style.backgroundColor;
+			if ( feature.style ) {
+			    feature.style.strokeColor = tdc.style.backgroundColor;
+			} else {
+			    var newstyle = OpenLayers.Util.applyDefaults({
+				strokeColor: tdc.style.backgroundColor
+			    }, feature.layer.styleMap.styles.default.defaultStyle );
+
+			    feature.style = newstyle;
+			}
 			this._vdsSegmentLines.drawFeature( feature );
 		    }
 		}

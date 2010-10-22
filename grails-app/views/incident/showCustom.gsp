@@ -252,7 +252,6 @@
 	       jsId="logGrid" 
 	       dojoType="dojox.grid.DataGrid" 
 	       region="center"
-	       onRowMouseOver="incidentView.simpleSelectLogEntry(event)"
 	       store="logStoreJs"
 	       >
 	  <thead>

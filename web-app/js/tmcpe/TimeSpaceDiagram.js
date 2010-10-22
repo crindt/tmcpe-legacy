@@ -772,23 +772,25 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		var dto=new Date(item.stampDateTime[0]);
 		var dt = Number(dto);
 		var cur = dt-st;
-		console.log(this._data.timesteps[0],item.stampDateTime[0],st,et,dto,dt,cur)
 		var frac = this._flip ? 100-100*(cur/dur) : 100*(cur/dur); // flip, if necessary
-		console.log("FRAC: " + frac);
 		if ( frac < 0 ) console.log( "FRAC < 0" );
 		if ( frac > 100 ) console.log( "FRAC > 100" );
 		var cc = "log_tsd_bar";
-		if ( i==0 ) cc += " startlog";
 		var ss = "top:"+frac+"%;";
 		var ii = "logit_"+item.id;
-		console.log( "CC " + cc );
-		console.log( "SS " + ss );
-		console.log( "II " + ii );
+		if ( i==0 ) {
+		    this._tableNodeContainer.appendChild(
+			dojo.create( "div", { 
+			    id: ii + "_start", 
+			    style: ss,
+			    class: cc +" startlog"   // add startlog class if first
+			}));
+		}
 		this._tableNodeContainer.appendChild(
 		    dojo.create( "div", { 
 			id: ii, 
 			style: ss,
-			class: cc   // add startlog class if first
+			class: cc
 		    }));
 	    }
 	}

@@ -107,13 +107,13 @@ class IncidentController {
       
 		// Limit spatially if the bbox and projection are specified
 		// along with the "geographic" toggle
-                if ( params.bbox && params.proj && params.geographic ) {
+                if ( params.bbox && params.proj /* && params.geographic*/ ) {
                     def bbox = params.bbox.split(",")
                     log.debug("============BBOX: " + bbox.join(","))
 
 		    // Parse out the projection
                     def proj_re_res = ( params.proj =~ /^EPSG\:(\d+)/ )
-		    def proj = proj[0][1]
+		    def proj = proj_re_res[0][1]
 
                     or {
                         // This does a bounding box query around the iCAD
@@ -122,12 +122,13 @@ class IncidentController {
                         addToCriteria(
 			    Restrictions.sqlRestriction( 
 				"""( st_transform( best_geom, $proj ) &&
+                                     st_transform(
                                      st_setsrid( 
                                         st_makebox2d(
                                            st_makepoint( ${bbox[0]}, ${bbox[1]} ), 
                                            st_makepoint( ${bbox[2]}, ${bbox[3]} ) 
                                            ), 
-                                        $proj ) 
+                                        4326 ), $proj )
                                    )"""
 			    ) )
                     }
@@ -223,7 +224,7 @@ class IncidentController {
 		def json = [];
 		theList.each() { json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, properties: it ] ) }
 		def fjson = [ type: "FeatureCollection", features: json ]
-		log.info( "===========EMITTING GEOJSON" );
+		log.info( "===========EMITTING ${theList.size()} GEOJSON" );
 		render fjson as JSON
 	    }
 	}

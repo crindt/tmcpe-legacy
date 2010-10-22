@@ -138,7 +138,7 @@ dojo.declare("tmcpe.ItemVectorLayerReadStore", null,{
 				if(possibleValue.toString().match(regexp)){
 					return true; // Boolean
 				}
-			}else if(value === possibleValue){
+o			}else if(value === possibleValue){
 				return true; // Boolean
 			}
 		});
@@ -236,13 +236,25 @@ dojo.declare("tmcpe.ItemVectorLayerReadStore", null,{
 			}else{
 			    for(key in requestArgs.query){
 				value = requestArgs.query[key];
-				if(!self._containsValue(candidateItem, key, value, regexpList[key])){
-				    match = false;
+				if ( key == 'onScreen' ) {
+				    // crindt HACK: onScreen query arg matches for
+				    // drawn features only (or not drawn)
+				    match = ( candidateItem.onScreen() == ( value == 'true' ) );
+				} else {
+				    if(!self._containsValue(candidateItem, key, value, regexpList[key])){
+					match = false;
+				    }
 				}
 			    }
 			}
 			if(match){
-			    items.push(candidateItem);
+			    if ( candidateItem.cluster && candidateItem.cluster.length > 0 ) {
+				for ( j = 0; j < candidateItem.cluster.length; ++j ) {
+				    items.push( candidateItem.cluster[ j ] );
+				}
+			    } else {
+				items.push(candidateItem);
+			    }
 			}
 		    }
 		    findCallback(items, requestArgs);

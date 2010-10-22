@@ -8,85 +8,68 @@ class TmcpeTagLib {
   def dojo_config = {
       out << 
       """    
-         <script type=\"text/javascript\">
+         <script type='text/javascript'>
             djConfig = {parseOnLoad: true,
                         isDebug:     true,
                         baseUrl:     '${resource( dir:'js',file:'tmcpe' )}/',
-                        modulePaths: { my: '${resource( dir:'js/tmcpe',file:'' )}' }
+                        modulePaths: { my: '${resource( dir:'js/tmcpe',file:'' )}' },
+                        debugAtAllCosts: true
                        };
          </script>
       """
   }
 
-  def dojo_1_4_styles = {
+  def dojo_styles( uncompressed ) {
+      def mod = ""
+      if ( uncompressed ) mod = '-src';
       out << 
-      '''
-         <link rel="stylesheet" href="${resource(dir:'js/dojo-uncompressed/dijit/themes/tundra/layout',file:'BorderContainer.css')}" />
-         <link rel="stylesheet" href="${resource(dir:'js/dojo-uncompressed/dojox/grid/resources',file:'Grid.css')}" />
-         <link rel="stylesheet" href="${resource(dir:'js/dojo-uncompressed/dojox/grid/resources',file:'tundraGrid.css')}" />
-         <link rel="stylesheet" href="${resource(dir:'js/dojo-uncompressed/dijit/themes/tundra',file:'tundra.css')}" />
-         <link rel="stylesheet" href="${resource(dir:'js/dojo-uncompressed/dojo/resources',file:'dojo.css')}" />
-      '''
+      """
+         <link rel='stylesheet' href='${resource(dir:"js/dojo$mod/dijit/themes/tundra/layout",file:'BorderContainer.css')}' />
+         <link rel='stylesheet' href='${resource(dir:"js/dojo$mod/dojox/grid/resources",file:'Grid.css')}' />
+         <link rel='stylesheet' href='${resource(dir:"js/dojo$mod/dojox/grid/resources",file:'tundraGrid.css')}' />
+         <link rel='stylesheet' href='${resource(dir:"js/dojo$mod/dijit/themes/tundra",file:'tundra.css')}' />
+         <link rel='stylesheet' href='${resource(dir:"js/dojo$mod/dojo/resources",file:'dojo.css')}' />
+      """
   }
 
-  def dojoUncompressed_1_4 = {
+  def dojo( uncompressed ) {
+      def mod = ""
+      if ( uncompressed ) mod = '-src';
+
       out << tmcpe.dojo_config()
       out << 
-      '''
-         <script type="text/javascript">
-            var djConfig = { parseOnLoad: true, isDebug: true, debugAtAllCosts:true };
-         </script>
-         <script src="${resource(dir:'js/dojo-uncompressed/dojo',file:'dojo.js')}"></script>
-      '''
+      """
+         <script src='${resource(dir:"js/dojo$mod/dojo",file:'dojo.js')}'></script>
+      """
   }
   
-  def dojo_1_4_styles_google = {
+  def dojo_styles_google( version ) {
       out << 
-      '''
-          <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.3/dijit/themes/tundra/layout/BorderContainer.css" />
-          <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.3/dojox/grid/resources/Grid.css" />
-          <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.3/dojox/grid/resources/tundraGrid.css" />
-          <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.3/dijit/themes/tundra/tundra.css" />
-          <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4.3/resources/dojo.css" />
-      '''
+      """
+          <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dijit/themes/tundra/layout/BorderContainer.css' />
+          <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dojox/grid/resources/Grid.css' />
+          <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dojox/grid/resources/tundraGrid.css' />
+          <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dijit/themes/tundra/tundra.css' />
+          <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/resources/dojo.css' />
+      """
   }
-  def dojoUncompressed_1_4_google = {
+  def dojo_google( version, uncompressed ) {
+      def mod = ""
+      if ( uncompressed ) mod = '.uncompressed.js';
       out << tmcpe.dojo_config()
       out << 
-      '''
-         <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.4.3/dojo/dojo.xd.js.uncompressed.js"></script>
+      """
+         <script src='http://ajax.googleapis.com/ajax/libs/dojo/$version/dojo/dojo.xd.js$mod'></script>
          <script>
-            dojo.config.dojoBlankHtmlUrl = "/blank.html";
+            dojo.config.dojoBlankHtmlUrl = '/blank.html';
          </script>
-      '''
-  }
-
-  def dojo_1_4 = {
-      out << tmcpe.dojo_config()
-      out << 
-      '''
-         <link rel="stylesheet" href="${resource(dir:'js/dojo/dijit/themes/tundra/layout',file:'BorderContainer.css')}" />
-         <link rel="stylesheet" href="${resource(dir:'js/dojo/dojox/grid/resources',file:'Grid.css')}" />
-         <link rel="stylesheet" href="${resource(dir:'js/dojo/dojox/grid/resources',file:'tundraGrid.css')}" />
-         <link rel="stylesheet" href="${resource(dir:'js/dojo/dijit/themes/tundra',file:'tundra.css')}" />
-         <link rel="stylesheet" href="${resource(dir:'js/dojo/dojo/resources',file:'dojo.css')}" />
-      '''
-  }
-  def dojo_1_4_google = {
-      out << tmcpe.dojo_config();
-      out << 
-      '''
-         <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.4.3/dojo/dojo.xd.js"></script>
-         <script>
-            dojo.config.dojoBlankHtmlUrl = "/blank.html";
-         </script>
-      '''
+      """
   }
 
   def openlayers_local = {
       out << 
       """
-         <script src=\"${resource(dir:'js/openlayers/lib/',file:'OpenLayers.js')}\"></script>
+         <script src='${resource(dir:'js/openlayers/lib/',file:'OpenLayers.js')}'></script>
       """
   }
 
@@ -109,14 +92,14 @@ class TmcpeTagLib {
 
 
   def tmcpe_styles = {
-      out << "<link rel=\"stylesheet\" href=\"${resource( dir:'css',file:'tmcpe.css' )}\" />\n"
-      out << tmcpe.dojo_1_4_styles_google()
+      out << "<link rel='stylesheet' href='${resource( dir:'css',file:'tmcpe.css' )}' />\n"
+      out << tmcpe.dojo_styles_google( '1.5' )
+      //out << tmcpe.dojo_styles()
   }
 
   def tmcpe = {
-      out << tmcpe.dojo_1_4_google()
-//      out << tmcpe.dojoUncompressed_1_4_google()
-//      out << tmcpe.dojo_1_4()
+      out << tmcpe.dojo_google( '1.5', true )
+      //out << tmcpe.dojo( true )
 
   }
 

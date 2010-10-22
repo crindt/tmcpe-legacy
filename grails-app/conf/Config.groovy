@@ -212,4 +212,16 @@ uiperformance {
 uiperformance.html.includePathPatterns = [".*\\.geojson"]
 uiperformance.html.includeContentTypes = [ "text/geojson", "application/json" ]
 
+uiperformance.bundles = [
+    [type: 'js',
+     name: 'openlayers/local',
+     files: ['openlayers/lib/OpenLayers.js']
+    ]],
+
+    [type: 'css',
+     name: 'tmcpe',
+     files: ['tmcpe.css']
+    ]]
+]
+
 

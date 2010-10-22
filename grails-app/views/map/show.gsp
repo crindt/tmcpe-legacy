@@ -27,6 +27,7 @@
       dojo.require("dijit.form.RadioButton");
       dojo.require("dijit.form.Form");
       dojo.require("dojo._base.json");
+      dojo.require("dojo.date");
       dojo.require("tmcpe.IncidentList");
       dojo.require("tmcpe.MyDateTextBox");
       dojo.require("tmcpe.MyTimeTextBox");
@@ -46,9 +47,7 @@
 
       var myFormatDateOnly = function( inDate ) {
         if ( inDate == null ) return "";
-        return myFormatDate( inDate );
-        var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDate), {selector:'date', formatLength:'short'} );
-        alert( "DATE IS: " + ret );
+        var ret = dojo.date.locale.format( inDate, {selector:'date', formatLength:'short'} );
         return ret;
       };
 
@@ -81,15 +80,9 @@
 
 	  <table>
 	    <tr>
-	      <th>
-		Time Options
-	      </th>
-	      <th>
-		Incident Options
-	      </th>
-	      <th>
-		Other Options
-	      </th>
+	      <th>Time Options</th>
+	      <th>Incident Options</th>
+	      <th>Other Options</th>
 	    </tr>
 	    <tr>
 	      <td style="width:33%;">
@@ -97,7 +90,9 @@
 		  <tr>
 		    <td><label id="dateRangeLabel" for="startDate">Date Range:</label></td>
 		    <td>
-		      <input type="text" style="width:8em;" name="startDate" id="startDate" value="" dojoType="tmcpe.MyDateTextBox"
+		      <input type="text" style="width:8em;" name="startDate" id="startDate" jsId="startDate"
+			     dojoType="tmcpe.MyDateTextBox"
+			     value="-3 months"
 			     required="false" />
 		      <label for="endDate">&nbsp;to:</label>
 		      <input type="text" style="width:8em;" name="endDate" id="endDate" value="" dojoType="tmcpe.MyDateTextBox"
@@ -160,27 +155,7 @@
 		</span>
 	      </td>
 
-<!--
-	  <div style="width:250px;padding:1em;">
-	    <label for="TimeOfDay">Time of Day</label>
-	    <div id="TimeOfDay" 
-		 discreteValues="97" 
-		 dojoType="dojox.form.HorizontalRangeSlider"
-		 value="6,8" minimum="0" maximum="24"
-		 intermediateChanges="true"
-		 showButtons="false"
-
-		 name="TimeOfDay">
-	      <script type="dojo/method" event="onChange" args="value">
-		dojo.byId("earliestTime").value = value[0];
-		dojo.byId("latestTime").value = value[1];
-	      </script>
-	    </div>
-	    <input type="text" id="earliestTime" name="earliestTime" value="6"/>
-	    <input type="text" id="latestTime" name="latesTime" value="8"/>
-	  </div>
-	  -->
-   <!-- Facility Data -->
+	      <!-- Facility Data -->
               <td style="width:33%;">
 		<table style="padding:0.5em;border-style=none;">
 		  <tr>
@@ -285,16 +260,19 @@
       </div> <!-- Query Pane -->
       <!-- Map and Details Pane -->
       <div dojoType="dijit.layout.BorderContainer" id="mapgrid" region="center" design="sidebar" style="background:green;" splitter="false" liveSplitters="false">
+
 	<!-- Map Pane -->
 	<div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
 	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
 	</div>
+
 	<!-- Incident Details Pane -->
 	<div dojoType="dijit.layout.BorderContainer" gutters="false" region="right" style="width: 500px;background:white;">
 	  <!-- Detail Box -->
 	  <div dojoType="dijit.layout.ContentPane" id="incidentDetailPane" gutters="true" region="center" >
 	    <div id="incidentDetails" style="margin-top:3em;">Select an incident on the map to view its details here.</div>
 	  </div>
+
 	  <!-- Detail Button Box -->
 	  <div dojoType="dijit.layout.ContentPane" id="incidentDetailsControllerPane" gutters="true" region="bottom">
 	    <div id="incidentDetailsController" class="centered-div centered" style="width:12em;visibility:hidden;">
