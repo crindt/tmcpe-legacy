@@ -215,7 +215,8 @@ class Incident {
     }
     
     def toJSON( json ) {
-	log.warn( "WARNING: emitting JSON incident cad:$cad [$id] without a section" );
+	if ( !section )
+	    log.warn( "WARNING: emitting JSON incident cad:$cad [$id] without a section" );
         return json.build{
             "class(Incident)"
             id(id)
