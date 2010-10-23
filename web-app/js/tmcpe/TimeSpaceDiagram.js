@@ -783,14 +783,23 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 			dojo.create( "div", { 
 			    id: ii + "_start", 
 			    style: ss,
-			    class: cc +" startlog"   // add startlog class if first
+			    className: cc +" startlog"   // add startlog class if first
 			}));
 		}
 		this._tableNodeContainer.appendChild(
 		    dojo.create( "div", { 
 			id: ii, 
 			style: ss,
-			class: cc
+			className: cc
+		    }));
+
+		// add a label to the log bar
+		this._tableNodeContainer.appendChild(
+		    dojo.create( "div", {
+			id: ii + "_label",
+			style: "top:"+frac+"%;",
+			className: "log_tsd_label",
+			innerHTML: ( item.memoOnly != "" ? item.memoOnly : item.activitySubject )
 		    }));
 	    }
 	}

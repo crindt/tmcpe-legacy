@@ -55,6 +55,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	dojo.connect( logGrid, "onRowMouseOver", function( event ) { 
 	    obj.simpleSelectLogEntry( event );
 	});
+	dojo.connect( logGrid, "onCellFocus", function( inCell, inRowIndex ) { 
+	    obj.simpleSelectLogEntry( { cell: inCell, rowIndex: inRowIndex } );
+	});
 
 	// connect some styling features to the log grid
 	dojo.connect( logGrid, "onStyleRow", function(row) { 
@@ -691,7 +694,15 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     },
 
     simpleSelectLogEntry: function( event ) {
-	var logEntry = event.grid.getItem( event.rowIndex );
+	var logEntry = null
+	if ( event.grid != null )
+	    logEntry = event.grid.getItem( event.rowIndex );
+	else if ( event.cell != null )
+	    logEntry = event.cell.grid.getItem( event.rowIndex );
+	else {
+	    console.log( "WARNING: simpleSelectLogEntry: NO EVENT OR CELL!" );
+	    return;
+	}
 
 	// Hide existing
 	dojo.query( ".log_tsd_bar" ).forEach(function(node,index,arr){
@@ -699,8 +710,14 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		node.style.visibility = 'hidden';
 	    }
 	});
+	dojo.query( ".log_tsd_label" ).forEach(function(node,index,arr){
+	    node.style.visibility = 'hidden';
+	});
 
 	dojo.query( "#logit_"+logEntry.id[0] ).forEach(function(node,index,arr){
+	    node.style.visibility = 'visible';
+	});
+	dojo.query( "#logit_"+logEntry.id[0]+"_label" ).forEach(function(node,index,arr){
 	    node.style.visibility = 'visible';
 	});
     },
