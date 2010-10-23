@@ -429,6 +429,18 @@ table.tmcpeTsd.showEvidence td.tsdEvidence {
 }
 
 /* A horizontal bar displayed in the TSD view to indicate log entries */
+.log_tsd_label {
+    position:absolute;
+    left:5%;
+    background-color: rgba(0,0,0,0.4);
+    color:white;
+    font-weight:bold;
+    padding-top:5px;
+    padding-left:10px;
+    text-align:left;
+    z-index:9;
+    visibility: hidden;
+}
 .log_tsd_bar {
     width:100%;
     position:absolute;
