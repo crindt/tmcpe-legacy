@@ -229,6 +229,30 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this._updateQueryFormFromParams( this._restoreIncidentsParams() );
     },
 
+    _getColor: function( /*float*/ val, /*float*/ min, /*float*/ max, /*float*/ minval, /*float*/ maxval ) {
+	// summary:
+	//		Computes a color between green and red based upon the given value and limits
+	// description:
+	//		If val >= max, the color is green.  If val <=
+	//		min, the color is red.  If it's in between,
+	//		the color is trends from green->yellow->orange->red
+	var frac = (val-min)/(max-min);
+	if ( frac < 0 )      return minval;
+	else if ( frac > 1 ) return maxval;
+	var r = 1;
+	var g = 1;
+	var b = 0;
+	if ( frac <= 0.5 ) {
+	    r = frac/0.5;
+	    g = 1;
+	} else {
+	    r = 1;
+	    g = ( 1 - (frac-0.5)/0.5 );
+	}
+	var ret = "rgba("+[Math.round(r*255),Math.round(g*255),Math.round(b*255),1.0].join(",")+")"
+	return ret;
+    },
+
     _incidentsLayerInit: function() {
 
 	// Set query parameters from cookie
@@ -261,57 +285,72 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	// Create the incidents layer.  The URL is hardcoded here...
 	var base = document.getElementById("htmldom").href;
 
+	// The basic styling for incidents.
 	var style = new OpenLayers.Style({
             pointRadius: "${getPointRadius}",
-            fillColor: "red",
+            fillColor: "${getFillColor}",
             fillOpacity: 0.5,
             strokeColor: "blue",
             strokeWidth: 2,
             strokeOpacity: 0.8,
-	    graphicZIndex:1
+	    graphicZIndex:1,
         }, {
             context: {
+		// Return a radius based upon the number of features in the
+		// cluster The minimum size is 5px, the maximum is 15, which is
+		// the size when there are 5 or more features in a cluster
                 getPointRadius: function(feature) {
 		    var len = feature.cluster ? feature.cluster.length : 1;
 		    return Math.min(len*2,10) + 5;
                 },
-            }
+		getFillColor: function(feature) {
+		    var features;
+		    if ( feature.cluster )
+			features = feature.cluster;
+		    else
+			features = [ feature ];
+		    var sum = 0;
+		    var cnt = 0;
+		    for ( var i = 0; i < features.length; i++) {
+			var feat = feature.cluster[ i ];
+			var del = feat.attributes.tmcpe_delay;
+			if ( del != undefined ) {
+			    cnt++;
+			    sum += del;
+			}
+		    }
+		    if ( cnt == 0 ) {
+			return "gray";
+		    } else {
+			// return a color between green and red as the delay
+			// increases from 50 veh-hr to 800 veh-hr
+			return obj._getColor( sum / cnt, 50, 800, "green", "red" );
+		    }
+		}
+	    }
         });
 
-	var hoverSelectStyle = new OpenLayers.Style({
-            pointRadius: "${getPointRadius}",
-            fillColor: "yellow",
-            fillOpacity: 0.5,
-            strokeColor: "blue",
-            strokeWidth: 2,
-            strokeOpacity: 0.8,
-	    graphicZIndex:5
-        }, {
-            context: {
-                getPointRadius: function(feature) {
-		    var len = feature.cluster ? feature.cluster.length : 1;
-		    return Math.min(len*2,10) + 5;
-                },
-            }
-        });
+	// When you hover over an incident it turns yellow and raises up
+	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
+	    strokeColor: "rgba(255,0,208,1)",
+	    strokeOpacity: 0.9,
+	    fillOpacity: 0.65,
+	    graphicZIndex: 5,
+	}, style.clone());
 
-	var selectStyle = new OpenLayers.Style({
-            pointRadius: "${getPointRadius}",
-            fillColor: "yellow",
-            fillOpacity: 0.7,
-            strokeColor: "blue",
-            strokeWidth: 5,
-            strokeOpacity: 0.9,
-	    graphicZIndex:10
-        }, {
-            context: {
-                getPointRadius: function(feature) {
-		    var len = feature.cluster ? feature.cluster.length : 1;
-		    return Math.min(len*2,10) + 10;
-                },
-            }
-        });
+	// When you select an incident it is yellow, is more pronounced by being
+	// 5px bigger (in minRadius) and bolder.  It is also raised even higher
+	var selectStyle = OpenLayers.Util.applyDefaults({
+	    strokeWidth: 6,
+	    strokeOpacity: 0.9,
+	    fillOpacity: 0.85,
+	    graphicZIndex: 10
+	}, hoverSelectStyle.clone());
 
+	selectStyle.context.getPointRadius = function(feature) {
+	    var len = feature.cluster ? feature.cluster.length : 1;
+	    return Math.min(len*2,10) + 10;
+        };
 
 	var obj = this;
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
@@ -678,16 +717,30 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	if ( feature.cluster ) {
 	    var buttons = new Array();
-	    for ( var i = 0; i < feature.cluster.length; ++i )
+
+	    // clone the cluster features and sort them on the basis of delay (desc)
+	    var tmpCluster = feature.cluster.slice(0).sort( 
+		function( a, b ) {
+		    var a1 = a.attributes.tmcpe_delay ? a.attributes.tmcpe_delay : 0;
+		    var b1 = b.attributes.tmcpe_delay ? b.attributes.tmcpe_delay : 0;
+		    return b1 - a1;
+		}
+	    );
+	    for ( var i = 0; i < tmpCluster.length; ++i ) 
 	    {
-		var f = feature.cluster[ i ];
+//		var f = feature.cluster[ i ];
+		var f = tmpCluster[ i ]
 		var id = f.attributes.id;
 		var cad = f.attributes.cad;
 		
 		var buttonId = 'showIncidentButton-'+f.attributes.id;
 		var button;
+
+		// Grab the portion of the memo up to the first :DOSEP:
 		var ii = f.attributes.memo.indexOf(":DOSEP:");
 		var memo = f.attributes.memo.substring(ii);
+
+		// Create and add the content pane for this incident
 		var cp = new dijit.layout.ContentPane(
 		    { title: "INCIDENT " + cad,
 		      content: '<table class="incidentSummary">' 
