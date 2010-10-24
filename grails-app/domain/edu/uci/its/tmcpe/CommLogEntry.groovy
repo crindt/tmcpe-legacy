@@ -30,7 +30,7 @@ class CommLogEntry implements Comparable {
 
     static mapping = {
 //        table 'ct_al_backup_2007'
-        table name: 'd12_comm_log', schema: 'actlog'
+        table name: 'd12_comm_log_censored', schema: 'actlog'
         id column: 'keyfield'
 //        cache usage:'read-only'
         // turn off optimistic locking, i.e., versioning

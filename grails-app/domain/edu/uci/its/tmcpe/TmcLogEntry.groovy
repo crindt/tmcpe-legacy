@@ -28,7 +28,7 @@ class TmcLogEntry implements Comparable {
 
     static mapping = {
 //        table 'ct_al_backup_2007'
-        table name: 'd12_activity_log', schema: 'actlog'
+        table name: 'd12_activity_log_censored', schema: 'actlog'
         id column: 'keyfield'
 //        cache usage:'read-only'
         // turn off optimistic locking, i.e., versioning
