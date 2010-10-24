@@ -28,8 +28,8 @@ __PACKAGE__->set_primary_key("site_no", "direction", "lane_no");
 __PACKAGE__->add_unique_constraint("wim_lane_dir_pkey", ["site_no", "direction", "lane_no"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yx7UsgCRvwqS4D2u9eV+2Q
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1GkKLIbuy10eV5Fhhns7Eg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

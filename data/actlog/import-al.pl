@@ -961,7 +961,7 @@ INCDEL: while( my $inc = $incrs->next ) {
     if ( $@ ) {
 	$_ = ref $@;
 	if    ( /SCALAR/ ) { warn $@; }
-	elsif ( /HASH/ )   { warn $@->{msg}; }
+	elsif ( /DBIx::Class::Exception/ )   { croak $@->{msg}; }
 	else               { warn "UNKNOWN PROBLEM COMPUTING DELAY"; }
 	next INCDEL;
     }

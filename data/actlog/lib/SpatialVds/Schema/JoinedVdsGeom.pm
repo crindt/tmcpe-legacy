@@ -52,8 +52,8 @@ __PACKAGE__->set_primary_key("gid");
 __PACKAGE__->add_unique_constraint("joined_vds_geom_pkey", ["gid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WF/b09Nc69+WtIhZJy+nvg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:omfx7bZioATlAN+B79enyw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

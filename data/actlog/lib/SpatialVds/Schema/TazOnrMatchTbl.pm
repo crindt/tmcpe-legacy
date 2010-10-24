@@ -45,8 +45,8 @@ __PACKAGE__->set_primary_key("gid");
 __PACKAGE__->add_unique_constraint("taz_onr_match_tbl_pkey", ["gid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:unkS6sXG4hi1Idf1uDp4bg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6HWyPADaFPfmtRdhGh4ooA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

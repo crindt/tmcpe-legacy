@@ -22,8 +22,8 @@ __PACKAGE__->set_primary_key("vds_id");
 __PACKAGE__->add_unique_constraint("vds_geom_2230_pkey", ["vds_id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GIfj0BzqTuJz3Fcq+kIQVg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mF6dHi7Nd69wF6+0GiB73Q
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

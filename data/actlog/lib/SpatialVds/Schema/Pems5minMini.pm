@@ -227,8 +227,8 @@ __PACKAGE__->set_primary_key("vdsid", "stamp");
 __PACKAGE__->add_unique_constraint("pems_5min_mini_pkey", ["vdsid", "stamp"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:b5eD+LkMY2xnWq9e2QA1vg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5lSeoF0HvTfiBr8oqvdiPw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

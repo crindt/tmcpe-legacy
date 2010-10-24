@@ -24,8 +24,8 @@ __PACKAGE__->set_primary_key("ml_vds_id", "r_vds_id");
 __PACKAGE__->add_unique_constraint("mainline_ramp_pkey", ["ml_vds_id", "r_vds_id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QVSMyr6n2stHwNzwp3IQhg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PirRtg8aK68HAxdFHsHnIA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

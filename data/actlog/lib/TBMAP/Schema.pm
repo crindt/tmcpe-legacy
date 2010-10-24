@@ -8,8 +8,8 @@ use base 'DBIx::Class::Schema';
 __PACKAGE__->load_classes;
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:31
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:d8g/rPmX/bN7Gg4ynSRBMg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:OtX/YjlU6lDYI+utwNCXLg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

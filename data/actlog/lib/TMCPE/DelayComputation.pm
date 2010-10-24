@@ -605,7 +605,7 @@ sub get_pems_data {
 			# created row and updates the existing row accordingly
 			foreach my $cr ( @created_rows ) {
 			    foreach my $col ( $er->result_source->columns ) {
-				$er->set_column( $_ => $cr->get_column( $_ ) ) 
+				$er->set_column( $col => $cr->get_column( $col ) ) 
 			    }
 			}
 
@@ -614,7 +614,7 @@ sub get_pems_data {
 
 		    } else {
 
-			#### =: join( '', Row doesn't exist for (',$vds->id,',',$br->stamp,'), create a new one' )
+			#### =: join( '', "Row doesn't exist for (",$vds->id,',',$br->stamp,'), create a new one' )
 			$self->vds_db->populate( 
 			    'Pems5minAnnualAvg',
 			    [ [ $created_rows[0]->result_source->columns ],
@@ -706,13 +706,13 @@ sub get_pems_data {
 				 $date,
 				 $time,
 				 $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name},
-				 fmt_unit( $row->a_vol * 12, " vph", "%5.0f" ),
-				 fmt_unit( $row->a_occ * 100 , "%", "%5.1f" ),
-				 fmt_unit( $row->a_spd , " mph", "%5.1f" ),
-				 fmt_unit( $row->sd_spd , " mph", "%5.1f" ),
-				 fmt_unit( $self->band * $row->sd_spd , " mph", "%5.1f" ),
-				 fmt_unit( $row->a_spd - $self->band * $row->sd_spd , " mph", "%5.1f" ),
-				 fmt_unit( $row->o_spd , " mph", "%5.1f" ),
+				 fmt_unit( $row->a_vol ? $row->a_vol * 12 : "<undef>", " vph", "%5.0f" ),
+				 fmt_unit( $row->a_occ ? $row->a_occ * 100 : '<undef>' , "%", "%5.1f" ),
+				 fmt_unit( $row->a_spd ? $row->a_spd : '<undef>' , " mph", "%5.1f" ),
+				 fmt_unit( $row->sd_spd ? $row->sd_spd : '<undef>' , " mph", "%5.1f" ),
+				 fmt_unit( $row->sd_spd ? $self->band * $row->sd_spd : '<undef>' , " mph", "%5.1f" ),
+				 fmt_unit( defined $row->a_spd && defined $row->sd_spd ? $row->a_spd - $self->band * $row->sd_spd : '<undef>' , " mph", "%5.1f" ),
+				 fmt_unit( defined $row->o_spd ? $row->o_spd : '<undef>' , " mph", "%5.1f" ),
 				 $row->days_in_avg,
 				 $row->o_pct_obs,
 				 $pjm,

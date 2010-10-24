@@ -65,8 +65,8 @@ __PACKAGE__->set_primary_key("vds_id", "ts");
 __PACKAGE__->add_unique_constraint("pems_lane_rollup_pkey", ["vds_id", "ts"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-18 14:46:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:NjrTbYSJQE0KRn+QhyWV1g
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:U+c9Mk7Y/6PL06PDi2ap7w
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
