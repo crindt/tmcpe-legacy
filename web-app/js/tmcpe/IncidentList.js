@@ -713,8 +713,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		}
 
 		button =new dijit.form.Button({
+		    ifaId: id,
 		    label: "Show Incident Detail",
-		    onClick: function() { window.open(base+'incident/showCustom?id='+id); }
+		    onClick: function() { 
+			window.open( base+'incident/showCustom?id='+this.ifaId ); 
+		    }
 		},buttonId);
 
 
