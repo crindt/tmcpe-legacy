@@ -593,7 +593,9 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 	var timesteps = d.timesteps;
 	var fheight = height;
-	var height_style = "height:" + fheight + "%;"+"min-height:" + fheight + "%;";
+
+	// Don't use this---just let the browser stretch it out...
+	//var height_style = "height:" + fheight + "%;"+"min-height:" + fheight + "%;";
 
 	for ( i = 0; i < numrows; ++i )
 	{
@@ -604,20 +606,19 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 
 	    // add the next row to the table
-	    this._tr[i] = tt.appendChild( dojo.create( "tr", {timeidx: i, time: iind, style: "min-height:" + fheight + "%;" } ) );
+	    this._tr[i] = tt.appendChild( dojo.create( "tr", {timeidx: i, time: iind/*, style: "min-height:" + fheight + "%;"*/ } ) );
 
 	    var tr = this._tr[i];
 
 	    // width of the table row header in pct
 	    var dt = 5;
-	    var trh_width = 5;
+	    var trh_width = 5;   // percept
 	    var trh_length = 15; // number of minutes per header
 	    var trh_length_cnt = trh_length/dt;
 	    if ( trh_length_cnt != Math.floor( trh_length_cnt ) ) 
 		alert( "trh_length [" + trh_length + "] in TSD is not a multiple of " + dt );
 
 	    // Create the table row headers (to hold time)
-	    
 	    if ( ( i < numrows ) && i % trh_length_cnt == 0 ) { // we don't label every row...
 
 		tr.className += " timeHeader";
@@ -640,18 +641,6 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		
 		this._trh[i].innerHTML = timeStr;
 
-/*
-		this._trh[i].appendChild( dojo.create( "div", {
-		    class: "timeHeader",
-		    style: "position:relative;top:0px;left:0px;width:100%;height:100%;",
-		    innerHTML: timeStr
-		}));	    
-		this._tableNodeContainer.appendChild( dojo.create( "div", {
-		    class: "timeHeader",
-		    style: "position:absolute;top:"+(i*fheight)+"%;left:0px;width:5%;height:",
-		    innerHTML: timeStr
-		}));	    
-*/
 	    }
 
 	    // Now loop and create the table cells
@@ -734,7 +723,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		    segment: j,
 		    station: d.sections[j].stnidx,
 		    innerHTML: ""/*i + "(" + iind + ")," + j*/, 
-		    style: "width:" + width.toFixed(3) + "%;"+height_style,
+		    style: "width:" + width.toFixed(3) + "%;", //+height_style, Let the browser do height
 		} ) );
 
 		// update the theme
