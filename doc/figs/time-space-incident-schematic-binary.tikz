@@ -1,0 +1,237 @@
+\scriptsize
+\setcounter{time}{0}
+\setcounter{space}{0}
+\begin{tikzpicture}
+  [incident/.style={draw,color=black!30,,fill=yellow!50,text=black},
+  feasible/.style={draw,color=black!30,fill=cyan!30,text=black},
+  infeasible/.style={draw,color=black!30,fill=black!5,text=black},
+  heading/.style={font={\scriptsize\bf}},
+  matrix of nodes/.style={ 
+    column sep=0pt,row sep=0pt,
+    nodes={draw,font=\scriptsize,minimum width=5em,minimum height=2.5em,anchor=south west},
+    execute at end cell=\addtocounter{space}{1}%
+  }]
+  \matrix[matrix of nodes] {
+    \node (timebox) [heading,minimum height=5em] {Time}; & \setcounter{space}{0}
+    \node (s\arabic{space})[heading]{$\mathbf{}i$}; & 
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}\cdots$}; &
+    \node (sF1)[heading]{$\mathbf{}1$\addtocounter{time}{1}\setcounter{space}{0}};
+    \setcounter{time}{1}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} F1)[infeasible]{};\addtocounter{time}{1}\setcounter{space}{0};
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} F1)[infeasible]{}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} F1)[infeasible]{}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{}; &
+    \node (n\arabic{time} F1)[infeasible]{}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[infeasible]{}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[incident]{0}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} F1)[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {\vdots{}}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{1}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (tM)[heading] {$t_M$}; \setcounter{space}{0} &
+    \node (n$M$ \arabic{space})[infeasible]{}; &
+    \node (n$M$ \arabic{space})[infeasible]{}; &
+    \node (n$M$ \arabic{space})[infeasible]{}; &
+    \node (n$M$ \arabic{space})[infeasible]{}; &
+    \node (n$M$ \arabic{space})[infeasible]{}; &
+    \node (n$M$ \arabic{space})[infeasible]{}; &
+    \node (n$M$ \arabic{space})[infeasible]{}; &
+    \node (n$M$ \arabic{space})[infeasible]{}; &
+    \node (n$M$ F1)[infeasible]{}; \\
+  };
+
+  % draw true impacted region
+  \draw[red,very thick] (n1 1.north west) -- (n1 1.north east) -- (n3 2.north west) -- (n3 2.north east) 
+  -- (n3 2.south east) -- (n4 3.north east) -- (n7 4.north west) -- (n7 4.north east)
+  -- (n8 5.north west) -- (n8 6.north east) -- (n8 6.south east) -- (n9 7.north east) -- (n11 7.south east)
+  -- (n11 6.south west) -- (n11 6.north west)
+  -- (n10 5.south west) -- (n10 5.north west)
+  -- (n9 4.south west) -- (n9 4.north west)
+  -- (n8 3.south west) -- (n8 3.north west)
+  -- (n7 2.south west) -- (n6 1.north east) -- (n6 1.north west) -- cycle;
+
+
+  % draw stupid heading at the top
+  \draw node at (s1.north west) [anchor=south west,minimum height=2.5em,minimum width=11*3.75em] {\scriptsize{}\bf{}Freeway section};
+  \draw (timebox.north east) rectangle (sF1.north east);
+
+  % draw outer rectangle
+  \draw (timebox.north west) rectangle (nM F1.south east);
+
+\end{tikzpicture}

@@ -1,0 +1,35 @@
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+\begin{tikzpicture}[scale=6]
+  \draw (0,0) node [below,anchor=north] {$0$} -- (1,0) node [below,anchor=north] {$t$};
+  \draw (0,0) -- (0,1);
+ 
+  \draw (0,0.4) coordinate (s1) node [left,anchor=east] {Q(0)} -- coordinate [pos=0.5] (mid) node [pos=0.8,above] {$A(t)$} (1,0.9) coordinate (s2);
+  \draw (0,0) -- node [pos=0.2,below right] {$D(t)$} coordinate (mid2) (mid);
+  \path (mid2 |- 0,1) coordinate (tmp);
+  \draw[-latex'] (mid2) -- node [pos=0.35,left,anchor=east] {Q(t)} (intersection of mid2--tmp and s1--s2) coordinate (int); 
+
+  % add red shading
+  \begin{pgfonlayer}{background}
+    \shade[top color=red!50,bottom color=red!10,shading angle=90] (0,0) -- (mid) -- (s1) -- cycle; 
+  \end{pgfonlayer}
+  
+  \draw (0.75,0.45) node {$\lambda < \mu$};
+\end{tikzpicture}
+\begin{tikzpicture}[scale=6]
+  \draw (0,0) node [below,anchor=north] {0} -- (1,0) node [below,anchor=north] {t};
+  \draw (0,0) -- (0,1);
+  
+   \draw (0,0.4) coordinate (a1) node [left,anchor=east] {Q(0)} -- coordinate [pos=0.5] (mid) node [pos=0.8,above] {$A(t)$} (1,0.9) coordinate (a2);
+  \draw (0,0) -- coordinate[pos=0.3] (mid2) node [pos=0.8,above] {$D(t)$} (1,0.3) coordinate (d2);
+  \path (mid2 |- 0,1) coordinate (tmp);
+  \draw[-latex'] (mid2) -- node [pos=0.5,left,anchor=east] {Q(t)} (intersection of mid2--tmp and a1--a2) coordinate (qttop); 
+
+  % add red shading
+  \begin{pgfonlayer}{background}
+    \shade[top color=red!10,bottom color=red!50,shading angle=90] (0,0) -- (a1) -- (a2) -- (d2) -- cycle;
+  \end{pgfonlayer}
+  
+  \draw (0.75,0.45) node {$\lambda > \mu$};
+\end{tikzpicture}

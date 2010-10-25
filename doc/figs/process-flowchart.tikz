@@ -1,0 +1,49 @@
+\newcommand{\detail}[4][west]{
+  \ifthenelse{\equal{#1}{west}}{%
+    \node (#2) [#3,anchor=east,text badly ragged] {
+      #4
+    };
+    \draw [decorate,decoration=brace] (#2.south west) -- 
+    (#2.north west)
+  }{%
+    \node (#2) [#3,anchor=west,text badly ragged left] {
+      #4
+    };
+    \draw [decorate,decoration=brace] (#2.north east) -- 
+    (#2.south east)
+  }
+}
+\begin{tikzpicture}[node distance=4cm,
+  software/.style={rectangle,draw,drop shadow},
+  tag/.style={text=red,fill=white},
+  staff/.style={rectangle,draw,rounded corners},
+  tech/.style={rectangle,draw,rounded corners},
+  every node/.style={fill=white}
+  ] 
+  \scriptsize
+  \node (event)  [draw,starburst,drop shadow] {event};
+%  \node (chpcad) [below=4cm,software] {CHP CAD};
+%  \node (actlog) [right of=chpcad,software] {Activity Log};
+
+  \node (verification) [right of=actlog] {
+    \begin{tikzpicture}[remember picture,node distance=1.5em,text width=10em,text centered]
+      \tiny
+      \node (chp1097) [staff] {CHP 10-97};
+      \node (cctv) [tech,below of=chp1097] {CCTV};
+      \node (ct1097) [tech,below of=cctv] {Caltrans 10-97};
+    \end{tikzpicture}
+  };
+  
+  
+  \draw [-latex'] (event) -- node (phone) [tag] {first call} (chpcad);
+  \detail[east]{info sources}{left of=phone,text width=10em}{
+    CAD\\
+    Caltrans maintenance\\
+    Public---via phone\\
+    CCTV\\
+    Media: Radio/TV\\
+    TMT enroute
+  };
+
+  \draw [-latex'] (chpcad) -- (actlog);
+\end{tikzpicture}

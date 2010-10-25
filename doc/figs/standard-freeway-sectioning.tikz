@@ -1,0 +1,87 @@
+\begin{tikzpicture}[draw]
+  \newcommand{\lw}{1.5em}
+  \newcommand{\fw}{\textwidth}
+  \scriptsize
+  \draw [-,line width=0.25*\lw,color=black!30] (0,0.125*\lw) -- (\fw,0.125*\lw);
+  \draw [-,color=black] (0,0) coordinate (centerstart) coordinate (laststart) -- ++(\fw,0) coordinate (centerend);
+
+  \path [fill=black!5] (centerstart) rectangle (centerend |- 0,-3*\lw);
+  %
+  % draw two lanes
+  \foreach \x in {1,2} {
+    \draw [dashed,thick] (laststart) ++(0,-\lw) coordinate (laststart) -- ++(\fw,0em);
+  }
+  % 
+  %% on ramp sec
+  \draw [thick] (laststart) ++(0,-\lw) coordinate (lol) -- ++(\fw/4/2,0) coordinate (ongore) ++(\fw/4/2,0) coordinate (mergeonslip);
+  \draw [thick] (lol) ++(0,-2em) coordinate (o1) -- (ongore); 
+  \draw [thick] ([yshift=-\lw]lol) ++(0,-2em) coordinate (o2) -- ([yshift=-\lw]ongore) coordinate (oppongore);
+  \draw [thick] (oppongore) -- ++(\fw/4/2/2,0) coordinate (endonslip);
+  \draw [thick] (endonslip) -- (mergeonslip);
+  \path [fill=black!5] (ongore) -- (mergeonslip) -- (endonslip) -- (oppongore) -- (o2) -- (o1) -- cycle;  
+
+  %% sec2
+  \draw [thick] (mergeonslip) -- ++(\fw/4,0) coordinate (mid);
+
+  %% sec3
+  \draw [thick] (mid) -- ++(\fw/4,0) coordinate (divergeoffslip) coordinate (laststart);
+
+  %% off ramp sec
+  \begin{scope}[xscale=-1]
+    \draw [thick] (laststart) ++(-\fw/4,0) coordinate(start) ++(0,0em) coordinate (lol) -- ++(\fw/4/2,0) coordinate (ongore) ++(\fw/4/2,0) coordinate (mergeonslip);
+    \draw [thick] (lol) ++(0,-2em) coordinate (o1) -- (ongore); 
+    \draw [thick] ([yshift=-\lw]lol) ++(0,-2em) coordinate (o2) -- ([yshift=-\lw]ongore) coordinate (oppongore);
+    \draw [thick] (oppongore) -- ++(\fw/4/2/2,0) coordinate (endonslip);
+    \draw [thick] (endonslip) -- (mergeonslip);
+    \path [fill=black!5] (ongore) -- (mergeonslip) -- (endonslip) -- (oppongore) -- (o2) -- (o1) -- cycle;  
+  \end{scope}
+
+  
+  %% detectors
+
+  \foreach \det/\shift in {1/-2em,2/-1em,3/1em,4/2em} {
+    
+  \draw (\det*\fw/4-\fw/4+\shift,0) coordinate (laststart);
+
+  \foreach \x in {1,2,3} {
+    \draw (laststart) ++(\fw/4/2,-\lw/2) coordinate (cctr\det) circle(0.8*\lw/2) ++(-\fw/4/2,-\lw/2) coordinate (laststart);
+    \draw (cctr\det) ++(-0.8*\lw/2,0) coordinate(lctr) -- ++(0,-1.2*\lw/2);
+    \ifnum\x>1
+      \draw (lctr) -- ++(0,0.8*\lw/2);
+    \fi
+  }
+  }
+
+  \foreach \sec/\nsec in {1/2,2/3,3/4} {
+    \path ($(cctr\sec)!.5!(cctr\nsec)$) coordinate (m\sec\nsec);
+    \draw [very thick,dash pattern=on 2pt off 3pt on 4pt off 4pt] (m\sec\nsec |- 0,2*\lw) coordinate (topsec\sec\nsec) 
+    -- ++(0,-6*\lw) coordinate (botsec\sec\nsec);
+  }
+
+  \path (0,0 |- m12) coordinate (m01);
+  \path (0,0 |- topsec12) coordinate (topsec01);
+  \path (\fw,0 |- m12) coordinate (m45);
+  \path (\fw,0 |- topsec12) coordinate (topsec45);
+
+  \foreach \ldet/\det/\ndet/\dir/\sec in {0/1/2/1/(i+1),1/2/3/-1/(i),2/3/4/1/(i-1),3/4/5/-1/(i-2)} {
+    \draw (cctr\det |- 0,0) ++(0,7pt) -- ++(0,\lw-7pt) coordinate (topdet\det);
+    \ifnum\dir>0
+      \draw[latex'-latex'] (topdet\det) ++(0,-3pt) coordinate (this) -- node[inner sep=0pt] {\tiny //} (this -| m\det\ndet);
+      \draw[latex'-latex'] (topdet\det) ++(0,-3pt) coordinate (this) -- node[inner sep=0pt] {\tiny /} (this -| m\ldet\det);
+    \fi
+    \ifnum\dir<0
+      \draw[latex'-latex'] (topdet\det) ++(0,-3pt) coordinate (this) -- node[inner sep=0pt] {\tiny /} (this -| m\det\ndet);
+      \draw[latex'-latex'] (topdet\det) ++(0,-3pt) coordinate (this) -- node[inner sep=0pt] {\tiny //} (this -| m\ldet\det);
+    \fi
+
+    \draw[latex'-latex'] (topsec\ldet\det) ++(0,-5pt) coordinate (last) -- node[above] {\it section \sec} (last -| topsec\det\ndet);
+
+    \draw (botsec23) ++(0,-0.5em) node [draw,shape border rotate=180,single arrow,anchor=north] {Direction of flow};
+  }
+\end{tikzpicture}
+%% Standard caption
+%\caption[Section definition and corresponding detector
+%  location]{Section definition and corresponding detector location.
+%  Sections boundaries are formed by bisecting freeway segments between
+%  each pair of detectors.  By convention, section numbers increase as
+%  you move downstream.}

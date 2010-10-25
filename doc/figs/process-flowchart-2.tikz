@@ -1,0 +1,189 @@
+\newcommand{\detail}[4][west]{
+  \ifthenelse{\equal{#1}{west}}{%
+    \node (#2) [#3,anchor=east,text badly ragged] {
+      #4
+    };
+    \draw [decorate,decoration=brace] (#2.south west) -- 
+    (#2.north west)
+  }{%
+    \node (#2) [#3,anchor=west,text badly ragged left] {
+      #4
+    };
+    \draw [decorate,decoration=brace] (#2.north east) -- 
+    (#2.south east)
+  }
+}
+\newenvironment{compactitemize}{%
+  \begin{list}{\labelitemi}{\leftmargin=1.25em\itemsep=-0.25em\topsep=-0.5em}%
+}{%
+  \end{list}
+}
+
+\scriptsize
+\begin{tikzpicture}[node distance=1cm,
+  funcbox/.style={matrix,draw,rounded corners,every node/.style={anchor=north west},anchor=north west,text width=11em,very thick,fill=blue!20},
+  funcarea/.style={font=\footnotesize\scshape\bfseries},
+  software/.style={rectangle,draw,drop shadow},
+  tag/.style={font=\scshape,text=red},
+  exit tag point/.style={very near start},
+  exit tag/.style={font=\scriptsize\scshape,tag,very near start,rotate=25,tag,above right=2em,anchor=south west},
+  data tag/.style={draw,fill=white,rectangle,rounded corners},
+  staff/.style={rectangle,draw,rounded corners},
+  tech/.style={rectangle,draw,rounded corners},
+  every node/.style={font=\scriptsize},
+  functrans/.style={-latex',rounded corners},
+  tag callout/.style={font={\scriptsize},draw,rectangle callout,text width=15em,fill=black!5,drop shadow},
+  remember picture
+  ] 
+  \node (event)  [draw=black,text=yellow,fill=red,starburst,drop shadow] {\bfseries event};
+  \node (ident) [funcbox,below of=event,node distance=10em]  
+  {
+    \node (identlabel) [funcarea] {Identification};\\[-0.5em]
+    \node {
+      \begin{compactitemize}
+      \item \emph{Notify CHP/CT staff}
+      \end{compactitemize}
+    };
+    \\ 
+  };
+  \draw (ident.south east) ++(3em,-1em) node (verif) [funcbox]
+  {
+    \node (veriflabel) [funcarea] {Verification};\\[-0.5em]
+    \node {
+      \begin{compactitemize}
+      \item \emph{Confirm location}
+      \item \emph{Determine type}
+      \item \emph{Determine severity}
+      \end{compactitemize}
+    };\\
+  };
+  \draw (verif.south east) ++(3em,-1em) node (resp) [funcbox]
+  {
+    \node (resplabel) [funcarea] {Response};\\[-0.5em]
+    \node {
+      \begin{compactitemize}
+      \item \tikz[remember picture] {\node[coordinate] (dissem) {};}\emph{Disseminate}% (media, CMS, HAR)
+      \item \tikz[remember picture] {\node[coordinate] (fr) {};}\emph{Field response}% (TMT, maint, HAZMAT, coroner)
+      \item \tikz[remember picture] {\node[coordinate] (coord) {};}\emph{Coordinate}% (super, MGMT, CHP MIO,CT TMC,Local TMC)
+      \item \tikz[remember picture] {\node[coordinate] (contr) {};}\emph{Manage}% (RMS, Closures)
+        % \item \emph{Informat Dist Comm in the TMC}
+      \end{compactitemize}
+    };\\
+  };
+  \draw (resp.south east) ++(3em,-1em) node (mon) [funcbox]
+  {
+    \node (monlabel) [funcarea] {Monitoring};\\[-0.5em]
+    \node {
+      \begin{compactitemize}
+      \item \emph{Condition changes}
+      \item \emph{Multiple incidents}
+      \item \emph{Performance reports}
+%      \item Log confirmed reports
+      \end{compactitemize}
+      }; \\ 
+  };
+
+  \draw [-latex'] (event) -- 
+      coordinate [exit tag point,pos=0.65] (firstpt) 
+      node (first call) [exit tag,pos=0.65,right=2.5em,anchor=south west] {First Call} 
+     (ident);
+  \draw [triangle 90 reversed-latex'] (firstpt) .. controls +(0:1em) and +(205:1em) .. (first call.west);
+
+  \draw [functrans] (ident) -| 
+      coordinate [exit tag point] (openpt) 
+      node (openact) [exit tag] {Open Incident} 
+      node [data tag] {Location}
+      (verif);
+  \draw [triangle 90 reversed-latex'] (openpt) .. controls +(90:1em) and +(205:1em) .. (openact.west);
+  \draw [functrans] (verif) -| 
+      coordinate [exit tag point] (verifpt) 
+      node (verifact) [exit tag] {Verify Incident} 
+      node [data tag] {Diagnosis}
+      (resp);
+  \draw [triangle 90 reversed-latex'] (verifpt) .. controls +(90:1em) and +(205:1em) .. (verifact.west);
+  \draw [functrans] (resp) -| 
+      coordinate [exit tag point] (respactpt) 
+      node (respact) [exit tag] {\{Response Action\}} 
+%      node [data tag] {Diagnosis}
+      (mon);
+  \draw [triangle 90 reversed-latex'] (respactpt) .. controls +(90:1em) and +(205:1em) .. (respact.west);
+  \draw [functrans] (mon) -| 
+      coordinate [exit tag point] (statuspt) 
+      node (statusact) [exit tag,anchor=north east,below left=2em] {\{Status Change\}} 
+      node [data tag] {Diagnosis}
+      (resp);
+  \draw [triangle 90 reversed-latex'] (statuspt) .. controls +(270:1em) and +(25:1em) .. (statusact.east);
+  \draw [-*] (mon) -- 
+      coordinate [exit tag point] (closept) 
+      node (closeact) [exit tag,left=2.5em,anchor=north east] {\{Close Incident\}} 
+      ++(0,-10em);
+  \draw [triangle 90 reversed-latex'] (closept) .. controls +(180:1em) and +(25:1em) .. (closeact.east);
+
+  \path (first call.east) ++(5.5cm,1cm) node[tag callout,callout absolute pointer={(first call.east)},text width=25em] {
+    The ``first call'' can come from any number of sources:\\[-0.5em]
+    \parbox[t]{24em}{%
+      \parbox[t]{12em}{
+        \begin{compactitemize}
+        \item CAD
+        \item ATMS Map
+        \item Caltrans field units
+        \item Public---via phone
+        \end{compactitemize}
+      }\hfill
+      \parbox[t]{12em}{
+        \begin{compactitemize}
+        \item CCTV
+        \item Media
+        \item Neighboring districts
+        \end{compactitemize}
+      }
+    }
+  };
+  \path (verif.south west) ++(-1cm,0) node[tag callout,callout absolute pointer={(verif.west)},anchor=east] {
+    Verification using:
+    \begin{compactitemize}
+    \item CCTV
+    \item CHP Field Units
+    \item Caltrans field units
+    \end{compactitemize}
+    };
+  \path (respact) ++(0,3cm) node[tag callout,callout absolute pointer={(respact.north)}] {
+    Ideally, each type of response action will be logged.
+  };
+  \path (statusact.south) ++(0cm,-2cm) node[tag callout,callout absolute pointer={(statusact.south)}] {
+    We want to be able to map any status changes to the collection of response actions used.
+  };
+  \path (dissem) ++(-5cm,-0.25cm) node[tag callout,callout absolute pointer={(dissem)},anchor=north east] (dissem block) {
+    \begin{compactitemize}
+    \item Public (CMS,Media,HAR)
+    \item Intra-agency %(MGMT,Supervisors)
+    \item Inter-agency %(MGMT,Supervisors)
+    \end{compactitemize}
+  };
+  \path (dissem block.south east) ++(1cm,-1em) node[tag callout,callout absolute pointer={(fr)},anchor=north east] (fr block) {
+    \begin{compactitemize}
+    \item Notify TMT
+    \item Maintenance
+    \item HAZMAT
+    \item Coroner (by CHP)
+    \item Fire
+    \item Freeway Service Patrol
+    \item Tow
+    \item Local Police
+    \end{compactitemize}
+  };
+  \path (fr block.south east) ++(1.75cm,-1em)  node[tag callout,callout absolute pointer={(coord)},anchor=north east] (coord block){
+    \begin{compactitemize}
+    \item CHP
+    \item Neighboring districts
+    \item Local agencies
+    \end{compactitemize}
+  };
+  \path (coord block.south east) ++(2.5cm,-1em) node[tag callout,callout absolute pointer={(contr)},anchor=north east] (control block ) {
+    \begin{compactitemize}
+    \item RMS
+    \item Closures (via CMS, HAR)
+    \end{compactitemize}
+  };
+
+\end{tikzpicture}

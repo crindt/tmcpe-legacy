@@ -1,0 +1,289 @@
+\scriptsize
+\newcounter{time}
+\newcounter{space}
+\begin{tikzpicture}
+  [incident/.style={draw,color=black!30,,fill=yellow!50,text=black},
+  feasible/.style={draw,color=black!30,fill=cyan!30,text=black},
+  infeasible/.style={draw,color=black!30,fill=black!5,text=black},
+  heading/.style={font={\scriptsize\bf}},
+  matrix of nodes/.style={ 
+    column sep=0pt,row sep=0pt,
+    nodes={draw,font=\scriptsize,minimum width=5em,minimum height=2.5em,anchor=south west},
+    execute at end cell=\addtocounter{space}{1}%
+  }]
+  \matrix[matrix of nodes] {
+    \node (timebox) [heading,minimum height=5em] {Time}; & \setcounter{space}{0} 
+    \node (s\arabic{space})[heading]{$\mathbf{}i$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}i-\arabic{space}$}; &
+    \node (s\arabic{space})[heading]{$\mathbf{}\cdots$}; &
+    \node (sF1)[heading]{$\mathbf{}1$\addtocounter{time}{1}\setcounter{space}{0}};
+    \setcounter{time}{1}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[infeasible]{$\hat{S}_{1}(t_{\arabic{time}})$\addtocounter{time}{1}\setcounter{space}{0}};
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[infeasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[infeasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[infeasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[infeasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[infeasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[feasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[feasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[feasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[feasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[feasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[incident]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[feasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[feasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {$t_{\arabic{time}}$}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_i(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\hat{S}_{i-\arabic{space}}(t_{\arabic{time}})$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\cdots$}; &
+    \node (n\arabic{time} F1)[feasible]{$\hat{S}_{1}(t_{\arabic{time}})$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (t\arabic{time})[heading] {\vdots{}}; \setcounter{space}{0} &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\vdots$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\vdots$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\vdots$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\vdots$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\vdots$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\vdots$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\vdots$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\ddots$}; &
+    \node (n\arabic{time} \arabic{space})[feasible]{$\vdots$}; 
+    \addtocounter{time}{1}
+    \setcounter{space}{0}
+    \\
+    \node (tM)[heading] {$t_M$}; \setcounter{space}{0} &
+    \node (nM \arabic{space})[]{$\hat{S}_i(t_{M})$}; &
+    \node (nM \arabic{space})[]{$\hat{S}_{i-\arabic{space}}(t_{M})$}; &
+    \node (nM \arabic{space})[]{$\hat{S}_{i-\arabic{space}}(t_{M})$}; &
+    \node (nM \arabic{space})[]{$\hat{S}_{i-\arabic{space}}(t_{M})$}; &
+    \node (nM \arabic{space})[]{$\hat{S}_{i-\arabic{space}}(t_{M})$}; &
+    \node (nM \arabic{space})[]{$\hat{S}_{i-\arabic{space}}(t_{M})$}; &
+    \node (nM \arabic{space})[]{$\hat{S}_{i-\arabic{space}}(t_{M})$}; &
+    \node (nM \arabic{space})[]{$\cdots$}; &
+    \node (nM F1)[]{$\hat{S}_{1}(t_{M})$}; \\
+  };
+
+
+  % draw true impacted region
+  \draw (n1 1.north west) -- (n1 1.north east) -- (n3 2.north west) -- (n3 2.north east) 
+  -- (n3 2.south east) -- (n4 3.north east) -- (n7 4.north west) -- (n7 4.north east)
+  -- (n8 5.north west) -- (n8 6.north east) -- (n8 6.south east) -- (n9 7.north east) -- (n11 7.south east)
+  -- (n11 6.south west) -- (n11 6.north west)
+  -- (n10 5.south west) -- (n10 5.north west)
+  -- (n9 4.south west) -- (n9 4.north west)
+  -- (n8 3.south west) -- (n8 3.north west)
+  -- (n7 2.south west) -- (n6 1.north east) -- (n6 1.north west) -- cycle;
+
+  % Feasible region
+  \draw [line width=3pt,color=red] (n1 1.north west) --%
+  node [drop shadow,arrow box,line width=0.4pt,draw,pos=0.5,color=black
+  ,sloped,above=3pt,anchor=south,fill=white,opacity=50
+  ,arrow box arrows={north:0.5cm}] {Unimpacted sections} 
+  node [drop shadow,arrow box,line width=0.4pt,draw,pos=0.5,color=black
+  ,sloped,below=3pt,anchor=north,fill=white,opacity=50
+  ,arrow box arrows={south:0.5cm}] {Possibly impacted sections} 
+  coordinate [pos=0.75] (feasible wave pt)
+  (n7 F1.north east);
+
+  \draw (feasible wave pt) ++(3em,3em)%
+  node [drop shadow,draw,fill=white,rectangle callout%
+  ,callout absolute pointer={(feasible wave pt)}]
+  {Fastest feasible shockwave};
+
+
+  \draw [color=orange,line width=3pt] 
+  (n1 1.north west) 
+  .. controls +(-45:1em) and +(90:1em)
+  .. (n2 2.north west)
+  .. controls +(270:2em) and +(180:2em)
+  .. (n4 3.north)
+  .. controls +(0:3em) and +(180:8em) 
+  .. (n8 5.north east) 
+  .. controls +(0:3em) and +(90:8em)
+  .. coordinate (loading wave pt) (n11 7.south east);
+
+  \draw (loading wave pt) ++(3em,3em) 
+  node [drop shadow,draw, fill=white, rectangle callout
+  , callout absolute pointer={(loading wave pt)}]  {Loading shockwave};
+
+  \draw [color=blue,line width=3pt]
+  (n5 1.south west)
+  .. controls +(0:6em) and +(165:6em)
+  .. (n8 3.south)
+  .. controls +(-15:2em) and +(135:3em)
+  .. (n9 4.south)
+  .. controls +(-45:3em) and +(180:10em)
+  .. coordinate [pos=0.75] (clearing wave pt) (n11 7.south east);
+
+  \draw (clearing wave pt) ++(-3em,-3em) 
+  node [drop shadow,draw, fill=white, rectangle callout
+  , callout absolute pointer={(clearing wave pt)}]  {Clearing shockwave};
+
+
+  \draw [xshift=-5pt] (t1.north west) -- ++(-2.5em,0) coordinate (t1meas);
+  \draw [xshift=-5pt] (t5.south west) -- ++(-2.5em,0) coordinate (t5meas);
+  \draw [latex'-latex'] (t5meas) ++(0.5em,0) coordinate (last) -- node [sloped,fill=white] 
+  {\scriptsize{}time to clear incident} (last |- t1meas);
+
+
+  % draw stupid heading at the top
+  \draw node at (s1.north west) [anchor=south west,minimum height=2.5em,minimum width=11*3.75em] {\scriptsize{}\bf{}Freeway section};
+  \draw (timebox.north east) rectangle (sF1.north east);
+
+  % draw outer rectangle
+  \draw (timebox.north west) rectangle (nM F1.south east);
+
+\end{tikzpicture}

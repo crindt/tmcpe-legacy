@@ -1,0 +1,52 @@
+\begin{tikzpicture}[xscale=6,yscale=4]
+  \draw (0,0) node [below] {} -- (1,0) node [below] {$t$};
+  \draw (0,0) -- (0,1) node [left] {$\frac{\textrm{veh}}{\textrm{time}}$};
+
+  \draw[dashed,line width=1pt] (0,0.5) node (lambda) [anchor=east] {$\lambda$} -- (lambda -| 1,0);
+
+  \draw[dotted] (0.1,0) node (t0) [below] {$t_0$} -- (t0 |- lambda) coordinate (serv t0);
+
+  \draw[dotted] (0.4,0.3) coordinate (serv t1) -- (serv t1 |- 0,0) node [below] {$t_1$}; 
+
+  % note: can't compute intersection of parabola and line automatically
+  % this is a manual hack! 
+  \draw[dotted] (lambda -| 0.70,0) coordinate (serv t2) -- (serv t2 |- 0,0) node [below] {$t_2$};
+
+%%  \draw (serv t0) parabola  bend (serv t1) (0.9,1) coordinate (serv t3); 
+  \draw (serv t0) .. controls +(-55:0.15) and +(180:0.15) .. (serv t1).. controls +(0:0.15) and +(235:0.1) .. (serv t2);
+  \shade[top color=red!10,bottom color=red!50,shading angle=90] (serv t0) .. controls +(-55:0.15) and +(180:0.15) .. (serv t1) -- (serv t1 |- lambda) coordinate (lambda t1) -- (serv t0);
+  \shade[top color=red!50,bottom color=red!10,shading angle=90] (serv t1) .. controls +(0:0.15) and +(235:0.1) .. (serv t2) -- (lambda t1);
+  \shade[draw,top color=green!10,bottom color=green!80,shading angle=90] {(0.9,0.5)  -- (serv t2) .. controls +(55:0.1) and +(260:0.1) .. coordinate[pos=0.5] (mulab) (0.9,1) coordinate (serv t3)}; 
+  \draw[dotted] (serv t3) -- (serv t3 |- 0,0) node [below] {$t_3$};
+
+  
+
+  % note: again, can't put a node along a parabola
+  % this is a manual hack!
+  \draw[-latex'] (0.55,0.85) node[anchor=east] {$\mu(t)$} .. controls ++(0.1,0) .. (mulab);
+
+\end{tikzpicture}
+~~~~
+\begin{tikzpicture}[xscale=6,yscale=4]
+  \draw (0,0) node [below] {} -- (1,0) node [below] {t};
+  \draw (0,0) -- (0,1) node [left] {veh};
+
+  \draw (0.10,0) coordinate (t0) node [below] {$t_0$};
+  \draw (0.40,0) coordinate (t1) node [below] {$t_1$};
+  \draw (0.71,0) coordinate (t2) node [below] {$t_2$};
+  \draw (0.90,0) coordinate (t3) node [below] {$t_3$};
+
+  \shade[draw,top color=red!10,bottom color=red!50,shading angle=90] 
+   (t2) -- (t0) {[draw] 
+  .. controls +(0:0.15) and +(245:0.15) .. (t1 |- 0,0.25) coordinate (q t1)
+  .. controls +(65:0.15) and +(180:0.15) .. (t2 |- 0,0.65) coordinate(q t2)};
+  \shade[draw,top color=red!50,bottom color=red!10,shading angle=90] (q t2) .. controls +(0:0.15) and +(95:0.2) .. (t3) coordinate(q t3) -- (t2);
+
+  \draw[dotted] (t1) -- (q t1);
+  \draw[dotted] (t2) -- (q t2);
+
+  % note: again, can't put a node along a parabola
+  % this is a manual hack!
+  \draw[-latex'] (0.38,0.6) node[anchor=east] {$Q(t)$} .. controls ++(0.1,0) .. (0.5175,0.5);
+  %     \draw (0.75,0.45) node {$\lambda > \mu$};
+\end{tikzpicture}

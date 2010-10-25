@@ -1,0 +1,62 @@
+\scriptsize 
+\begin{tikzpicture}[remember picture,
+  component/.style={rectangle,draw,text badly centered},
+  tightcomponent/.style={component,inner sep=3pt},
+  fixedcomponent/.style={component,text width=10em},
+  possfixedcomp/.style={fixedcomponent,fill=black!20},
+  container/.style={rectangle,draw,inner sep=1em},
+  node distance=2em
+  ]
+  \node (uis) [container] {
+    \begin{tikzpicture}[remember picture]
+      \node (webclient) [fixedcomponent] {Web client};
+      \node (tmcmanapp) [possfixedcomp,right=of webclient] {TMC management application};
+    \end{tikzpicture}
+  };
+  \node (mis) [container,below=of uis] {
+    \begin{tikzpicture}[remember picture]
+      \node (delsavest) [fixedcomponent] {TMC Delay Savings Estimator};
+      \node (rtdelest) [possfixedcomp,right=of delsavest] {Real-time Delay Estimator};
+    \end{tikzpicture}
+  };
+  \node (msgbus) [below=of mis] {
+    \begin{tikzpicture}[remember picture]
+      \node (msgbusn) [inner sep=0.5em] {M~e~s~s~a~g~e~~~B~u~s};
+    \end{tikzpicture}
+  };
+  \node (core) [below=of msgbus] { 
+    \tikz[remember picture] \node (dbs) [container] {
+      \begin{tikzpicture}[node distance=3em,remember picture,datanode/.style={cylinder,shape border rotate=90,aspect=0.33,draw,text width=2em,text height=1em}]
+        \node (chpcad) [datanode] {};
+        \node [below] at (chpcad.south) {CHP CAD};
+        \node (tmcact) [datanode,right=of chpcad,anchor=north west] {};
+        \node [below] at (tmcact.south) {TMC Activity Log};
+        \node (atms) [datanode,right=of tmcact,anchor=north west] {};
+        \node [below] at (atms.south) {ATMS};
+      \end{tikzpicture}
+    };
+    \tikz[remember picture] \node (buslog) [container,right=of dbs] {
+      \tikz[remember picture] \node (evtpar) [tightcomponent] {Event Parser};
+      \tikz[node distance=0.25em,remember picture] \node (cordel) [tightcomponent,right=of evtpar] {Core Delay Model};
+    };
+    \tikz[remember picture] \node (newdb) [container,right=of buslog,datanode/.style={cylinder,shape border rotate=90,aspect=0.33,draw,text width=2em,text height=1em}] {
+      \begin{tikzpicture}[node distance=0.25em]
+        \node (tmcpedb) [datanode] {};
+        \node [below] at (tmcpedb.south) {TMCPE datastore};
+      \end{tikzpicture}
+    };
+  };
+  % Draw msgbus lines
+  \draw [very thick] (core.west |- msgbus.north) -- (core.east |- msgbus.north);
+  \draw [very thick] (core.west |- msgbus.south) -- (core.east |- msgbus.south);
+
+  \begin{scope}[dataflow/.style={text width=4em,text badly ragged left,anchor=north east},
+    dataflowr/.style={dataflow,text badly ragged,anchor=north west}]
+    \draw[-latex'] (evtpar.north) ++ (1em,0) coordinate (t) -- (t |- msgbus.south) node [dataflowr,text width=6em] {\footnotesize\emph{incident parameters}};
+    \draw[latex'-] (evtpar.north) ++ (-1em,0) node [dataflow,anchor=south east] {\footnotesize\emph{raw events}} coordinate (t) -- (t |- msgbus.south);
+    \draw[-latex'] (chpcad.north) -- (chpcad.north |- msgbus.south) node[dataflow] {\footnotesize\emph{incident detail}}; 
+    \draw[-latex'] (tmcact.north) -- (tmcact.north |- msgbus.south) node[dataflow] {\footnotesize\emph{response detail}}; 
+    \draw[-latex'] (atms.north)   -- (atms.north |- msgbus.south)   node[dataflow] {\footnotesize\emph{traffic data}}; 
+  \end{scope}
+\end{tikzpicture}
+

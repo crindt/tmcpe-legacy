@@ -1,0 +1,40 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amssymb,amsmath}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows,shapes,decorations.pathmorphing,decorations.pathreplacing,matrix,positioning,shadows,patterns,fit} 
+\usepackage{authblk}
+\usepackage{units}
+%\usepackage{nomencl}
+\usepackage{graphicx}
+\usepackage{paralist} 
+\usepackage{natbib}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{ctable}
+\usepackage{soul}
+\usepackage{pgfpages}
+\usepackage{tabularx}
+\usepackage{rotating}
+
+\begin{document}
+
+% We characterize the operations of the TMC with respect to incident
+% management as four major functional areas.
+% \begin{enumerate}
+% \item Identification
+% \item Verification
+% \item Response
+% \item Monitoring
+% \end{enumerate}
+ 
+\begin{sidewaysfigure}
+  \pgfpagesuselayout{resize to}[letterpaper,landscape,border shrink=5mm]
+  \centering
+  \input{figs/process-flowchart-2.tikz}
+  \caption{Flowchart}
+  \label{fig:flowchart}
+\end{sidewaysfigure}
+
+\end{document}

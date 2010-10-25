@@ -1,0 +1,53 @@
+\begin{tikzpicture}[scale=13.5,line width=0.5pt]
+  \draw (0,0) coordinate (orig) node [] {} -- (1,0) node [anchor=north] {$t$};
+  \draw (0,0) -- (0,0.7);
+
+  \draw [dashed] (0,0) -- coordinate [pos=0.05] (q0) node [pos=0.85,anchor=south east] {A(t)} (0.9,0.55) coordinate (a3);% -- (1,0.55/0.9);
+  \draw [dotted] (a3) -- (a3 |- 0,0) node [anchor=north] {$t_3$};
+
+  \draw [dotted] (0.15,0.6) coordinate (ttop) (0.15,0) coordinate (tbot) node (t0lab) [anchor=north] {$t_0$}  -- (intersection of tbot--ttop and orig--a3) coordinate (a0) coordinate (d0);
+
+  \draw (a0) .. controls +(30:0.25) and +(210:0.25) .. coordinate [pos=0.5] (d1) (0.7,0.15) coordinate(d2) .. controls +(30:0.1) and +(250:0.1) .. (a3) coordinate (d3);
+  \path (d2) |- +(0,0.3) coordinate (d2 ceiling);
+
+  \shade[top color=red!10,bottom color=red!50,shading angle=90] (a0) .. controls +(30:0.25) and +(210:0.25) .. (0.7,0.15) -- (intersection cs: first line={(d2)--(d2 ceiling)}, second line={(a0)--(a3)}) coordinate (a2) -- (a0);
+  \shade[top color=red!50,bottom color=red!10,shading angle=90] (d2) .. controls +(30:0.1) and +(250:0.1) .. (a3) -- (a2) -- (d2);
+
+  % redraw
+  \draw (a0) .. controls +(30:0.25) and +(210:0.25) .. (d2) .. controls +(30:0.1) and +(250:0.1) .. node[pos=0.50,anchor=south east] {D(t)} coordinate[pos=0.67] (caplabpt) (a3);
+
+%  \shade[top color=red!10,bottom color=red!50,draw,shading angle=90] (a0) .. controls +(30:0.25) and +(210:0.25) .. coordinate [pos=0.5] (d1) (0.7,0.15) coordinate(d2);
+%  \shade[top color=red!50,bottom color=red!10,draw,shading angle=90] (d2) .. controls +(30:0.1) and +(250:0.1) .. node[pos=0.50,anchor=south east] {D(t)} coordinate[pos=0.67] (caplabpt) (a3) coordinate (d3);
+
+  \draw [dashed] (d2) +(210:0.1) -- +(30:0.1);
+
+  \draw [dotted] (d1) -- (d1 |- 0,0) coordinate (t1) node[anchor=north] {$t_1$};
+  \draw [dotted] (d2) -- (d2 |- 0,0) coordinate (t2) node[anchor=north] {$t_2$};
+
+  \path (d0) -- node [pos=0.65,below=1cm,anchor=north] (steadylabel) {$\frac{dA}{dt}=\frac{dD}{dt}$} (d2);
+  \draw [-latex'] (steadylabel) .. controls +(180:0.1) and +(-30:0.1) .. (d0);
+  \draw [-latex'] (steadylabel) .. controls +(0:0.1) and +(270:0.1) .. (d2);
+
+  \draw [-latex'] (d1) ++(0.1,0.05) node (d1lab) {$\frac{d^2D}{dt^2}=0$} (d1lab.west) .. controls +(180:0.025) and +(90:0.025) .. (d1);
+
+  \draw (d0) ++(0.05,0.2) node (q0label) {Incident occurs}; 
+  \draw [-latex'] (q0label) .. controls +(240:0.1) and +(120:0.1) .. (d0);
+  \draw (d1) ++(-0.15,0.30) node (clearinglabel) {Clearing begins to slow growth of queue};
+  \draw [-latex'] (clearinglabel) ..controls +(270:0.1) and +(90:0.1) .. (d1);
+
+  \draw [latex'-] (d3) ..controls +(140:0.05) and +(0:0.05) .. ++(-0.25,0.05) node [anchor=east] {Effects of incident totally dissipated};
+
+  \path (t0) -- coordinate[pos=0.7] (tresp) (t1);
+  \draw [-latex'] (t0lab) -- coordinate (respptr) node [below=2em,anchor=north,text width=15em] (resplab) {Incident detection, verification, and response deployment} (t0lab -| tresp) coordinate (tmp);
+  \path (tmp |- t0lab.south) coordinate(tmp);
+  \draw (tmp) -- (tmp |- 0,0);
+  \draw [-latex'] (resplab) -- (respptr);
+
+  \path (resplab.north -| t2) node [anchor=north,text width=15em] (caprestlab) {Capacity restored to level consistent with demand};
+  \draw [-latex'] (caprestlab) .. controls +(45:0.1) and +(300:0.1) .. (d2);
+
+  \draw [dotted,line width=0.6pt] (d3) +(250:0.40) -- +(70:0.1);
+ 
+  \draw [latex'-] (caplabpt) .. controls +(-45:0.025) and +(180:0.025) .. ++(0.05,-0.05) node [anchor=west,text width=10em] {Full capacity restored; clearance activities completed}; 
+  \draw (d3) +(70:0.05) coordinate (tt) +(70:0.1) coordinate (tt2) -- node [right] (mucaplab) {$\mu = \mu_{\text{capacity}}$} (tt2 |- tt) -- (tt);
+\end{tikzpicture}

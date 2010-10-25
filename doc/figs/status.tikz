@@ -1,0 +1,66 @@
+\newcommand{\umlactor}[3][]{%
+  \draw node (#2) [#1] {%
+    \begin{tikzpicture}[remember picture]
+      \draw (0,0) node (#2 head) [draw,circle,text width=0.75em] {};
+      \draw (#2 head.south) -- coordinate[pos=0.15] (#2 shoulder) ++(0,-1.75em) coordinate (#2 groin);
+      \draw (#2 groin) -- +(240:1.5em) coordinate (#2 rfoot);
+      \draw (#2 groin) -- +(300:1.5em) coordinate (#2 lfoot);
+      \draw (#2 shoulder) ++(-1.25em,0) coordinate (#2 rhand) -- ++(2.5em,0) coordinate (#2 lhand);
+      \draw ($(#2 lfoot)!0.5!(#2 rfoot)$) node [below] {#3};
+    \end{tikzpicture}
+  }
+} 
+\begin{tikzpicture}[component/.style={draw,text badly centered,fill=white,text width=10em,drop shadow},
+  datanode/.style={cylinder,shape border rotate=90,aspect=0.33,draw,text width=5em,text badly centered,cylinder uses custom fill,cylinder body fill=black!5},
+  datanode complete/.style={datanode,cylinder body fill=green!70!white,cylinder end fill=green!35!white},
+  datanode partial/.style={datanode,cylinder body fill=yellow!70!white,cylinder end fill=yellow!35!white},
+  datanode planned/.style={datanode,cylinder body fill=red!70!white,cylinder end fill=red!35!white},
+  datanode future/.style={datanode,cylinder body fill=blue!70!white},
+  complete/.style={fill=green!70!white},
+  partial/.style={fill=yellow!70!white},
+  planned/.style={fill=red!50!white},
+  future/.style={fill=blue!50!white},
+  llabel/.style={text width=4em},
+  label below/.style={llabel,below,text badly centered},
+  label above/.style={llabel,above,text badly centered},
+  label right/.style={llabel,right,text badly ragged},
+  label left/.style={llabel,left,text badly ragged left},
+  node distance=5em]
+  \draw node (iim) [component,partial] {Incident Impact Model};
+  \draw node (tmcpedb) [datanode partial,below=of iim]{\scriptsize{}TMCPEDB};
+  \draw node (atms) [datanode complete,below=of tmcpedb]{\scriptsize{}ATMS};
+  \draw node (actlog) [datanode partial,left=of tmcpedb]{\scriptsize{}ACTLOG};
+  \draw node (sched) [component,above=of iim,planned] {Analysis Scheduler};
+  \umlactor[left=of sched]{admin}{Admin};
+  \draw node (tim) [component,planned,right=of iim] {TMC impact model}; 
+  \draw node (webint) [component,partial,below=of tim] {Web Interface};
+  \umlactor[below=of webint]{analyst}{Analyst};
+
+  % legend
+  {
+    \scriptsize
+    \draw node (legend planned) [node distance=5em,above=of tim,component,planned,text width=1em,text width=3em,xshift=-4em] {};
+    \draw (legend planned.east) node (lpllab) [right] {planned feature};
+    \draw node (legend partial) [node distance=0.75em,above=of legend planned,component,partial,text width=1em,text width=3em] {};
+    \draw (legend partial.east) node (lplab) [right] {partially functional feature};
+    \draw node (legend complete) [node distance=0.75em,above=of legend partial,component,complete,text width=1em,text width=3em] {};
+    \draw (legend complete.east) node (lclab) [right] {fully functional feature};
+    \draw node[draw,fit=(legend planned) (lclab) (lplab) (lpllab)] {};
+  }
+  
+
+  \draw[-latex'] ($0.5*(actlog.before top) + 0.5*(actlog.after top)$) |- node [label left,pos=0.23] {\emph{critical events}} (iim);
+%  \draw[-latex'] ($0.5*(atms.after top) + 0.5*(atms.before bottom)$) -- node [label above] {\emph{5-minute sensor data}} ($0.5*(tmcpedb.before top) + 0.5*(tmcpedb.after bottom)$);
+  \draw[-latex'] ($0.5*(atms.after top) + 0.5*(atms.before top)$) -- node [label left,text width=6em] {\emph{5-minute\\sensor data}} (tmcpedb.bottom);
+  \draw[-latex'] ($0.5*(tmcpedb.before top) + 0.5*(tmcpedb.after top)$) -- node [label left,text width=8em] {\emph{processed sensor data relevant to selected incident}} (iim);
+  \draw[-latex'] (sched) -- node[label left,text width=6em] {\emph{automated processing jobs}} (iim);
+  \draw[-latex'] (admin) -- node[label above,text width=5em] {\emph{baseline analysis params}} (sched);
+  \draw[-latex'] (iim) -- node[label above] {\emph{baseline delay}} (tim);
+  \draw[latex'-] (tim.south) ++(-0.5em,0) coordinate (t) -- 
+  node[label left,text width=6em] {\emph{``what if'' scenario}}
+  (t |- webint.north);
+  \draw[-latex',xshift=1em] (tim.south) ++(0.5em,0) coordinate (t) -- 
+  node[label right] {\emph{TMC benefit report}}
+  (t |- webint.north);
+  \draw[latex'-latex'] (analyst) -- (webint);
+\end{tikzpicture}

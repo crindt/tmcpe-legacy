@@ -1,0 +1,28 @@
+\begin{tikzpicture}[scale=13.5,line width=0.5pt]
+  \draw (0,0) coordinate (orig) node [] {} -- (1,0) node [below] {$t$};
+  \draw (0,0) -- (0,0.7) node [left] {veh};
+  
+  \draw [dashed] (0,0) -- node [pos=0.65,anchor=south east] {A(t)} (0.9,0.55) coordinate (a3);% -- (1,0.55/0.9);
+  \draw [dotted] (a3) -- (a3 |- 0,0) node [anchor=north] {$t_3$};
+  
+  \draw [dotted] (0.15,0.6) coordinate (ttop) (0.15,0) coordinate (tbot) coordinate (t0) node[anchor=north] {$t_0$}  -- (intersection of tbot--ttop and orig--a3) coordinate (a0) coordinate (d0);
+  
+  \shade [draw,top color=red!50,bottom color=red!10] (a0) .. controls +(30:0.25) and +(210:0.25) .. coordinate [pos=0.5] (d1) (0.7,0.15) coordinate(d2) .. controls +(30:0.1) and +(250:0.1) .. node[pos=0.33,anchor=south east] {D(t)} (a3) coordinate (d3); 
+  
+  \draw [dashed] (d2) +(210:0.1) -- +(30:0.1);
+  
+  \draw [dotted] (d1) -- (d1 |- 0,0) node[anchor=north] {$t_1$};
+  \draw [dotted] (d2) -- (d2 |- 0,0) node[anchor=north] {$t_2$};
+  
+  \path (d0) -- node [pos=0.65,below=1cm,anchor=north] (steadylabel) {$\frac{dA}{dt}=\frac{dD}{dt}$} (d2);
+  \draw [-latex'] (steadylabel) .. controls +(180:0.1) and +(-30:0.1) .. (d0);
+  \draw [-latex'] (steadylabel) .. controls +(0:0.1) and +(270:0.1) .. (d2);
+  
+  \draw [-latex'] (d1) ++(0.1,0.05) node (d1lab) {$\frac{d^2D}{dt^2}=0$} (d1lab.west) .. controls +(180:0.025) and +(90:0.025) .. (d1);
+  
+  \draw [decoration={brace,amplitude=1em},decorate] (0,0) -- node (midbrace) [above=0.75em,sloped] {} (a0);
+  \draw (midbrace) ++(0.15,0.3) node (q0label) {$Q(t) \equiv 0$ for $\frac{dA}{dt} < \frac{dD}{dt}$};
+
+  \draw [-latex'] (q0label) .. controls +(240:0.1) and +(120:0.1) .. (midbrace);
+
+\end{tikzpicture}
