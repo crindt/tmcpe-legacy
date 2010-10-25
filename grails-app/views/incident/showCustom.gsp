@@ -71,7 +71,7 @@
       </div>
 
       <!-- MAP PANE -->
-      <div dojoType="dijit.layout.ContentPane" class="dijitContentPaneLoading" id="mapPane" region="center" splitter="false" style="width:50%;">
+      <div dojoType="dijit.layout.ContentPane" class="dijitContentPaneLoading" id="mapPane" region="center" splitter="false" >
 	<div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
       </div>
 
