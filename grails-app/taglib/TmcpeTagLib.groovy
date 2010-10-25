@@ -45,17 +45,17 @@ class TmcpeTagLib {
   
   def dojo_styles_google( version ) {
       out << 
-      """
-          <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dijit/themes/tundra/layout/BorderContainer.css' />
+      """ <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dijit/themes/tundra/layout/BorderContainer.css' />
           <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dojox/grid/resources/Grid.css' />
           <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dojox/grid/resources/tundraGrid.css' />
           <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/dijit/themes/tundra/tundra.css' />
           <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/$version/resources/dojo.css' />
       """
   }
+
   def dojo_google( version, uncompressed ) {
       def mod = ""
-      if ( uncompressed ) mod = '.uncompressed.js';
+      if ( uncompressed ) mod = '.uncompressed.js'
       out << tmcpe.dojo_config()
       out << 
       """
@@ -93,12 +93,13 @@ class TmcpeTagLib {
 
   def tmcpe_styles = {
       out << "<link rel='stylesheet' href='${resource( dir:'css',file:'tmcpe.css' )}' />\n"
-      out << tmcpe.dojo_styles_google( '1.5' )
+      out << "<link rel='stylesheet' href='${resource( dir:'js/openlayers/theme/default',file:'style.css' )}' />\n"
+      tmcpe.dojo_styles_google( '1.5' )
       //out << tmcpe.dojo_styles()
   }
 
   def tmcpe = {
-      out << tmcpe.dojo_google( '1.5', true )
+      tmcpe.dojo_google( '1.5', true )
       //out << tmcpe.dojo( true )
 
   }
