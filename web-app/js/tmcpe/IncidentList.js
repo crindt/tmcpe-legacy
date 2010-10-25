@@ -164,7 +164,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	//    alert( "THE PARAMS MAX" + theParams['max'] );
 	if ( theParams['max'] == undefined ) 
 	{
-	    theParams['max'] = 1000;
+	    theParams['max'] = 2500;
 	}
 	//    alert( "THE PARAMS MAX" + theParams[ 'max' ] );
 
@@ -605,6 +605,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 
     updateIncidentsTable: function( theParams ) {
+	console.log( "UPDATING INCIDENTS TABLE" );
 	// Point the store to the incidents layer
 	var store = new tmcpe.ItemVectorLayerReadStore( {vectorLayer: this._incidentsLayer} );
 	this.getIncidentGrid().setStore( store );
