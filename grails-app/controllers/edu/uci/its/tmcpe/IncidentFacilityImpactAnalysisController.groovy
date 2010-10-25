@@ -84,7 +84,10 @@ class IncidentFacilityImpactAnalysisController {
                 }
 		xls {
 			Workbook wb = new HSSFWorkbook()
-			def fname = "incident-" + incidentFacilityImpactAnalysisInstance?.incidentImpactAnalysis?.incident?.cad + "-data.xls"
+			def fname = [ "incident",
+				      incidentFacilityImpactAnalysisInstance?.incidentImpactAnalysis?.incident?.cad,
+				      incidentFacilityImpactAnalysisInstance.location.freewayId + "-" + incidentFacilityImpactAnalysisInstance.location.freewayDir,
+				      "data.xls" ].join("_")
 			
                         // Get the timesteps
                         def timesteps = null
@@ -97,7 +100,7 @@ class IncidentFacilityImpactAnalysisController {
                         def firstcol=2
                         def firstrow=4
 
-                        for ( dt in ["spd", "vol", "occ", "p_j_m", "incident_flag", "cap", "dem", "q", "spdkm", "alpha", "tmcpe_delay", "E(v^2)", "SMS(mph)", "den(vplm)"] ) {
+                        for ( dt in ["spd", "vol", "occ", "spd_avg", "vol_avg", "occ_avg", "p_j_m", "incident_flag", "cap", "dem", "q", "spdkm", "alpha", "tmcpe_delay", "E(v^2)", "SMS(mph)", "den(vplm)"] ) {
 
                             // create sheet
                             def sheet = wb.createSheet( dt )
