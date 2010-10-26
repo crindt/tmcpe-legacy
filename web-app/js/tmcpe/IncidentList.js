@@ -179,6 +179,31 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
     initApp: function() {
 	this._incidentsLayerInit();
+
+	var igrid = this.getIncidentGrid();
+	// connect some styling features to the log grid
+	dojo.connect( igrid, "onStyleRow", function(row) { 
+            //The row object has 4 parameters, and you can set two others to provide your own styling
+            //These parameters are :
+            // -- index : the row index
+            // -- selected: wether the row is selected
+            // -- over : wether the mouse is over this row
+            // -- odd : wether this row index is odd.
+
+	    row.customClasses += " noHighlight";
+	});
+
+	var iGrid = this.getIncidentGrid();
+	var obj = this; // for closure
+	dojo.connect( iGrid, "onCellFocus", function( inCell, inRowIndex ) { 
+            var item = iGrid.getItem(inRowIndex);
+	    iGrid.selection.clear();
+	    if ( item ) {
+		iGrid.selection.setSelected( inRowIndex, true );
+	    }
+	    obj.simpleSelectIncident( { cell: inCell, grid: iGrid, rowIndex: inRowIndex } );
+	});
+
     },
 
     // called to indicate that the layer update is complete...
@@ -312,7 +337,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    var sum = 0;
 		    var cnt = 0;
 		    for ( var i = 0; i < features.length; i++) {
-			var feat = feature.cluster[ i ];
+			var feat = features[ i ];
 			var del = feat.attributes.tmcpe_delay;
 			if ( del != undefined ) {
 			    cnt++;
@@ -442,21 +467,16 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this._hoverIncident.activate();
 	
 
+	var obj = this;
 	this._selectIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer, {
 	    renderIntent: "select",
 	    eventListeners: {
 		"featurehighlighted": function( evt ) {
 		    var feature = evt.feature
 		    if ( feature && feature.cluster ) {
-			// create tooltip when we hover
-			var xy = obj.getMap().getControl('ll_mouse').lastXy || new OpenLayers.Pixel(0,0);
-			var loc = feature.cluster[0].attributes.locString;
-			var txt = 
-			    loc + ': <span style="font-weight:bold;">' + 
-			    feature.cluster.length + " event" + 
-			    ( feature.cluster.length == 1 ? "" : "s" ) + "</span>";
-			obj._map.showTooltip( txt, xy.x, xy.y );
+			obj._showTooltipForFeature( feature );
 		    }
+		    obj.scrollIncidentsToItem( feature );
 		},
 		"featureunhighlighted": function( feature ) {
 		    // hide tooltip when we unhighlight
@@ -484,6 +504,44 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
 	
 	return theParams;
+    },
+
+    _showTooltipForFeature: function( feature ) {
+	// create tooltip when we hover
+	var pp = new OpenLayers.LonLat( feature.geometry.x, feature.geometry.y );
+	var xy = this.getMap().getPixelFromLonLat( pp );
+
+	// if the cluster feature has a 'last' property, use that value for the tooltip text
+	
+	var tmpCluster = feature.cluster.slice(0).sort( 
+	    function( a, b ) {
+		var a1 = a.attributes.tmcpe_delay ? a.attributes.tmcpe_delay : 0;
+		var b1 = b.attributes.tmcpe_delay ? b.attributes.tmcpe_delay : 0;
+		return b1 - a1;
+	    }
+	);
+
+	var loc = "<unknown location>";
+	var cad = "<unknown cad>";
+	var i, targ = null;
+	if ( feature.last != null ) {
+
+	    for ( i = 0; i < tmpCluster.length && targ==null; ++i ) {
+		var feat = tmpCluster[ i ];
+		if ( feat == feature.last ) {
+		    targ = feat;
+		}
+	    }
+	    loc = targ.attributes.locString;
+	    cad = targ.attributes.cad;
+	} else {
+	    loc = tmpCluster[0].attributes.locString;
+	    cad = tmpCluster[0].attributes.cad;
+	    i = 1;
+	}
+	var txt = cad + ": " + loc + ': <span style="font-weight:bold;">' + 
+	    i + " of " + feature.cluster.length;
+	this._map.showTooltip( txt, xy.x, xy.y );
     },
     
     
@@ -593,8 +651,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	}
 	if ( idx >= 0 ) {
 	    gn.selection.clear();
-	    gn.selection.addToSelection( idx );
 	    gn.scrollToRow( idx );
+	    gn.selection.addToSelection( idx );
 	    //				     alert( "item " + cad + "found @ idx:" + idx );	
 	} else {
 	    alert( "Strangely, item " + cad + " wasn't found in the grid!" );
@@ -667,6 +725,14 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     updateIncidentCluster: function() {
 	var scw = this._incidentStackContainer.selectedChildWidget;
 
+	if ( scw.incident != null ) {
+	    // select the new feature and update the tooltip
+	    var feat = this._getFeatureForIncident( scw.incident );
+	    feat.last = scw.incident;
+	    this._showTooltipForFeature( feat );
+	    this.scrollIncidentsToItem( scw.incident );
+	}
+
 	var scwi = this._incidentStackContainer.getIndexOfChild( scw ) + 1;
 
 	var tot = this._incidentStackContainer.getChildren().length;
@@ -727,6 +793,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    return b1 - a1;
 		}
 	    );
+	    var selectedPane = null;
 	    for ( var i = 0; i < tmpCluster.length; ++i ) 
 	    {
 //		var f = feature.cluster[ i ];
@@ -756,7 +823,13 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		      + "</table>"
 		      //+ '<p><A href="'+base+'incident/showCustom?id='+id+'">Show Incident</a></p>'
 		    });
+		// store a reference to the feature so we can use it to update the map
+		cp.incident = f;
 		this._incidentStackContainer.addChild(cp);
+		if ( f == feature.last ) {
+		    // caller wants this to be highlighted (active)
+		    selectedPane = cp;
+		}
 
 		// Create "show details button"
 		var base = document.getElementById("htmldom").href;
@@ -787,7 +860,13 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		label: "The incident detail will open in a new window"
 	    });
 	    
-	    if ( feature.cluster.length == 0 ) {
+
+	    if ( selectedPane != null ) {
+		// Select the appropriate pane to show
+		this._incidentStackContainer.selectChild( selectedPane );
+	    }
+
+	    if ( feature.cluster.length <= 1 ) {
 		dojo.byId( 'previousIncident' ).disable = true;
 		dojo.byId( 'nextIncident' ).disable = true;
 		dojo.byId( 'incidentIndex' ).innerHTML = "0 of 0";
@@ -857,6 +936,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var feature = event.feature;
 
 	il.updateIncidentDetails( feature );
+	il._showTooltipForFeature( feature );
     },
 
 
@@ -898,16 +978,44 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     },
 
     
+    // This is necessary when using the Cluster strategy because the incident
+    // feature
+    _getFeatureForIncident: function( incident ) {
+	var layer = this._incidentsLayer;
+
+	if ( layer.features ) {
+	    for ( var i = 0; i < layer.features.length; ++i ) {
+		var ff = layer.features[ i ];
+		if ( ff.cluster && ff.cluster.length > 0 ) { 
+		    for ( var j = 0; j < ff.cluster.length; ++ j ) {
+			var fff = ff.cluster[ j ];
+			if ( fff == incident ) return ff;
+		    }
+		} else {
+		    if ( incident == ff ) return ff;
+		}
+	    }
+	}
+	return null;
+		
+    },
+
+	    
     simpleSelectIncident: function( event ) {
 	var il = dijit.byId( 'incidentList' );
 	var incident = event.grid.getItem( event.rowIndex );
 
-	// raise it to the top
-	il._incidentsLayer.removeFeatures( incident, { silent:true } );
-	il._incidentsLayer.addFeatures( incident, { silent:true } );
+	// Find the feature cluster this belongs to and activate that one
+	var incidentFeature = this._getFeatureForIncident( incident );
 
+	if ( incidentFeature == null ) return;
+
+	incidentFeature.last = incident;
+	
 	il._selectIncident.unselectAll();
-	il._selectIncident.select( incident );
+	il._selectIncident.select( incidentFeature );
+	il.updateIncidentDetails( incidentFeature );
+	il._showTooltipForFeature( incidentFeature );
     },
 
 

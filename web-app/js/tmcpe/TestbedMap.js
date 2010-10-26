@@ -151,21 +151,33 @@ dojo.declare("tmcpe.TestbedMap", [ dijit._Widget ], {
 
     showTooltip: function(ttText, x, y) {
 //	alert( "Showing tooltip " + ttText + " @ " + x + ", " + y );
-	var windowWidth = this.getViewport().width;
+	//var windowWidth = this.getViewport().width;
+	var windowWidth = this._map.size.w;
 	var o = this._mapTooltip;  //this._mapTooltip;
 	o.innerHTML = ttText;
 	if(o.offsetWidth) {
 	    var ew = o.offsetWidth;
+	    var eh = o.offsetHeight;
 	} else if(o.clip.width) {
 	    var ew = o.clip.width;
+	    var eh = o.clip.height;
 	}
-	y = y + 16;
-	x = x - (ew / 4);
+	//y = y + 16;
+	var oldy = y;
+	y = y - 20;
+	//x = x - (ew / 4);
+	var oldx = x;
+	x = x + 20;
 	if (x < 2) {
 	    x = 2;
 	} else if(x + ew > windowWidth) {
-	    x = windowWidth - ew - 4;
+	    x = oldx - ew - 20;
 	}
+	if ( y - 20 - eh < 0 ) {
+	    y = oldy + 20;
+	}
+
+
 	o.style.zIndex = 800;
 	o.style.backgroundColor = '#ffffff';
 	o.style.borderColor = '#000000';
