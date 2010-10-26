@@ -19,7 +19,7 @@ foreach my $ff (@ARGV) {
     print $fcmd;
     system ( $fcmd ) && die "FAILED!";
     system ( "rm $f" ) && die "FAILED REMOVING";
-    system ( "mv $ff done/$ff" ) && die "FAILED MOVING $f to done/$ff";
+    system ( "mv $ff done" ) && die "FAILED MOVING $f to done/`basename $ff`";
     system ( "echo $ff >> completed" );
 }
 
