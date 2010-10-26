@@ -261,11 +261,13 @@
 	</div> <!-- Form -->
       </div> <!-- Query Pane -->
       <!-- Map and Details Pane -->
-      <div dojoType="dijit.layout.BorderContainer" id="mapgrid" region="center" design="sidebar" style="background:green;" splitter="false" liveSplitters="false">
+      <div dojoType="dijit.layout.BorderContainer" id="mapgrid" 
+	   region="center" design="sidebar" style="background:green;" 
+	   splitter="false" liveSplitters="false">
 
 	<!-- Map Pane -->
 	<div dojoType="dijit.layout.ContentPane" id="mapPane" region="center" style="background:yellow;" splitter="false" liveSplitters="false">
-	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map"></div>
+	  <div dojoType="tmcpe.TestbedMap" id="map" jsId="map" style="width:100%;height:100%;"></div>
 	</div>
 
 	<!-- Incident Details Pane -->
@@ -308,6 +310,7 @@
 		 region="center"
 		 onRowClick="incidentList.simpleSelectIncident(event)"
 		 style="width:100%;height:4em;"
+		 selectionMode="single"
 		 >
 	    <thead>
 	      <tr>
