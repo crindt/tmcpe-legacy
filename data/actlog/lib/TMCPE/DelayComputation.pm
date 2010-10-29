@@ -123,7 +123,7 @@ use Class::MethodMaker
      scalar => [ { -default => 0 }, 'use_eq8b' ],
      scalar => [ { -default => 5 }, 'dt' ],  # number of minutes in a time step
      scalar => [ { -default => 1 }, 'weight_for_length' ],
-     scalar => [ { -default => 0 }, 'weight_for_distance' ],  # value is exponent of weighting function
+     scalar => [ { -default => 3 }, 'weight_for_distance' ],  # value is exponent of weighting function
      scalar => [ { -default => 20 }, 'limit_loading_shockwave' ],  # 15 mi/hr
      scalar => [ { -default => 60 }, 'limit_clearing_shockwave' ],  # 15 mi/hr
      scalar => [ qw/ boundary_intersects_within / ], # =[dx,dt]: require incident boundary to include at least 
