@@ -307,7 +307,7 @@ table.tmcpeTsd {
     left:0;
 /*    border-width:3px;
     border-color:#000000; */
-/*    border-collapse:collapse; */
+    border-collapse:collapse;
     width:100%;
     height:100%;
 }
@@ -316,6 +316,9 @@ table.tmcpeTsd td {
     visibility:inherit;
     opacity:ihherit;
     background: none;
+    border-left: 1px solid rgba(0,0,0,0.15);
+    padding-top: 6px;
+    padding-bottom: 6px;
 /* Causes problems in ffox
     border-bottom: 0px;
     border-top: 0px;
@@ -342,7 +345,7 @@ table.tmcpeTsd th {
     border-top-style:solid;
     border-bottom: 0px;
     border-bottom-style: none;
-    border-top-color: rgba(0, 0, 200, 0.246094);
+    border-top-color: rgba(0, 0, 200, 0.15);
 }
 
 .tsdTableNodeContainer table.tmcpeTsd tr:not(.timeHeader) {
@@ -375,39 +378,43 @@ table.tmcpeTsd.hideIncident td.incident {
 }
 
 table.tmcpeTsd.showIncident td.borderDownstream {
-    border-left-width:5px;
+    border-left-width:4px;
     border-left-style:solid;
     border-left-color:rgba(0,0,255,0.75);
 }
 
 table.tmcpeTsd.showIncident td.borderUpstream {
-    border-right-width:5px;
+    border-right-width:4px;
     border-right-style:solid;
     border-right-color:rgba(0,0,255,0.75);
 }
 
 table.tmcpeTsd.showIncident.fliptime td.borderLater {
-    border-top-width:5px;
+    border-top-width:4px;
     border-top-style:solid;
     border-top-color:rgba(0,0,255,0.75);
+    padding-top: 1px;
 }
 
 table.tmcpeTsd.showIncident.fliptime td.borderEarlier {
-    border-bottom-width:5px;
+    border-bottom-width:4px;
     border-bottom-style:solid;
     border-bottom-color:rgba(0,0,255,0.75);
+    padding-bottom: 1px;
 }
 
 table.tmcpeTsd:not(.fliptime).showIncident td.borderLater {
-    border-bottom-width:5px;
+    border-bottom-width:4px;
     border-bottom-style:solid;
     border-bottom-color:rgba(0,0,255,0.75);
+    padding-bottom: 1px;
 }
 
 table.tmcpeTsd:not(.fliptime).showIncident td.borderEarlier  {
-    border-top-width:5px;
+    border-top-width:4px;
     border-top-style:solid;
     border-top-color:rgba(0,0,255,0.75);
+    padding-top: 1px;
 }
 
 table.tmcpeTsd td.tsdDataSuspect {
