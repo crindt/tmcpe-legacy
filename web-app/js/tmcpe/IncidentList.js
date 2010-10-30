@@ -14,20 +14,25 @@ dojo.require("dojo.cookie");
 dojo.require("tmcpe.TestbedMap");
 dojo.require("tmcpe.ItemVectorLayerReadStore");
 
-//dojo.require("dojox.gfx.Surface");
+const queryCookie = 'TmcpeQueryParams';   // The query cookie name
+const maxIncidents = 2500;                // The absolute max number of incidents to query
 
-// our declared class
-dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
+/**
+ * The application logic for the TMCPE Incident List
+ */
+dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
     
-    _map: null,
-    _incidentsLayer: null,
-    _selectIncident: null,
-    _hoverIncident: null,
-    
-    _vdsLayer: null,
-    _selectVds: null,
-    _hoverVds: null,
-    
+    ////// parameters //////
+    _showProgress: null,    // show progress bar if true
+
+    // widgets 
+    _map: null,             // the TestbedMap widget
+
+    // Openlayers
+    _incidentsLayer: null,  // The layer of incident markers
+    _selectIncident: null,  // The select controller for incident markers
+    _hoverIncident: null,   // The hover controller for incident markers 
+
     _incidentGrid: null,
     _incidentStackContainer: null,
     _previousIncident: null,
@@ -47,13 +52,54 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     postCreate: function() {
     },
 
+    initApp: function() {
+	this._incidentsLayerInit();
+
+	var igrid = this.getIncidentGrid();
+	// connect some styling features to the log grid
+	dojo.connect( igrid, "onStyleRow", function(row) { 
+            //The row object has 4 parameters, and you can set two others to provide your own styling
+            //These parameters are :
+            // -- index : the row index
+            // -- selected: wether the row is selected
+            // -- over : wether the mouse is over this row
+            // -- odd : wether this row index is odd.
+
+	    row.customClasses += " noHighlight";
+	});
+
+	var iGrid = this.getIncidentGrid();
+	var obj = this; // for closure
+	dojo.connect( iGrid, "onCellFocus", function( inCell, inRowIndex ) { 
+            var item = iGrid.getItem(inRowIndex);
+	    iGrid.selection.clear();
+	    if ( item ) {
+		iGrid.selection.setSelected( inRowIndex, true );
+	    }
+	    obj.simpleSelectIncident( { cell: inCell, grid: iGrid, rowIndex: inRowIndex } );
+	});
+
+    },
+
+    /**
+     * Accessor for the openlayers map object 
+     * 
+     * @returns OpenLayers map object contained in the TestbedMap
+     */
     getMap: function() {
 	if ( !this._map ) {
 	    this._map = dijit.byId( 'map' );
 	}
+
+	// We return the openlayers map object contained in the TestbedMap
 	return this._map._map;
     },
 
+    /**
+     * Accessor for the incident grid 
+     *
+     * @returns The incident grid dijit
+     */
     getIncidentGrid: function() {
 	if ( !this._incidentGrid ) {
 	    this._incidentGrid = dijit.byId( 'incidentGrid' );
@@ -61,6 +107,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	return this._incidentGrid;
     },
 
+    /**
+     * Accessor for the incident details 
+     *
+     * @returns The incident details DOM Node
+     */
     getIncidentDetails: function() {
 	if ( !this._incidentDetails ) {
 	    this._incidentDetails = dojo.byId( 'incidentDetails' );
@@ -68,6 +119,12 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	return this._incidentDetails;
     },
 
+    /**
+     * Store query params in the query cookie
+     *
+     * @arg theParams A hash of query parameters to store along with the form
+     *                data
+     */
     _storeIncidentsParams: function( theParams ) {
 	if ( !theParams || theParams == undefined ) {
 	    theParams = {};
@@ -86,11 +143,16 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    }
 	}
 	theParams[ 'extents' ] = this.getMap().getExtent().toArray();
-	dojo.cookie( 'tmcpeHackParams', JSON.stringify( theParams ) );
+	dojo.cookie( queryCookie, JSON.stringify( theParams ) );
     },
 
+    /**
+     * Get query params from the query cookie
+     *
+     * @returns A hash of query parameters
+     */
     _restoreIncidentsParams: function () {
-	var cookstr = dojo.cookie( 'tmcpeHackParams' );
+	var cookstr = dojo.cookie( queryCookie );
 	if ( cookstr ) {
 	    theParams = JSON.parse( cookstr );
 	} else {
@@ -100,8 +162,14 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	return theParams;
     },
 
+    /**
+     * Create a set of query parameters from the form data
+     *
+     * @arg theParams An initial set of parameters to override
+     *
+     * @returns       A final set of query parameters
+     */
     _constructIncidentsParams: function( theParams ) {
-	var w = 0;
 	if ( !theParams || theParams == undefined ) {
 	    theParams = {};
 	}
@@ -149,7 +217,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	var days = [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ];
 	for ( dow in days ) {
 	    var dowWid = dijit.byId( days[dow] );
-	    //	alert( "DOW " + days[dow] + ": " + dowWid );
 	    if ( dowWid && dowWid.checked ) {
 		//	    alert( "DOW " + days[dow] + " CHECKED" );
 		if ( theParams['dow'] == undefined ) {
@@ -158,102 +225,80 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    theParams['dow'] += "," + dowWid.get('value');
 		}
 	    }	
-}
-	//    alert( "PARAMS: " + theParams['dow'] );
+	}
 
-	//    alert( "THE PARAMS MAX" + theParams['max'] );
 	if ( theParams['max'] == undefined ) 
 	{
-	    theParams['max'] = 2500;
+	    theParams['max'] = maxIncidents;
 	}
-	//    alert( "THE PARAMS MAX" + theParams[ 'max' ] );
 
-	// set the storeQuery parameter so the controller will save this query in cookies
-	theParams['storeQuery'] = true;
-
+	// Push these query parameters to the cookie so they're persistent
 	this._storeIncidentsParams( );
 
 	return theParams;
 
     },
 
-    initApp: function() {
-	this._incidentsLayerInit();
-
-	var igrid = this.getIncidentGrid();
-	// connect some styling features to the log grid
-	dojo.connect( igrid, "onStyleRow", function(row) { 
-            //The row object has 4 parameters, and you can set two others to provide your own styling
-            //These parameters are :
-            // -- index : the row index
-            // -- selected: wether the row is selected
-            // -- over : wether the mouse is over this row
-            // -- odd : wether this row index is odd.
-
-	    row.customClasses += " noHighlight";
-	});
-
-	var iGrid = this.getIncidentGrid();
-	var obj = this; // for closure
-	dojo.connect( iGrid, "onCellFocus", function( inCell, inRowIndex ) { 
-            var item = iGrid.getItem(inRowIndex);
-	    iGrid.selection.clear();
-	    if ( item ) {
-		iGrid.selection.setSelected( inRowIndex, true );
-	    }
-	    obj.simpleSelectIncident( { cell: inCell, grid: iGrid, rowIndex: inRowIndex } );
-	});
-
-    },
-
-    // called to indicate that the layer update is complete...
-    _demoCallback: function() {
-	console.log( "GOT DEMO CALLBACK!" );
-	//	this._loadEnd(); 
-    },
-
+    /**
+     * Push the given parameters out to the query form
+     *
+     * @arg theParams  The parameters to update the form with
+     */
     _updateQueryFormFromParams: function( theParams ) {
+	// Loop over all the inputs in the query form
 	var inputs = dojo.query( '#queryForm input' );
 	for ( var i = 0; i < inputs.length; ++i ) {
 	    var input = inputs[ i ];
 	    if (  input.id != null && input.id != "" ) {
+
+		// Get the corresponding value for the input from the parameters
 		var tp = theParams[ input.id ];;
-		if ( tp != null && tp.value != null   && tp.value != "" )   {
-		    var djt = dijit.byId( input.id );
-		    //input.value = tp.value
+		if ( tp != null && tp.value != null && tp.value != "" ) {
+		    // It is a dijit with a value, update it
+		    var djt = dijit.byId( input.id );  // get the dijit
+
 		    if ( djt instanceof tmcpe.MyDateTextBox ) {
+			// The date box requires a type conversion
 			djt.attr( 'value', new Date( tp.value ) );
+
 		    } else {
 			djt.attr( 'value', tp.value );
 		    }
 		}
 		if ( tp != null && tp.checked != null ) {
+		    // It is a checkbox; set the checked value
 		    var djt = dijit.byId( input.id );
 		    djt.attr( 'checked', tp.checked );
 		}
-		var jj = 1;
 	    }
 	}
 
+	// Finally, update the map bounds
 	if ( theParams[ 'extents' ] != null )
 	    this.getMap().zoomToExtent( new OpenLayers.Bounds.fromArray( theParams[ 'extents' ] ) );
 
 	return;
-
-	if ( theParams[ 'startDate' ] != null ) {
-	    var wid = dijit.byId( 'startDate' );
-	    wid.setDateFromString( theParams[ 'startDate' ] );
-	}
-	if ( theParams[ 'endDate' ] != null ) {
-	    var wid = dijit.byId( 'endDate' );
-	    wid.setDateFromString( theParams[ 'endDate' ] );
-	}
     },
 
+    /**
+     * Convenience function to restore the query view to the one last stored
+     */
     setLastQuery: function() {
 	this._updateQueryFormFromParams( this._restoreIncidentsParams() );
     },
 
+    /**
+     * Computes a color between green and red based upon the given value and
+     * limits
+     *
+     * @arg val    The value to determine the color for
+     * @arg min    The low end of the value range
+     * @arg max    The high end of the value range
+     * @arg minval The color to use if val < min
+     * @arg maxval The color to use if val > max
+     *
+     * @returns    An rgba color string
+     */
     _getColor: function( /*float*/ val, /*float*/ min, /*float*/ max, /*float*/ minval, /*float*/ maxval ) {
 	// summary:
 	//		Computes a color between green and red based upon the given value and limits
@@ -278,13 +323,16 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	return ret;
     },
 
+    /**
+     * Initializes the incidents layer
+     */
     _incidentsLayerInit: function() {
 
 	// Set query parameters from cookie
 	this.setLastQuery();
 
-	// should validate
-	if ( !this._progressDialog ) {
+	if ( !this._progressDialog && this._showProgress ) {
+	    // Show the progress
 	    this._progressDialog = new dijit.Dialog({//dojox.widget.Dialog({
 		//		title: "Loading",
 		id: "progressDialog",
@@ -305,10 +353,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    this._progressDialog.set( 'content', this._progressBar ); 
 	}
 
+	// A local copy of 'this' for use in closures
 	var obj = this;
-
-	// Create the incidents layer.  The URL is hardcoded here...
-	var base = document.getElementById("htmldom").href;
 
 	// The basic styling for incidents.
 	var style = new OpenLayers.Style({
@@ -328,6 +374,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		    var len = feature.cluster ? feature.cluster.length : 1;
 		    return Math.min(len*2,10) + 5;
                 },
+
+		// Set the fill color based upon the average delay of incidents
+		// in the feature cluster
 		getFillColor: function(feature) {
 		    var features;
 		    if ( feature.cluster )
@@ -355,7 +404,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    }
         });
 
-	// When you hover over an incident it turns yellow and raises up
+	// The hover style: when you hover over an incident its stroke turns
+	// magenta and the whole circle raises up
 	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
 	    strokeColor: "rgba(255,0,208,1)",
 	    strokeOpacity: 0.9,
@@ -363,8 +413,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    graphicZIndex: 5,
 	}, style);
 
-	// When you select an incident it is yellow, is more pronounced by being
-	// 5px bigger (in minRadius) and bolder.  It is also raised even higher
+	// The select style: when you select an incident its stroke is a thick
+	// magenta, it is more pronounced by being 5px bigger (in minRadius) and
+	// bolder.  It is also raised even higher
 	var selectStyle = OpenLayers.Util.applyDefaults({
 	    strokeWidth: 6,
 	    strokeOpacity: 0.9,
@@ -372,18 +423,21 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    graphicZIndex: 10
 	}, hoverSelectStyle);
 
+	// This should make the selected circle bigger too, but it doesn't --
+	// FIXME
 	selectStyle.context.getPointRadius = function(feature) {
 	    var len = feature.cluster ? feature.cluster.length : 1;
 	    return Math.min(len*2,10) + 10;
         };
 
-	var obj = this;
+
+	// OK, now create the incidents layer
+	var base = document.getElementById("htmldom").href;
 	this._incidentsLayer = new OpenLayers.Layer.Vector("Incidents", {
             projection: obj.getMap().displayProjection,
-	    //            strategies: [new OpenLayers.Strategy.Fixed()],
 	    strategies: [new OpenLayers.Strategy.BBOX({resFactor: 1.1}),new OpenLayers.Strategy.Cluster()],
             protocol: new OpenLayers.Protocol.HTTP({
-            	url: base + "incident/list.geojson",//theurl,
+            	url: base + "incident/list.geojson",
             	params: obj._constructIncidentsParams(),
             	format: new OpenLayers.Format.GeoJSON({})
             }),
@@ -396,8 +450,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
             reportError: true
 	});
 
-	var obj = this;
-	var loaded;
+
+	// Now, attach some event handlers to the incident layer & its features
+	var loaded;  // closure vars
 	var toadd;
 	this._incidentsLayer.events.on({
             "featureselected": obj.onFeatureSelectIncident,
@@ -405,46 +460,59 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	    "loadstart": function() {
 		// notify IncidentList "app" that we're starting to load
-//		obj._loadStart();
-//		loaded = 0;
-//		obj._progressBar.update( { 'maximum': 100, 'progress': loaded } );
+		obj._loadStart();
+		if ( obj._showProgress && obj._progressBar ) {
+		    loaded = 0;
+		    obj._progressBar.update( { 'maximum': 100, 'progress': loaded } );
+		}
 	    },
 	    "loadend": function() {
 		// notify IncidentList "app" that we've finished loading
-//		obj._loadEnd();
+		obj._loadEnd();
 	    },
+
 	    "loadcancel": function() {
 		// force IncidentList "app" to recognize that we've finished loading
-//		obj._loadCancel();
+		obj._loadCancel();
 	    },
 
 	    "beforefeaturesadded": function (feat) { 
 		console.log( "before features added" );
 		console.log( "ADDING " + feat.features.length + " FEATURES" );
 		toadd = feat.features.length;
-//		obj._progressBar.update( { 'maximum': toadd, 'progress': 0 } );
+
+		if ( obj._showProgress && obj._progressBar ) 
+		    obj._progressBar.update( { 'maximum': toadd, 'progress': 0 } );
 	    },
+
 	    "featureadded": function( feat ) { 
 		console.log( "feature added" );
 		loaded++;
 
-		// Update every 10%
-		if ( ( Math.floor( 100 * ( loaded / toadd ) ) % 20 ) == 0 ) {
-//		    obj._progressBar.update( { progress: loaded } );
+		if ( obj._showProgress && obj._progressBar ) {
+		    // Update every 10%
+		    if ( ( Math.floor( 100 * ( loaded / toadd ) ) % 20 ) == 0 ) {
+			obj._progressBar.update( { progress: loaded } );
+		    }
 		}
 	    },
+
 	    "featuresadded": function( feat ) { 
 		console.log( feat.features.length + " features added" );
 	    },
+
 	    "featuresremoved": function( feat ) { 
 		console.log( feat.features.length + " features removed" );
 	    },
+
 	    "move": function() {
 		obj._map.hideTooltip();    // Hide any tooltips that linger
 	    },
+
 	    "zoomend": function() {
 		obj._map.hideTooltip();    // Hide any tooltips that linger
 	    },
+
 	    "moveend": function() { 
 		/*
 		  var geo = dijit.byId( 'geographic' );
@@ -459,7 +527,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    },
 	});
 
-	//    map.events.register("moveend", null, function() { alert("updating query"); updateIncidentsQuery(); } )
 	this.getMap().addLayers([this._incidentsLayer]);
 
 	this._hoverIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer,{ 
@@ -492,21 +559,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this._selectIncident.activate();
 
 	this.updateIncidentsQuery();
-    },
-
-    _constructVdsSegmentsParams: function( theParams ) {
-	if ( !theParams || theParams == undefined ) {
-	    // some defaults to prevent runaways
-	    theParams = {};
-	    
-	    theParams = {};
-	    theParams[ 'district' ] = 12;
-	}
-	theParams[ 'type' ] = 'ML';
-	theParams[ 'bbox' ] = [getMap().getExtent().toBBOX()];
-	theParams[ 'proj' ] = "EPSG:900913";/*map.projection*/
-	
-	return theParams;
     },
 
     _showTooltipForFeature: function( feature ) {
@@ -548,79 +600,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
     },
     
     
-    _vdsLayerInit: function( theParams ) {
-
-	var myParams = this._constructVdsSegmentsParams( theParams );
-
-	var obj = this;
-
-	var base = document.getElementById("htmldom").href;
-
-	this._vdsLayer = new OpenLayers.Layer.Vector("Vds Segments", {
-	    projection: this.getMap().displayProjection,
-	    strategies: [new OpenLayers.Strategy.Fixed()],
-	    style: {strokeWidth: 8, strokeColor: "#00ff00", strokeOpacity: 0.25 },
-	    protocol: new OpenLayers.Protocol.HTTP({
-  		url: base + "vds/list.geojson",
-		params: myParams,
-		format: new OpenLayers.Format.GeoJSON({})
-	    })
-	});
-	
-	var obj = this;
-	vdsSegmentLines.events.on({
-	    "featureselected": obj._onFeatureSelectVds,
-	    "featureunselected": obj._onFeatureUnselectVds,
-	    "moveend": function() { obj.updateVdsSegmentsQuery( {} ); }
-	});
-
-	/*
-           vdsSegmentLines.events.register("featureselected", null, onFeatureSelectVds )
-           vdsSegmentLines.events.register("featureunselected", null, onFeatureUnselectVds )
-           map._map.events.register("moveend", null, function() { updateVdsSegmentsQuery(); } )
-         */
-
-	this.getMap().addLayers([vdsSegmentLines]);
-
-
-	var hoverSelectStyle = OpenLayers.Util.applyDefaults({
-	    fillColor: "yellow",
-	    strokeColor: "yellow"}, OpenLayers.Feature.Vector.style["select"]);
-
-	this._hoverVds = new OpenLayers.Control.SelectFeature(
-	    this._vdsLayer,{ 
- 		hover: true,
- 		highlightOnly: true,
-		renderIntent: "temporary",
-		selectStyle: hoverSelectStyle
-		//        eventListeners: {
-		//            beforefeaturehighlighted: report,
-		//            featurehighlighted: report,
-		//            featureunhighlighted: report
-		//        }
-	    });
-	this.getMap().addControl(this._hoverVds);
-	this._hoverVds.activate();
-
-
-	var selectStyle = OpenLayers.Util.applyDefaults({
-	    //	    fillColor: "blue",
-	    //	    strokeColor: "blue"
-	}, OpenLayers.Feature.Vector.style["select"]);
-
-	this._selectVds = new OpenLayers.Control.SelectFeature(
-	    this._vdsLayer,{
-		highlightOnly: true,
-		renderIntent: "temporary",
-		selectStyle: selectStyle
-	    });
-	
-	this.getMap().addControl(selectVds);
-	this._selectVds.activate();   
-	
-    },
-    
-
 
     ////////// TABLE FUNCTIONS
 
@@ -953,33 +932,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	}
     },
 
-
-    onFeatureSelectVds: function(event) {
-	var il = dijit.byId( 'incidentList' );
-
-	var feature = event.feature;
-	var lonlats = feature.attributes.vdsLocation.split( ' ' );
-	var lonlat = new OpenLayers.LonLat( lonlats[ 0 ], lonlats[ 1 ] ).transform(map._map.displayProjection, map._map.projection)
-	var popup = new OpenLayers.Popup.FramedCloud("chicken", 
-						     lonlat,
-						     new OpenLayers.Size(100,100),
-						     "<h2>"+feature.attributes.name + "</h2>",// + feature.attributes.description,
-						     null, true, onPopupCloseVds
-						    );
-	feature.popup = popup;
-	il.getMap().addPopup(popup);
-    },
-
-    onFeatureUnselectVds: function(event) {
-	var il = dijit.byId( 'incidentList' );
-	var feature = event.feature;
-	if(feature.popup) {
-	    il.getMap().removePopup(feature.popup);
-	    feature.popup.destroy();
-	    delete feature.popup;
-	}
-    },
-
     
     // This is necessary when using the Cluster strategy because the incident
     // feature
@@ -1053,36 +1005,34 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	this._jobs++;
 	console.log( "LOAD START: " + this._jobs );
 
-	this._progressBar.update( { progress: 0 } );
-
-	if ( !this._progressDialog.open ) {
-	    this._progressDialog.show();
+	if ( this._showProgress && this._progressBar ) {
+	    this._progressBar.update( { progress: 0 } );
+	    
+	    if ( !this._progressDialog.open ) {
+		this._progressDialog.show();
+	    }
 	}
     },
 
     _loadEnd: function() {
 	this._jobs--;
-	//	this._progressDialog.set( "content", "finished" ); 
 	console.log( "LOAD END: " + this._jobs );
-	if ( this._jobs <= 0 && this._progressDialog != null ) { 
+
+	if ( this._jobs <= 0 ) { 
 
 	    // All reads from the server are done so we can update the table
 	    this.updateIncidentsTable();
-	    this._progressDialog.hide(); 
+
+	    if ( this._showProgress && this._progressDialog ) { 
+		this._progressDialog.set( "content", "finished" ); 
+		this._progressDialog.hide(); 
+	    }
 	}
     },
 
     _loadCancel: function() {
 	// repeatedly end until the number of open jobs is 0
 	while ( obj._jobs > 0 ) { obj._loadEnd(); };
-    },
-
-    updateVdsSegmentsQuery: function( theParams ) {
-	if ( this._selectVds )
-	    this._selectVds.unselectAll();
-	var myParams = this._constructVdsSegmentsParams( theParams );
-
-	this._updateVdsSegmentsLayer( myParams );
     },
 
     _updateIncidentsLayer: function( theParams ) {
@@ -1102,22 +1052,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	//	}
 	this._incidentsLayer.refresh({force: true, params:theParams});
     },
-
-    _updateVdsSegmentsLayer: function( theParams ) {
-	if ( this._vdsLayer.protocol.url == "" ) {
-	    // update the url
-	    var base = document.getElementById("htmldom").href;
-
-	    this._vdsLayer.protocol = 
-		new OpenLayers.Protocol.HTTP({
-  		    url: base + "vds/list.geojson",
-		    params: theParams,
-		    format: new OpenLayers.Format.GeoJSON({})
-		});
-	}
-	this._vdsLayer.refresh({force: true, params:theParams});    
-    },
-
 
 
     sleep: function (naptime){

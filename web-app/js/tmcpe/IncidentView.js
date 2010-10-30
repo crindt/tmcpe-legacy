@@ -13,24 +13,24 @@ dojo.require("dojox.json.ref");
 dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
     ////// parameters /////
-    incidentId: null,  // The database id of the incident we're displaying
+    incidentId: null,       // The database id of the incident we're displaying
+    _facilityImpactAnalysis: null, // the active impact analysis (the one in the plot)
 
     ////// private vars /////
-    _incident: null,   // The JSON object holding the incident data
-    _tsd: null,        // The TimeSpaceDiagram widget
-    _map: null,        // The map widget
+    _incident: null,        // The JSON object holding the incident data
 
-    // 
-    _vdsSegmentLines: null,
+    // Widgets
+    _tsd: null,             // The TimeSpaceDiagram widget
+    _map: null,             // The map widget
+    _facilityStore: null,   // The dojo facility store
+    _incidentSummary: null, // The dom node holding the incident summary
+    _activityLogGrid: null, // The dom node holding the activity log grid dojo
+
+    // Openlayers
+    _vdsSegmentLayer: null,
     _incidentsLayer: null,
     _selectVds: null,
     _hoverVds: null,
-    _facilityImpactAnalysis: null, // the active impact analysis (the one in the plot)
-
-    _facilityStore: null, // The dojo facility store
-    _incidentSummary: null, // The dom node holding the incident summary
-    _activityLogGrid: null, // The dom node holding the activity log grid dojo
-							// widget
     
     constructor: function() {
     },
@@ -258,24 +258,24 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     },
 
     _updateVdsSegmentsLayer: function( theParams ) {
-	if ( ! this._vdsSegmentLines ) {
+	if ( ! this._vdsSegmentLayer ) {
 	    this.initVdsSegmentsLayer( {} );
 	    return;
 	}
 
 	var base = document.getElementById("htmldom").href;
 
-	var vdsSegmentLines = this._vdsSegmentLines;
-	if ( vdsSegmentLines.protocol.url == "" ) {
+	var vdsSegmentLayer = this._vdsSegmentLayer;
+	if ( vdsSegmentLayer.protocol.url == "" ) {
 	    // update the url
-	    vdsSegmentLines.protocol = 
+	    vdsSegmentLayer.protocol = 
 		new OpenLayers.Protocol.HTTP({
   		    url: base + "vds/list.geojson",
 		    params: theParams,
 		    format: new OpenLayers.Format.GeoJSON({})
 		});
 	}
-	vdsSegmentLines.refresh({force: true, params:theParams});
+	vdsSegmentLayer.refresh({force: true, params:theParams});
 
     },
 
@@ -304,7 +304,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	}
 
 	// Loop over the stations to connect them to features
-	var vsl = this._vdsSegmentLines;
+	var vsl = this._vdsSegmentLayer;
 	for ( j = 0; j < tsd._data.sections.length; ++j ) {
 	    var station = tsd._data.sections[ tsd._data.sections[ j ].stnidx ];
 
@@ -402,9 +402,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     },
 
     getIncidentExtent: function() {
-	var maxExtent = this._vdsSegmentLines.getDataExtent();
+	var maxExtent = this._vdsSegmentLayer.getDataExtent();
 	if ( maxExtent == null ) maxExtent = new OpenLayers.Bounds();
-	var unrendered = this._vdsSegmentLines.unrenderedFeatures;
+	var unrendered = this._vdsSegmentLayer.unrenderedFeatures;
 	var i;
 	for ( i in unrendered ) {
 	    var feat = unrendered[i];
@@ -446,7 +446,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var hoverSelectStyle = style.clone();
 	hoverSelectStyle.strokeWidth = 10;
 
-	this._vdsSegmentLines = new OpenLayers.Layer.Vector("Vds Segments", {
+	this._vdsSegmentLayer = new OpenLayers.Layer.Vector("Vds Segments", {
             projection: this.getMap().displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
 	    styleMap: new OpenLayers.StyleMap({
@@ -463,7 +463,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	});
 	
 	var obj = this;
-	this._vdsSegmentLines.events.on({
+	this._vdsSegmentLayer.events.on({
 	    "loadend": function() { 
 		obj._linkFeaturesToCells(); 
 		if ( obj._first_vds_render ) {
@@ -476,9 +476,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	});
 
 
-	this.getMap().addLayers([this._vdsSegmentLines]);
+	this.getMap().addLayers([this._vdsSegmentLayer]);
 
-	this._hoverVds = new OpenLayers.Control.SelectFeature(this._vdsSegmentLines,{ 
+	this._hoverVds = new OpenLayers.Control.SelectFeature(this._vdsSegmentLayer,{ 
  	    hover: true,
  	    highlightOnly: true,
             renderIntent: "temporary",
@@ -495,7 +495,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    strokeOpacity: 1
 	}, OpenLayers.Feature.Vector.style["select"]);
 
-	this._selectVds = new OpenLayers.Control.SelectFeature(this._vdsSegmentLines,{
+	this._selectVds = new OpenLayers.Control.SelectFeature(this._vdsSegmentLayer,{
 	    highlightOnly: true,
 	    renderIntent: "temporary",
 	    selectStyle: selectStyle
@@ -505,12 +505,12 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	this._selectVds.activate();   
 
 
-// obj.getMap().zoomToExtent( obj._vdsSegmentLines.getDataExtent() );
+// obj.getMap().zoomToExtent( obj._vdsSegmentLayer.getDataExtent() );
 
 /*
- * dojo.connect( this._vdsSegmentLines, "moveend", this.updateVdsSegmentsQuery );
- * dojo.connect( this._vdsSegmentLines, "featuresadded",
- * this._linkFeaturesToCells ); dojo.connect( this._vdsSegmentLines,
+ * dojo.connect( this._vdsSegmentLayer, "moveend", this.updateVdsSegmentsQuery );
+ * dojo.connect( this._vdsSegmentLayer, "featuresadded",
+ * this._linkFeaturesToCells ); dojo.connect( this._vdsSegmentLayer,
  * "featuresremoved", this._linkFeaturesToCells );
  */
 
@@ -549,7 +549,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     	var station = this._tsd._data.sections[ stationnm ];
     	
     	// HACK: highlight the corresponding station in the map
-    	var vsl = this._vdsSegmentLines;
+    	var vsl = this._vdsSegmentLayer;
     	if ( vsl && station ) {
 
 	    feature = this._getFeatureForStation( station );
@@ -584,7 +584,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		? station.feature
 		: null );
 
-	var vsl = this._vdsSegmentLines;
+	var vsl = this._vdsSegmentLayer;
 	if ( feature == null && vsl ) {
 
 	    // Loop over the lines until we find the correct station
@@ -617,7 +617,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	var timeind = e.target.getAttribute( 'time' );
 	var d = this._tsd._data;
 
-	var vsl = this._vdsSegmentLines;
+	var vsl = this._vdsSegmentLayer;
 	if ( vsl ) {
 
 	    var tt = this._tsd._td[ timeidx ].length;
@@ -637,11 +637,11 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 			// from the stylemap
 			feature.tdc = tdc;
 
-			if ( this._vdsSegmentLines ) {
+			if ( this._vdsSegmentLayer ) {
 			    // reset the style, which will force the layer to
 			    // recompute
 			    feature.style = null;
-			    this._vdsSegmentLines.drawFeature( feature );
+			    this._vdsSegmentLayer.drawFeature( feature );
 			}
 		    }
 		}
