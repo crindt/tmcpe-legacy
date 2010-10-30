@@ -195,18 +195,6 @@ class IncidentController {
             order( 'startTime', 'asc' )
         }
 
-	// Store the query if params.storeQuery was set
-	/*
-	if ( params.storeQuery ) {
-	    def pairs = params.collect { key, value -> "$key:$value" }
-	    log.info( "COOKIE IS " + pairs.join("|") );
-	    def cookie = new Cookie( 'tmcpeQuery', pairs.join("|") )
-	    cookie.maxAge = 90*24*3600  // make the age 90 days
-	    cookie.path = '/tmcpe'  // FIXME: hardcoded path!
-	    response.addCookie( cookie )
-	    }
-	*/
-	
 	log.info( "===================QUERY DONE" )
 	
 	// now emit for various formats
