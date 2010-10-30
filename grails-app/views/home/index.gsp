@@ -6,14 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 -->
     <!-- Load the map javascript and css -->
-    <tmcpe:tmcpe_styles />       
-    <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
 
-    <g:javascript>
-      dojo.require("dijit.layout.StackContainer");
-      dojo.require("dijit.Tooltip");
-    </g:javascript>
-    
+    <p:dependantJavascript> <!-- render javascript at the end -->
+      <g:javascript>
+	dojo.addOnLoad(function(){ 
+	  dojo.require("dijit.layout.StackContainer");
+	  dojo.require("dijit.Tooltip");
+	});
+      </g:javascript>
+    </p:dependantJavascript>
   </head>
 
   <body onload="" 
@@ -146,8 +147,8 @@
 		the event such that the degree to which the evidence
 		of congestion as shown in the following image
 		</p>
-		<div class="centered cleared%">
-		  <img src="images/doc/tsd-example.png" style="width:67%;border-style:solid;border-width:2px;"/>
+		<div class="centered cleared">
+		  <p:image src="doc/tsd-example.png" style="width:67%;border-style:solid;border-width:2px;" />
 		</div>
 		<p>
 		  which shows how the speed during this incident

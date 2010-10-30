@@ -54,7 +54,7 @@ environments {
 		grails.casURL = "https://parsons.its.uci.edu/cas"
 	}
 	development {
-		grails.serverURL = "https://localhost:8443/${appName}"
+		grails.serverURL = "https://localhost:8443/${appName ? appName : ( appname ? appname :  'tmcpe' )}"
 		grails.casURL = "https://parsons.its.uci.edu/cas"
 	}
 	test {
@@ -171,58 +171,53 @@ ldap.mapper.userDetailsClass = 'inetOrgPerson'
 // Search for explicit validation tags on classes that aren't domain classes
 grails.validateable.packages = ['edu.uci.its.auth']
 
-compress {
-    // just in case for some reason you want to disable the filter
-    enabled = true
-    debug = true
-    statsEnabled = true
-    compressionThreshold = 256
-    // filter's url-patterns
-    urlPatterns = ["/*"]
-    // include and exclude are mutually exclusive
-    includePathPatterns = []
-    excludePathPatterns = [".*\\.gif", ".*\\.ico", ".*\\.jpg", ".*\\.swf"]
-    // include and exclude are mutually exclusive
-    includeContentTypes = []
-    excludeContentTypes = ["image/png"]
-    // include and exclude are mutually exclusive
-    includeUserAgentPatterns = []
-    excludeUserAgentPatterns = [".*MSIE 4.*"]
-    // probably don't want these, but their available if needed
-    javaUtilLogger = ""
-    jakartaCommonsLogger = ""
-
-    development {
-        debug = true
-        compressionThreshold = 2048
-    }
-    production {
-        statsEnabled = false
-    }
-}
-
-uiperformance {
-    enabled = true
-    //    debug = true
-    statsEnabled = true
-    html.compress = true
-    //    html.debug = true
-       
+environments {
+	production {
+	    uiperformance {
+		enabled=true
+		debug = false
+		statsEnabled = false
+		html.compress = true
+		html.debug = false
+	    }
+	}
+	development {
+	    uiperformance {
+		enabled=false
+		debug = true
+		statsEnabled = true
+		html.compress = true
+		html.debug = true
+	    }
+	}
 }
 uiperformance.html.includePathPatterns = [".*\\.geojson"]
 uiperformance.html.includeContentTypes = [ "text/geojson", "application/json" ]
 
+uiperformance.exclusions = [
+    "**/grails_logo.jpg",
+    "**/dojo/**",
+    "**/dojo-src/**",
+    "**/navigation*/**",
+    "**/tmcpe/**",
+    "**/openlayers*/**",
+]
 
 uiperformance.bundles = [
     [type: 'js',
-     name: 'openlayers/local',
-     files: ['openlayers/lib/OpenLayers.js']
+     name: 'openlayers/openlayers-bundle',
+     files: ['openlayers/OpenLayers-custom',
+	    ]
     ],
-
+    [type: 'js',
+     name: 'application-core',
+     files: ['application']
+    ],
     [type: 'css',
-     name: 'tmcpe',
-     files: ['tmcpe.css']
+     name: 'bundled',
+     files: ['tmcpe',
+	     'main',
+	     'navigation'
+	    ]
     ]
 ]
-
-

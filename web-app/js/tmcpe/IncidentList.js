@@ -361,7 +361,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    strokeOpacity: 0.9,
 	    fillOpacity: 0.65,
 	    graphicZIndex: 5,
-	}, style.clone());
+	}, style);
 
 	// When you select an incident it is yellow, is more pronounced by being
 	// 5px bigger (in minRadius) and bolder.  It is also raised even higher
@@ -370,7 +370,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 	    strokeOpacity: 0.9,
 	    fillOpacity: 0.85,
 	    graphicZIndex: 10
-	}, hoverSelectStyle.clone());
+	}, hoverSelectStyle);
 
 	selectStyle.context.getPointRadius = function(feature) {
 	    var len = feature.cluster ? feature.cluster.length : 1;
@@ -405,24 +405,24 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 	    "loadstart": function() {
 		// notify IncidentList "app" that we're starting to load
-		obj._loadStart();
-		loaded = 0;
-		obj._progressBar.update( { 'maximum': 100, 'progress': loaded } );
+//		obj._loadStart();
+//		loaded = 0;
+//		obj._progressBar.update( { 'maximum': 100, 'progress': loaded } );
 	    },
 	    "loadend": function() {
 		// notify IncidentList "app" that we've finished loading
-		obj._loadEnd();
+//		obj._loadEnd();
 	    },
 	    "loadcancel": function() {
 		// force IncidentList "app" to recognize that we've finished loading
-		obj._loadCancel();
+//		obj._loadCancel();
 	    },
 
 	    "beforefeaturesadded": function (feat) { 
 		console.log( "before features added" );
 		console.log( "ADDING " + feat.features.length + " FEATURES" );
 		toadd = feat.features.length;
-		obj._progressBar.update( { 'maximum': toadd, 'progress': 0 } );
+//		obj._progressBar.update( { 'maximum': toadd, 'progress': 0 } );
 	    },
 	    "featureadded": function( feat ) { 
 		console.log( "feature added" );
@@ -430,7 +430,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 
 		// Update every 10%
 		if ( ( Math.floor( 100 * ( loaded / toadd ) ) % 20 ) == 0 ) {
-		    obj._progressBar.update( { progress: loaded } );
+//		    obj._progressBar.update( { progress: loaded } );
 		}
 	    },
 	    "featuresadded": function( feat ) { 
@@ -440,6 +440,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {/* */
 		console.log( feat.features.length + " features removed" );
 	    },
 	    "move": function() {
+		obj._map.hideTooltip();    // Hide any tooltips that linger
+	    },
+	    "zoomend": function() {
 		obj._map.hideTooltip();    // Hide any tooltips that linger
 	    },
 	    "moveend": function() { 

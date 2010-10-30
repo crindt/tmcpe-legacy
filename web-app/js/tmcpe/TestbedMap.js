@@ -70,17 +70,17 @@ dojo.declare("tmcpe.TestbedMap", [ dijit._Widget ], {
 	// Create tooltip div
 	this._mapTooltip = dojo.byId('map').appendChild( document.createElement( 'div', { 
 	    id: "mapTooltip",
-	    class: "popup",
+	    className: "popup",
 	    style: "visibility: hidden;position:absolute;z-index:800;padding:5px;border-width:1px;border-color:#000000;border-style:solid;"
 	}));
     },
     
     _formatLonlats: function(lonLat) {
         var lat = lonLat.lat;
-        var long = lonLat.lon;
+        var lon = lonLat.lon;
         var ns = lat; OpenLayers.Util.getFormattedLonLat(lat);
-        var ew = long; OpenLayers.Util.getFormattedLonLat(long,'lon');
-        return ns + ', ' + ew + ' (' + (Math.round(lat * 10000) / 10000) + ', ' + (Math.round(long * 10000) / 10000) + ')';
+        var ew = lon; OpenLayers.Util.getFormattedLonLat(lon,'lon');
+        return ns + ', ' + ew + ' (' + (Math.round(lat * 10000) / 10000) + ', ' + (Math.round(lon * 10000) / 10000) + ')';
     },
     
     _osm_getTileURL: function(bounds) {

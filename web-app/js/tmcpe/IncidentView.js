@@ -6,18 +6,21 @@ dojo.require("dijit._Widget");
 dojo.require("dijit._Templated");
 dojo.require("dojox.json.ref");
 
-// dojo.require("dojox.gfx.Surface");
 
-// our declared class
+/**
+ * The application logic for the TMCPE Incident View
+ */
 dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
-    // parameters
-    incidentId: null,
+    ////// parameters /////
+    incidentId: null,  // The database id of the incident we're displaying
 
-    // private vars
-    _incident: null,
-    _tsd: null,
-    _map: null,
+    ////// private vars /////
+    _incident: null,   // The JSON object holding the incident data
+    _tsd: null,        // The TimeSpaceDiagram widget
+    _map: null,        // The map widget
+
+    // 
     _vdsSegmentLines: null,
     _incidentsLayer: null,
     _selectVds: null,
@@ -51,10 +54,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 
 	this.inherited( arguments );
 
+	// A local reference to 'this' to be used in the callbacks below
 	var obj = this;
-	dojo.connect( logGrid, "onRowMouseOver", function( event ) { 
-	    obj.simpleSelectLogEntry( event );
-	});
+
 	dojo.connect( logGrid, "onCellFocus", function( inCell, inRowIndex ) { 
 	    obj.simpleSelectLogEntry( { cell: inCell, rowIndex: inRowIndex } );
 	});
@@ -67,7 +69,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
             // -- selected: wether the row is selected
             // -- over : wether the mouse is over this row
             // -- odd : wether this row index is odd.
-	    console.log( "STYLING " + row.index );
+	    //console.log( "STYLING " + row.index );
 
             var item = logGrid.getItem(row.index);
             if (item) {
@@ -434,7 +436,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 		getStrokeColor: function( feature ) {
 		    // set the color to the associated tdc cell OR to green
 		    var color = feature.tdc ? feature.tdc.style.backgroundColor : "#0000ff";
-		    console.log( feature.attributes.name + ":" + color );
+		    //console.log( feature.attributes.name + ":" + color );
 		    return color;
 		}
 	    }

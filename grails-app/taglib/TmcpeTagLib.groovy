@@ -9,7 +9,7 @@ class TmcpeTagLib {
       out << 
       """    
          <script type='text/javascript'>
-            djConfig = {parseOnLoad: true,
+            djConfig = {parseOnLoad: false,
                         isDebug:     true,
                         baseUrl:     '${resource( dir:'js',file:'tmcpe' )}/',
                         modulePaths: { my: '${resource( dir:'js/tmcpe',file:'' )}' },
@@ -93,6 +93,7 @@ class TmcpeTagLib {
 
   def tmcpe_styles = {
       out << "<link rel='stylesheet' href='${resource( dir:'css',file:'tmcpe.css' )}' />\n"
+      //p.css( name: tmcpe );
       out << "<link rel='stylesheet' href='${resource( dir:'js/openlayers/theme/default',file:'style.css' )}' />\n"
       tmcpe.dojo_styles_google( '1.5' )
       //out << tmcpe.dojo_styles()
@@ -103,6 +104,8 @@ class TmcpeTagLib {
       //out << tmcpe.dojo( true )
 
   }
+
+  def dojo_version = { out << "1.5" }
 
   def version = { out << "0.4.0 [${grails.util.Environment.getCurrent()}]" }
 }

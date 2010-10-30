@@ -8,27 +8,14 @@
     <meta name="layout" content="main" />
 
     <!-- Load the css, then the js -->
-    <tmcpe:tmcpe_styles />       <!-- Loads openlayers from the common project source -->
-    <tmcpe:openlayers />         <!-- Loads openlayers from the common project source -->
-    <tmcpe:init_g_map_api />     <!-- Init the google map api key -->
-    <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
+    <p:css name="openlayers/style" /> <!-- Load the openlayers css -->
 
-    <g:javascript>
-         <!-- Here are the custom widgets -->
-         dojo.require("tmcpe.IncidentView"); <!-- This is the application (behavioral) widget -->
-         dojo.require("tmcpe.TestbedMap");
-         dojo.require("tmcpe.TimeSpaceDiagram");
-         
-         <!-- Here are all the dojo widgets we use -->
-         dojo.require("dojo.data.ItemFileReadStore");
-         dojo.require("dijit.form.FilteringSelect");
-         dojo.require("dijit.form.HorizontalSlider");
-         dojo.require("dijit.form.HorizontalRule");
-         dojo.require("dijit.form.HorizontalRuleLabels");
-         dojo.require("dijit.form.CheckBox");
-         dojo.require("dojox.grid.DataGrid");
-         dojo.require("dojo.date.locale");
+    <p:dependantJavascript>
 
+      <p:javascript src='openlayers-bundle' /> <!-- Loads bundled openlayers -->
+      <tmcpe:init_g_map_api />     <!-- Init the google map api key -->
+
+      <g:javascript>
 
       var fireItUp = function() {
 
@@ -44,18 +31,36 @@
         return ret;
       };
 
-      <!-- Fire up the application -->
-      dojo.addOnLoad(function(){ 
-         fireItUp();
-      });
-
       function popitup(url) {
 	newwindow=window.open(url,'name','height=200,width=150');
 	if (window.focus) {newwindow.focus()}
 	return false;
       }
 
+      <!-- Fire up the application -->
+      dojo.addOnLoad(function(){ 
+         <!-- Here are the custom widgets -->
+         dojo.require("tmcpe.IncidentView"); <!-- This is the application (behavioral) widget -->
+         dojo.require("tmcpe.TestbedMap");
+         dojo.require("tmcpe.TimeSpaceDiagram");
+         
+         <!-- Here are all the dojo widgets we use -->
+         dojo.require("dojo.data.ItemFileReadStore");
+         dojo.require("dijit.form.FilteringSelect");
+         dojo.require("dijit.form.HorizontalSlider");
+         dojo.require("dijit.form.HorizontalRule");
+         dojo.require("dijit.form.HorizontalRuleLabels");
+         dojo.require("dijit.form.CheckBox");
+         dojo.require("dojox.grid.DataGrid");
+         dojo.require("dojo.date.locale");
+
+	 dojo.addOnLoad(function(){ 
+  	    fireItUp();
+	 });
+      });
+
     </g:javascript>
+    </p:dependantJavascript>
 
   </head>
 
@@ -241,7 +246,8 @@
 	</div>
       </div>
 
-      <div dojoType="dijit.layout.ContentPane" region="bottom" id="logPane" splitter="true" liveSplitters="false" style="height:200px;">
+      <div dojoType="dijit.layout.ContentPane" region="bottom" id="logPane" splitter="true" liveSplitters="false" 
+	   style="height:200px;">
 	<!-- Log Data -->
 	<div id="logStore"
              dojoType="dojo.data.ItemFileReadStore" 
@@ -253,6 +259,7 @@
 	       dojoType="dojox.grid.DataGrid" 
 	       region="center"
 	       store="logStoreJs"
+	       width="95%"
 	       >
 	  <thead>
 	    <tr>
@@ -260,11 +267,11 @@
 		  <th field="stampDateTime" dataType="Date" formatter="myFormatDate" width="10em">Timestamp</th>
 		  -->
 	      <!--<th field="id" dataType="Integer" width="6em">Id</th>-->
-	      <th field="stampDateTime" dataType="Date" formatter="myFormatDate" width="10em">Date</th>
-	      <th field="status" dataType="String" width="10em">Status</th>
-	      <th field="deviceSummary" dataType="String" width="25em">Resource</th>
-	      <th field="activitySubject" dataType="String" width="15em">Subject</th>
-	      <th field="memoOnly" dataType="String" width="auto">Memo</th>
+	      <th field="stampDateTime" dataType="Date" formatter="myFormatDate" width="10%">Date</th>
+	      <th field="status" dataType="String" width="10%">Status</th>
+	      <th field="deviceSummary" dataType="String" width="15%">Resource</th>
+	      <th field="activitySubject" dataType="String" width="15%">Subject</th>
+	      <th field="memoOnly" dataType="String" width="40%">Memo</th>
 	    </tr>
 	  </thead>
 	</table>

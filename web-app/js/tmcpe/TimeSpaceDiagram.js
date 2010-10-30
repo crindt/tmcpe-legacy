@@ -510,7 +510,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// Create the container
 	this._tableNodeContainer = 
 	    dojo.create( "div", { id: "tsdTableNodeContainer", 
-				  class: "tsdTableNodeContainer"
+				  className: "tsdTableNodeContainer"
 				} );
 	this.domNode.appendChild( this._tableNodeContainer );
 
@@ -527,7 +527,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this._tableNode = 
 	    dojo.create( "table", 
 			 { id: "tsdTableNode", 
-			   class: supp_classes.join( " " ),
+			   className: supp_classes.join( " " ),
 			   ref: [this.incident, this.facility, this.direction].join('-'), 
 			   style: "z-index:1;"
 			 }
@@ -625,7 +625,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 		this._trh[i] = tr.appendChild( dojo.create( "th", { 
 		    id:["trh",iind].join("_"), 
-		    class: "timeHeader",
+		    className: "timeHeader",
 		    timeidx: i,
 		    time: iind,
 		    rowspan: (trh_length_cnt>numrows-i?numrows-i:trh_length_cnt),
@@ -717,7 +717,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 
 		this._td[i][j] = tr.appendChild( dojo.create( "td", { 
 		    id:["tsd",iind,j].join("_"), 
-		    class: tdClass.join( " " ),
+		    className: tdClass.join( " " ),
 		    timeidx: i,
 		    time: iind,
 		    segment: j,
@@ -736,7 +736,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	this._tableNodeContainer.appendChild( 
 	    dojo.create( "div", { 
 		id: "incloc", 
-		class: "incloc",
+		className: "incloc",
 		style: "left:"+locpct+"%;"
 	    }));
 
@@ -753,17 +753,18 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     updateLogGUI: function(items,request) {
 	if ( items.length > 0 ) {
 	    var st = Number(new Date(this._data.timesteps[0]));
-	    var et = Number(new Date(this._data.timesteps[this._data.timesteps.length-1]));
-	    var dur = et-st;
+	    var et = Number(new Date(this._data.timesteps[this._data.timesteps.length-1]))+5*60;
+	    var dur = (et-st);
 	    var i;
 	    for ( i=0; i < items.length; ++i ) {
 		var item=items[i];
 		var dto=new Date(item.stampDateTime[0]);
 		var dt = Number(dto);
-		var cur = dt-st;
+		var cur = (dt-st)*1.0;
 		var frac = this._flip ? 100-100*(cur/dur) : 100*(cur/dur); // flip, if necessary
 		if ( frac < 0 ) console.log( "FRAC < 0" );
 		if ( frac > 100 ) console.log( "FRAC > 100" );
+		console.log( "CUR: " + cur + ", DUR: " + dur + ", CUR/DUR: " + (cur/dur) + ", frac:" + frac );
 		var cc = "log_tsd_bar";
 		var ss = "top:"+frac+"%;";
 		var ii = "logit_"+item.id;

@@ -2,65 +2,70 @@
   <head>
     <title>Incident List</title>
     <meta name="layout" content="main" />
-<!--
-    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
--->
 
-    <!-- Load the css, then the js -->
-    <tmcpe:tmcpe_styles />       <!-- Loads openlayers from the common project source -->
-    <tmcpe:openlayers />         <!-- Loads openlayers from the common project source -->
-    <tmcpe:init_g_map_api />     <!-- Init the google map api key -->
-    <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
+    <!-- Load the openlayers css -->
+    <p:css name="openlayers/style" />
 
-    <g:javascript>
-      <!-- Here are all the dojo widgets we use -->
-      dojo.require("dojo.data.ItemFileReadStore");
-      dojo.require("dojox.grid.DataGrid");
-      dojo.require("dijit.InlineEditBox");
-      dojo.require("dijit.form.NumberTextBox");
-      dojo.require("dijit.form.Form");
-      dojo.require("dijit.form.CheckBox");
-      dojo.require("dijit.form.FilteringSelect");
-      dojo.require("dijit.Tooltip");
-      dojo.require("dojox.form.RangeSlider");
-      dojo.require("dojox.layout.RadioGroup");
-      dojo.require("dijit.form.RadioButton");
-      dojo.require("dijit.form.Form");
-      dojo.require("dojo._base.json");
-      dojo.require("dojo.date");
-      dojo.require("tmcpe.IncidentList");
-      dojo.require("tmcpe.MyDateTextBox");
-      dojo.require("tmcpe.MyTimeTextBox");
+    <p:dependantJavascript> <!-- render javascript at the end -->
 
-      var myFormatDate = function(inDatum){
-        var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
-        return ret;
-      };
+      <p:javascript src='openlayers-bundle' /> <!-- Loads bundled openlayers -->
+      <tmcpe:init_g_map_api />                 <!-- Init the google map api key -->
 
-      var myFormatNumber = function( inNum ) {
-        if ( inNum != null ) {
-           return dojo.number.format(inNum, {places:0});
-        } else {
-           return null;
-        }
-      };
+      <g:javascript>
+	var incidentList;
 
-      var myFormatDateOnly = function( inDate ) {
-        if ( inDate == null ) return "";
-        var ret = dojo.date.locale.format( inDate, {selector:'date', formatLength:'short'} );
-        return ret;
-      };
+	var myFormatDate = function(inDatum){
+	var ret = dojo.date.locale.format(dojo.date.stamp.fromISOString(inDatum), {formatLength:'short'} );
+	return ret;
+	};
 
-      dojo.addOnLoad(function(){ 
-         incidentList ? incidentList.initApp() : alert( "NO INCIDENT LIST!" );
-      });
-    </g:javascript>
+	var myFormatNumber = function( inNum ) {
+	if ( inNum != null ) {
+	return dojo.number.format(inNum, {places:0});
+	} else {
+	return null;
+	}
+	};
+
+	var myFormatDateOnly = function( inDate ) {
+	if ( inDate == null ) return "";
+	var ret = dojo.date.locale.format( inDate, {selector:'date', formatLength:'short'} );
+	return ret;
+	};
+
+	dojo.addOnLoad(function(){ 
+    	   <!-- Here are all the dojo widgets we use -->
+	   dojo.require("dojo.data.ItemFileReadStore");
+	   dojo.require("dojox.grid.DataGrid");
+	   dojo.require("dijit.InlineEditBox");
+	   dojo.require("dijit.form.NumberTextBox");
+	   dojo.require("dijit.form.Form");
+	   dojo.require("dijit.form.CheckBox");
+	   dojo.require("dijit.form.FilteringSelect");
+	   dojo.require("dijit.Tooltip");
+	   dojo.require("dojox.form.RangeSlider");
+	   dojo.require("dojox.layout.RadioGroup");
+	   dojo.require("dijit.form.RadioButton");
+	   dojo.require("dijit.form.Form");
+	   dojo.require("dojo._base.json");
+	   dojo.require("dojo.date");
+	   dojo.require("tmcpe.IncidentList");
+	   dojo.require("tmcpe.MyDateTextBox");
+	   dojo.require("tmcpe.MyTimeTextBox");
+
+	   // notice the second onLoad here:
+	   // defer loading, this will load after main.gsp calls dojo.parser.parser()
+	   dojo.addOnLoad(function(){
+	     incidentList = new tmcpe.IncidentList( {id: 'incidentList'} );
+	     incidentList.initApp();
+	   });
+	});
+      </g:javascript>
+    </p:dependantJavascript>
   </head>
 
   <body onload="" 
 	class="tundra">
-    <!-- Application -->
-    <div dojoType="tmcpe.IncidentList" jsId="incidentList" id="incidentList"></div>
 
     <!-- Viewport -->
     <div dojoType="dijit.layout.BorderContainer" id="mapView" design="headline" region="center" gutters="true" liveSplitters="false">
@@ -314,13 +319,13 @@
 		 >
 	    <thead>
 	      <tr>
-		<th field="cad" tooltip="Check" dataType="String" styles="padding-left:5px;padding-right:5px;" width="6%">CAD ID</th>
-		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" formatter="myFormatDate" width="7%">Timestamp</th>
+		<th field="cad" tooltip="Check" dataType="String" styles="padding-left:5px;padding-right:5px;" width="10%">CAD ID</th>
+		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" formatter="myFormatDate" width="10%">Timestamp</th>
 		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="15%">Section</th>
 		<th field="memo" dataType="String" styles="padding-left:5px;padding-right:5px;" width="35%">Description</th>
-		<th field="d12_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">D<sub>35</sub></th>
-		<th field="tmcpe_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">D<sub>tmcpe</sub></th>
-		<th field="savings" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">TMC Savings</th>
+		<th field="d12_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="5%">D<sub>35</sub></th>
+		<th field="tmcpe_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="5%">D<sub>tmcpe</sub></th>
+		<th field="savings" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="5%">TMC Savings</th>
 	      </tr>
 	    </thead>
 	  </table>
