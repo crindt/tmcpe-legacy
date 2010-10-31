@@ -32,6 +32,7 @@ GetOptions( \%opt,
 	    "skip-critical-events",
 	    "skip-delay-comp",
 	    "only-sigalerts",
+	    "only-type=s@",
 	    "date-from=s",
 	    "date-to=s",
 	    "use-existing",
@@ -117,7 +118,8 @@ my $procopt = {
     replace_existing => 1,
     ignore_unprocessed => 0,
     reprocess_existing => 1,
-    forced => []
+    forced => [],
+    only_type => []
 };
 
 foreach my $o ( keys %opt ) {
@@ -678,6 +680,7 @@ my $lp = new TMCPE::ActivityLog::LocationParser();
 $lp->use_osm_geom( $procopt->{use_osm_geom} );
 
 eval {
+  INCIDENT:
     while ( my $al = $alrs->next ) {
 	    
 	# see if the incident is already in the database
@@ -697,16 +700,31 @@ eval {
 	# Set the start time
 	$inc->start_time( $al->get_column( 'starttime' ) );
 		      
+	my $locdata;
+
 	# Get and set the event type
 	$_ = $al->cad;
 	my $type="UNKNOWN";
 	if ( /^\d+-\d\d\d\d\d\d$/ || /^\d+-\d\d\d\d\d\d\d\d$/ ) { $type = "INCIDENT" }
-	elsif ( /^ANGEL.*$/ ) { $type = "ANGEL STADIUM" }
-	elsif ( /^HONDA.*$/ ) { $type = "HONDA CENTER" }
+	elsif ( /^ANGEL.*$/ ) { 
+	    $type = "ANGEL STADIUM";
+	    # Hardcode location
+	    my @res = $vdsdb->resultset('VdsGeoviewFull')->search( { id=>1202093 } );
+	    $locdata = shift @res  || croak "BAD VDSID";
+	}
+	elsif ( /^HONDA.*$/ ) { 
+	    $type = "HONDA CENTER";
+	    my @res = $vdsdb->resultset('VdsGeoviewFull')->search( { id=>1202093 } );
+	    $locdata = shift @res || croak "BAD VDSID";
+	}
 	elsif ( /^C[^-]*-\d\d\d\d\d\d$/ || /^C[^-]*-\d\d\d\d\d\d\d\d$/ || /^CONST-.*/) { $type = "CONSTRUCTION" }
 	elsif ( /^M[^-]*-\d\d\d\d\d\d$/ || /^M[^-]*-\d\d\d\d\d\d\d\d$/ || /^CONST-.*/) { $type = "MAINTENANCE" }
 	elsif ( /^FAIR.*$/ || /^OC[\s_]*FAIR.*$/ ) { $type = "OCFAIR" }
 	elsif ( /^EMERG.*$/ ) { $type = "EMERGENCY" }
+
+	if ( not grep { $type =~ /$_/ } @{$procopt->{only_type}} ) {
+	    next INCIDENT;
+	}
 
 	$inc->event_type( $type );
 
@@ -750,7 +768,6 @@ eval {
 	    {
 		order_by => 'stamp asc'
 	    });
-	my $locdata;
 	my $openinc;
 	foreach my $log ( @incloc ) {
 
