@@ -1531,7 +1531,7 @@ sub write_to_db {
 	croak $@->{msg} if $@;
 
 	my $m = 0;
-	my @statdat = sort { $a->{timeofday} cmp $b->{timeofday} } @{$station->{data}};
+	my @statdat = sort { $a->{date}." ".$a->{timeofday} cmp $b->{date}." ".$b->{timeofday} } @{$station->{data}};
 	my $vdsid = $station->{vds}->id;
 	foreach my $secdat ( @statdat ) { ### CREATING VDS $vdsid DATA |===[%]            |
 	    my $at;

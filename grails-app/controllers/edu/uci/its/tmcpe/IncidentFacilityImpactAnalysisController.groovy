@@ -72,7 +72,7 @@ class IncidentFacilityImpactAnalysisController {
                              name: it.section.name,
                              seglen: it.section.segmentLength,
                              analyzedTimesteps: it.analyzedTimestep.size() > 0 ? it.analyzedTimestep.collect { 
-                                  [ vol: it.vol, spd: it.spd, occ: it.occ, 
+				   [ fivemin: it.fivemin, vol: it.vol, spd: it.spd, occ: it.occ, 
                                     days_in_avg: it.days_in_avg, vol_avg: it.vol_avg, spd_avg: it.spd_avg, spd_std: it.spd_std, pct_obs_avg: it.pct_obs_avg, 
                                     p_j_m: it.p_j_m, inc: it.incident_flag, tmcpe_delay: it.tmcpe_delay, d12_delay: it.d12_delay ] 
                                 } : [ 1..cnt ].collect {
