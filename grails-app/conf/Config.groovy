@@ -205,11 +205,6 @@ uiperformance.exclusions = [
 
 uiperformance.bundles = [
     [type: 'js',
-     name: 'openlayers/openlayers.bundle',
-     files: ['openlayers/OpenLayers',
-	    ]
-    ],
-    [type: 'js',
      name: 'application-core',
      files: ['application']
     ],

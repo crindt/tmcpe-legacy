@@ -422,7 +422,7 @@ table.tmcpeTsd td.tsdDataSuspect {
 }
 
 table.tmcpeTsd.showEvidence td.tsdEvidence {
-    background-image: url(/tmcpe/images/stripe.png);
+    background-image: url(images/stripe.png);
 }
 
 .tsdTableNodeContainer {

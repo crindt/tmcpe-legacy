@@ -31,7 +31,8 @@
       <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojox/grid/resources/tundraGrid.css' />
       <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/1.5/dijit/themes/tundra/tundra.css' />
       
-      <p:favicon src="${resource(dir:'/images',file:'favicon.ico')}" />
+<!--      <p:favicon src="${resource(dir:'images',file:'favicon.ico')}" /> -->
+      <p:favicon src="images/favicon.ico" />
 
       <!-- layouts/main.gsp layout head -->
       <g:layoutHead />

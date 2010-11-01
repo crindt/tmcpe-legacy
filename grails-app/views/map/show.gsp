@@ -8,7 +8,7 @@
 
     <p:dependantJavascript> <!-- render javascript at the end -->
 
-      <p:javascript src='openlayers/openlayers.bundle' /> <!-- Loads bundled openlayers -->
+      <p:javascript src='openlayers/OpenLayers' /> <!-- Loads custom openlayers -->
       <tmcpe:init_g_map_api />                 <!-- Init the google map api key -->
 
       <g:javascript>
