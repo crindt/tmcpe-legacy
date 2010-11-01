@@ -30,7 +30,6 @@
       <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojox/grid/resources/Grid.css' />
       <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojox/grid/resources/tundraGrid.css' />
       <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/1.5/dijit/themes/tundra/tundra.css' />
-      <link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/dojo/1.5/resources/dojo.css' />
       
       <p:favicon src="${resource(dir:'/images',file:'favicon.ico')}" />
 
