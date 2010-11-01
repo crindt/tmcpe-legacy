@@ -8,10 +8,14 @@
 
     <p:dependantJavascript> <!-- render javascript at the end -->
 
-      <p:javascript src='openlayers-bundle' /> <!-- Loads bundled openlayers -->
+      <p:javascript src='openlayers/openlayers.bundle' /> <!-- Loads bundled openlayers -->
       <tmcpe:init_g_map_api />                 <!-- Init the google map api key -->
 
       <g:javascript>
+	<!-- We need to override the image path, 
+	OpenLayers.ImgPath = dojo.byId( 'htmldom' ).href + 'js/openlayers/img/';
+	-->
+
 	var incidentList;
 
 	var myFormatDate = function(inDatum){
@@ -316,6 +320,8 @@
 		 onRowClick="incidentList.simpleSelectIncident(event)"
 		 style="width:100%;height:4em;"
 		 selectionMode="single"
+		 keepRows=2500
+		 rowsPerPage=2500
 		 >
 	    <thead>
 	      <tr>

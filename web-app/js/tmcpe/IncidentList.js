@@ -47,6 +47,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 
     _incidentDetailButtonTooltip: null,
 
+    _selectedIncident: null,
+    _selectedFeature: null,
+
     _jobs: 0,
 
     postCreate: function() {
@@ -541,17 +544,20 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	this._selectIncident = new OpenLayers.Control.SelectFeature(this._incidentsLayer, {
 	    renderIntent: "select",
 	    eventListeners: {
+/*
 		"featurehighlighted": function( evt ) {
 		    var feature = evt.feature
 		    if ( feature && feature.cluster ) {
 			obj._showTooltipForFeature( feature );
 		    }
+		    this._selectedFeature = feature;
 		    obj.scrollIncidentsToItem( feature );
 		},
 		"featureunhighlighted": function( feature ) {
 		    // hide tooltip when we unhighlight
 		    obj._map.hideTooltip();
 		}
+*/
 	    }
 
 	});
@@ -578,27 +584,34 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 
 	var loc = "<unknown location>";
 	var cad = "<unknown cad>";
-	var i, targ = null;
-	if ( feature.last != null ) {
+
+	// default to first entry in cluster
+	var i = 1;
+	var targ = null; 
+
+	if ( this._selectedIncident != null ) {
 
 	    for ( i = 0; i < tmpCluster.length && targ==null; ++i ) {
 		var feat = tmpCluster[ i ];
-		if ( feat == feature.last ) {
+		if ( feat == this._selectedIncident ) {
 		    targ = feat;
 		}
 	    }
-	    loc = targ.attributes.locString;
-	    cad = targ.attributes.cad;
-	} else {
-	    loc = tmpCluster[0].attributes.locString;
-	    cad = tmpCluster[0].attributes.cad;
-	    i = 1;
 	}
+
+	if ( targ == null ) {
+	    targ = tmpCluster[0];
+	    alert( "TARG IS NULL UPDATING TOOLTIP" );
+	}
+
+	loc = targ.attributes.locString;
+	cad = targ.attributes.cad;
+
 	var txt = cad + ": " + loc + ': <span style="font-weight:bold;">' + 
 	    i + " of " + feature.cluster.length;
 	this._map.showTooltip( txt, xy.x, xy.y );
-    },
-    
+    }, 
+   
     
 
     ////////// TABLE FUNCTIONS
@@ -607,35 +620,81 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	var cad = item.attributes.id;
 	var gn = this.getIncidentGrid();
 
-	if ( !gn.store.isItemLoaded( item ) )
-	{
-	    gn.store.loadItem( item );
+
+	var targ = null;
+
+	// Check if the item is a cluster, 
+	if ( item.cluster ) {
+	    // if so, pull the active incident from the detail pane as the
+	    // feature
+	    var tmpCluster = item.cluster.slice(0).sort( 
+		function( a, b ) {
+		    var a1 = a.attributes.tmcpe_delay ? a.attributes.tmcpe_delay : 0;
+		    var b1 = b.attributes.tmcpe_delay ? b.attributes.tmcpe_delay : 0;
+		    return b1 - a1;
+		}
+	    );
+
+	    if ( this._selectedIncident != null ) {
+
+		targ = this._selectedIncident;
+
+	    } else {
+		targ = tmpCluster[ 0 ];
+		this._selectedIncident = targ;
+	    }
+
+	} else {
+	    // Otherwise, just use the item directly
+	    targ = item;
 	}
-	var idx = gn.getItemIndex( item );
+	
+
+	if ( !gn.store.isItemLoaded( targ ) )
+	{
+	    gn.store.loadItem( targ );
+	}
+	var idx = gn.getItemIndex( targ );
 	if ( idx == -1 ) {
 	    // hmm, the grid hasn't materialized this item, 
-	    /*
-	idx = item._0;
-	// load the missing page
-	// some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
-	var pageIndex = gn._rowToPage( idx );
-	gn._requestPage( pageIndex );
-*/
+
 	    // the above hack only works for itemfilereadstore.  Here,
 	    // we'll scan the features until we find the correct item.
 	    // This will be slow, but should work
-	    var i = 0;
-	    var items = this._incidentsLayer.features;
-	    for ( i = 0; i < items.length && items[ i ] != item; ++ i )
-	    {}
-	    // If found, set idx
-	    if ( i <= items.length ) idx = i;
+	    //var items = this._incidentsLayer.strategies[1]/*the cluster strategy, fix this hack*/.features;
+	    gn.store.fetch({ onComplete: function( items, request ) {
+		var i = 0;
+		for ( i = 0; i < items.length && items[ i ] !== targ; ++ i )
+		{}
+		// If found, set idx
+		
+		// load the missing page
+		// some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
+		var pageIndex = gn._rowToPage( i );
+		gn._requestPage( pageIndex );
+
+		idx = i;
+	    }});
+
+	    
 	}
+
 	if ( idx >= 0 ) {
+	    var pageIndex = gn._rowToPage( idx );
+	    gn._requestPage( pageIndex );
 	    gn.selection.clear();
-	    gn.scrollToRow( idx );
+	    
+	    // see if we need to scroll
+	    if ( sv = gn.views.getFirstScrollingView() ) {
+		var rowNode = sv.getRowNode( idx );
+		if ( rowNode != null ) {  // check for visibility
+		    if ( ! (rowNode.offsetTop >= gn.scrollTop && 
+			    (rowNode.offsetTop + rowNode.offsetHeight ) <= ( gn.scrollTop + sv.scrollboxNode.offsetHeight ) ) )
+			gn.scrollToRow( idx );
+		}
+	    }
+	    
 	    gn.selection.addToSelection( idx );
-	    //				     alert( "item " + cad + "found @ idx:" + idx );	
 	} else {
 	    alert( "Strangely, item " + cad + " wasn't found in the grid!" );
 	}
@@ -710,9 +769,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	if ( scw.incident != null ) {
 	    // select the new feature and update the tooltip
 	    var feat = this._getFeatureForIncident( scw.incident );
-	    feat.last = scw.incident;
+	    this._selectedIncident = scw.incident;
+	    this._selectedFeature = feat;
 	    this._showTooltipForFeature( feat );
-	    this.scrollIncidentsToItem( scw.incident );
+	    this.scrollIncidentsToItem( this._selectedIncident );
 	}
 
 	var scwi = this._incidentStackContainer.getIndexOfChild( scw ) + 1;
@@ -808,7 +868,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 		// store a reference to the feature so we can use it to update the map
 		cp.incident = f;
 		this._incidentStackContainer.addChild(cp);
-		if ( f == feature.last ) {
+		if ( f == this._selectedIncident ) {
 		    // caller wants this to be highlighted (active)
 		    selectedPane = cp;
 		}
@@ -846,7 +906,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	    if ( selectedPane != null ) {
 		// Select the appropriate pane to show
 		this._incidentStackContainer.selectChild( selectedPane );
+	    } else {
+		// the stack container will show the first
 	    }
+
 
 	    if ( feature.cluster.length <= 1 ) {
 		dojo.byId( 'previousIncident' ).disable = true;
@@ -862,9 +925,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	    var f = feature;
 	    var id = f.attributes.id;
 	    var cad = f.attributes.cad;
-
-	    var il = dijit.byId( 'incidentList' );
-	    il.scrollIncidentsToItem( feature );
 
 	    var buttonId = 'showIncidentButton-'+f.attributes.id;
 	    var button;
@@ -918,7 +978,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	var feature = event.feature;
 
 	il.updateIncidentDetails( feature );
-	il._showTooltipForFeature( feature );
     },
 
 
@@ -963,14 +1022,14 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	// Find the feature cluster this belongs to and activate that one
 	var incidentFeature = this._getFeatureForIncident( incident );
 
+	il._selectedIncident = incident;
+
 	if ( incidentFeature == null ) return;
 
-	incidentFeature.last = incident;
+	il._selectedFeature = incidentFeature;
 	
 	il._selectIncident.unselectAll();
 	il._selectIncident.select( incidentFeature );
-	il.updateIncidentDetails( incidentFeature );
-	il._showTooltipForFeature( incidentFeature );
     },
 
 
