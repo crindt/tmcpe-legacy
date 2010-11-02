@@ -311,14 +311,14 @@
 
       <!-- Incident List Pane -->
       <div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
-	<div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;padding:0px;" splitter="false" liveSplitters="false" style="height:50%">
+	<div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;padding:0px;" splitter="false" liveSplitters="false">
 	  <table id="incidentGrid" 
 		 jsId="incidentGrid" 
 		 dojoType="dojox.grid.DataGrid" 
 		 sortInfo=2
 		 region="center"
 		 onRowClick="incidentList.simpleSelectIncident(event)"
-		 style="width:100%;height:4em;"
+		 style="width:100%;"
 		 selectionMode="single"
 		 keepRows=2500
 		 rowsPerPage=2500
@@ -336,7 +336,7 @@
 	    </thead>
 	  </table>
 	</div>
-	<div dojoType="dijit.layout.ContentPane" id="gridSummaryContainer" region="bottom" style="background:purple;" splitter="false" liveSplitters="false" style="padding:0px;">
+	<div dojoType="dijit.layout.ContentPane" id="gridSummaryContainer" region="bottom" style="background:purple;" splitter="false" liveSplitters="false" style="padding:0px;height:2.5em;">
 	  <div dojoType="dojo.data.ItemFileReadStore" 
 	       data="{items:[
 		     {'cad':'','timestamp':'',locString:'','memo':'Totals for Analyzed:','d12_delay':'0','tmcpe_delay':'0','savings':'0'},
@@ -345,6 +345,10 @@
 	       id="incidentSummaryStoreNode"
 	       style="visibility:hidden;">
 	  </div>
+	  <div id="incidentSummaryGridContainer" 
+	       style="width:100%;height:2.5em;background-color:#eeeeee;margin:0px;margin-top:3px;padding:0px:margin-left:0px;margin-right:0px;">
+	  </div>
+<!--
 	  <table id="incidentSummaryGrid" 
 		 jsId="incidentSummaryGrid" 
 		 dojoType="dojox.grid.DataGrid"
@@ -366,6 +370,7 @@
 	    </thead>
 	  </table>
 	</div>
+-->
       </div>
     </div>
      

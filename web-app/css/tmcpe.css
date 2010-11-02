@@ -505,3 +505,8 @@ table.tmcpeTsd.showEvidence td.tsdEvidence {
 .dojoxGridCell {
     white-space: nowrap;
 }
+
+.dojoxGrid-scrollbox {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}

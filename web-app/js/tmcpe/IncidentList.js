@@ -34,6 +34,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
     _hoverIncident: null,   // The hover controller for incident markers 
 
     _incidentGrid: null,
+    _incidentSummaryGrid: null,
     _incidentStackContainer: null,
     _previousIncident: null,
     _nextIncident: null,
@@ -56,7 +57,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
     },
 
     initApp: function() {
-	this._incidentsLayerInit();
 
 	var igrid = this.getIncidentGrid();
 	// connect some styling features to the log grid
@@ -82,6 +82,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	    obj.simpleSelectIncident( { cell: inCell, grid: iGrid, rowIndex: inRowIndex } );
 	});
 
+	this._incidentsLayerInit();
     },
 
     /**
@@ -702,6 +703,93 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	//    alert( "Selected " + cad )
     },
 
+    regenerateIncidentSummary: function() {
+
+	if ( this._incidentSummaryGrid != null ) {
+	    this._incidentSummaryGrid.destroy();
+	}
+
+	// Add summary table
+	var mainTableHeaders = dojo.query('#gridContainer tbody tr th');
+	var firstColWidth=0;
+	var i;
+	for ( i = 0; i < 4 && mainTableHeaders && mainTableHeaders[i] != null; ++i ) {
+	    var h = mainTableHeaders[i];
+	    firstColWidth+=h.clientWidth+5;
+	}
+	firstColWidth-=20+2;
+	var layout = [
+	    {field:'title',width:firstColWidth+'px',styles:'text-align:right;padding-left:5px;padding-right:5px;'},
+	    {field:'d12_delay',width:(mainTableHeaders[i++].clientWidth-10)+'px',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber},
+	    {field:'tmcpe_delay',width:(mainTableHeaders[i++].clientWidth-10)+'px',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber},
+	    {field:'savings',width:(mainTableHeaders[i++].clientWidth-10)+'px',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber}
+	];
+	
+	this._incidentSummaryGrid = new dojox.grid.DataGrid({
+	    id: 'incidentSummaryGrid',
+	    jsId: 'incidentSummaryGrid',
+	    structure: layout
+	});
+	
+	dojo.byId('incidentSummaryGridContainer').appendChild( this._incidentSummaryGrid.domNode );
+
+	var gc = dojo.query( '#incidentGrid .dojoxGridContent' );
+
+	if ( gc == null || gc[0] == null ) alert( "BAD GRID CONTENT!!" );
+	
+	var obj = this;
+	dojo.connect( gc, "resize", obj, function() {
+	    obj.regenerateIncidentSummary();
+	    obj.updateIncidentsTable();
+	});
+	
+	this._incidentSummaryGrid.startup();
+    },
+
+    updateIncidentsSummary: function( items, request ) {
+	var il = dijit.byId('incidentList' );
+
+	// Update the summary statistics:
+	console.debug( "Updating the incidents Summary" );
+	var totAnalyzed = 0;
+	var tot = 0;
+	var d12Delay = 0;
+	var totDelay = 0;
+	var totSavings = 0;
+	
+	for (var i = 0; i<items.length; ++i )
+	{
+	    tot++;
+	    var item = items[ i ];
+	    if ( item.attributes.analysesCount ) {
+		totAnalyzed++;
+	    }
+	    if ( item.attributes.d12_delay ) {
+		d12Delay += item.attributes.d12_delay;
+		//console.log( totDelay + ' += ' + item.attributes.d12_delay );
+	    }
+	    if ( item.attributes.tmcpe_delay ) {
+		totDelay += item.attributes.tmcpe_delay;
+		//console.log( totDelay + ' += ' + item.attributes.tmcpe_delay );
+	    }
+	    if ( item.attributes.savings ) {
+		totDelay += item.attributes.savings;
+	    }
+
+	}
+
+	il.regenerateIncidentSummary();
+	
+	var newStore = new dojo.data.ItemFileReadStore({
+	    data: { items: [
+		{title:'Totals for Analyzed:',
+		 d12_delay: d12Delay,
+		 tmcpe_delay: totDelay,
+		 savings: totSavings}
+	    ]}});
+	il._incidentSummaryGrid.setStore( newStore );
+    },
+
 
     updateIncidentsTable: function( theParams ) {
 	console.log( "UPDATING INCIDENTS TABLE" );
@@ -713,52 +801,12 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	var geo = dijit.byId( 'geographic' );
 	if ( geo ) this.getIncidentGrid().setQuery( { onScreen: 'true' } );
 
-	var updateIncidentsSummary = function( items, request ) {
-	    // Update the summary statistics:
-	    console.debug( "Updating the incidents Summary" );
-	    var totAnalyzed = 0;
-	    var tot = 0;
-	    var d12Delay = 0;
-	    var totDelay = 0;
-	    var totSavings = 0;
-	    
-	    for (var i = 0; i<items.length; ++i )
-	    {
-		tot++;
-		var item = items[ i ];
-		if ( item.attributes.analysesCount ) {
-		    totAnalyzed++;
-		}
-		if ( item.attributes.d12_delay ) {
-		    d12Delay += item.attributes.d12_delay;
-		    //console.log( totDelay + ' += ' + item.attributes.d12_delay );
-		}
-		if ( item.attributes.tmcpe_delay ) {
-		    totDelay += item.attributes.tmcpe_delay;
-		    //console.log( totDelay + ' += ' + item.attributes.tmcpe_delay );
-		}
-		if ( item.attributes.savings ) {
-		    totDelay += item.attributes.savings;
-		}
 
-	    }
+	this.regenerateIncidentSummary();
 
-	    var newStore = new dojo.data.ItemFileReadStore({
-		data: { items: [
-		    {cad: '',
-		     timestamp: '',
-		     locString: '',
-		     memo:'Totals for Analyzed:',
-		     d12_delay: d12Delay,
-		     tmcpe_delay: totDelay,
-		     savings: totSavings,
-		     analysesCount: '',
-		     dummy: ''}
-		]}});
-	    incidentSummaryGrid.setStore(newStore);
-	}
-	
-	store.fetch( {onComplete: updateIncidentsSummary} );
+
+	var obj = this;
+	store.fetch( {onComplete: obj.updateIncidentsSummary} );
     },
 
 
