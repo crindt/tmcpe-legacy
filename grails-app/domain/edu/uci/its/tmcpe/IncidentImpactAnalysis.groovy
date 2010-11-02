@@ -36,7 +36,10 @@ class IncidentImpactAnalysis implements Comparable {
 
     Float netDelay() {
         def f = 0
-        incidentFacilityImpactAnalyses?.collect{ f += (it?.netDelay?: 0) }
+        incidentFacilityImpactAnalyses?.collect{ 
+	    def d = (it?.netDelay?: 0);
+	    f += (d<0?0:d);
+	}
         return f
     }
 
