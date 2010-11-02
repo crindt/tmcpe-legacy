@@ -972,7 +972,7 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 		    { title: "INCIDENT " + cad,
 		      content: '<table class="incidentSummary">' 
 		      + "<tr><th>CAD</th><td>" + f.attributes.cad + "</td></tr>"
-		      + '<tr><th style="width:8em;">Start Time</th><td>' + f.attributes.timestamp + "</td></tr>"
+		      + '<tr><th style="width:8em;">Start Time</th><td>' + myFormatDate(f.attributes.timestamp) + "</td></tr>"
 		      + "<tr><th>Location</th><td>" + f.attributes.locString + "</td></tr>"
 		      + "<tr><th>Memo</th><td>" + memo + "</td></tr>"
 		      + "<tr><th>D<sub>35</sub></th><td>" + f.attributes.d12_delay + " veh-hr</td></tr>"
