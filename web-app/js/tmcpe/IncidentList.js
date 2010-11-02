@@ -642,20 +642,21 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	    // we'll scan the features until we find the correct item.
 	    // This will be slow, but should work
 	    //var items = this._incidentsLayer.strategies[1]/*the cluster strategy, fix this hack*/.features;
-	    gn.store.fetch({ onComplete: function( items, request ) {
-		var i = 0;
-		for ( i = 0; i < items.length && items[ i ] !== targ; ++ i )
-		{}
-		// If found, set idx
-		
-		// load the missing page
-		// some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
-		var pageIndex = gn._rowToPage( i );
-		gn._requestPage( pageIndex );
-
-		idx = i;
-	    }});
-
+	    gn.store.fetch({ 
+		onComplete: function( items, request ) {
+		    var i = 0;
+		    for ( i = 0; i < items.length && items[ i ] !== targ; ++ i )
+		    {}
+		    // If found, set idx
+		    
+		    // load the missing page
+		    // some hackiness from http://neonstalwart.blogspot.com/2009/05/fetching-everything-selected-in.html
+		    var pageIndex = gn._rowToPage( i );
+		    gn._requestPage( pageIndex );
+		    
+		    idx = i;
+		}});
+	    
 	    
 	}
 
@@ -871,7 +872,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 
 
 	var obj = this;
-	store.fetch( {onComplete: obj.updateIncidentsSummary} );
+	store.fetch( {
+	    query: { onScreen: 'true' },
+	    onComplete: obj.updateIncidentsSummary
+	} );
     },
 
 
