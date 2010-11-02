@@ -89,11 +89,14 @@ class IncidentController {
                 if ( params.earliestTime || params.latestTime ) {
 		    def early = params.earliestTime ? params.earliestTime : '00:00'
 		    def late  = params.latestTime ? params.latestTime : '23:59'
-                    def from = java.sql.Time.parse( "HH:mm", early )
-                    def to = java.sql.Time.parse( "HH:mm", late )
-                    log.debug("============TIMES: " + from + " <<>> "  + to )
 
-                    between( 'startTime', from, to )
+		    // We need an explicit query to do time of day restrictions
+		    addToCriteria(
+			Restrictions.sqlRestriction(
+			    """start_time::time between '${early}' AND '${late}'"""
+			))
+
+                    //between( 'startTime', from.toString(), to.toString() )
                 }
 
 		// Limit depending on whether the incident has been analyzed
