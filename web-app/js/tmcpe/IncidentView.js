@@ -396,8 +396,9 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
     recenterMap: function() {
 	var bb = this.getIncidentExtent();
 	this.getMap().zoomToExtent( bb );
+	this.getMap().zoomOut( 1 );
 //	var zoom = this.getMap().getZoomForExtent();
-//	this.getMap().moveTo( bb.getCenterLonLat(), zoom-1 );
+//	this.getMap().moveTo( bb.getCenterLonLat(), zoom-2 );
 	
     },
 
