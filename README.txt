@@ -32,5 +32,4 @@ The processing looks like this:
 
 SECURITY
 
-We're looking to integrate the TMCPE app with some sort of single sign-on system..
-
+We're looking to integrate the TMCPE app with some sort of single sign-on system.
