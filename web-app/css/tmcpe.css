@@ -510,3 +510,24 @@ table.tmcpeTsd.showEvidence td.tsdEvidence {
     overflow-x: hidden;
     overflow-y: scroll;
 }
+
+#incidentGrid .dojoxGridRowOver:not(.dojoxgridrowselected) .dojoxgridcell {
+    background-color:#fff;
+    color:#000;
+}
+
+#incidentGrid .dojoxGridRowOver .dojoxgridrowselected .dojoxgridcell {
+    background-color:#D9E8F9;
+    color:#000;
+}
+
+#incidentGrid .tundra .dojoxGridCellFocus {
+    border: 0px !important;
+}
+
+#incidentGrid .tundra .dojoxGridCellFocus .dojoxGridCellOver {
+    border: 0px !important;
+}
+#incidentGrid .tundra .dojoxGridCellOver {
+    border: 0px;
+}

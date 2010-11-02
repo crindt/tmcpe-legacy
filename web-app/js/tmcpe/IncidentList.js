@@ -58,29 +58,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 
     initApp: function() {
 
-	var igrid = this.getIncidentGrid();
-	// connect some styling features to the log grid
-	dojo.connect( igrid, "onStyleRow", function(row) { 
-            //The row object has 4 parameters, and you can set two others to provide your own styling
-            //These parameters are :
-            // -- index : the row index
-            // -- selected: wether the row is selected
-            // -- over : wether the mouse is over this row
-            // -- odd : wether this row index is odd.
-
-	    row.customClasses += " noHighlight";
-	});
-
-	var iGrid = this.getIncidentGrid();
-	var obj = this; // for closure
-	dojo.connect( iGrid, "onCellFocus", function( inCell, inRowIndex ) { 
-            var item = iGrid.getItem(inRowIndex);
-	    iGrid.selection.clear();
-	    if ( item ) {
-		iGrid.selection.setSelected( inRowIndex, true );
-	    }
-	    obj.simpleSelectIncident( { cell: inCell, grid: iGrid, rowIndex: inRowIndex } );
-	});
 
 	this._incidentsLayerInit();
     },
@@ -106,7 +83,9 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
      */
     getIncidentGrid: function() {
 	if ( !this._incidentGrid ) {
-	    this._incidentGrid = dijit.byId( 'incidentGrid' );
+	    //this._incidentGrid = dijit.byId( 'incidentGrid' );
+	    this.regenerateIncidentGrid();
+	    this.regenerateIncidentSummary();
 	}
 	return this._incidentGrid;
     },
@@ -703,6 +682,82 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	//    alert( "Selected " + cad )
     },
 
+    regenerateIncidentGrid: function() {
+	if ( this._incidentGrid != null ) {
+	    this._incidentGrid.destroy();
+	}
+
+	// Add incident grid table
+	var gc = dojo.query('#gridContainer');
+	if ( !gc && !gc[0] ) alert( "NO GRID CONTAINER" );
+	gc = gc[0];
+/*
+	var scrollBarWidth = 30; 
+	var spacing = 5;//7*6*2;  // 7 columns, 1px border, 5 px padding on each of 2 sides
+	var contWidth = gc.offsetWidth-scrollBarWidth-spacing;
+*/
+	var layout = [
+	    {field:'cad', name:"CAD ID", dataType:"String", width:'10%',styles:'padding-left:5px;padding-right:5px;', noresize:true},
+	    {field:'timestamp', name:"Start Time", dataType:"Date", width:'10%',styles:'right;padding-right:5px;padding-right:5px;',formatter:myFormatDate, noresize:true},
+	    {field:'locString', name:"Location", dataType:"String", width:'15%',styles:'padding-left:5px;padding-right:5px;', noresize:true},
+	    {field:'memo', name:"Description", dataType:"String", width:'50%',styles:'padding-left:5px;padding-right:5px;', noresize:true},
+	    {field:'d12_delay', dataType:"Integer", width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true},
+	    {field:'tmcpe_delay',dataType:"Integer",width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true},
+	    {field:'savings',dataType:"Integer",width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true}
+	];
+
+	var obj = this;
+	this._incidentGrid = new dojox.grid.DataGrid({
+	    id: 'incidentGrid',
+	    jsId: 'incidentGrid',
+	    structure: layout,
+	    onRowClick: function(event) { obj.simpleSelectIncident( event ) },
+	    selectionMode: 'single',
+	    rowsPerPage: maxIncidents
+	});
+
+	dojo.byId('incidentGridContainer').appendChild( this._incidentGrid.domNode );
+	
+	this._incidentGrid.startup();
+
+	var obj = this;
+	dojo.forEach(this._incidentGrid.views.views, function(view) {
+	    dojo.connect(view.header, "doResizeNow", function(inDrag, data) {
+		console.log("Row "+inDrag.index+" set to width "+data.w);
+		var g = obj.getIncidentGrid();
+		var s = g.store;
+		s.fetch({onComplete: obj.updateIncidentsSummary});
+	    });
+	});
+
+	// reconnect the events
+	var igrid = this.getIncidentGrid();
+	// connect some styling features to the log grid
+	dojo.connect( igrid, "onStyleRow", function(row) { 
+            //The row object has 4 parameters, and you can set two others to provide your own styling
+            //These parameters are :
+            // -- index : the row index
+            // -- selected: wether the row is selected
+            // -- over : wether the mouse is over this row
+            // -- odd : wether this row index is odd.
+
+	    row.customClasses += " noHighlight";
+	});
+
+	var iGrid = this.getIncidentGrid();
+	var obj = this; // for closure
+	dojo.connect( iGrid, "onCellFocus", function( inCell, inRowIndex ) { 
+            var item = iGrid.getItem(inRowIndex);
+	    iGrid.selection.clear();
+	    if ( item ) {
+		iGrid.selection.setSelected( inRowIndex, true );
+	    }
+	    obj.simpleSelectIncident( { cell: inCell, grid: iGrid, rowIndex: inRowIndex } );
+	});
+
+
+    },
+
     regenerateIncidentSummary: function() {
 
 	if ( this._incidentSummaryGrid != null ) {
@@ -715,20 +770,22 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	var i;
 	for ( i = 0; i < 4 && mainTableHeaders && mainTableHeaders[i] != null; ++i ) {
 	    var h = mainTableHeaders[i];
-	    firstColWidth+=h.clientWidth+5;
+	    firstColWidth+=h.offsetWidth;
 	}
-	firstColWidth-=20+2;
+	firstColWidth -= 5;
 	var layout = [
-	    {field:'title',width:firstColWidth+'px',styles:'text-align:right;padding-left:5px;padding-right:5px;'},
-	    {field:'d12_delay',width:(mainTableHeaders[i++].clientWidth-10)+'px',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber},
-	    {field:'tmcpe_delay',width:(mainTableHeaders[i++].clientWidth-10)+'px',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber},
-	    {field:'savings',width:(mainTableHeaders[i++].clientWidth-10)+'px',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber}
+	    {field:'count',width:'60%',styles:'text-align:left;font-weight:bold;padding-left:5px;padding-right:20px;', noresize:true},
+	    {field:'title',width:'25%',styles:'text-align:right;padding-left:20px;padding-right:5px;', noresize:true},
+	    {field:'d12_delay',width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true},
+	    {field:'tmcpe_delay',width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true},
+	    {field:'savings',width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true}
 	];
 	
 	this._incidentSummaryGrid = new dojox.grid.DataGrid({
 	    id: 'incidentSummaryGrid',
 	    jsId: 'incidentSummaryGrid',
-	    structure: layout
+	    structure: layout,
+	    style: 'width:'+this._incidentGrid.views.views[0].getContentWidth()+';'
 	});
 	
 	dojo.byId('incidentSummaryGridContainer').appendChild( this._incidentSummaryGrid.domNode );
@@ -739,11 +796,21 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	
 	var obj = this;
 	dojo.connect( gc, "resize", obj, function() {
-	    obj.regenerateIncidentSummary();
-	    obj.updateIncidentsTable();
+	    obj.getIncidentGrid().fetch({oncomplete: obj.updateIncidentsSummary});
 	});
 	
 	this._incidentSummaryGrid.startup();
+
+	var newStore = new dojo.data.ItemFileReadStore({
+	    data: { items: [
+		{count: '0 incidents in view',
+		 title:'Totals for Analyzed:',
+		 d12_delay: 0,
+		 tmcpe_delay: 0,
+		 savings: 0}
+	    ]}});
+	this._incidentSummaryGrid.setStore( newStore );
+
     },
 
     updateIncidentsSummary: function( items, request ) {
@@ -782,7 +849,8 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	
 	var newStore = new dojo.data.ItemFileReadStore({
 	    data: { items: [
-		{title:'Totals for Analyzed:',
+		{count: items.length+' incidents in view',
+		 title:'Totals for Analyzed:',
 		 d12_delay: d12Delay,
 		 tmcpe_delay: totDelay,
 		 savings: totSavings}
@@ -800,9 +868,6 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	// we only want features that are on screen
 	var geo = dijit.byId( 'geographic' );
 	if ( geo ) this.getIncidentGrid().setQuery( { onScreen: 'true' } );
-
-
-	this.regenerateIncidentSummary();
 
 
 	var obj = this;

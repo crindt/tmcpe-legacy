@@ -312,69 +312,13 @@
       <!-- Incident List Pane -->
       <div dojoType="dijit.layout.BorderContainer" id="gridRegion" region="bottom" design="sidebar" splitter="true" liveSplitters="false" gutters="false" style="height:15em;">
 	<div dojoType="dijit.layout.ContentPane" id="gridContainer" region="center" style="background:purple;padding:0px;" splitter="false" liveSplitters="false">
-	  <table id="incidentGrid" 
-		 jsId="incidentGrid" 
-		 dojoType="dojox.grid.DataGrid" 
-		 sortInfo=2
-		 region="center"
-		 onRowClick="incidentList.simpleSelectIncident(event)"
-		 style="width:100%;"
-		 selectionMode="single"
-		 keepRows=2500
-		 rowsPerPage=2500
-		 >
-	    <thead>
-	      <tr>
-		<th field="cad" tooltip="Check" dataType="String" styles="padding-left:5px;padding-right:5px;" width="10%">CAD ID</th>
-		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" formatter="myFormatDate" width="10%">Timestamp</th>
-		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="15%">Section</th>
-		<th field="memo" dataType="String" styles="padding-left:5px;padding-right:5px;" width="35%">Description</th>
-		<th field="d12_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="5%">D<sub>35</sub></th>
-		<th field="tmcpe_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="5%">D<sub>tmcpe</sub></th>
-		<th field="savings" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="5%">TMC Savings</th>
-	      </tr>
-	    </thead>
-	  </table>
+	  <div id="incidentGridContainer" style="height:100%"></div>
 	</div>
 	<div dojoType="dijit.layout.ContentPane" id="gridSummaryContainer" region="bottom" style="background:purple;" splitter="false" liveSplitters="false" style="padding:0px;height:2.5em;">
-	  <div dojoType="dojo.data.ItemFileReadStore" 
-	       data="{items:[
-		     {'cad':'','timestamp':'',locString:'','memo':'Totals for Analyzed:','d12_delay':'0','tmcpe_delay':'0','savings':'0'},
-		     ]}" 
-	       jsId="incidentSummaryStore" 
-	       id="incidentSummaryStoreNode"
-	       style="visibility:hidden;">
-	  </div>
 	  <div id="incidentSummaryGridContainer" 
 	       style="width:100%;height:2.5em;background-color:#eeeeee;margin:0px;margin-top:3px;padding:0px:margin-left:0px;margin-right:0px;">
 	  </div>
-<!--
-	  <table id="incidentSummaryGrid" 
-		 jsId="incidentSummaryGrid" 
-		 dojoType="dojox.grid.DataGrid"
-		 onRowClick=""
-		 style="width:100%;height:2.5em;background-color:#eeeeee;margin:0px;margin-top:3px;"
-		 store="incidentSummaryStore"
-		 >
-	    <thead>
-	      <tr>
-		<th field="cad" dataType="String" styles="padding-left:5px;padding-right:5px;" width="6%">CAD ID</th>
-		<th field="timestamp" dataType="Date" styles="padding-left:5px;padding-right:5px;" width="7%">Timestamp</th>
-		<th field="locString" dataType="String" styles="padding-left:5px;padding-right:5px;" width="15%">Section</th>
-		<th field="memo" dataType="String" styles="padding-left:5px;padding-right:5px;text-align:right;font-weight:bold;" width="35%">Description</th>
-		<th field="d12_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">Delay (veh-hr)</th>
-		<th field="tmcpe_delay" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">Delay (veh-hr)</th>
-		<th field="savings" dataType="Float" formatter="myFormatNumber" styles="padding-left:5px;padding-right:5px;text-align:right;" width="10%">TMC Savings (veh-hr)</th>
-		<th field="dummy" dataType="Integer" width="19px"></th>
-	      </tr>
-	    </thead>
-	  </table>
-	</div>
--->
       </div>
     </div>
-     
-   <!-- Incident Data -->
-   <div dojoType="dojo.data.ItemFileReadStore" data="{items:[]}" jsId="incidentStore" id="incidentStoreNode" defaultTimeout="20000"></div>
   </body>
 </html>
