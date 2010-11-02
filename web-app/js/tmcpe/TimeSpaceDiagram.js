@@ -496,6 +496,53 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	// Get the accessor we'll use to theme the table
 	this._colorDataAccessor = this._colorAccessors[ this.colorDataAccessor ];
 
+
+
+	// d is a local shorthand variable for accessing the traffic data
+	var d = this._data;
+
+	if ( !d ) {
+	    console.debug( "Can't redraw time-space diagram because there's no data!" );
+	    return;
+	}
+
+	// The numrows is the number of timesteps.  Pull this from the d.timesteps array
+	var numrows = d.timesteps.length;
+	//console.debug( "NUMROWS IS " + numrows );
+	this._numTimeRows = numrows;
+
+	// FIXME: Similarly here, I'm getting the number of freeway
+	// segments (columns) to plot and computing the total length
+	// of the section.  Standardization required
+	var totlen = 0;
+	var incloc=0;
+	for ( j = 0; j < d.sections.length; ++j )
+	{
+	    if ( this._data.location.id == d.sections[j].vdsid ) {
+		incloc = totlen + d.sections[j].seglen/2;
+	    }
+	    totlen += ( d.sections[j].seglen );
+	}
+	if ( totlen < 0 ) totlen = -totlen;
+
+	//console.debug( "TOTAL SECTIONS IS " + d.sections.length );
+	//console.debug( "TOTAL SECTIONS LENGTH IS " + totlen );
+
+
+	// Create the space header row at the top
+	this._tch = this.domNode.appendChild( dojo.create( "div", {style: "width:100%;clear:both;"} ) );
+	var pm = this._tch.appendChild( dojo.create( "div", { style:"position:relative;left:5%;width:95%;" } ) ); 
+	var ds = d.sections[d.sections.length-1];
+	pm.appendChild( dojo.create( "div", { style: "position:absolute; left: 0px; border-left:1px solid black;padding-left:3px;", 
+					      innerHTML: this.facility + "-" + this.direction + ' @ ' + ds.pm } ) );
+	pm.appendChild( dojo.create( "div", { style: "position:absolute:; left: 0px;text-align:center;width:100%;", innerHTML: "<-- Direction of Travel" } ) );
+	ds = d.sections[0];
+	pm.appendChild( dojo.create( "div", { style: "position:absolute; top: 0px;right: 0px;border-right:1px solid black; padding-right:3px;", 
+					      innerHTML: this.facility + "-" + this.direction + ' @ ' + d.sections[0].pm } ) );
+
+
+
+
 	//    dojo.byId( "statusText" ).textContent = "Drawing plot...";
 	this._clear( this._tableNodeContainer );
 
@@ -507,12 +554,15 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	    if ( this._tableNode ) delete this._tableNode;
 	}
 
+
+
 	// Create the container
 	this._tableNodeContainer = 
 	    dojo.create( "div", { id: "tsdTableNodeContainer", 
 				  className: "tsdTableNodeContainer"
 				} );
 	this.domNode.appendChild( this._tableNodeContainer );
+
 
 
 	// Now create the table element  
@@ -544,37 +594,6 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 		tt.deleteRow(i -1);
 	    }
 	}
-
-	// d is a local shorthand variable for accessing the traffic data
-	var d = this._data;
-
-	if ( !d ) {
-	    console.debug( "Can't redraw time-space diagram because there's no data!" );
-	    return;
-	}
-
-
-	// The numrows is the number of timesteps.  Pull this from the d.timesteps array
-	var numrows = d.timesteps.length;
-	//console.debug( "NUMROWS IS " + numrows );
-	this._numTimeRows = numrows;
-
-	// FIXME: Similarly here, I'm getting the number of freeway
-	// segments (columns) to plot and computing the total length
-	// of the section.  Standardization required
-	var totlen = 0;
-	var incloc=0;
-	for ( j = 0; j < d.sections.length; ++j )
-	{
-	    if ( this._data.location.id == d.sections[j].vdsid ) {
-		incloc = totlen + d.sections[j].seglen/2;
-	    }
-	    totlen += ( d.sections[j].seglen );
-	}
-	if ( totlen < 0 ) totlen = -totlen;
-
-	//console.debug( "TOTAL SECTIONS IS " + d.sections.length );
-	//console.debug( "TOTAL SECTIONS LENGTH IS " + totlen );
 	
 
 	// I size the rows and columns using percentages in the CSS
@@ -594,8 +613,6 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
 	var timesteps = d.timesteps;
 	var fheight = height;
 
-	// Don't use this---just let the browser stretch it out...
-	//var height_style = "height:" + fheight + "%;"+"min-height:" + fheight + "%;";
 
 	for ( i = 0; i < numrows; ++i )
 	{
