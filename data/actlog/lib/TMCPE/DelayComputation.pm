@@ -255,7 +255,10 @@ sub get_affected_vds {
 sub get_gams_data {
     my ( $self, @avds ) = @_;
 
-    my $if = io ( $self->get_gams_file );
+    my $if;
+    $if = io ( $self->get_gams_file );
+    if ( ! $if->is_file() ) { $if = io ( 'done/'.$self->get_gams_file ) }
+    if ( ! $if->is_file() ) { croak 'NO EXISTING GAMS DATA FOR '.$self->cad; }
 
     my $inseclen=0;
     my $inpjm=0;
