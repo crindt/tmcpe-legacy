@@ -306,7 +306,7 @@ sub get_gams_data {
 
     my @times;
     for ( my $ct = $cs5; $ct <= $ce5; $ct += 300 ) {
-	push @times, time2str( "%D %T", $ct );
+	push @times, time2str( "%Y-%m-%d %T", $ct );
     }
 
 
@@ -527,11 +527,11 @@ sub get_pems_data {
 
     my @times;
     for ( my $ct = $cs5; $ct <= $ce5; $ct += 300 ) {
-	push @times, time2str( "%D %T", $ct );
+	push @times, time2str( "%Y-%m-%d %T", $ct );
     }
 	
-    my $ss = time2str( "%D %T", $cs5 );
-    my $es = time2str( "%D %T", $ce5 );
+    my $ss = time2str( "%Y-%m-%d %T", $cs5 );
+    my $es = time2str( "%Y-%m-%d %T", $ce5 );
 
     #### ANALYZED TIMES BETWEEN $ss AND $es ARE:
     #map { print STDERR "\t$_\n"; } @times if $self->debug;
@@ -654,7 +654,7 @@ sub get_pems_data {
 	
 	if ( !@rows ) {
 	    ### =: "NO DATA FOR $vdsid $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name}!!!"
-
+	    
 	    # CREATE SOME DUMMY DATA FOR THIS STATION
 	    foreach ( @times ) {
 		my ($date,$time) = split(/\s+/);
@@ -676,13 +676,47 @@ sub get_pems_data {
 		    shockspd => undef   # (0 - a_flw)/(0-a_den) = -a_flw /-a_den = -a_flw / -( a_flw / a_spd ) = a_spd
 		};
 	    }
-	    1;
 	    
 	} else {
-	    ### require: @rows == @times
+	    if ( @rows != @times ) {
+		# compute difference (recipe from perlfaq4)
+		my @union = ();
+		my @intersection = ();
+		my @difference = ();
+		my %count = ();
 
+		foreach my $element ( map { time2str( "%Y-%m-%d %T", str2time( $_ ) ) } @times, map { $_->stamp } @rows) { $count{$element}++ }
+		foreach my $element (keys %count) {
+		    push @union, $element;
+		    push @{ $count{$element} > 1 ? \@intersection : \@difference }, $element;
+		}
+
+		# there is some missing observed data, create some dummy data
+		foreach my $ts ( @difference ) {
+		    ### =: "TIME $ts IS MISSING FROM DATASET, CREATING DUMMY DATA"
+		    my ($date,$t) = split(/\s+/, $ts);
+		    push @{$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}}, { 
+			date => $date,
+			timeofday => $t,
+			avg_spd => undef,
+			stddev_spd => undef,
+			avg_pctobs => 0,   #
+			incspd => undef,
+			incpctobs => 0,
+			incocc => undef,
+			avg_occ => undef,
+			avg_flw => undef,
+			incflw => undef,
+			p_j_m => $self->unknown_evidence_value,
+			days_in_avg => 0,
+			incden => 0,  # inferred
+			shockspd => undef   # (0 - a_flw)/(0-a_den) = -a_flw /-a_den = -a_flw / -( a_flw / a_spd ) = a_spd
+		    };
+		}
+	    }
+	    
 	    foreach my $row ( @rows ) {
-		my ($date,$time) = split(/\s+/, $row->stamp);
+		my ($date,$t) = split(/\s+/, $row->stamp);
 		
 		my $pjm=$self->unknown_evidence_value;  # default to unknown
 		if ( $row->days_in_avg >= $self->min_avg_days && $row->o_pct_obs >= $self->min_obs_pct ) 
@@ -692,7 +726,7 @@ sub get_pems_data {
 			$pjm = $self->unknown_evidence_value;
 		    } else {
 			if ( $row->o_spd < ( $row->a_spd - $self->band * $row->sd_spd ) 
-
+			     
 			     # we won't flag speeds over some maximum as incidents,
 			     # regardless of their relationship to averages
 			     && ( $row->o_spd <= $self->max_incident_speed ) 
@@ -707,7 +741,7 @@ sub get_pems_data {
 		my $diag = join( " : ",
 				 $vdsid,
 				 $date,
-				 $time,
+				 $t,
 				 $data->{$i}->{$facilkey}->{stations}->{$vdsid}->{name},
 				 fmt_unit( $row->a_vol ? $row->a_vol * 12 : "<undef>", " vph", "%5.0f" ),
 				 fmt_unit( $row->a_occ ? $row->a_occ * 100 : '<undef>' , "%", "%5.1f" ),
@@ -725,7 +759,7 @@ sub get_pems_data {
 		# This is what we really need to fill!
 		push @{$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}}, { 
 		    date => $date,
-		    timeofday => $time,
+		    timeofday => $t,
 		    avg_spd => $row->a_spd,
 		    stddev_spd => $row->sd_spd,
 		    avg_pctobs => $row->a_pct_obs,   #
@@ -743,7 +777,7 @@ sub get_pems_data {
 		
 		my $st=$vdsid;
 		
-		$self->mintimeofday( $time ) if ( not defined( $self->mintimeofday ) );
+		$self->mintimeofday( $t ) if ( not defined( $self->mintimeofday ) );
 		$self->mindate( $date ) if ( not defined( $self->mindate ) );
 		
 		# grab closest
@@ -754,6 +788,14 @@ sub get_pems_data {
 		}
 		
 	    }
+
+	    # resort the data
+	    my @tmp = 
+		sort { 
+		    join(' ',$a->{date},$a->{timeofday}) cmp join(' ',$b->{date},$b->{timeofday}) 
+	    } @{$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}};
+	    @{$data->{$i}->{$facilkey}->{stations}->{$vdsid}->{data}} = @tmp;
+	    
 	}
     }
 
@@ -1503,8 +1545,8 @@ sub write_to_db {
 	
 	$ifa = $ia->create_related( 'incident_facility_impact_analyses',
 				    {
-					start_time => time2str( "%D %T", $self->calcstart ),
-					end_time => time2str( "%D %T", $self->calcend ),
+					start_time => time2str( "%Y-%m-%d %T", $self->calcstart ),
+					end_time => time2str( "%Y-%m-%d %T", $self->calcend ),
 					band => $self->band,
 					max_incident_speed => $self->max_incident_speed,
 					location_id => $loc->id,

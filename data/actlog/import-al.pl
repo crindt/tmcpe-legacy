@@ -663,7 +663,7 @@ $datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
 my $condition;
 
 # Can't use this condition because starttime doesn't exist in the D12ActivityLog
-#$condition->{starttime} = $datecond if $datecond;
+$condition->{stamp} = $datecond if $datecond;
 my @include = grep { not /^not-/ } @ARGV;
 my @exclude = grep { /^not-/ } @ARGV;
 $condition->{cad}->{'-in'} = [ @include ] if @include;
@@ -722,7 +722,7 @@ eval {
 	elsif ( /^FAIR.*$/ || /^OC[\s_]*FAIR.*$/ ) { $type = "OCFAIR" }
 	elsif ( /^EMERG.*$/ ) { $type = "EMERGENCY" }
 
-	if ( not grep { $type =~ /$_/ } @{$procopt->{only_type}} ) {
+	if ( @{$procopt->{only_type}} && ( not grep { $type =~ /$_/ } @{$procopt->{only_type}} ) ) {
 	    next INCIDENT;
 	}
 
