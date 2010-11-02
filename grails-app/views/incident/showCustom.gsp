@@ -197,11 +197,13 @@
 		 type="checkbox"
                  onChange="tsd.toggleEvidenceWindow( dojo.byId( 'evidenceCheck' ).checked )" />
 	  <label for="evidenceCheck">Show Evidence?</label> 	    
+<!--
 	  <input id="tsdFlipCheck" dojotype="dijit.form.CheckBox"
 	         name="tsdFlipCheckBox" checked="false"
 		 type="checkbox"
                  onChange="incidentView.flipTimeSpaceDiagram( dojo.byId( 'tsdFlipCheck' ).checked )" />
 	  <label for="tsdFlipCheck">Flip time axis?</label> 	    
+-->
 	  
 <!--
 	  <input id="activityCheck" dojotype="dijit.form.CheckBox"
