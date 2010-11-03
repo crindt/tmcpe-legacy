@@ -210,8 +210,10 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    url = "http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&"
 		+ encodeURIComponent( "issue[subject]=Problem with analysis of "+fiaSummary )
 		+ "&" + encodeURIComponent( "issue[description]=Bad analysis for available for ["+fiaSummary+"]("
-					    +base+'incident/showCustom?id='+this._incident.id
-					    +")" )
+					    +base+'incident/showCustom?id='+this._incident.id					    
+					    +")\n\n"
+					    +"User Agent: " + navigator.userAgent
+					  )
 	    dojo.byId('tmcpe_report_problem_link').href = url;
 	    dojo.byId('tmcpe_report_problem_link').onclick = "return popitup('"+url+"')";
 	    this.updateVdsSegmentsQuery();
