@@ -1,95 +1,142 @@
 package TBMAP::Schema::Tvd;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+TBMAP::Schema::Tvd
+
+=cut
+
 __PACKAGE__->table("tbmap.tvd");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 name
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 freeway_dir
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 2
+
+=head2 lanes
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 length
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 cal_pm
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 12
+
+=head2 abs_pm
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 latitude
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 longitude
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 last_modified
+
+  data_type: 'date'
+  is_nullable: 1
+
+=head2 gid
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 geom
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=head2 freeway_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 vdstype
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 4
+
+=head2 district
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "name",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 64,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "freeway_dir",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 2 },
   "lanes",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "length",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "cal_pm",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 12,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 12 },
   "abs_pm",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "latitude",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "longitude",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "last_modified",
-  { data_type => "date", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "date", is_nullable => 1 },
   "gid",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "geom",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
   "freeway_id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "vdstype",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 4,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 4 },
   "district",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
-__PACKAGE__->add_unique_constraint("tvd_pkey", ["id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:04
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QiXpD+XL1VsS+KTU8Iuvfw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:24:25
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ydahNiS9jnwJ3C2YNWeUQw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -1,30 +1,60 @@
 package SpatialVds::Schema::OctamNodesGeom2230;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::OctamNodesGeom2230
+
+=cut
+
 __PACKAGE__->table("octam_nodes_geom_2230");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 geom
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "geom",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
-__PACKAGE__->add_unique_constraint("octam_nodes_geom_2230_pkey", ["id"]);
+
+=head1 RELATIONS
+
+=head2 id
+
+Type: belongs_to
+
+Related object: L<SpatialVds::Schema::OctamNodes>
+
+=cut
+
 __PACKAGE__->belongs_to("id", "SpatialVds::Schema::OctamNodes", { id => "id" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MVD8GSZCYR+eXq0DBEsh3g
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:a3RfieXSsN+p0CcOGB+7OQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -87,8 +87,37 @@ class Incident {
         def start = entries.first().getStampDateTime()
         def startj = new DateTime( start )
         def verif = entries.find() { it.activitysubject == 'VERIFICATION' }
-        if ( verif ) {
-            def verifj = new DateTime( verif.getStampDateTime() )
+	def verifj = null
+	if ( verif )
+	    verifj = new DateTime(verif.getStampDateTime())
+	def verif2 = entries.find() { it.memo =~ /VERIFIED BY CCTV/ }
+	if ( verif2 != null ) {
+	    def verifj2 = new DateTime(verif2.getStampDateTime())
+	    if ( verifj == null || verifj2.compareTo(verifj) < 0 ) {
+		verif = verif2
+		verifj = verifj2
+	    }
+	}
+	    
+	verif2 = entries.find() { it.memo =~ /PER CCTV/ }
+	if ( verif2 != null ) {
+	    def verifj2 = new DateTime(verif2.getStampDateTime())
+	    if ( verifj == null || ( verifj2 && verifj2.compareTo(verifj) < 0 ) ) {
+		verif = verif2
+		verifj = verifj2
+	    }
+	}
+
+	verif2 = entries.find() { it.memo =~ /TMC HAS VISUAL/ }
+	if ( verif2 != null ) {
+	    def verifj2 = new DateTime(verif2.getStampDateTime())
+	    if ( verifj == null || ( verifj2 && verifj2.compareTo(verifj) < 0 ) ) {
+		verif = verif2
+		verifj = verifj2
+	    }
+	}
+
+        if ( verif && verifj ) {
             return new Period( startj, verifj )
         } else {
             return null

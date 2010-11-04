@@ -1,32 +1,68 @@
 package SpatialVds::Schema::VdsFreeway;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::VdsFreeway
+
+=cut
+
 __PACKAGE__->table("vds_freeway");
+
+=head1 ACCESSORS
+
+=head2 vds_id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 freeway_id
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 freeway_dir
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 2
+
+=cut
+
 __PACKAGE__->add_columns(
   "vds_id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "freeway_id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "freeway_dir",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 2 },
 );
 __PACKAGE__->set_primary_key("vds_id");
-__PACKAGE__->add_unique_constraint("vds_freeway_pkey", ["vds_id"]);
+
+=head1 RELATIONS
+
+=head2 vds_id
+
+Type: belongs_to
+
+Related object: L<SpatialVds::Schema::VdsIdAll>
+
+=cut
+
 __PACKAGE__->belongs_to("vds_id", "SpatialVds::Schema::VdsIdAll", { id => "vds_id" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2Hw6mlWnkFEoN8dJz5QJMQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QvAT0FmTekkE2du+ovISXw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

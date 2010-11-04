@@ -1,46 +1,116 @@
 package SpatialVds::Schema::OctamNodes;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::OctamNodes
+
+=cut
+
 __PACKAGE__->table("octam_nodes");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 x
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 y
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "x",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "y",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
-__PACKAGE__->add_unique_constraint("octamnodes_pkey", ["id"]);
+
+=head1 RELATIONS
+
+=head2 octam_links_tonodes
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::OctamLinks>
+
+=cut
+
 __PACKAGE__->has_many(
   "octam_links_tonodes",
   "SpatialVds::Schema::OctamLinks",
   { "foreign.tonode" => "self.id" },
+  {},
 );
+
+=head2 octam_links_frnodes
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::OctamLinks>
+
+=cut
+
 __PACKAGE__->has_many(
   "octam_links_frnodes",
   "SpatialVds::Schema::OctamLinks",
   { "foreign.frnode" => "self.id" },
+  {},
 );
+
+=head2 octam_nodes_geom_2230s
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::OctamNodesGeom2230>
+
+=cut
+
 __PACKAGE__->has_many(
   "octam_nodes_geom_2230s",
   "SpatialVds::Schema::OctamNodesGeom2230",
   { "foreign.id" => "self.id" },
+  {},
 );
+
+=head2 octam_nodes_geom_2875s
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::OctamNodesGeom2875>
+
+=cut
+
 __PACKAGE__->has_many(
   "octam_nodes_geom_2875s",
   "SpatialVds::Schema::OctamNodesGeom2875",
   { "foreign.id" => "self.id" },
+  {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/dbGrDkqNZA7QjxITaESkg
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0WqF6exXcxaGNdgkvToDiw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

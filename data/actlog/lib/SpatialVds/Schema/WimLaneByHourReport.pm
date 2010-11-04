@@ -1,41 +1,84 @@
 package SpatialVds::Schema::WimLaneByHourReport;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::WimLaneByHourReport
+
+=cut
+
 __PACKAGE__->table("wim_lane_by_hour_report");
+
+=head1 ACCESSORS
+
+=head2 site_no
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 direction
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 1
+
+=head2 lane_no
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 wim_lane_no
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 ts_hour
+
+  data_type: 'timestamp'
+  is_nullable: 0
+
+=head2 volume
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=cut
+
 __PACKAGE__->add_columns(
   "site_no",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "direction",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 1 },
   "lane_no",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "wim_lane_no",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "ts_hour",
-  {
-    data_type => "timestamp without time zone",
-    default_value => undef,
-    is_nullable => 0,
-    size => 8,
-  },
+  { data_type => "timestamp", is_nullable => 0 },
   "volume",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("site_no", "wim_lane_no", "ts_hour");
-__PACKAGE__->add_unique_constraint(
-  "wim_lane_by_hour_report_pkey",
-  ["site_no", "wim_lane_no", "ts_hour"],
-);
+
+=head1 RELATIONS
+
+=head2 site_no
+
+Type: belongs_to
+
+Related object: L<SpatialVds::Schema::WimStations>
+
+=cut
+
 __PACKAGE__->belongs_to(
   "site_no",
   "SpatialVds::Schema::WimStations",
@@ -43,8 +86,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:efVJhAIX7Z9GLKJSjV1SoA
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pTOn32b7m1g97BqQnoDICw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

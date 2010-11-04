@@ -1,46 +1,76 @@
 package SpatialVds::Schema::FinalMatchTbl;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::FinalMatchTbl
+
+=cut
+
 __PACKAGE__->table("final_match_tbl");
+
+=head1 ACCESSORS
+
+=head2 vds_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 taz_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 mindist
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 manhdist
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 gid
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'final_match_tbl_gid_seq'
+
+=cut
+
 __PACKAGE__->add_columns(
   "vds_id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "taz_id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "mindist",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "manhdist",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "gid",
   {
-    data_type => "integer",
-    default_value => "nextval('final_match_tbl_gid_seq'::regclass)",
-    is_nullable => 0,
-    size => 4,
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "final_match_tbl_gid_seq",
   },
 );
 __PACKAGE__->set_primary_key("gid");
 __PACKAGE__->add_unique_constraint("match_vds_taz_uniq", ["vds_id", "taz_id"]);
-__PACKAGE__->add_unique_constraint("final_match_tbl_pkey", ["gid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gYhbQM1ApgRW0dCdrJ8DWw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:t5N4hePBpU4H/iM5+Mracg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

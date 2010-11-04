@@ -1,43 +1,61 @@
 package SpatialVds::Schema::OctamFlowData;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::OctamFlowData
+
+=cut
+
 __PACKAGE__->table("octam_flow_data");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 ab_daily_volume
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 ba_daily_volume
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 tot_daily_volume
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "ab_daily_volume",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "ba_daily_volume",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "tot_daily_volume",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
-__PACKAGE__->add_unique_constraint("octam_flow_data_pkey", ["id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Zi8amkX8lS67twpuvJeKyg
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LvSnGXw6/JnUP1ddtQyVcw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -1,35 +1,69 @@
 package SpatialVds::Schema::WimLaneDir;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::WimLaneDir
+
+=cut
+
 __PACKAGE__->table("wim_lane_dir");
+
+=head1 ACCESSORS
+
+=head2 site_no
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 direction
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 1
+
+=head2 lane_no
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 wim_lane_no
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 facility
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "site_no",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "direction",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 1 },
   "lane_no",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "wim_lane_no",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "facility",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("site_no", "direction", "lane_no");
-__PACKAGE__->add_unique_constraint("wim_lane_dir_pkey", ["site_no", "direction", "lane_no"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1GkKLIbuy10eV5Fhhns7Eg
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9P25jxLI5YZ+Nb6Sm3KoeQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

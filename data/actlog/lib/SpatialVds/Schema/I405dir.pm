@@ -1,50 +1,79 @@
 package SpatialVds::Schema::I405dir;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::I405dir
+
+=cut
+
 __PACKAGE__->table("i405dir");
+
+=head1 ACCESSORS
+
+=head2 ggid
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 route_id
+
+  data_type: 'text'
+  is_nullable: 1
+  original: {data_type => "varchar"}
+
+=head2 segment_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 geom
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=head2 ns_dir
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 ew_dir
+
+  data_type: 'text'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "ggid",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "route_id",
   {
-    data_type => "character varying",
-    default_value => undef,
+    data_type   => "text",
     is_nullable => 1,
-    size => undef,
+    original    => { data_type => "varchar" },
   },
   "segment_id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "geom",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
   "ns_dir",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "ew_dir",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iKnFKDx7/Kw+lQbv4h2XAQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aNT+v4zEjsgMjnr2RH2Uwg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

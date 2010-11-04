@@ -701,10 +701,10 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	    {field:'cad', name:"CAD ID", dataType:"String", width:'10%',styles:'padding-left:5px;padding-right:5px;', noresize:true},
 	    {field:'timestamp', name:"Start Time", dataType:"Date", width:'10%',styles:'right;padding-right:5px;padding-right:5px;',formatter:myFormatDate, noresize:true},
 	    {field:'locString', name:"Location", dataType:"String", width:'15%',styles:'padding-left:5px;padding-right:5px;', noresize:true},
-	    {field:'memo', name:"Description", dataType:"String", width:'50%',styles:'padding-left:5px;padding-right:5px;', noresize:true},
-	    {field:'d12_delay', dataType:"Integer", width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true},
-	    {field:'tmcpe_delay',dataType:"Integer",width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true},
-	    {field:'savings',dataType:"Integer",width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true}
+	    {field:'memo', name:"Description", dataType:"String", width:'41%',styles:'padding-left:5px;padding-right:5px;', noresize:true},
+	    {field:'d12_delay', name:"D<sub>35</sub> (veh-hr)", dataType:"Integer", width:'8%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true},
+	    {field:'tmcpe_delay', name:"D<sub>tmcpe</sub> (veh-hr)",dataType:"Integer",width:'8%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true},
+	    {field:'savings', name:"&Delta;<sub>tmcpe</sub> (veh-hr)",dataType:"Integer",width:'8%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber, noresize:true}
 	];
 
 	var obj = this;
@@ -775,11 +775,11 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	}
 	firstColWidth -= 5;
 	var layout = [
-	    {field:'count',width:'60%',styles:'text-align:left;font-weight:bold;padding-left:5px;padding-right:20px;', noresize:true},
+	    {field:'count',width:'51%',styles:'text-align:left;font-weight:bold;padding-left:5px;padding-right:20px;', noresize:true},
 	    {field:'title',width:'25%',styles:'text-align:right;padding-left:20px;padding-right:5px;', noresize:true},
-	    {field:'d12_delay',width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true},
-	    {field:'tmcpe_delay',width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true},
-	    {field:'savings',width:'5%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true}
+	    {field:'d12_delay',width:'8%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true},
+	    {field:'tmcpe_delay',width:'8%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true},
+	    {field:'savings',width:'8%',styles:'text-align:right;padding-left:5px;padding-right:5px;',formatter:myFormatNumber,noresize:true}
 	];
 	
 	this._incidentSummaryGrid = new dojox.grid.DataGrid({
