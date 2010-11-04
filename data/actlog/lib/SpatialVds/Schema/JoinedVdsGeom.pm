@@ -1,59 +1,94 @@
 package SpatialVds::Schema::JoinedVdsGeom;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::JoinedVdsGeom
+
+=cut
+
 __PACKAGE__->table("joined_vds_geom");
+
+=head1 ACCESSORS
+
+=head2 gid
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'joined_vds_geom_gid_seq'
+
+=head2 freeway_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 district_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 name
+
+  data_type: 'text'
+  is_nullable: 1
+  original: {data_type => "varchar"}
+
+=head2 cnt
+
+  data_type: 'smallint'
+  is_nullable: 1
+
+=head2 geom
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=head2 shape_geom
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "gid",
   {
-    data_type => "integer",
-    default_value => "nextval('joined_vds_geom_gid_seq'::regclass)",
-    is_nullable => 0,
-    size => 4,
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "joined_vds_geom_gid_seq",
   },
   "freeway_id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "district_id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "name",
   {
-    data_type => "character varying",
-    default_value => undef,
+    data_type   => "text",
     is_nullable => 1,
-    size => undef,
+    original    => { data_type => "varchar" },
   },
   "cnt",
-  {
-    data_type => "smallint",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "smallint", is_nullable => 1 },
   "geom",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
   "shape_geom",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("gid");
-__PACKAGE__->add_unique_constraint("joined_vds_geom_pkey", ["gid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:omfx7bZioATlAN+B79enyw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:me1FhV6OMT7njDl/CbsmTA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

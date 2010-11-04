@@ -1,72 +1,111 @@
 package SpatialVds::Schema::PemsLaneRollup;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::PemsLaneRollup
+
+=cut
+
 __PACKAGE__->table("pems_lane_rollup");
+
+=head1 ACCESSORS
+
+=head2 vds_id
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 ts
+
+  data_type: 'timestamp'
+  is_nullable: 0
+
+=head2 fwydir
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 20
+
+=head2 vehlanes_count
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 vehlanes_occ
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 vehlanes_spd
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 trucklanes_count
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 trucklanes_occ
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 trucklanes_spd
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 truckcnt
+
+  data_type: 'real'
+  is_nullable: 1
+
+=head2 vehcnt
+
+  data_type: 'real'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "vds_id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "ts",
-  {
-    data_type => "timestamp without time zone",
-    default_value => undef,
-    is_nullable => 0,
-    size => 8,
-  },
+  { data_type => "timestamp", is_nullable => 0 },
   "fwydir",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 20,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 20 },
   "vehlanes_count",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "vehlanes_occ",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "vehlanes_spd",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "trucklanes_count",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "trucklanes_occ",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "trucklanes_spd",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "truckcnt",
-  { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "real", is_nullable => 1 },
   "vehcnt",
-  { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "real", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("vds_id", "ts");
-__PACKAGE__->add_unique_constraint("pems_lane_rollup_pkey", ["vds_id", "ts"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:U+c9Mk7Y/6PL06PDi2ap7w
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sfVpmB34sT8Zt46hbBlBag
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -1,21 +1,66 @@
 package SpatialVds::Schema::WimPoints4326;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::WimPoints4326
+
+=cut
+
 __PACKAGE__->table("wim_points_4326");
+
+=head1 ACCESSORS
+
+=head2 gid
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 wim_id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=cut
+
 __PACKAGE__->add_columns(
   "gid",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "wim_id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("wim_id");
-__PACKAGE__->add_unique_constraint("wim_points_4326_pkey", ["wim_id"]);
+
+=head1 RELATIONS
+
+=head2 gid
+
+Type: belongs_to
+
+Related object: L<SpatialVds::Schema::GeomPoints4326>
+
+=cut
+
 __PACKAGE__->belongs_to("gid", "SpatialVds::Schema::GeomPoints4326", { gid => "gid" });
+
+=head2 wim_id
+
+Type: belongs_to
+
+Related object: L<SpatialVds::Schema::WimStations>
+
+=cut
+
 __PACKAGE__->belongs_to(
   "wim_id",
   "SpatialVds::Schema::WimStations",
@@ -23,8 +68,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:OqNAGpX/64ytPP1lBWCfDw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GQ66JY+rWMor1QVYlxcR1g
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

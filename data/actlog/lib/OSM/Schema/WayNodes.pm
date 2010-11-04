@@ -1,26 +1,54 @@
 package OSM::Schema::WayNodes;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+OSM::Schema::WayNodes
+
+=cut
+
 __PACKAGE__->table("way_nodes");
+
+=head1 ACCESSORS
+
+=head2 way_id
+
+  data_type: 'bigint'
+  is_nullable: 0
+
+=head2 node_id
+
+  data_type: 'bigint'
+  is_nullable: 0
+
+=head2 sequence_id
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=cut
+
 __PACKAGE__->add_columns(
   "way_id",
-  { data_type => "bigint", default_value => undef, is_nullable => 0, size => 8 },
+  { data_type => "bigint", is_nullable => 0 },
   "node_id",
-  { data_type => "bigint", default_value => undef, is_nullable => 0, size => 8 },
+  { data_type => "bigint", is_nullable => 0 },
   "sequence_id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("way_id", "sequence_id");
-__PACKAGE__->add_unique_constraint("pk_way_nodes", ["way_id", "sequence_id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:24
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5hlg/zL9AsNHYkoI3esH3A
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:14
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:IFBEZJGzR6QyHI2EKzL0WQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

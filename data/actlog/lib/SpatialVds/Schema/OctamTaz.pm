@@ -1,47 +1,114 @@
 package SpatialVds::Schema::OctamTaz;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::OctamTaz
+
+=cut
+
 __PACKAGE__->table("octam_taz");
-__PACKAGE__->add_columns(
-  "taz_id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
-);
+
+=head1 ACCESSORS
+
+=head2 taz_id
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=cut
+
+__PACKAGE__->add_columns("taz_id", { data_type => "integer", is_nullable => 0 });
 __PACKAGE__->set_primary_key("taz_id");
-__PACKAGE__->add_unique_constraint("octam_taz_pkey1", ["taz_id"]);
+
+=head1 RELATIONS
+
+=head2 octam_sed_2000s
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::OctamSed2000>
+
+=cut
+
 __PACKAGE__->has_many(
   "octam_sed_2000s",
   "SpatialVds::Schema::OctamSed2000",
   { "foreign.taz_id" => "self.taz_id" },
+  {},
 );
+
+=head2 octam_taz_geoms
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::OctamTazGeom>
+
+=cut
+
 __PACKAGE__->has_many(
   "octam_taz_geoms",
   "SpatialVds::Schema::OctamTazGeom",
   { "foreign.taz_id" => "self.taz_id" },
+  {},
 );
+
+=head2 vds_taz_intersections
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::VdsTazIntersections>
+
+=cut
+
 __PACKAGE__->has_many(
   "vds_taz_intersections",
   "SpatialVds::Schema::VdsTazIntersections",
   { "foreign.taz_id" => "self.taz_id" },
+  {},
 );
+
+=head2 vds_taz_intersections_alts
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::VdsTazIntersectionsAlt>
+
+=cut
+
 __PACKAGE__->has_many(
   "vds_taz_intersections_alts",
   "SpatialVds::Schema::VdsTazIntersectionsAlt",
   { "foreign.taz_id" => "self.taz_id" },
+  {},
 );
+
+=head2 vds_taz_intersections_simples
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::VdsTazIntersectionsSimple>
+
+=cut
+
 __PACKAGE__->has_many(
   "vds_taz_intersections_simples",
   "SpatialVds::Schema::VdsTazIntersectionsSimple",
   { "foreign.taz_id" => "self.taz_id" },
+  {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dtv7MADs5UiBqJH0I+VOYw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8k9qHP6iW8DD6fsRJagBnA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

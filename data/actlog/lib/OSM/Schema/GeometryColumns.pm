@@ -1,52 +1,81 @@
 package OSM::Schema::GeometryColumns;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+OSM::Schema::GeometryColumns
+
+=cut
+
 __PACKAGE__->table("geometry_columns");
+
+=head1 ACCESSORS
+
+=head2 f_table_catalog
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 256
+
+=head2 f_table_schema
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 256
+
+=head2 f_table_name
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 256
+
+=head2 f_geometry_column
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 256
+
+=head2 coord_dimension
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 srid
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 type
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 30
+
+=cut
+
 __PACKAGE__->add_columns(
   "f_table_catalog",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 256,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 256 },
   "f_table_schema",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 256,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 256 },
   "f_table_name",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 256,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 256 },
   "f_geometry_column",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 256,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 256 },
   "coord_dimension",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "srid",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "type",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 30,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 30 },
 );
 __PACKAGE__->set_primary_key(
   "f_table_catalog",
@@ -54,19 +83,10 @@ __PACKAGE__->set_primary_key(
   "f_table_name",
   "f_geometry_column",
 );
-__PACKAGE__->add_unique_constraint(
-  "geometry_columns_pk",
-  [
-    "f_table_catalog",
-    "f_table_schema",
-    "f_table_name",
-    "f_geometry_column",
-  ],
-);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:24
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eAcF0s79kTWQ6BtQP8EFTw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:14
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dgNAo+8MGyk2J6XwXsTyLA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

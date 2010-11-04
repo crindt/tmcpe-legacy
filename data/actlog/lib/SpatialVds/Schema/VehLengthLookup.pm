@@ -1,38 +1,63 @@
 package SpatialVds::Schema::VehLengthLookup;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::VehLengthLookup
+
+=cut
+
 __PACKAGE__->table("veh_length_lookup");
+
+=head1 ACCESSORS
+
+=head2 fwydir
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 20
+
+=head2 timeofday
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 20
+
+=head2 avgvehlength
+
+  data_type: 'real'
+  is_nullable: 1
+
+=head2 avgtrucklength
+
+  data_type: 'real'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "fwydir",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 20,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 20 },
   "timeofday",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 0,
-    size => 20,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 20 },
   "avgvehlength",
-  { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "real", is_nullable => 1 },
   "avgtrucklength",
-  { data_type => "real", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "real", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("timeofday", "fwydir");
-__PACKAGE__->add_unique_constraint("veh_length_lookup_pkey", ["timeofday", "fwydir"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XrhonZVWyEMMt9bEyC4KoA
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:su4oXsi4tSwxNzRLSLkrwQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

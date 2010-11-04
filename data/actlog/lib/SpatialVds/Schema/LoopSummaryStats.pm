@@ -1,93 +1,138 @@
 package SpatialVds::Schema::LoopSummaryStats;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::LoopSummaryStats
+
+=cut
+
 __PACKAGE__->table("loop_summary_stats");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 estimate_time
+
+  data_type: 'timestamp'
+  is_nullable: 0
+
+=head2 interval_seconds
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 mu_volocc
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=head2 min_volocc
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=head2 max_volocc
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=head2 mu_vol
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=head2 min_vol
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=head2 max_vol
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=head2 sd_vol
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=head2 sum_vol
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "estimate_time",
-  {
-    data_type => "timestamp without time zone",
-    default_value => undef,
-    is_nullable => 0,
-    size => 8,
-  },
+  { data_type => "timestamp", is_nullable => 0 },
   "interval_seconds",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "mu_volocc",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 0 },
   "min_volocc",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 0 },
   "max_volocc",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 0 },
   "mu_vol",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 0 },
   "min_vol",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 0 },
   "max_vol",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 0 },
   "sd_vol",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 0 },
   "sum_vol",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("id");
-__PACKAGE__->add_unique_constraint("loop_summary_stats_pkey", ["id"]);
+
+=head1 RELATIONS
+
+=head2 id
+
+Type: belongs_to
+
+Related object: L<SpatialVds::Schema::StatsIds>
+
+=cut
+
 __PACKAGE__->belongs_to("id", "SpatialVds::Schema::StatsIds", { id => "id" });
+
+=head2 vds_summarystats
+
+Type: has_many
+
+Related object: L<SpatialVds::Schema::VdsSummarystats>
+
+=cut
+
 __PACKAGE__->has_many(
   "vds_summarystats",
   "SpatialVds::Schema::VdsSummarystats",
   { "foreign.stats_id" => "self.id" },
+  {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:w2rtkSaaxyeX4nuBTHXVqQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yjw4L3+lIwv6nU5oLjflsA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

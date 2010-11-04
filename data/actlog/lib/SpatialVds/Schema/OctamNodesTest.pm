@@ -1,43 +1,61 @@
 package SpatialVds::Schema::OctamNodesTest;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::OctamNodesTest
+
+=cut
+
 __PACKAGE__->table("octam_nodes_test");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 x
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 y
+
+  data_type: 'numeric'
+  is_nullable: 1
+
+=head2 geom
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "x",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "y",
-  {
-    data_type => "numeric",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "numeric", is_nullable => 1 },
   "geom",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
-__PACKAGE__->add_unique_constraint("octam_nodes_test_pkey", ["id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mMqCnDy7l3zLY7uGKpKEXQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum://RrdoCZ/AiE0EMSoGrMwg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

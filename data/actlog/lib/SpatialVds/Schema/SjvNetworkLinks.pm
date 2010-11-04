@@ -1,180 +1,217 @@
 package SpatialVds::Schema::SjvNetworkLinks;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+SpatialVds::Schema::SjvNetworkLinks
+
+=cut
+
 __PACKAGE__->table("sjv_network_links");
+
+=head1 ACCESSORS
+
+=head2 gid
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'sjv_network_links_gid_seq'
+
+=head2 a
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 b
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 distance
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 capclass
+
+  data_type: 'smallint'
+  is_nullable: 1
+
+=head2 stname
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 20
+
+=head2 region
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 11
+
+=head2 speed
+
+  data_type: 'smallint'
+  is_nullable: 1
+
+=head2 count_am06
+
+  data_type: 'smallint'
+  is_nullable: 1
+
+=head2 count_pm06
+
+  data_type: 'smallint'
+  is_nullable: 1
+
+=head2 lanes
+
+  data_type: 'smallint'
+  is_nullable: 1
+
+=head2 cnt
+
+  data_type: 'smallint'
+  is_nullable: 1
+
+=head2 capacity
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 v_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 time_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 vc_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 cspd_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 vdt_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 vht_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 v1_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 vt_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 v1t_31
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 the_geom
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=head2 geom_3310
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=head2 geom_4326
+
+  data_type: 'geometry'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "gid",
   {
-    data_type => "integer",
-    default_value => "nextval('sjv_network_links_gid_seq'::regclass)",
-    is_nullable => 0,
-    size => 4,
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "sjv_network_links_gid_seq",
   },
   "a",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "b",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "distance",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "capclass",
-  {
-    data_type => "smallint",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "smallint", is_nullable => 1 },
   "stname",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 20,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 20 },
   "region",
-  {
-    data_type => "character varying",
-    default_value => undef,
-    is_nullable => 1,
-    size => 11,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 11 },
   "speed",
-  {
-    data_type => "smallint",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "smallint", is_nullable => 1 },
   "count_am06",
-  {
-    data_type => "smallint",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "smallint", is_nullable => 1 },
   "count_pm06",
-  {
-    data_type => "smallint",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "smallint", is_nullable => 1 },
   "lanes",
-  {
-    data_type => "smallint",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "smallint", is_nullable => 1 },
   "cnt",
-  {
-    data_type => "smallint",
-    default_value => undef,
-    is_nullable => 1,
-    size => 2,
-  },
+  { data_type => "smallint", is_nullable => 1 },
   "capacity",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "v_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "time_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "vc_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "cspd_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "vdt_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "vht_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "v1_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "vt_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "v1t_31",
-  {
-    data_type => "double precision",
-    default_value => undef,
-    is_nullable => 1,
-    size => 8,
-  },
+  { data_type => "double precision", is_nullable => 1 },
   "the_geom",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
   "geom_3310",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
   "geom_4326",
-  {
-    data_type => "geometry",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "geometry", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("gid");
-__PACKAGE__->add_unique_constraint("sjv_network_links_pkey", ["gid"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-10-23 11:03:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qDezp8ZQmj1M51nBNkFlmg
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KM4c4vyzwFlBMOr924qJbw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
