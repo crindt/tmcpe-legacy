@@ -51,15 +51,15 @@ grails.enable.native2ascii = true
 environments {
 	production {
 		grails.serverURL = "https://parsons.its.uci.edu/${appName}-${appVersion}"
-		grails.casURL = "https://parsons.its.uci.edu/cas"
+		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	development {
 		grails.serverURL = "https://localhost:8443/${appName ? appName : ( appname ? appname :  'tmcpe' )}"
-		grails.casURL = "https://parsons.its.uci.edu/cas"
+		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	test {
 		grails.serverURL = "http://localhost:8080/${appName}"
-		grails.casURL = "https://parsons.its.uci.edu/cas"
+		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	
 }
