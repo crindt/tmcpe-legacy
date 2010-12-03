@@ -3,17 +3,17 @@ package edu.uci.its.tmcpe
 import grails.plugins.springsecurity.Secured
 
 @Secured(["ROLE_ADMIN","ROLE_TMCPE","ROLE_CALTRANS_D12_TMC"])
-class MapController {
+class MapController extends BaseController {
 	
-	// Get the authenticateService bean
-	def springSecurityService
+    // Get the authenticateService bean
+    def springSecurityService
 
     static navigation = [
         group:'tabs',
         order:2,
         title:'Query Incidents',
-		isVisible: { org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN,ROLE_TMCPE,ROLE_CALTRANS_D12_TMC") }
-        ]
+	isVisible: { org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN,ROLE_TMCPE,ROLE_CALTRANS_D12_TMC") }
+    ]
     
     def index = { redirect(action:show,params:params) }
 
