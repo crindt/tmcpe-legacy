@@ -54,11 +54,11 @@ environments {
 		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	development {
-		grails.serverURL = "https://localhost:8443/${appName ? appName : ( appname ? appname :  'tmcpe' )}"
+		grails.serverURL = "https://192.168.0.2:8443/${appName ? appName : ( appname ? appname :  'tmcpe' )}"
 		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	test {
-		grails.serverURL = "http://localhost:8080/${appName}"
+		grails.serverURL = "http://192.168.0.2:8080/${appName}"
 		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	
@@ -119,7 +119,7 @@ log4j = {
 
 vdsdata {
 	couchdb {
-		host = "localhost"
+		host = "192.168.0.2"
 		db_suffix = "morehash"
 	}      
 }

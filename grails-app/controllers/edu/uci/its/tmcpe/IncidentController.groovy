@@ -7,7 +7,7 @@ import javax.servlet.http.Cookie
 import grails.plugins.springsecurity.Secured
 
 @Secured(["ROLE_ADMIN","ROLE_TMCPE","ROLE_CALTRANS_D12_TMC"])
-class IncidentController {
+class IncidentController extends BaseController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
