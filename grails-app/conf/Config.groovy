@@ -50,7 +50,7 @@ grails.enable.native2ascii = true
 // set per-environment serverURL stem for creating absolute links
 environments {
 	production {
-		grails.serverURL = "https://parsons.its.uci.edu/${appName}-${appVersion}"
+		grails.serverURL = "https://tmcpe.ctmlabs.net/${appName}-${appVersion}"
 		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	development {
