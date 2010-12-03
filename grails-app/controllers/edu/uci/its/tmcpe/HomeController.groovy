@@ -3,7 +3,7 @@ package edu.uci.its.tmcpe
 class HomeController {
 
     static navigation = [
-        [group: 'tabs', order:1, title:'Home', action: 'index'],
+        [group: 'tabs', order:100, title:'About', action: 'index'],
         ]
 
     def index = {
