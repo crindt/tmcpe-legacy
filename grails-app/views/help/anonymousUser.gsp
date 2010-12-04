@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 -->
     <!-- Load the map javascript and css -->
-    <!-- <tmcpe:openlayers_latest /> --> <!--  brings in the openlayers stuff -->
     <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
 
     <g:javascript>

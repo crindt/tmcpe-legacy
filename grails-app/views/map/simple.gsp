@@ -7,7 +7,6 @@
 -->
 
     <!-- Load the map javascript and css -->
-    <!-- <tmcpe:openlayers_latest /> --> <!--  brings in the openlayers stuff -->
     <tmcpe:openlayers />  
     <tmcpe:tmcpe />              <!-- This loads the tmcpe (dojo-based) interface framework -->
 
