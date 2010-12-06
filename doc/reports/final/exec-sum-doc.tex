@@ -1,0 +1,74 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amssymb,amsmath}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows,shapes,decorations.pathmorphing,decorations.pathreplacing,matrix,positioning,shadows,patterns,fit} 
+\usepackage{authblk}
+\usepackage{units}
+%\usepackage{nomencl}
+\usepackage{graphicx}
+\usepackage{paralist} 
+\usepackage{natbib}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{ctable}
+\usepackage{soul}
+
+\title{A Measurement-based System for TMC Performance Evaluation\\[1em]
+  \Large  \emph{Interim Report---Executive Summary}
+}
+
+\author{Craig Rindt}
+\author{Will Recker}
+\affil{
+  Institute of Transportation Studies\\
+  University of California, Irvine\\
+  Irvine, CA 92697-3600}
+
+\newif\iffull
+
+\newif\iffinal
+\pgfrealjobname{exec-sum-doc}
+
+\iffinal
+  \newcommand{\inputTikZ}[1]{%
+    \input{#1.tikz}%
+  }
+\else
+  \newcommand{\inputTikZ}[1]{%
+    \beginpgfgraphicnamed{#1-external}%
+    \input{#1.tikz}%
+    \endpgfgraphicnamed%
+  }
+\fi
+
+
+\begin{document}
+
+\maketitle{}
+ 
+\input{exec-sum}
+
+\begin{figure}[t]
+  \centering
+  \inputTikZ{figs/status}
+  \caption[TMC performance evaulation software architecture and the
+  current status of its components]{TMC performance evaulation
+    software architecture and the current status of its components.
+    Rectangular nodes show individual software components.  Cylinders
+    represent database storage.  Green indicates components that are
+    completely functional.  Yellow indicates components that have
+    prototypes functioning and are under active development.  Red
+    indicates planned components with no current implementation.  Two
+    actors interact with the system to establish its functions.  The
+    administrator establishes a schedule and core model parameters
+    that are used to compute baseline delay of observed incidents at
+    regular intervals (e.g., nightly).  The analyst can then interact
+    with the system to propose what-if scenarios that are modeled and
+    used to estimate performance benefits attributable to TMC
+    operations.}
+  \label{fig:status}
+\end{figure}
+
+\end{document}

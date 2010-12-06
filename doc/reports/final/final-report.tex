@@ -1,0 +1,1879 @@
+\documentclass[12pt]{report}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amssymb,amsmath}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows,shapes,decorations.pathmorphing,decorations.pathreplacing,matrix,positioning,shadows,patterns,fit} 
+\usepackage{pgfpages}
+\usepackage{authblk}
+\usepackage{units}
+%\usepackage{nomencl}
+\usepackage{graphicx}
+\usepackage{paralist} 
+\usepackage{natbib}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\usepackage{ctable}
+\usepackage{soul}
+
+\newif\iffinal % introduce a switch for draft vs. final document
+%\finaltrue % use this to compile the final document
+\newif\iffull
+\fulltrue
+
+% [more preamble that in my case also uses \iffinal for other stuff]
+
+\pgfrealjobname{interim-report-2009-06}
+
+\iffinal
+  \newcommand{\inputTikZ}[1]{%
+    \input{#1.tikz}%
+  }
+\else
+  \newcommand{\inputTikZ}[1]{%
+    \beginpgfgraphicnamed{#1-external}%
+    \input{#1.tikz}%
+    \endpgfgraphicnamed%
+  }
+\fi
+
+%\makenomenclature
+
+
+\title{A Measurement-based System for TMC Performance Evaluation\\[1em]
+  \Large  \emph{Final Report}
+}
+
+\author{Craig Rindt}
+\author{Will Recker}
+\affil{
+  Institute of Transportation Studies\\
+  University of California, Irvine\\
+  Irvine, CA 92697-3600}
+
+\begin{document}
+
+\setcounter{tocdepth}{2} \setcounter{secnumdepth}{3}
+
+% \nomenclature{$\overline{s}$}{The space-mean speed of the traffic
+%   stream in \unitfrac{mi}{h}.}%
+% \nomenclature{$q$}{The flow rate of the traffic stream in
+%   \unitfrac{veh}{h}.}%
+% \nomenclature{$occ$}{The percent of time a point sensor is activated
+%   by passing vehicles.}%
+% \nomenclature{$g$}{An adjustment factor for converting occupancy to
+%   stream density---typically the effective length of a point sensor
+%   plus the average vehicle length at the location.}%
+
+
+\maketitle{}
+
+\clearpage
+
+%\chapter*{Executive Summary}
+{\noindent\huge\bfseries\centering Executive Summary\par\nobreak
+  \vskip 20pt}
+\label{execsum}
+\addcontentsline{toc}{chapter}{\protect\numberline{}Executive Summary}
+\input{exec-sum}
+
+
+
+\clearpage{}
+\tableofcontents
+
+\listoffigures
+\addcontentsline{toc}{chapter}{\protect\numberline{}List of Figures}
+
+% \clearpage
+
+% \listoftables
+% \addcontentsline{toc}{chapter}{\protect\numberline{}List of Tables}
+
+\clearpage
+
+%\setcounter{page}{0}
+
+
+\chapter{Introduction and Background}
+\label{sec:intro}
+
+
+Caltrans has a significant investment in TMCs throughout the
+state. These operations centers are tasked with maintaining the safety
+and efficiency of California's highways by actively managing
+disruptions to the system caused by anticipated and unanticipated
+events that impact the available capacity and/or the demand to use
+individual facilities.  Presently, however, no comprehensive methods
+are available to quantify the benefits of existing TMC
+deployments. This ongoing research project is developing a TMC
+performance evaluation system that addresses this problem. The system
+will allow TMC managers to evaluate the performance of various bundles
+of TMC technologies and operational policies by mapping their effects
+onto events in the system that can be measured using existing
+surveillance systems and daily activity logs. The resulting tool will
+provide managers with the long needed capabilities to:
+\begin{itemize}
+\item justify valuable technology, personnel allocations, and
+  maintenance costs,
+\item identify technologies that aren't meeting their initial promise,
+  and
+\item identify gaps in current operational strategies that might be
+  filled with new technology deployments.
+\end{itemize}
+The evaluation method used will primarily consider delay savings that
+are attributable to specific TMC actions, but may also seek to
+quantify benefits on other dimensions such as safety. All computations
+are based on direct measurement of the system using available sensors
+and do not rely on speculative simulation models requiring extensive
+assumptions.
+
+The system is being implemented using a modular software architecture
+that can interface with a variety of existing or planned systems used
+by Caltrans. The initial deployment is focusing on delivering a
+reporting system accessible from the Testbed Website. Possible future
+deployments could integrate the core performance evaluation models
+with real-time TMC management systems to assist operators with
+prioritizing response.
+
+% This report details progress made to date in this project.
+% Chapter~\ref{sec:background} describes the general TMC performance
+% evaluation problem along with a review of related research and
+% recommendations from the literature. 
+
+
+%\chapter{Background}
+%\label{sec:background}
+
+\section{Performance measures of highway systems}
+\label{sec:perf-hw-sys}
+
+Recent years have seen a significant push toward better evaluation of
+highway systems using data-driven performance measures. A number of
+recent federally-sponsored reports offer comprehensive overviews of
+current performance monitoring approaches and recommended practice for
+transportation management agencies. A common theme of developing an
+effective performance measurement system for operations is an early
+and complete definition of the goals of the traffic management
+system. These goals structure specific efforts in defining performance
+measurement tasks and applying the results to improve operations. Once
+system goals are defined, they must be translated into metrics that
+are obtainable from available (or feasible) data collection systems.
+Finally, the metrics should be integrated into management and
+operations to consistently evaluate the effectiveness of the system
+and, ideally, use that feedback across various time-scales to improve
+performance over time. In the next section, we discuss how to apply
+this general method to the analysis of TMC performance.
+
+\section{Benefits of the TMC}
+\label{sec:tmc-bene}
+
+Traffic management centers perform a range of functions to meet broad
+transportation management goals. We use the taxonomy offered by Park (2005) to
+characterize TMC functions into three general areas: traffic monitoring, travel
+information, and event management.
+
+\subsection{Traffic monitoring}
+\label{sec:traf-mon}
+
+Traffic monitoring includes functions where transportation systems must be
+monitored in real-time, such as traffic flow monitoring and evaluating traffic
+conditions. To date, Caltrans has made significant progress in traffic
+monitoring. Data from the state's sensor network is available within and across
+districts---notably through PeMS, which offers system-wide measures of
+effectiveness on traffic flow as well as the health of the sensor system itself.
+
+\subsection{Travel information}
+\label{sec:trav-info}
+
+Travel information programs refer to programs available to the public that
+provide information on current traveling conditions. In California, a number of
+systems disseminate travel information to the traveling public through various
+public channels (traditional media, 511 systems, changeable message signs,
+traffic web sites, etc.) so that they can make more informed travel decisions.
+
+Metrics on the benefits of this information dissemination are generally not
+available except in vary broad terms from the results of travel behavior surveys
+in response to information. Understanding more clearly how travelers respond to
+specific information provided by the TMC could identify critical contributions
+of TMC operations that heretofore are undervalued.
+
+\subsection{Event management}
+\label{sec:event-man}
+
+Events managed by the TMC may be
+\begin{inparaenum}[(1)]
+\item random (e.g., incidents),
+\item recurring (e.g., congestion from prevailing traffic patterns)
+  and
+\item scheduled (maintenance or special events).
+\end{inparaenum}
+Generally, such events can impact the normal operating capacity of the system or
+can produce significantly altered demands.  Event management---particularly of
+non-recurrent congestion caused by incidents---is likely the most tangible
+benefit offered by the TMC. Procedures vary across districts and are tuned to
+the specific capabilities of each, but urban districts with TMCs have
+specialists who actively manage disruptions to the system. Nonetheless, event
+management is an area of continued development for Caltrans.
+
+The typical metric for evaluating TMC event management processes is delay
+savings. A number of methods have been proposed to estimate total non-recurrent
+congestion delay.  They can be classified into three groups:
+\begin{enumerate}
+\item analytical methods using deterministic queuing diagrams
+  \protect\citep[e.g.,]{goolsby71:_influen_of_incid_freew_qualit_of_servic,chow74:_study_of_traff_perfor_model,morales87:_analy_proced_for_estim_freew_traff_conges,trb94:_highw_capac_manual,lawson97:_using_input_output_diagr_to,erera98:_simpl_gener_method_for_analy,skabardonis04:_devel_and_applic_of_method}
+\item kinematic wave (i.e., shockwave) theory \citep[e.g.,]{chow74:_study_of_traff_perfor_model,wirasinghe78:_deter_of_traff_delay_from,heydecker94:_incid_and_inter_freew,al-deek95:_new_method_for_estim_freew_incid_conges}
+\item heuristic methods \citep[e.g.,]{skabardonis96:_i_field_exper,skabardonis03:_measur_recur_and_nonrec_traff_conges}
+\end{enumerate}
+The results from these approaches have been applied both alone and in concert
+with each other. But, since virtually none of these studies uses a source of
+incident data with descriptive variables and reporting techniques in common with
+the others, comparisons between different methods are difficult
+\citep{goolsby71:_influen_of_incid_freew_qualit_of_servic}, and their spatial
+transferability is limited. To date there has been only limited research into
+models that can estimate how long, how far, and to what extent any particular
+incident will affect traffic and, by extension, little research into
+understanding how TMCs perform at minimizing the impact of such incidents.  The
+focus in this project has been the development of incident-specific
+delay-estimation metrics that can be used to evaluate TMC performance.
+% The next section
+% details the methods developed to date and suggests an approach for
+% applying these delay metrics to analyzing the impacts of TMC processes
+% on incident-related delay.
+
+
+\section{Data sources}
+\label{sec:data-sources}
+
+Performance evaluation requires data.  Specifically, data is needed about what
+is happening in the freeway system and data is needed about actions taken by the
+TMC and other agencies.  In its role as an information broker for Caltrans, the
+TMC has access to a range of information that can meet these needs in whole or
+part.  We summarize them in the below as they dictate the types of performance
+evaulation analyses that are possible
+
+\subsection{System data}
+\label{sec:system-data}
+
+The real-time traffic data collected by Caltrans loop detectors stations are the
+primary source of information regarding the actual performance of the freeway
+system during incidents. A number of sources supply this data in a manner that
+can be used for this project.  It should be noted, however, that a local archive
+of the data must be maintained as the delay calculations rely on customized
+queries for relevant sensor data.  These queries are not generally available
+from the systems listed below.
+
+\subsubsection{PeMS}
+\label{sec:pems}
+
+Initial prototype of the TMC performance evaluation system used the PeMS
+database to obtain a year of 5-minute data from every sensor in Orange County.
+This data was archived in a local database to support the prototyping of
+efficient database queries necessary for the analysis.  PeMS offers availability
+to this data archive that is scriptable and therefore could be incorporated as
+the primary data source for archived performance in the system.
+
+\subsubsection{ATMS/UCI sensor archive}
+\label{sec:uci-data}
+
+
+The UCI Testbed provides an ideal implementation platform for accessing detector
+data because the UCI Testbed labs receive identical data to that available to in
+the TMC by way of the Testbed real-time data intertie and the associated
+database.  As such, development can proceed in the UCI labs and later be
+transferred seamlessly to operation in D12.
+
+\subsubsection{D12 SOAP interface (devices)}
+\label{sec:d12-soap}
+
+For greater transferability of the performance evaluation system, the
+performance evaluation system can also make use of the devices implementation in
+the District 12's SOAP interface.  This interface implements portions of the
+center-to-center interface of the National ITS Architecture standard---including
+the VDS interface standard which streams 30-second sensor readings from all
+detectors in the district.  In order to make use of this interface, the
+performance evaluation system would need to build its own archive of sensor data
+received.
+
+\subsection{TMC actions}
+\label{sec:tmc-actions}
+
+
+\subsubsection{TMC activity log}
+
+At present, the D12 TMC activity log records a range of transactions---actions
+carried out by TMC operators that they manually record using a web-based
+interface to the log database.  Transactions in the database are cross
+referenced with CHP CAD ids, which allows additional data from the CAD
+system---such as the incident's geographic coordinates---to be associated with
+each incident under analysis.  Currently, only a limited number of database
+entries are reliable enough to parse automatically and thus be used directly by
+the performance evaluation system.  These are the \texttt{OPEN/CLOSE INCIDENT}
+and \texttt{SIGALERT BEGIN/END} entries.  Additional entries relating to the
+status of changeable message signs and construction closures are useful for
+cross checking, but generally cannot be used in the calculations described in
+chapter~\ref{sec:method} in their present form.  Improvements to the TMC
+activity log are planned for the remainder of this contract.
+
+
+\subsubsection{CHP CAD log (XML feed)}
+
+The CHP Computer-Aided Dispatch (CAD) system logs all roadway incident reports
+including: incident date, CHP CAD identification number, CHP CAD time stamp,
+incident type, and incident location. This data is not necessarily canonical and
+therefore is not necessarily easy to parse automatically. Nonetheless, it is the
+only source for raw information regarding multi-agency incident response.
+
+The functions provided by the TMC performance evaluation project require a local
+copy of the key data from the CHP CAD log---particularly the geographic location
+of incidents.  To support this requirement, the CHP CAD log will be locally
+archived as part of this project.  If the geographic data is added to the
+Activity Log, the direct dependence of the performance evaluation system on the
+CHP CAD log can be removed.
+
+\subsubsection{D12 SOAP interface (events, devices)}
+
+The D12 SOAP interface also streams event data from the TMC and control states
+of Changable Message Signs and Ramp Metering Stations.  The event data could be
+tapped to obtain incident verification details, while the CMS and RMS settings
+could be parsed to infer control actions carried out by operators.  Ideally,
+however, any control actions would be tied to specific TMC processes and their
+associated goals (see section 6 for further discussion on relating actions to
+TMC processes).
+
+\section{Organization of this report}
+\label{sec:organization}
+
+
+The remainder of this report is structured as follows.
+Chapter~\ref{chap:tmc-activity} describes the processes used in the Caltrans D12
+TMC during the management of accidents, which is the initial target of this
+performance evaulation effort.  Chapter~\ref{sec:method} details the methods
+being used for performance measurement---with a focus on the calculation of
+delay attributable to specific incidents as well as a discussion of how to model
+the impacts of TMC actions on the dynamics of such incidents.
+%Section \ref{} offers a preliminary
+%analysis of three representative incidents used to evaluate the
+%method. 
+Chapter~\ref{sec:system-architecture} describes the system architecture that is
+being developed to deploy the system as an operational tool for the TMC as part
+of the Caltrans ATMS Testbed.
+%Finally, section \ref{} offers some recommendations for
+%modifications to existing processes and tools in the District 12 TMC
+%(particularly the TMC activity log) that will support more complete
+%performance evaluation metrics going forward.
+
+\chapter{TMC Activity}
+\label{chap:tmc-activity}
+
+At the onset of this project, the district 12 TMC employed locally-developed
+software to record TMC activity.  This software was developed over a number of
+years with a variety of purposes in mind.  Though the initial analyses have been
+conducted using this existing logging data, the data is unsuitable for general
+purpose automated processing to identify critical events in TMC operations that
+impact system performance.  As such, work was initiated under this contract to
+improve the activity logging system to better meet such performance monitoring
+needs going forward.
+
+A critical first step in this process has been the identification of core events
+in incident management that can be directly recorded by the activity logging
+system through a set of interviews and communications with district 12 staff and
+contractors.  The following summarizes the TMC processes used to manage
+accidents occuring in the managed system.  Note that this effort was carried out
+in parallel to a number of efforts in district 12 and beyond to capture and
+organize event management, including D12's event management system development
+and the Caltrans-wide effort to develop the TMCAL logging system.  Any findings
+below should be considered one characterization of the larger problem of
+organizing TMC processes to best manage, monitor, and evaluate Caltrans traffic
+management in general, and TMC activity in particular.
+
+Based upon our interviews, incident management by the TMC can be described as
+four major subprocesses that are traversed sequentially as shown in
+figure~\ref{fig:flowchart}
+\begin{sidewaysfigure}
+  \pgfpagesuselayout{resize to}[letterpaper,landscape,border shrink=5mm]
+  \centering
+  \input{figs/process-flowchart-2.tikz}
+  \caption[TMC process flowchart for accident management]{TMC process
+    flowchart for accident management.  Four major subprocesses
+    dictate a series of actions to be carried out by the TMC.  The
+    trajectory through the subprocesses is governed by a series of
+    events (in red) whose dynamics are dictated by events in the
+    field.}
+  \label{fig:flowchart}
+\end{sidewaysfigure}
+Each subprocess dictates a series of actions to be carried out by the TMC.  The
+transition between the subprocesses is governed by a series of events (in red)
+whose dynamics are dictated by events in the field.
+
+\section{Identification}
+\label{sec:identification}
+
+
+TMC management of an incident always begins with the {\sc First Call} to the
+TMC, which notifies operators that there has been a disruption to what is
+considered ``normal'' operating conditions.  From an operational perspective,
+these disruptions can affect the capacity of particular sections of roadway (as
+in a traffic accident), the prevailing demand to use particular stretches of
+roadway (as in a special event), or some combination of the two.  Our emphasis
+for the current discussion is capacity-reducing accidents.
+
+The {\sc First Call} can come from any number of sources including:
+\begin{itemize}
+\item CHP CAD
+\item ATMS Map
+\item Caltrans field units
+\item Public---via phone
+\item CCTV
+\item Media
+\item Neighboring districts
+\end{itemize}
+The vast majority come by way of the CHP CAD system and the local CHP liason to
+the TMC.
+
+When a {\sc First Call} is received, initial details are collected about the
+location, type, and likely impact on the system.  TMC staff is notified and a
+decision is made to manage the incident, which we term an {\sc Open Incident}
+event, at which point the process transitions to the Verification stage.
+
+
+\section{Verification}
+\label{sec:verification}
+
+The purpose of verification is to identify and confirm the details of the
+incident to support response including the location, type, severity, and any
+other special conditions that are necessary to support TMC operations.  Strictly
+speaking, the TMC cannot respond to the incident until its characteristics are
+known.  This is particularly true in situations requiring special response, such
+as incidents requiring hazardous material spills.  Since total queuing delay is
+proportional to the fourth power of the response time (see
+section~\ref{sec:total-delay}), the speed with which verification is carried out
+can be a significant determinant to the quality of the response and the
+subsequent degree of disruption experienced by users of the system.
+
+The TMC has a number of resources to support verification including:
+\begin{itemize}
+\item CCTV (both those owned by Caltrans and those owned by partner
+  agencies)
+\item CHP field units
+\item Caltrans field units
+\end{itemize}
+TMC operators use information collected via resources to characterize the
+incident---which we term a diagnosis---for the purpose of formulating a
+response.  Once a diagnosis is produced, verification is complete and the TMC
+moves to the {\sc Response} subprocess.
+
+\section{Response}
+\label{sec:response}
+
+The response subprocess is understandably the most involved activity carried out
+by the TMC.  The collection of activities carried fall into four categories:
+Information dissemination, Field Response, Coordination, and Control.
+
+\subsection{Information dissemination}
+\label{sec:inf-dis}
+
+The sharing of information regarding the incident is one of the most critical
+actions carried out by the TMC.  Information must flow to a number of audiences.
+Among the most important recipients are the operators and management of other
+agencies---including neighboring Caltrans districts and management, whose
+actions may depend on or involve the affected facilities.  Dedicated procedures
+exist for providing this communication, and for specifying when such
+communication must occur.  For instance, headquarters is always notified when a
+SIGALERT is issued, updated, and terminated.
+
+Similarly, the users of the system must be notified of disruptions.  This serves
+the purpose of providing both higher quality of service to users, since lack of
+information degrades the user experience, as well as acting as a control
+mechanism to initiate unmanaged diversion (see below for prescribed diversion).
+A number of communications channels exist for notifying the public.  The media
+is informed through various information feeds that are provided directly or
+indirectly by Caltrans and its partner agencies.  For instance, members of the
+media can access the public CHP CAD feed as well as speed information derived
+from Caltrans freeway sensors and exposed to various traffic information
+providers by via the ATMS system.  Issuance of a SIGALERT (by the CHP) or a
+Traffic Advisory (by Caltrans) triggers specific interactions with the media.
+Information can be provided directly to users in the vicinity of the incident
+using the fixed or mobile CMS and HAR systems.
+
+\subsection{Field response}
+\label{sec:field-response}
+
+The field response to a particular incident is governed by the diagnosis
+generated during the {\sc Verification} process.  The Caltrans TMC is
+responsible for managing the actions of traffic management teams (TMTs),
+hazardous material crews (HAZMAT), maintenance crews, and the coroner (managed
+by the CHP) that are dispatched to mitigate the impacts of an incident on
+traffic operations and system infrastructure.  These actions are critical to
+restoring the performance of the system to normal and are therefore time
+critical events that must be logged effectively to support performance
+evaulation.
+
+\subsection{Coordinate}
+\label{sec:coordinate}
+
+Though the transportation system is divided into multiple jurisdictions for
+management purposes, its global performance is linked by the actions of other
+agencies, most notably the CHP, neighboring Caltrans districts, and neighboring
+municipalities.  From interviews with TMC staff, coordination with CHP is fluid,
+with the CHP and the TMC working in concert to manage incidents.  Coordination
+with neighboring districts also involves fluid communications regarding actions
+and responsibilities.  Coordination with municipal entities is limited except in
+the case of severe incidents.  In those instances, response coordination is
+typically governed by pre-defined coordinated response plans that govern
+actions, for instance, in the case of a freeway closure and subsequent diversion
+to a municipality's surface street network.
+
+
+\subsection{Control}
+\label{sec:control}
+
+Active traffic control actions taken by Caltrans are typically limited to the
+most severe incidents.  In those cases, Caltrans may institute a freeway closure
+and prescribed diversion.  In very rare instances involving long-term closures,
+settings of field traffic controllers (such as time-of-day ramp metering
+settings) may be modified to account for shifts in prevailing traffic flow.
+
+
+\section{Monitoring}
+\label{sec:monitoring}
+
+Each discrete response activity described above has an explicit or implicit
+intended outcome that would, in an ideal system, be directly measurable via the
+monitoring subprocess.  In reality, the impact of only a subset of the response
+actions can be measured directly.  For instance, the efforts of CHP, TMT,
+etc. to clear the roadway can be recorded directly in the TMC activity logs as
+lanes restored.  The impact of information dissemination, on the other hand, is
+very difficult to infer from the course sensor data available.  The monitoring
+process should also track when additional event(s) occur that may impact the
+mitigation efforts for a prevailing incident.  Management of multiple incidents
+may be handled separately or combined into a single management problem.
+
+Generally, the monitoring process should keep track of changes to the system as
+they relate to the incident in question.  Changes might include arrival of TMT
+or other response crews, lane clearance, completion of HAZMAT efforts, length of
+queuing (for validation purposes) and any other information that is potentially
+relevant to incident post analysis.  Each such (verified) {\sc Status Change}
+could produce an updated diagnosis and possibly changes to the TMC response, as
+indicated by the feedback loop in figure~\ref{fig:flowchart}.
+
+
+\section{Practical Concerns}
+\label{sec:practical-concerns}
+
+The TMC is a complex environment with a vast array of hardware and software
+collecting, managing, and disseminating information regarding the performance
+and operation of the Caltrans highway network.  It is notable that a number of
+these systems have functions that occasionally overlap.  For instance, the
+activity logging software is the \emph{de facto} interface for TMC operators
+engaged in traffic management.  However, a subset of TMC actions, like setting
+the CMS messages are carried out via the ATMS system.  Logging of CMS messages
+in the activity log must (currently) be done manually.  Furthermore, Caltrans
+continues to actively develop an expert system for event management to improve
+event management processes by formalizing them and mandating that certain
+information is recorded and that particular actions are carried out.
+
+In this complex environment, additional logging burdens are not likely to be
+well received.  Ideally, many TMC actions would be automatically logged using
+messages passed between the various software systems (including the TMC activity
+log interface) to a logging service that maintains the backend logging database.
+With this in mind, we recommend a simple, extensible event tagging system that
+captures key points of the incident management process consistent with the above
+description.  These event tags correspond to the red events in
+figure~\ref{fig:flowchart} and are summarized in
+table~\ref{tab:tmc-event-summary}.
+\begin{table}[ht]
+  \centering
+ \footnotesize
+\begin{tabularx}{\textwidth}{lX}
+  \hline
+  \textbf{Event tag} & \textbf{Description}\\
+  \hline {\sc \textcolor{red}{First Call}} & Logged when a TMC
+  operator received the first report of an incident.  Typically will
+  be the first entry in the activity log with an associated CHP CAD ID
+  and should note the source of the notification.  \\
+  {\sc \textcolor{red}{Open Incident}} & Logged when the decision is
+  made that a particular incident must be tracked and
+  managed by the TMC.\\
+  {\sc \textcolor{red}{Verify Incident}} & Logged when the details of
+  the incident have been confirmed.  Should include all sources (and
+  technology) used to verify the characteristics of the incident.  \\
+  {\sc \textcolor{red}{Response Action:<Subtype>}} & Logged when a
+  particular action is taken to mitigate the impact of an incident.
+  The range of actions available for logging will vary with the
+  situation.\\
+  {\sc \textcolor{red}{Status Change:<Subtype>}} & Logged when a
+  notable change to the managed event has occurred.  For instance,
+  arrival of TMT, restoration of a lane, etc.  Informational messages
+  for model validation are useful here too, such as noting the
+  location of the back of the queue.\\
+  {\sc \textcolor{red}{Close Incident}} & Logged when all management
+  functions have terminated and traffic flow has returned to normal
+  conditions. \\
+  \hline
+\end{tabularx}
+  \caption{Core TMC events to be recorded by the activity log to support TMC performance evaulation}
+  \label{tab:tmc-event-summary}
+\end{table}
+
+The {\sc Response Action} and {\sc Status Change} tags will ideally include a
+complete set of possible response/condition pairs that characterizes TMC actions
+and their effects.  To the exent that the TMC Logging system can standardize
+logging to produce unambiguous tags for these events, the performance evaluation
+system will be able to reconstruct historical incidents for post-analysis.  The
+next chapter describes that modeling methodology as it current stands, and
+points to the next steps for completing the performance evaluation system.
+
+
+\chapter{Modeling Methodology}
+\label{sec:method}
+
+To determine the relative impact of TMC technologies and processes on the
+performance of the system, we decompose the analysis into two general steps.  In
+the first step, an \emph{incident impact model}
+(section~\ref{sec:incident-impact-model}) estimates the degree to which an
+incident disrupts freeway operations in time and space (the ``control volume'')
+as well as the total delay in the control volume using sensor observations
+relative to ``average'' conditions.  This delay estimate serves as a baseline
+condition for the analysis.  In the second phase of the analysis, we use the
+\emph{TMC impact model} (section~\ref{sec:mod-tmc-impacts}) to explore how
+system performance would change in the absence of specific TMC actions by
+coupling observations and estimated changes in critical incident parameters with
+a model based upon queuing theory to estimate delays for the same incident if
+the TMC was absent.
+
+
+\section{Incident impact model}
+\label{sec:incident-impact-model}
+
+\subsection{Section definition}
+\label{sec:sec-def}
+A freeway section in this study corresponds to a mainline loop detector
+station. Section boundaries are defined by the middle of two detector stations
+as shown in figure~\ref{fig:sec-def}.  We assume that estimated speed at the
+station is representative of the speed for the corresponding section.  Based on
+the sections and their corresponding detector stations, estimated speeds and
+densities for each section i are calculated for each 5-minute interval during
+the one-year analysis period---sections downstream of section i are labeled
+consecutively as $(i + 1), (i + 2), \ldots{}$ while those upstream are labeled
+consecutively as $(i - 1), (i - 2), \ldots{}$.
+\begin{figure}[t]%
+  \begin{center}%
+    \inputTikZ{figs/standard-freeway-sectioning}%
+    \caption[Section definition and corresponding detector
+    location]{Section definition and corresponding detector location.
+      Sections boundaries are formed by bisecting freeway segments between
+      each pair of detectors.  By convention, section numbers increase as
+      you move downstream. }
+    \label{fig:sec-def}
+  \end{center}
+\end{figure}
+
+
+\subsection{Stream state estimation using single loops}
+\label{sec:state-est}
+
+This method relies upon access to the prior one-year of historical traffic
+data--- specifically: traffic counts and occupancy for each lane at each
+detector station every 30 seconds. Lane-by-lane traffic data is aggregated to
+5-minute intervals at each detector station in order to obtain stable traffic
+data from each point.
+
+Loop detectors in Orange County predominantly are single loop detectors that
+provide only traffic counts and occupancies; travel speeds need to be estimated
+from these measures assuming a so-called ``$g$-factor,'' the summation of the
+average vehicle length and effective detection length
+\cite{hall89:_evaluat_of_speed_estim_made,jia01:_pems_algor_for_accur_real,wang03:_can_singl_loop_detec_do}.
+The average speed, $\overline{s}$ , can be calculated as:
+\begin{equation}
+  \label{eq:speed-est}
+  \overline{s} (\unitfrac{mi}{h}) = g\left(\frac{q}{5280(\unitfrac{ft}{mi}) \times occ}\right)
+\end{equation}
+where
+\begin{quote}
+\begin{description}
+\item[$q$] = $\textrm{flow rate} (\unitfrac{veh}{h})$
+\item[$occ$] = $\textrm{vehicle occupancy} (\%)$
+\item[$g$]= $\textrm{$g$-factor}$ 
+\end{description}
+\end{quote}
+Applying appropriate $g$-factors is a key in estimating speeds from single loop
+detector data. There are various ways to estimate $g$-factors.  The simplest
+approach is to use a single $g$-factor for all loop detectors in the study area.
+Although this is very common in practice, the approximation from this approach
+is too coarse for the objective of this study.  An alternative is to use a
+single $g$-factor for each lane through the entire freeway system.  This
+approach accounts for vehicle length varying by lane, but assumes the same
+proportion of heavy vehicles on every section of the freeway.  Another approach
+is to find a single $g$-factor for every loop in each lane.  This can be
+estimated by using flow and occupancy from some period for which speed can be
+assumed to be known; for example, flow and occupancy during 1:00AM-1:05AM, where
+the average speed can be assumed as a free flow speed, can be used to calculate
+the $g$-factor.  This approach, however, does not account for the variation of
+the vehicle composition over time.  \citet{jia01:_pems_algor_for_accur_real}
+noted that the $g$-factors for different loop detectors in the same district
+differ by as much as 100 percent, and the $g$-factors for the same loop can vary
+up to 50 percent over 24-hour period.
+
+In this research, we account for spatial and temporal variations of the
+$g$-factors by calculating a $g$-factor representing each hour interval over the
+52 weeks for each loop detector station as:
+\begin{equation}
+  \label{eq:g-fact}
+  \hat{g}_i(t+1) = p\cdot{}\hat{g}_i(t)+(1-p)\cdot{}g_i(t+1)
+\end{equation}
+\begin{quote}
+  \begin{description}
+  \item[$\hat{g}_i(t)$] = $g$-factor for section $i$ for time step $t$
+  \item[$g_i(t+1)$] = initial average $g$-factor for section $i$ for
+    time step $t+1$, obtained by assuming free-flow speed (75 mph)
+    when the occupancy is lower than 0.06
+  \item[$p$] = smoothing parameter (0.9 in this research)
+  \end{description}
+\end{quote}
+By applying the above procedure, representative $g$-factors for each hour of day
+are calculated for all loop detector stations. These $g$-factors provide basic
+information for speed calculation in this study. Based on these $g$-factors,
+speeds are calculated every 5 minutes for all 52 weeks.
+
+\subsection{Nominal speed distribution}
+\label{sec:nom-speed-dist}
+For each freeway section j , for each specific 5-minute time interval $t_m$ on
+each day of the week, a nominal total of 52 observations1 are available during
+the one-year observation period on which to base calculations of flow $q_j(t_m)$
+and occupancy $\mathrm{occ}_j(t_m)$ under conditions that are incident free. For
+example, section $j$ on Monday from $t_m$ = 08:10 to 08:15 for 52 weeks is
+composed of 52 samples. Thus the speed associated with the
+$n$\textsuperscript{th} observation for any particular day-of-week/time
+interval/section combination can be estimated as:
+\begin{equation}
+  \label{eq:nominal-speed-obs}
+  \overline{s}_{jn}(t_m) = g_{jn}(t_m)\left(\frac{q_{jn}(t_m)}{5280\times occ_{jn}(t_m)}\right);n=1,2,\ldots,K,\ldots{52}
+\end{equation}
+where the subscript n is used to designate the estimate of the corresponding
+value based on the $n$\textsuperscript{th} observation. From these (nominally)
+52 observations, a distribution of $s_{jn}(t_m)$ can be constructed, such as
+that shown in figure~\ref{fig:incident-speed-case}.  Then, let $\Omega_{jm} =
+\Omega\left(\overline{s}_j(t_m),\sigma_{s_j}(t_m)\right)$ denote the set of
+parameters defining the distribution of speeds $s_{jn}(t_m)$ corresponding to
+this ``incident-free'' base case. (Here, we make no attempt to categorize these
+distributions among the set of well-known distributions, but rather assume, for
+simplicity, that they can be adequately defined by their means and standard
+deviations.)  Then, associated with an incident known to have occurred on
+freeway section $i$ during some time interval $t_1$ , we can compose a matrix of
+the parameters defining the distribution of base case conditions (i.e.,
+conditions in which there is no incident) that can be expected to prevail for
+$t_m \ge t_1, m = 1, 2, \ldots{}, M$ (i.e., time intervals after the incident
+that occurs in section i at t1 ) for all upstream sections that could possibly
+have been affected by the incident, as in figure~\ref{tab:speed-base-case-dist}.
+
+\begin{figure}[t]
+  \centering
+  \scriptsize
+  \renewcommand\arraystretch{2} 
+  \newcolumntype{A}{>{\columncolor{black!5}}c}
+  \begin{tabular}{|c|A|A|A|A|A|A|}
+    \hline
+             & \multicolumn{6}{c|}{Freeway Section} \\ \cline{2-7} 
+    \rowcolor{white} 
+    Time     & $i$& $i-1$ & $i-2$ & $\cdots{}$ & 2 & 1 \\ \hline
+    $t_1$    & $\Omega_{i,1}  =\Omega(\overline{s}_i(t_1),\sigma_{s_i(t_1)})$ 
+             & $\Omega_{i-1,1}=\Omega(\overline{s}_{i-1}(t_1),\sigma_{s_{i-1}(t_1)})$ 
+             & $\cdots{}$ & $\cdots{}$ & $\cdots{}$ 
+             & $\Omega_{1,1}=\Omega(\overline{s}_{1}(t_1),\sigma_{s_{1}(t_1)})$ \\ \hline
+    $t_2$    & $\Omega_{i,2}  =\Omega(\overline{s}_i(t_2),\sigma_{s_i(t_2)})$ 
+             & $\Omega_{i-1,2}=\Omega(\overline{s}_{i-1}(t_2),\sigma_{s_{i-1}(t_2)})$ 
+             & $\cdots{}$ & $\cdots{}$ & $\cdots{}$ 
+             & $\Omega_{1,2}=\Omega(\overline{s}_{1}(t_2),\sigma_{s_{1}(t_2)})$ \\ \hline
+    $t_3$    & $\Omega_{i,3}  =\Omega(\overline{s}_i(t_3),\sigma_{s_i(t_3)})$ 
+             & $\Omega_{i-1,3}=\Omega(\overline{s}_{i-1}(t_3),\sigma_{s_{i-1}(t_3)})$ 
+             & $\cdots{}$ & $\cdots{}$ & $\cdots{}$ 
+             & $\Omega_{1,3}=\Omega(\overline{s}_{1}(t_3),\sigma_{s_{1}(t_3)})$ \\ \hline
+    $\vdots$ & $\vdots$
+             & $\vdots$ 
+             & $\vdots$ & $\ddots$ & $$\vdots${}$ 
+             & $\vdots$ \\ \hline
+    $t_{M}$    & $\Omega_{i,{M}}  =\Omega(\overline{s}_i(t_{M}),\sigma_{s_i(t_{M})})$ 
+             & $\Omega_{i-1,{M}}=\Omega(\overline{s}_{i-1}(t_{M}),\sigma_{s_{i-1}(t_{M})})$ 
+             & $\cdots{}$ & $\cdots{}$ & $\cdots{}$ 
+             & $\Omega_{1,{M}}=\Omega(\overline{s}_{1}(t_{M}),\sigma_{s_{1}(t_{M})})$ \\ \hline
+  \end{tabular}
+  \caption{Base case of distributional properties for non-incident speeds $s_{jn}(t_m)$}
+  \label{tab:speed-base-case-dist}
+\end{figure}
+
+Similarly, associated with a known incident that occurs on freeway section $i$
+at time $t = t1$, we can construct a matrix of speeds $\hat{s}_j(t_m)$ based on
+observed loop data under the incident conditions, $ \hat{q}_j(t_m),
+\hat{k}_j(t_m); j=i,i-1,i-2,\ldots{},1 ; m = 1,2,\ldots{},M$ as:
+\begin{equation}
+  \label{eq:shat}
+  \hat{s}_j(t_m) = \frac{\hat{q}_j(t_m)}{\hat{k}_j(t_m)}; \: j=i,i-1,i-2,\ldots{},1 ;
+m = 1,2,\ldots{},M
+\end{equation}
+from which we can then compose a matrix of incident case speed conditions (i.e.,
+conditions that were observed to prevail following the incident) as in
+figure~\ref{tab:speed-base-case-dist}.
+\begin{figure}[t]
+  \centering \scriptsize \renewcommand\arraystretch{2}
+  \newcolumntype{A}{>{\columncolor{black!5}}c}
+  \begin{tabular}{|c|A|A|A|A|A|A|}
+    \hline
+             & \multicolumn{6}{c|}{Freeway Section} \\ \cline{2-7} 
+    \rowcolor{white} 
+    Time     & $i$& $i-1$ & $i-2$ & $\cdots{}$ & 2 & 1 \\ \hline
+    $t_1$    & $\hat{s}_i(t_1)$ 
+             & $\hat{s}_{i-1}(t_1)$ 
+             & $\cdots{}$ & $\cdots{}$ & $\cdots{}$ 
+             & $\hat{s}_{1}(t_1)$ \\ \hline
+    $t_2$    & $\hat{s}_i(t_2)$ 
+             & $\hat{s}_{i-1}(t_2)$ 
+             & $\cdots{}$ & $\cdots{}$ & $\cdots{}$ 
+             & $\hat{s}_{1}(t_2)$ \\ \hline
+    $t_3$    & $\hat{s}_i(t_3)$ 
+             & $\hat{s}_{i-1}(t_3)$ 
+             & $\cdots{}$ & $\cdots{}$ & $\cdots{}$ 
+             & $\hat{s}_{1}(t_3)$ \\ \hline
+    $\vdots$ & $\vdots$
+             & $\vdots$ 
+             & $\vdots$ & $\ddots$ & $$\vdots${}$ 
+             & $\vdots$ \\ \hline
+    $t_{M}$  & $\hat{s}_i(t_{M})$ 
+             & $\hat{s}_{i-1}(t_{M})$ 
+             & $\cdots{}$ & $\cdots{}$ & $\cdots{}$ 
+             & $\hat{s}_{1}(t_{M})$ \\ \hline
+  \end{tabular}
+  \caption{Observed incident speeds $s_{jn}(t_m)$}
+  \label{fig:speed-base-case-dist}
+\end{figure}
+Using figure~\ref{tab:speed-base-case-dist}, we can identify the
+negative effects (i.e., speed reduction) of the incident schematically
+as shown in figure~\ref{fig:incident-impact}.  The negative effect by
+the incident will be propagated from the incident section to upstream
+sections.  Such a distinct discontinuity between non-congested and
+congested flow is known as a shock wave
+\cite{lighthill55:_kinem_waves}.  If the dot-shaded (yellow) area
+affected by the shock wave in figure~\ref{fig:incident-impact} is
+identified, then the temporal and spatial impacts of the incident will
+be also determined. 
+\begin{figure}[tbp]
+  \begin{center}
+    \inputTikZ{figs/time-space-incident-schematic}
+    \caption[Incident impact projected into discrete space]{Incident
+      impact projected into discrete space.  The state of traffic flow
+      is described in terms of discrete spatial ($i$) and temporal ($t$)
+      sections as shown.  An incident occurring at the downstream end of
+      section $i$ at time $t_1$ disrupts flow for some period of time.
+      The geometry of the fastest possible shockwave line dictates that
+      the sections above cannot be impacted by the incident (shown in
+      gray).  The sections below this line (shown in blue) could
+      feasibly be impacted by the incident.  In actuality, only a subset
+      of the discrete sections (shown in yellow) will be circumscribed
+      by the loading and clearing shockwaves.}
+    \label{fig:incident-impact}
+  \end{center}
+\end{figure}
+We approach this identification as a topology problem in which the
+objective is to construct the most probable set of cells that define
+the incident-affected temporal/spatial region, subject to constraints
+imposed by allowable shapes of the affected region. The following
+section describes the method for discriminating the regions between
+non-congested and congested area due to traffic incidents.
+
+
+\subsection{Quantifying the total delay caused by an incident}
+\label{sec:delay-calc}
+
+\subsubsection{Determining maximum extent of incident influence}
+\label{sec:max-infl}
+
+Since data on neither the severity (such as the number of closed lanes
+by an incident) nor when the incident was cleared are directly
+obtainable from loop data, we first estimate the maximum possible
+extent of the shock wave by assuming the worst possible
+conditions-total blockage for some pre-specified time period. Thus,
+for any given incident occurring at section i at time $t_1$ , we
+compute the maximum number of upstream sections that could be affected
+by the assumed persistent total blockage at section i at time $t_1$
+. Using this sort of data, we can schematically construct the
+``maximum area of interest'' for any incident occurring at section $i$
+at time $t_1$ as the shaded (blue) area in
+figure~\ref{fig:incident-impact}. Based on this interpretation, the
+only data relevant to the current example of an incident occurring at
+section $i$ at time $t_1$ can be restricted to cells in the shaded
+(blue) area. That is, the region of interest can be
+depicted as shown in figure~\ref{fig:incident-impact-feas}.
+\begin{figure}[tbp]
+  \begin{center}
+    \inputTikZ{figs/time-space-incident-schematic-reduced}
+    \caption[Reduced feasible space]{Reduced feasible space.}
+    \label{fig:incident-impact-feas}
+  \end{center}
+\end{figure}
+
+
+\subsubsection{Determining the congested region}
+\label{sec:det-cong-reg}
+
+Figure~\ref{fig:incident-impact-feas} shows two shaded areas: a
+dot-shaded (yellow) area and plain-shaded (blue) area. The cells in
+the dot-shaded (yellow) area represent speeds, $\hat{s}_j(t_m)$, that
+have been determined to have been affected by the incident; i.e., they
+have been deemed to be significantly lower than would be expected
+based on the distribution of non-incident base speeds for that
+particular section-time interval combination.  The plain-shaded (blue)
+cells represent particular section-time interval combinations for
+which the observed speeds are not significantly different from
+non-incident conditions.  That is, they are speeds that are determined
+from observation not to be affected by the pertinent incident, but
+within the maximum possible affected  sections by an
+incident of greatest consequence (when all lanes are blocked, as
+assumed above).
+
+Considering that the speed of traffic in sections adversely affected
+by the traffic incident will be lowered, the basic idea behind
+discriminating between these two regions is to compare the incident
+speed, $\hat{s}_j(t_m)$, to the distribution of the non-incident
+speeds $s_{jn}(t_m); n = 1,2,\ldots{},n_{obs}; n_{obs}\le 52$ and
+assign some level of confidence that any particular $\hat{s}_j(t_m)$
+was not drawn from the distribution of $s_{jn}(t_m)$. If we limit our
+level of confidence that the speed was not drawn from the distribution
+of $s_{jn}(t_m)$ to those that compute to be at least
+$\alpha\cdot\sigma_{s_j(t_m)}$ , where $\alpha$ is a positive number,
+below the mean speed of the distribution of $s_{jn}(t_m)$, we can
+define two cases according the difference between the mean speed and
+the threshold as shown in figure~\ref{fig:incident-speed-case}.
+\begin{figure}[t]
+  \begin{center}
+    \inputTikZ{figs/incident-speed-classification}
+    \caption[The method for determining whether observed speeds are
+    evidence of abnormal conditions.]{The method for determining whether
+      observed speeds are evidence of abnormal conditions.  An observed
+      speed distribution for a given freeway section $j$ and time of day
+      $m$ is shown (in blue) having a mean $\overline{s}_j(t_m)$ and
+      standard deviation $\sigma_{s_j(t_m)}$.  When the observed speed
+      estimate $\hat{s}_j(m)$ of a section falls below the critical
+      threshold $\hat{s}_j(t_m) \le \overline{s}_j(t_m) -
+      \alpha\cdot\sigma_{s_j(t_m)}$, the observation is treated as
+      evidence that an incident is occurring.  When $\hat{s}_j(t_m) >
+      \overline{s}_j(t_m) - \alpha\cdot\sigma_{s_j(t_m)}$, the
+      observation is treated as evidence of normal conditions.}
+    \label{fig:incident-speed-case}
+  \end{center}
+\end{figure}
+If, in the representation of figure~\ref{fig:incident-impact-feas}, we
+assign to the cells in which speed has been significantly affected by
+the incident the outcome of the probability that the speed
+$\hat{s}_j(t_m)$ in such cells is drawn from the distribution of speeds
+associated with non-incident conditions, we can construct the binary
+matrix shown in figure~\ref{fig:incident-speed-classification-binary},
+as the ``true'' representation of the affected region.
+\begin{figure}[t]
+  \begin{center}
+    \inputTikZ{figs/time-space-incident-schematic-binary}
+    \caption[Binary incident speed classification matrix]{Binary incident speed classification matrix.}
+    \label{fig:incident-speed-classification-binary}
+  \end{center}
+\end{figure}
+
+However, owing to uncertainties and other externalities, assigning an
+outcome based on a significance test related to the null hypothesis
+that the cell speed actually came from the non-incident speed
+distribution, in general will result in less-than accurate conclusions
+regarding the affected region, as shown in
+figure~\ref{fig:incident-speed-classification-binary-dirty}, where the
+true boundary of the affected region is shown by the red line.
+\begin{figure}[t]
+  \begin{center}
+    \inputTikZ{figs/time-space-incident-schematic-binary-dirty}
+    \caption[Empirical binary incident speed classification
+    matrix]{Empirical binary incident speed classification matrix.}
+    \label{fig:incident-speed-classification-binary-dirty}
+  \end{center}
+\end{figure}
+
+
+If we define $P_{jm}$ as follows:
+\begin{equation}
+  \label{eq:pjm}
+  P_{jm} = 
+  \begin{cases}
+    0;& \hat{s}_j(t_m) \le \overline{s}_j(t_m) - \alpha\cdot\sigma_{s_j(t_m)},\\
+    1;& \hat{s}_j(t_m) > \overline{s}_j(t_m) - \alpha\cdot\sigma_{s_j(t_m)}.
+  \end{cases}
+\end{equation}
+the problem of determining the ``best'' set of ``dot-shaded (or yellow)'' cells can be
+formulated as following statement.
+\begin{equation}
+  \label{eq:best-as-minimum}
+  \sum\limits_{\forall\text{dot shaded cells}} P_{jm} + \sum\limits_{\forall\text{unshaded cells}} (1-P_{jm}) = \text{Minimum}
+\end{equation}
+Or, defining
+\begin{equation*}
+  \delta_{jm} =
+  \begin{cases}
+    1,& \text{if cell is affected by the incident (i.e., dot-shaded)},\\
+    0,& \text{if cell is not affected by the incident (i.e., plain shaded)}.
+  \end{cases} 
+\end{equation*}
+Equation~(\ref{eq:best-as-minimum}) can be written as:
+\begin{equation}
+  \label{eq:best-as-minimum-w-delta}
+  \sum\limits_{\forall j,m}\left[P_{jm}\cdot\delta_{jm}+(1-P_{jm})\cdot(1-\delta_{jm})\right] = \text{Minimum}
+\end{equation}
+In this minimization problem, care must be taken regarding the number
+of observations because we use statistics regarding the mean and
+standard deviation that would be sensitive to the number of
+observations. It must be noted that a relatively high portion of
+traffic data cannot be collected due to various reasons, e.g.,
+electrical malfunction of detector and temporary freeway maintenance
+work. However, when calculating the mean and standard deviation of the
+distribution of the non-accident speeds $s_{jn}(t_m); n = 1,
+2,\ldots{}, n_{\mathrm{obs}}; n_{\mathrm{obs}} \le 52$ and assigning
+some level of confidence that any particular $\hat{s}_j(t_m)$ was not
+drawn from the distribution of $s_{jn}(t_m)$ , we need a ``sufficient
+number'' of observations, $n_{\mathrm{obs}}$.  We first need to set a
+threshold regarding the minimum number of observations that we require
+in order to have some confidence in the statistical calculations for
+mean and standard deviation, say $n_{\textrm{minobs}}$. Since 30 is
+commonly used for the minimum number of observations required for the
+law of large numbers to apply, we set $n_{\textrm{minobs}} =
+30$. Then, for cells in the matrix in
+figure~\ref{fig:incident-speed-classification-binary} for which
+$n_{\mathrm{obs}} < n_{\textrm{minobs}}$, we set $P_{jm} = 0.5$ and
+continue the analysis; i.e., we modify the definition of $P_{jm}$ as
+follows:
+\begin{equation}
+  \label{eq:pjm-final}
+  P_{jm} = 
+  \begin{cases}
+    0;& \hat{s}_j(t_m) \le \overline{s}_j(t_m) - \alpha\cdot\sigma_{s_j(t_m)}; n_{\mathrm{obs}} \ge n_{\textrm{minobs}}\\
+    1;& \hat{s}_j(t_m) > \overline{s}_j(t_m) - \alpha\cdot\sigma_{s_j(t_m)}; n_{\mathrm{obs}} \ge n_{\textrm{minobs}}\\
+    0.5;& n_{\mathrm{obs}} < n_{\textrm{minobs}}
+  \end{cases}
+\end{equation}
+Moreover, the subset of cells for which the accident speeds are
+significantly different from the non-accident speeds comprise a region
+that theoretically must obey certain properties. Specifically, there
+are three impossible local shape configurations for the subset of
+spatio-temporal cells congested by the accident. The first such case
+is a region that contains any holes, as shown in
+figure~\ref{fig:time-space-incident-schematic-infeasible-1}.
+\begin{figure}[t]
+  \begin{center}
+    \inputTikZ{figs/time-space-incident-schematic-infeasible-1}
+    \caption[Impossible shape I of the impacted region]{Impossible shape I of the impacted region.}
+    \label{fig:time-space-incident-schematic-infeasible-1}
+  \end{center}
+\end{figure}
+In addition, the vertical position ($t$) of any dot-shaded
+(``yellow'') section $j$ must be either lower or same (i.e., $\le$ )
+vertical position of the neighboring shaded (``yellow'') section $j -
+n$ , as shown in
+figure~\ref{fig:time-space-incident-schematic-infeasible-2}.
+\begin{figure}[t]
+  \begin{center}
+    \inputTikZ{figs/time-space-incident-schematic-infeasible-2}
+    \caption[Impossible shape II of the impacted region]{Impossible shape II of the impacted region.}
+    \label{fig:time-space-incident-schematic-infeasible-2}
+  \end{center}
+\end{figure}
+Likewise, figure~\ref{fig:time-space-incident-schematic-infeasible-3}
+represents another impermissible configuration.
+\begin{figure}[t]
+  \begin{center}
+    \inputTikZ{figs/time-space-incident-schematic-infeasible-3}
+    \caption[Impossible shape III of the impacted region]{Impossible shape III of the impacted region.}
+    \label{fig:time-space-incident-schematic-infeasible-3}
+  \end{center}
+\end{figure}
+These conditions can be enforced by the following relationships:
+\begin{subequations}
+  \label{eq:constraint-relationships}
+  \begin{align}
+    \label{eq:constraint-relationship-a}
+    \delta_{j+k,m} &\le \left[1 - (\delta_{j,m} - \delta_{j+1,m})\right]\cdot{}R; \forall{}j, m; \forall{}k \le J - j\\
+    \label{eq:constraint-relationship-b}        
+    \delta_{j,m+r} & \le \left[1 - (\delta_{j,m} - \delta_{j,m+1})\right]\cdot{}R; \forall{}j, m; \forall{}r \le M - m\\
+    \label{eq:constraint-relationship-c}            
+    \delta_{j,m+k} & \le \left[1 + (\delta_{j,m} - \delta_{j+1,m})\right]\cdot{}R; \forall{}j, m; \forall{}k \le M - m
+  \end{align}
+\end{subequations}
+where $R$ is a large number, $J$ is the maximum number of upstream
+sections, and $M$ is the maximum number of time period, in 5-minute
+intervals (e.g., if the analysis time period is 4 hours in the study,
+$M$ = 48).  Equations~(\ref{eq:best-as-minimum-w-delta}) and
+(\ref{eq:constraint-relationships}) are in the form of the objective
+function and constraint, respectively, of ``Binary Integer Programming
+(BIP).'' The determination problem described above can be represented
+in the form of the following BIP problem:
+\begin{equation}
+  \begin{split}
+  \label{eq:bip-formulation}
+  \min\limits_{\delta_{jm}} Z & = \sum\limits_{\forall{}j,m}\left[P_{jm}\cdot{}\delta_{jm}+(1-P_{jm})(1-\delta_{jm})\right] \\
+  \textrm{st}~~~~~~~~~&\\
+    \delta_{j+k,m} &\le \left[1 - (\delta_{j,m} - \delta_{j+1,m})\right]\cdot{}R; \forall{}j, m; \forall{}k \le J - j\\
+    \delta_{j,m+r} & \le \left[1 - (\delta_{j,m} - \delta_{j,m+1})\right]\cdot{}R; \forall{}j, m; \forall{}r \le M - m\\
+    \delta_{j,m+k} & \le \left[1 + (\delta_{j,m} - \delta_{j+1,m})\right]\cdot{}R; \forall{}j, m; \forall{}k \le M - m
+  \end{split}
+\end{equation}
+In the definition of $P_{jm}$, the threshold value $\alpha$ is very
+critical to separate between speed affected by an incident and the
+other speeds.  In this study, various values were applied to find the
+best threshold. The best value was empirically found from the relation
+between traffic data and traffic accident as $\alpha = 0.25$.
+
+
+\subsection{Ongoing work}
+\label{sec:ongoing-work-incident-impact}
+
+\subsubsection{Improved statistical techniques}
+\label{sec:improved-stats}
+
+The statistical techniques described in section~\ref{sec:det-cong-reg}
+used to determine the evidence that a given time-space freeway segment
+is experiencing abnormal conditions is admittedly simple.  We are
+currently working with data mining experts to develop a more robust
+statistical technique that applies Bayesian methods to develop better
+evidence regarding the presence of abnormal conditions on the roadway.
+Among the advantages to the approach under development will be the
+development of finer grained confidence estimates about incident
+conditions ranging from 0 to 1, rather than the current approach that
+uses only values in the set {0,0.5,1}, representing certainty of no
+incident, complete uncertainty, and certainty of incident.  
+
+We anticipate that the new approach will speed the solution algorithm
+and produce better results.  Furthermore, the approach is novel and
+should add an important contribution to the literature.
+
+
+\subsubsection{Improved solver}
+\label{sec:improved-solver}
+
+The initial implementation for the proof of concept formulates the
+binary integer program (BIP) in equations~(\ref{eq:bip-formulation})
+for solution using the \texttt{GAMS} solver, which is a general
+purpose solver.  At present, the solution time for determining the
+impacted region on a single facility for a major incident is on the
+order of 60 seconds.  Since the number of major incidents per day is
+relatively small, this performance is suitable for batch processes
+that compute the baseline delays for a given day during the course of
+the following night.  Still, it is likely that the (time) performance
+of the solver can be improved by using algorithms more tuned for
+solving BIP problems.  Improved performance would give the analyst
+more flexibility for re-running the solver with different parameters
+(e.g., $\alpha$, the maximum duration, etc.) for a given incident.
+This would, in turn, allow the web-based interface to provide a better
+end-user experience.
+
+
+
+\section{Modeling {TMC} impacts}
+\label{sec:mod-tmc-impacts}
+
+The following details a proposed method for computing transient or
+oversaturated queues caused by incident conditions subject to critical
+parameters under the influence of TMC operations---particularly the
+time to respond to an incident. While it is a work in progress, it
+represents the basis of the approach we will use to model the benefits
+of the TMC.
+
+We begin by describing the typical capacity-disrupting incident. Let
+\begin{quote}
+\begin{description}
+\item[$A(t)$] = Cumulative quantity (or number of vehicles) to arrive
+  by time t.
+\item[$D(t)$] = Cumulative quantity (or number of vehicles) to have
+  been serviced by time t.
+\item[$Q(t)=A(t)-D(t)$] = Number of vehicles in the queue (or queue
+  length) at time t.
+\end{description}
+\end{quote}
+Suppose that the arrival rate, queue, and time interval are
+sufficiently large so that random fluctuations in the number of
+arrivals can be considered small compared to the observed number of
+arrivals; i.e., the Law of Large Numbers applies:
+\begin{equation}
+  \label{eq:lln}
+  \Pr\left\{\lim_{t\to\infty}\frac{A(t)-E\{A(T)\}}{E\{A(t)\}}\right\} 
+\end{equation}
+Equation~(\ref{eq:lln}) implies that $A(t), D(t)$ can be approximated by
+non-random continuous variables.
+
+For example, when $Q(0)=1$, and we have a steady arrival rate $\lambda
+\Rightarrow A(t) = \lambda t$ , and a constant service rate $\mu \Rightarrow D(t)
+= \mu t, Q(t)>0$, then, 
+\begin{align*}
+  \label{eq:arrival-and-queues}
+  A(t) & = Q(0) + \lambda t \Rightarrow \lambda = \frac{dA(t)}{dt}\\
+  Q(t) & = Q(0) + (\lambda - \mu ) t; \: Q(t) \ge 0
+\end{align*}
+These conditions are shown in figure~\ref{fig:queuing-constant-rates}.
+\begin{figure}[tbp]
+  \begin{center}
+    \inputTikZ{figs/queuing-undersat-and-oversat}
+    \caption[Queuing under constant arrival and service rates]{Queuing
+      under constant arrival and service rates.  In both figures, a
+      queue of length $Q(0)$ exists at time 0 and there is some
+      constant arrival rate $A(t)=\lambda$.  The figure on the left
+      shows the dissipation of the queue when the arrival rate is less
+      than the service rate $\lambda<\mu$.  The figure on the right
+      shows the increasing queue cased by the oversaturated conditions
+      $\lambda>\mu$.}
+    \label{fig:queuing-constant-rates}
+  \end{center}
+\end{figure}
+ 
+In the general case, the arrival rate $\lambda$ is not restricted to constant and we have:
+\begin{equation*}
+  \label{eq:gen-arr}
+  A(t) = \int\lambda(\tau)d\tau \Rightarrow \lambda(t) = \frac{dA(t)}{dt} 
+\end{equation*}
+Consider flow conditions following an incident that causes the
+capacity (or service rate $\mu(t)$) to fall below the demand (or
+arrival rate $\lambda(t)$ ) for a period during which the incident is
+identified, verified, and actions are taken to restore capacity to its
+pre-incident conditions.  Assume that the demand remains constant
+during this period; i.e., $\lambda(t) = \mathrm{constant} = \lambda$.
+Prior to the incident, $D(t) \equiv A(t)$.  With the onset of the
+incident, the resulting queue $Q(t)$ can be expected to start off
+small, rise to a peak (maximum) during the process of clearing (owing
+to removal activity at the scene), then gradually subside as capacity
+is restored. Note that, at some time during the clearing process, the
+rate of growth of the queue will be slowed by actions taken at the
+scene to begin to restore capacity. Note also that $Q(t)$ will reach
+its maximum precisely when capacity has been restored to a level that
+is equal to the demand $\lambda$; assuming that the full capacity of
+the section is greater than $\lambda$ (if, not, the queue will be
+persistent), clearing of the incident ultimately will permit the queue
+to be dissipated. This is shown in
+figure~\ref{fig:general-incident-queuing}.
+\begin{figure}[tbp]
+  \begin{center}
+    \inputTikZ{figs/queuing-formation-for-typical-incident}
+    \caption{The formation of a queuing for a typical incident}
+    \label{fig:general-incident-queuing} 
+  \end{center}
+\end{figure}
+
+Here, the arrival rate is less than the service rate, i.e., $\lambda <
+\mu$, until $t_0$ and the queue is essentially zero, i.e., $Q(t)
+\equiv 0, 0 \le t \le t_0$. Beyond $t_0$, $\lambda > \mu$ so that the
+queue grows until $t_2$---the point at which the rate of service rate
+$A(t)$ and demand rate $D(t)$ are equal.  From $t_2$ until $t_3$, the
+queue diminishes until $t_3$, when $D(t_3) = A(t_3), t \ge t_3$ as
+shown in figure~\ref{fig:arrival-service-and-queuing}.
+\begin{figure}[tbp]
+  \begin{center}
+    \inputTikZ{figs/arrival-service-and-queuing}
+    \caption[The relationship between the arrival rate, the service
+    rate, and queuing during an incident response]{The relationship
+      between the arrival rate ($\mu(t)$), the service rate
+      ($\lambda$), and queuing ($Q(t)$) during an incident response.}
+    \label{fig:arrival-service-and-queuing}
+  \end{center}
+\end{figure}
+
+From the perspective of TMC operations, the corresponding incident
+response would look something like
+figure~\ref{fig:tmc-resp-and-queuing}.
+\begin{figure}[tbp]
+  \begin{center}
+    \inputTikZ{figs/tmc-response-and-queuing}
+    \caption{TMC incident response and its relationship to queuing dynamics}
+    \label{fig:tmc-resp-and-queuing}
+  \end{center}
+\end{figure}
+
+\subsection{Computing queues caused by incident congestion}
+\label{sec:comp-queues}
+
+We now turn to the problem of computing delay as a function of the
+critical time points of incident response that can be influenced by
+TMC actions.
+
+
+\subsubsection*{Case of slight oversaturation}
+
+Suppose the time period during which $\lambda > \mu$ is relatively short, i.e., $t_3 - t_0$ is relatively
+small. Then, expand $\mu(t)$ as a Taylor series about $t_1$:
+\begin{equation}
+  \label{eq:mu-expansion}
+  \mu(t) = \mu(t_1)+\frac{d\mu}{dt}\Biggr\rvert_{t=t_1} \cdot{}(t-t_1)
+  +\frac{1}{2}\frac{d^2\mu}{dt^2}\Biggr\rvert_{t=t_1} \cdot{}(t-t_1)^2
+  +O(t-t_1)^3
+\end{equation}
+But, $\frac{d\mu}{dt} = 0 \Rightarrow$
+\begin{equation}
+\begin{split}
+  \label{eq:mu-expansion-simpl}
+  \mu(t) & = \mu(t_1)+\frac{1}{2}\frac{d^2\mu}{dt^2}\Biggr\rvert_{t=t_1}\cdot(t-t_1)^2+O(t-t_1)^3 \\
+  ~& = \mu(t_1)+\beta (t-t_1)^2 + O(t-t_1)^3, t_0 \le t \le t_3
+\end{split}
+\end{equation}
+where
+\begin{equation}
+  \label{eq:beta}
+  \beta = \frac{1}{2}\frac{d^2\mu}{dt^2}\Biggr\rvert_{t=t_1} \: (\mathrm{Note:}\: \beta > 0).
+\end{equation}
+Observe, at $t=t_0$, (\ref{eq:mu-expansion-simpl}) becomes:
+\begin{equation}
+  \label{eq:mu-at-t0}
+  \mu(t_0) = \mu(t_1) + \beta \cdot (t_0-t_1)^2+O(t_0-t_1)^3
+\end{equation}
+Also, 
+\begin{equation}
+  \label{eq:lambda-at-t0}
+\begin{split}
+  \lambda & = \lambda(t_0) = \mu(t_0) \Rightarrow \\
+  \lambda & = \mu(t_0) = \mu(t_1) + \beta \cdot
+  (t_0-t_1)^2+O(t_0-t_1)^3
+\end{split}
+\end{equation}
+Similarly
+\begin{equation}
+  \label{eq:lambda-at-t2}
+  \lambda = \lambda(t_2) = \mu(t_2) = \mu(t_1) + \beta \cdot (t_2-t_1)^2+O(t_2-t_1)^3
+\end{equation}
+Solving (\ref{eq:lambda-at-t0}) for $t_0$ and (\ref{eq:lambda-at-t2})
+for $t_2$, neglecting terms $O(t_2 - t_1)^3$ and $O(t_0 - t_1 )^3$ we get
+\begin{equation}
+  \label{eq:t1-t2-implications}
+  \begin{split}
+    (t_0-t_2)^2 = \frac{\lambda-\mu(t_1)}{\beta} \Rightarrow t_0-t_1 & = \pm\left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{1}{2}}\\
+    t_1>t_0 \Rightarrow t_0 & = t_1 - \left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{1}{2}}\\
+    (t_2-t_1)^2 = \frac{\lambda-\mu(t_1)}{\beta} \Rightarrow t_2 - t_1 & = \pm\left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{1}{2}}\\
+    t_2>t_1 \Rightarrow t_2 & = t_1  + \left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{1}{2}}
+  \end{split}
+\end{equation}
+Observe from (\ref{eq:lambda-at-t0}) and (\ref{eq:lambda-at-t2}),
+\begin{equation}
+  \label{eq:mu-lambda-roots}
+  (\lambda - \mu(t))\rvert_{t=t_0} = (\lambda - \mu(t))\rvert_{t=t_2} = 0
+\end{equation}
+And, from (\ref{eq:mu-expansion-simpl}) we see that $\mu(t)$ is a quadratic in $t$,
+so that $\lambda-\mu(t)$ is also a quadratic in $t$ (since $\lambda$
+is a constant).  From (\ref{eq:mu-lambda-roots}), $\lambda - \mu(t)$ has
+roots $t=t_0,t_2$.  So, $\lambda - \mu(t)$ is of the form
+\begin{equation}
+  \label{eq:lambda-mu-form}
+  \lambda-\mu(t) = c(t-t_0)(t-t_2)
+\end{equation}
+But from (\ref{eq:beta})
+\begin{equation}
+  \label{eq:d2mudt}
+  \beta = \frac{1}{2}\frac{d^2\mu}{dt^2}\Biggr\rvert_{t=t_1}
+  \Rightarrow \frac{d^2\mu}{dt^2}\Biggr\rvert_{t=t_1} = 2\beta
+\end{equation}
+Taking ${d^2}/{dt^2}$ of (\ref{eq:lambda-mu-form}) and comparing
+to (\ref{eq:d2mudt}), we get
+\begin{equation*}
+  \frac{d^2\mu}{dt^2} = 2c \:\Rightarrow\:
+  \frac{d^2\mu}{dt^2}\Biggr\rvert_{t=t_1}=2c \:\Rightarrow\: c = \beta
+\end{equation*}
+So
+\begin{equation}
+  \label{eq:lambda-mu-beta}
+  \lambda - \mu(t) = \beta(t-t_0)(t-t_2)
+\end{equation}
+Recall that the queue at any time $t_0 \le t \le t_3$  is given by
+\begin{equation}
+  \label{eq:qt-def}
+  Q(t)=A(t)-D(t)=\int_{t_0}^t\left[\lambda(\tau)-\mu(\tau)\right]d\tau
+\end{equation}
+For the case of a constant arrival rate, $\lambda$, (\ref{eq:qt-def})
+becomes
+\begin{equation}
+  \label{eq:qt-def-2}
+  Q(t)=A(t)-D(t)=\int_{t_0}^t\left[\lambda-\mu(\tau)\right]d\tau
+\end{equation}
+Or, from (\ref{eq:lambda-mu-beta})
+\begin{equation}
+  \label{eq:qt-def-beta}
+  Q(t)=\int_{t_0}^t\left[\beta(\tau-t_0)(\tau-t_2)\right]d\tau
+\end{equation}
+Integrate (\ref{eq:qt-def-beta}) by parts:
+\begin{align*}
+  u & = (\tau-t_2) & dv & = (\tau-t_0)d\tau\\
+  du & = d\tau & v & = \frac{1}{2}(\tau - t_0)^2
+\end{align*}
+
+\begin{equation}
+  \label{eq:qt-final}
+  \begin{split}
+    Q(t) & =\int_{t_0}^t\left[\beta(\tau-t_0)(\tau-t_2)\right]d\tau
+    = \beta\left\{\frac{(\tau-t_2)(\tau-t_0)^2}{2}\Biggr\rvert_{t_0}^{t}
+      - \frac{1}{2}\int_{t_0}^t(\tau-t_0)^2d\tau\right\}\\
+    &= \beta\left\{\frac{(\tau-t_2)(\tau-t_0)^2}{2}\Biggr\rvert_{t_0}^{t}
+      - \frac{1}{6}(\tau-t_0)^3\Biggr\rvert_{t_0}^{\tau}\right\}\\ 
+    &= \beta\left\{\frac{(t-t_2)(t-t_0)^2}{2}
+      - \frac{1}{6}(t-t_0)^3\right\}\\ 
+    &= \beta(t-t_0)^2\left\{\frac{(t-t_2)}{2}
+      - \frac{(t-t_0)}{6}\right\}\\ 
+    &= \beta(t-t_0)^2\left\{\frac{(t-t_0)}{3}
+      - \frac{(t_2-t_0)}{2}\right\}\\ 
+  \end{split}
+\end{equation}
+
+\subsubsection*{Asymptotic behavior}~\\
+
+For \emph{$\lim_{t\to t_0+} Q(t)$}, we have:
+
+\begin{equation}
+  \label{eq:qt-asymp-at-t0}
+  \begin{split}
+    Q(t) = \beta(t-t_0)^2\left\{\frac{(t-t_0)}{3}
+      - \frac{(t_2-t_0)}{2}\right\}\\ 
+    \frac{(t_2-t_0)}{2} \gg \frac{(t-t_0)}{3} 
+    \Rightarrow Q(t) \approx \beta(t-t_0)^2(t_2-t_0)/2
+  \end{split}
+\end{equation}
+
+
+\vspace{1em}\noindent\emph{$\lim_{t\to t_0+} Q(t)$:}
+At $t=t_2$, $Q(t)$ reaches its maximum:
+\begin{equation}
+  \label{eq:max-qt}
+  Q(t_2) =\frac{\beta}{6}(t_2-t_0)^3
+\end{equation}
+But from (\ref{eq:t1-t2-implications}), i.e.,
+\begin{equation*}
+  \begin{split}
+    t_0 & = t_1 - \left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{1}{2}}\\
+    t_2 & = t_1  + \left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{1}{2}}
+  \end{split}
+\end{equation*}
+Then,
+\begin{equation}
+  \label{eq:combined-t0-t2}
+  (t_2-t_0) = 2\left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{1}{2}}
+\end{equation}
+So,
+\begin{equation}
+  \label{eq:q-t2}
+  \begin{split}
+    Q(t_2)& = \frac{4}{3}\beta\left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{3}{2}}\\
+    & = \frac{4\left[\lambda-\mu(t_1)\right]^{\nicefrac{3}{2}}}{4\beta^{\nicefrac{1}{2}}} \\
+  \end{split}
+\end{equation}
+Or,
+\begin{equation}
+  \label{eq:qt-prop-oversat}
+  Q(t_2) \propto [\mathrm{Oversaturation}]^{\nicefrac{3}{2}}
+\end{equation}
+Note that $Q(t)$ vanishes at $t=t_3$, i.e., $Q(t_3)=0$.  Then, from~(\ref{eq:qt-final})
+\begin{equation}
+  \label{eq:t3-ito-t0-t2}
+  \begin{split}
+    Q(t_3) =\beta(t_3-t_0)^2\left\{\frac{t_2-t_0}{2}-\frac{t_3-t_0}{3}\right\} & = 0 \Rightarrow  \\
+    \frac{t_2-t_0}{2}-\frac{t_3-t_0}{3} = 0 \\
+    t_3 = t_0 + \frac{3}{2}(t_2-t_0)
+  \end{split}
+\end{equation}
+But from (\ref{eq:t1-t2-implications})
+\begin{equation}
+  \label{eq:t2-ito-t1-t0}
+  t_0 + t_2 = 2t_1 \Rightarrow t_2 = 2t_1 - t_0
+\end{equation}
+Substituting (\ref{eq:t2-ito-t1-t0}) into (\ref{eq:t3-ito-t0-t2}), we
+get
+\begin{equation}
+  \label{eq:t3-ito-t1-t0}
+  t_3 = t_0 + 3(t_1-t_0)
+\end{equation}
+Consider
+\begin{equation*}
+  Q(t) = \beta(t-t_0)^2\left\{\frac{t_2-t_0}{2}-\frac{t-t_0}{3}\right\}
+\end{equation*}
+But, from (\ref{eq:t3-ito-t0-t2})
+\begin{equation}
+  \label{eq:t-relate}
+  \frac{(t_2-t_0)}{2} = \frac{(t_3-t_0)}{3}
+\end{equation}
+Substituting (\ref{eq:t-relate}) into the expression for $Q(t)$,
+\begin{equation}
+  \label{eq:qt-ito-t3-t0}
+  \begin{split}
+    Q(t)&=\beta(t-t_0)^2\left\{\frac{t_3-t_0}{3}-\frac{t_3-t_0}{3}\right\}\\
+    &=\beta(t-t_0)^2(t_3-t)/3
+  \end{split}
+\end{equation}
+
+\subsubsection*{Relative size of queue}
+\label{sec:rel-size-queue}
+
+Define
+\begin{equation}
+  \label{eq:qhat-def}
+  \hat{Q}(t) = \frac{Q(t)}{\max\limits_t Q(t)} = \frac{Q(t)}{Q(t_2)}
+\end{equation}
+Let
+\begin{equation}
+  \label{eq:t-hat-def}
+  \hat{t}=\frac{(t-t_0)}{t_3-t_0}
+\end{equation}
+Then
+\begin{equation}
+  \label{eq:qhat-final}
+  \begin{split}
+  \hat{Q} & =\frac{\beta(t-t_0)^2(t_3-t)/3}{\beta(t_2-t_0)^3/6}\\
+  &= 2\frac{\hat{t}^2(t_3-t_0)^2(t_3-t)}{(t_2-t_0)^3}
+  \end{split}
+\end{equation}
+
+\subsubsection*{Total delay}
+\label{sec:total-delay}
+
+Observe that the total delay, $D_{\mathrm total}$, is simply
+\begin{equation}
+  \label{eq:dtot-def}
+  D_{\mathrm total} = \int\limits_{t_0}^{t_3}Q(\tau)d\tau
+\end{equation}
+From (\ref{eq:qt-ito-t3-t0})
+\begin{equation}
+  \label{eq:dtot-q3-q0-sub}
+  D_{\mathrm total} = \frac{\beta}{3}\int\limits_{t_0}^{t_3}(\tau-t_0)(t_3-\tau)d\tau
+\end{equation}
+Let $\eta = (t-t_0) \Rightarrow d\eta = d\tau$.  Then (\ref{eq:dtot-q3-q0-sub}) becomes
+\begin{equation}
+  \label{eq:dtot-ito-eta}
+  D_{\mathrm total} = \frac{\beta}{3}\int\limits_{0}^{t_3-t_0}\eta^2(t_3-t_0-\eta)d\eta
+\end{equation}
+Let $\phi = \eta/(t_3-t_0) \Rightarrow d\phi = d\eta/(t_3-t_0)$.
+Then~(\ref{eq:dtot-ito-eta}) becomes
+\begin{equation}
+  \label{eq:dtot-ito-phi}
+  \begin{split}
+    D_{\mathrm total} & = \frac{\beta}{3}(t_3-t_0)^4\int\limits_{0}^{1}\phi^2(1-\phi)d\phi \\
+    & = \frac{\beta}{3}(t_3-t_0)^4\left(\frac{\phi^3}{3}-\frac{\phi^4}{4}\right)\Biggr\rvert_{0}^{1} \\
+  & = \frac{\beta}{3}(t_3-t_0)^4\left(\frac{1}{3}-\frac{1}{4}\right) \\
+  & = \frac{\beta}{36}(t_3-t_0)^4
+  \end{split}
+\end{equation}
+But from (\ref{eq:t3-ito-t0-t2}) and (\ref{eq:combined-t0-t2})
+\begin{equation}
+  \label{eq:t3-t0-def}
+  t_3-t_0=3(t_2-t_0)/2 = 3\left[\frac{\lambda-\mu(t_1)}{\beta}\right]^{\nicefrac{1}{2}}
+\end{equation}
+So, substituting (\ref{eq:t3-t0-def}) into~(\ref{eq:dtot-ito-phi}), we get
+\begin{equation}
+  \label{eq:dtot-ito-beta-t1}
+  \begin{split}
+    D_{\mathrm total} &= \frac{\beta}{36}(81)\left[\frac{\lambda-\mu(t_1)}{\beta}\right]\\
+    &= \frac{9[\lambda-\mu(t_1)]^2}{4\beta}
+  \end{split}
+\end{equation}
+So, total delay is proportional to the square of the amount of
+oversaturation, $[\lambda-\mu(t1)]$, \textbf{or} to the 4\textsuperscript{th} power of the peak, $(t_3-t_0)$; i.e.,
+\begin{subequations}
+  \label{dtot-final}
+  \begin{align}
+    D_{\mathrm total} & \propto [\lambda-\mu(t_1)]^2 \label{eq:dtot-ito-oversat}\\
+    D_{\mathrm total} & \propto (t_3-t_0)^4 \label{eq:dtot-ito-peak}
+  \end{align}
+\end{subequations}
+
+\subsection{Estimating tangible TMC benefits}
+\label{sec:est-benefits}
+
+Equations (\ref{dtot-final}) offer a tool for estimating TMC benefits
+from measurable events in the TMC activity logs.  Specifically, if we
+can determine from TMC logs how much the time to initial response to
+an incident $t_1$ is shortened by TMC actions, we can estimate the
+delay savings attributable to TMC functions.  Furthermore, if these
+actions can be associated with specific processes or technologies, we
+can make statements regarding the delay savings attributable to
+specific TMC assets (or bundles of them). The extent to which this is
+possible depends on the quality of data in the TMC logs, which has
+been a motivating factor behind the planned improvements to the TMC
+activity logs discussed in chapter~\ref{chap:tmc-activity}.
+
+
+\subsection{Ongoing work}
+\label{sec:ongoing-work-tmc-impact}
+
+To date, the incident impact model has not been applied to data.  The
+next step in developing this model is to compare baseline delay
+predictions of the theoretical model (equations~\ref{dtot-final}) to
+the observed delay estimates obtained from the incident impact model
+(section~\ref{sec:incident-impact-model}).  The features of the
+incident impact model will be determined, in large part, by the
+improvements to the activity logging system, but we will also make an
+effort to infer the critical points during past incident management
+using the legacy logs.
+
+
+
+\chapter{System architecture}
+\label{sec:system-architecture}
+
+
+In this chapter we detail how the TMC incident performance evaluation
+system will be made available for use in regular TMC operations using
+a flexible service-oriented architecture that is under active
+development in the Testbed.
+
+\section{Use Cases}
+\label{sec:use-cases}
+
+
+The TMC performance evaluation system could potentially be used in a
+variety of settings. The primary use-case is to allow TMC personnel to
+perform post-analysis of incidents that have occurred in order to
+produce a measure of the value of TMCs to Caltrans and the State of
+California. In this role, the system must operate as an easy-to-use
+reporting system with which the analyst can specify a set of
+analytical parameters defining the incidents to analyze, any necessary
+modeling assumptions, and TMC components to model. The ideal interface
+will be accessible from any authenticated computer and will use
+technology already familiar to operators.
+
+A second potential use-case for the evaluation system is a real-time
+mode that attempts to forecast the cost of delaying action on current
+incidents. While this use would not be part of this initial project,
+it would be a potentially straightforward extension of the core models
+to provide real-time decision support to TMC personnel actively
+engaged in managing multiple simultaneous incidents. In this role, the
+evaluation system would operate in the background, occasionally
+broadcasting estimates to other software components for them to
+integrate into existing TMC processes.
+
+A third use-case is that the performance evaluation system might be
+integrated into existing or future software systems used by Caltrans
+and its partners. One obvious example includes the PeMS system, which
+performs similar functions with less detail. This project is a natural
+extension to that existing work and may therefore be a candidate for
+integration.
+
+This software is intended to support a process or set of processes
+carried out by TMC operators and traffic engineers.  Toward that end,
+the system should integrate as cleanly as possible with existing
+processes and the software used to support them.  We note, however,
+that existing systems in the Caltrans D12 TMC tend to be monolithic
+(and generally proprietary) applications---particularly as regards
+their user interfaces.  This makes integrating new software into the
+TMC very challenging and potentially expensive.
+
+To overcome these barriers, TMC Incident Performance Evaluation system
+is being deployed using horizontal integration strategies that
+separate core logic and data from the user interfaces used to interact
+with them.  The system architecture is shared by the Cartesius/CTNET
+integration project which focuses on the sharing of high-level
+incident response information between traffic management centers.  The
+initial interface to the system will focus on the post-analysis
+use-case and will be web-browser based since that is a platform that
+will be familiar to virtually all users.  Integration of the system
+into any real-time operations will require further study.
+Nonetheless, the architecture of the system should be flexible enough
+to allow such deployment in the future.
+
+\section{Service-Oriented Architecture}
+\label{sec:soa}
+
+The TMC performance evaluation system is being implemented using a
+service-oriented architecture (SOA) as shown in
+figure~\ref{fig:system-arch}. A collection of existing databases
+provide raw data to the Incident Impact Model.  An analysis scheduler
+is configured to regularly execute performance analysis of incidents
+to generate baseline delays estimates.  Analysts can use the TMC
+impact model via a web interface to analyze the benefits of the TMC
+for any identified incident.
+
+A possible future extension of the system for real-time delay
+estimation is not shown in the figure. In this mode, a Real-time Delay
+Estimator component would actively monitor the system for identified
+incidents, and would query the incident impact model to estimate the
+relative costs of delaying action on all active incidents. These
+results could be broadcast to any TMC management application to assist
+operators in prioritizing TMC actions.  
+
+\begin{figure}[htbp]
+  \begin{center}
+    %\inputTikZ{figs/tmcpe-system-arch}
+%    \inputTikZ{figs/software-arch}
+    %\includegraphics[width=\textwidth]{figs/software-arch.png}
+    \inputTikZ{figs/status}
+    \caption{System architecture of the TMC performance evaluation
+      system}
+    \label{fig:system-arch}
+  \end{center}
+\end{figure}
+
+\section{Components}
+\label{sec:components}
+
+The main components of the performance evaluation system fall into two
+categories: logical components that process data to produce new
+metrics for use in the TMC and interface components that expose that
+data to other software or to users in the TMC.
+
+\subsection{Business Logic}
+\label{sec:logic}
+
+\subsubsection{Incident impact service}
+
+The component encapsulates the incident impact model described in
+section~\ref{sec:incident-impact-model}.  This component only requires
+the user to provide the activity log ID as input.  The service will
+independently query the sensor database and CHP CAD data to obtain
+further data necessary for the analysis.  The service returns a list
+of impacted sections and associated delay calculations.
+
+\paragraph{STATUS:} The core models for the incident impact service
+have been developed using perl scripts to generate mathematical
+programming formulations for the GAMS general purpose solver.  As the
+system is refined, we anticipate building a custom solver that will
+perform the delay calculations more efficiently.  We have also engaged
+data mining experts to develop improved statistical techniques for
+providing congestion evidence for the delay calculation in
+section~\ref{sec:delay-calc}.
+
+
+\subsubsection{TMC impact service}
+The TMC impact service will encapsulate the final TMC impact model
+resulting from the work described in
+section~\ref{sec:mod-tmc-impacts}.  This service requires as input the
+activity log ID of the incident to be analyzed, the output from the
+incident impact service in order to characterize the critical section
+and estimate the arrival pattern to the impacted region, and any
+parameters characterizing changes to the observed incident response As
+with the incident impact service, this model will independently access
+additional databases as necessary to support its analysis.  The
+service returns an estimated delay savings attributable to actions
+characterized by the input parameters.
+
+\paragraph{STATUS:} The TMC impact service portion of the website will
+be developed once the TMC impact model is completed.
+
+
+
+\subsection{Interfaces}
+\label{sec:interfaces}
+
+The core logic generates data objects that can be adapted for the
+use-cases described in section~\ref{sec:use-cases}.  To support these
+applications, the architecture includes two main interfaces to the
+core logical services.
+
+\subsubsection{Web-based incident post-analysis tool}
+
+The primary interface to the performance evaluation system will be a
+straightforward web interface that allows an analyst to query the
+model for
+\begin{itemize}
+\item TMC benefits (delay savings) for specific incidents
+\item TMC benefits for a set of incidents meeting particular criteria
+  (location, time of day, severity, etc.)
+\end{itemize}
+The interface will give the analyst control of all input parameters to
+the model including necessary assumptions, but will offer sensible
+defaults where possible.
+
+\paragraph{STATUS:} We are currently prototyping the web-based
+interface using the grails framework, which is an open-source
+java-based web application system that is compatible with existing
+projects on the Testbed.  Within that framework, we are implementing a
+map-based interface using the OpenLayers javascript library and the
+openstreetmap map dataset (google maps can also be used as a
+background layer).  
+
+Analysis of a particular incident will be reflected in the analysis of
+all potentially impacted facilities, whose estimated time-space
+impacts will be displayed using a custom javascript widget developed
+for this project.
+Figures~\ref{fig:view-stddev}--~\ref{fig:view-overlays} show a
+preliminary version of this interface.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{images/i61-5-n-stdspd.png}
+  \caption{Viewing the standard deviation of speeds in time and space around an incident.}
+  \label{fig:view-stddev}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{images/i61-5-n-pjm.png}
+  \caption{Viewing the time-space evidence values ($P_{jm}$) around an incident.}
+  \label{fig:view-pjm}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{images/i61-5-n-alog-sta.png}
+  \caption{Viewing the standard deviation of speeds in time and space
+    around an incident with activity log and freeway station
+    overlays.}
+  \label{fig:view-overlays}
+\end{figure}
+
+% \subsubsection{Incident status event channel}
+
+% To support other use-cases involving integration of the incident delay
+% model into TMC operations or other external services, we will provide
+% an event channel and associated external interface (using, e.g., SOAP
+% or other web-based data feed technology) over which estimates from the
+% core delay model will be broadcast to any subscribers.  These
+% estimates, for instance, might be integrated into TMC processes (and
+% associated software) in order to prioritize incident response being
+% managed by the TMC.
+
+% \paragraph{STATUS:} No work has been completed on the status event channel.
+
+\section{Ongoing work}
+\label{sec:ongoing-work}
+
+
+\subsection{Improved TMC activity data}
+\label{sec:improved-activity-data}
+
+The first interim report for this project
+\citep{rindt08:_measur_based_system_for_tmc_perfor_evaluat}
+we noted that
+\begin{quote}
+  The D12 TMC activity log records sufficient TMC activity to perform
+  the basic delay calculation and evaluate a limited portion of the
+  benefits provided by the TMC. For the activity log to be more
+  generally useful to performance evaluation, entries in the log
+  should be tied both to specific technologies that offer notable
+  impacts on TMC processes or to procedures that are designed to have
+  intended effects.
+\end{quote}
+These recommendations were folded into a set of modifications being
+made to the D12 TMC activity log under the Testbed contract between
+Caltrans D12 and UCI.  
+
+\paragraph{STATUS:} We anticipate that the modified TMC Activity Log
+will be available by the end of Q3 2008/2009.  At that point, work
+will be necessary to make the Activity Log database available to the
+TMC performance evaluation system by exposing it (or a shadowed
+version of the data) on the SOA so that it can be accessed by the core
+modeling components.
+
+
+\subsection{System architecture}
+\label{sec:arch}
+
+The system architecture described above is designed to leverage
+existing software under development for related research being carried
+out in the Testbed.  The tasks necessary to deploy the TMC Performance
+Evaluation platform using this architecture are confined to the
+specification of the data sources, business logic (software
+implementing the models described in chapter~\ref{sec:method}), user
+interfaces, and information flows between those components.
+
+% \section{Summary}
+% \label{sec:summary}
+
+
+
+
+%\includegraphics[width=\textwidth]{images/inc-61-ss.png}
+
+\bibliographystyle{apalike}
+\bibliography{refs}
+
+%\printnomenclature 
+
+\end{document}
