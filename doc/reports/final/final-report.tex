@@ -16,6 +16,7 @@
 \usepackage{tabularx}
 \usepackage{ctable}
 \usepackage{soul}
+\usepackage{local-defs}
 
 \newif\iffinal % introduce a switch for draft vs. final document
 %\finaltrue % use this to compile the final document
@@ -24,7 +25,7 @@
 
 % [more preamble that in my case also uses \iffinal for other stuff]
 
-\pgfrealjobname{interim-report-2009-06}
+\pgfrealjobname{final-report}
 
 \iffinal
   \newcommand{\inputTikZ}[1]{%
@@ -1124,6 +1125,79 @@ other speeds.  In this study, various values were applied to find the
 best threshold. The best value was empirically found from the relation
 between traffic data and traffic accident as $\alpha = 0.25$.
 
+\subsection{Improvements to the core delay model}
+\label{sec:delay-improvements}
+
+When research is transferred into application, the idealized assumptions
+underlying the model are often found to oversimplify the real world.  
+
+\subsubsection{Bounding the incident}
+\label{sec:incident-bounds}
+
+\fixme[]{crindt}{Discuss the use of leading and trailing shockwave constraints}
+
+\subsubsection{Distance weighting}
+\label{sec:dist-weight}
+
+One common characteristic of real-world data is that incidents do not occur in
+isolation.  Many times these incidents are related, while other times they are
+independent.  Furthermore, a randomly sampled time-space section in the freeway
+network will often have regions of congestion arising from the random processes
+underlying traffic flow.  As such, it is fairly common for such congestion
+plumes to be sufficiently close in time and space to a known incident locations.
+
+In such cases, a poorly tuned delay algorithm might erroneously attribute the
+random congestion to the known event.  One such case is shown in
+\fixme[]{crindt}{THE FOLLOWING FIGURE}.
+\begin{figure}[t]
+  \begin{center}
+    %\inputTikZ{figs/time-space-incident-schematic-infeasible-3}
+    \caption[Random congestion in proximity to a known event]{Random congestion in proximity to a known event}
+    \label{fig:time-space-random-versus-known}
+  \end{center}
+\end{figure}
+Here, a known incident causes a congestion plume that is clearly spatially
+distinct from some random upstream disturbance.  Nonetheless the simplified
+delay calculation model attributes the random congestion to the known event
+because in the algorithm's objective, it is ``cheaper'' to incorrectly identify
+the uncongested are between the plumes as congested rather than miss out on the
+opportunity to identify upstream congestion as related to the known incident.
+This bundling of plumes, however, is an artifact of the objective rather than a
+correct attribution of congestion to the given event.
+
+We considered two approaches to improving the ability of the model to account
+for such cases.  The first approach was to bias the objective function to make
+false positives more 'costly' to the algorithm than false negatives.  More
+specifically, this altered the objective function in \eqref{eq:bip-formulation}
+to be:
+\begin{equation}
+  \label{eq:false-positive-bias}
+  \min\limits_{\delta_{jm}} Z = \sum\limits_{\forall{}j,m}\left[(1-\beta)\cdot{}P_{jm}\cdot{}\delta_{jm}+(1-P_{jm})(1-\delta_{jm})\right]
+\end{equation}
+where $\beta \in (0,1)$ is a parameter set to reduce the importance of false
+negatives.  As $\beta \rightarrow 1$, the importance of false negatives is
+reduced.  For instance, setting $\beta = 0.1$ effectively makes a false negative
+10\% less important than a false positive.
+%
+This method, however tended to be too conservative and would result in the
+algorithm calculating \fixme[very small regions of delay]{crindt}{Give an
+  example of this}.
+
+The second method was to alter the objective function to weight the cells based
+upon their time-space proximity to the estimated location of the incident.  
+\begin{equation}
+    \label{eq:distance-weighting}
+    \min\limits_{\delta_{jm}} Z = \sum\limits_{\forall{}j,m}\bigg(\left[\cdot{}P_{jm}\cdot{}\delta_{jm}+(1-P_{jm})(1-\delta_{jm})\right]\bigg.
+\end{equation}
+
+Use
+of this method was made possible by the improvements made to the TMC activity
+log to add geospatial coordinates from the CHP iCAD system to the incident logs
+(see \fixme{crindt}{Add section reference}).
+
+
+
+
 
 \subsection{Ongoing work}
 \label{sec:ongoing-work-incident-impact}
@@ -1865,6 +1939,14 @@ interfaces, and information flows between those components.
 
 % \section{Summary}
 % \label{sec:summary}
+
+\chapter{TODO}
+\begin{itemize}
+\item Describe perl-based architecture
+\item Describe databases
+\item Describe security measures
+\item Describe integration with CTMLabs
+\end{itemize}
 
 
 

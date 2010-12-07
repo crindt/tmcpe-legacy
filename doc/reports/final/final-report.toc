@@ -1,0 +1,63 @@
+\contentsline {chapter}{\numberline {}Executive Summary}{1}
+\contentsline {chapter}{\numberline {}List of Figures}{6}
+\contentsline {chapter}{\numberline {1}Introduction and Background}{7}
+\contentsline {section}{\numberline {1.1}Performance measures of highway systems}{7}
+\contentsline {section}{\numberline {1.2}Benefits of the TMC}{8}
+\contentsline {subsection}{\numberline {1.2.1}Traffic monitoring}{8}
+\contentsline {subsection}{\numberline {1.2.2}Travel information}{8}
+\contentsline {subsection}{\numberline {1.2.3}Event management}{8}
+\contentsline {section}{\numberline {1.3}Data sources}{9}
+\contentsline {subsection}{\numberline {1.3.1}System data}{9}
+\contentsline {subsubsection}{\numberline {1.3.1.1}PeMS}{9}
+\contentsline {subsubsection}{\numberline {1.3.1.2}ATMS/UCI sensor archive}{10}
+\contentsline {subsubsection}{\numberline {1.3.1.3}D12 SOAP interface (devices)}{10}
+\contentsline {subsection}{\numberline {1.3.2}TMC actions}{10}
+\contentsline {subsubsection}{\numberline {1.3.2.1}TMC activity log}{10}
+\contentsline {subsubsection}{\numberline {1.3.2.2}CHP CAD log (XML feed)}{10}
+\contentsline {subsubsection}{\numberline {1.3.2.3}D12 SOAP interface (events, devices)}{11}
+\contentsline {section}{\numberline {1.4}Organization of this report}{11}
+\contentsline {chapter}{\numberline {2}TMC Activity}{12}
+\contentsline {section}{\numberline {2.1}Identification}{12}
+\contentsline {section}{\numberline {2.2}Verification}{14}
+\contentsline {section}{\numberline {2.3}Response}{14}
+\contentsline {subsection}{\numberline {2.3.1}Information dissemination}{15}
+\contentsline {subsection}{\numberline {2.3.2}Field response}{15}
+\contentsline {subsection}{\numberline {2.3.3}Coordinate}{15}
+\contentsline {subsection}{\numberline {2.3.4}Control}{16}
+\contentsline {section}{\numberline {2.4}Monitoring}{16}
+\contentsline {section}{\numberline {2.5}Practical Concerns}{16}
+\contentsline {chapter}{\numberline {3}Modeling Methodology}{18}
+\contentsline {section}{\numberline {3.1}Incident impact model}{18}
+\contentsline {subsection}{\numberline {3.1.1}Section definition}{18}
+\contentsline {subsection}{\numberline {3.1.2}Stream state estimation using single loops}{18}
+\contentsline {subsection}{\numberline {3.1.3}Nominal speed distribution}{20}
+\contentsline {subsection}{\numberline {3.1.4}Quantifying the total delay caused by an incident}{21}
+\contentsline {subsubsection}{\numberline {3.1.4.1}Determining maximum extent of incident influence}{21}
+\contentsline {subsubsection}{\numberline {3.1.4.2}Determining the congested region}{23}
+\contentsline {subsection}{\numberline {3.1.5}Improvements to the core delay model}{30}
+\contentsline {subsubsection}{\numberline {3.1.5.1}Bounding the incident}{30}
+\contentsline {subsubsection}{\numberline {3.1.5.2}Distance weighting}{30}
+\contentsline {subsection}{\numberline {3.1.6}Ongoing work}{31}
+\contentsline {subsubsection}{\numberline {3.1.6.1}Improved statistical techniques}{31}
+\contentsline {subsubsection}{\numberline {3.1.6.2}Improved solver}{31}
+\contentsline {section}{\numberline {3.2}Modeling {TMC} impacts}{31}
+\contentsline {subsection}{\numberline {3.2.1}Computing queues caused by incident congestion}{35}
+\contentsline {subsection}{\numberline {3.2.2}Estimating tangible TMC benefits}{40}
+\contentsline {subsection}{\numberline {3.2.3}Ongoing work}{40}
+\contentsline {chapter}{\numberline {4}System architecture}{41}
+\contentsline {section}{\numberline {4.1}Use Cases}{41}
+\contentsline {section}{\numberline {4.2}Service-Oriented Architecture}{42}
+\contentsline {section}{\numberline {4.3}Components}{42}
+\contentsline {subsection}{\numberline {4.3.1}Business Logic}{42}
+\contentsline {subsubsection}{\numberline {4.3.1.1}Incident impact service}{42}
+\contentsline {paragraph}{STATUS:}{42}
+\contentsline {subsubsection}{\numberline {4.3.1.2}TMC impact service}{44}
+\contentsline {paragraph}{STATUS:}{44}
+\contentsline {subsection}{\numberline {4.3.2}Interfaces}{44}
+\contentsline {subsubsection}{\numberline {4.3.2.1}Web-based incident post-analysis tool}{44}
+\contentsline {paragraph}{STATUS:}{44}
+\contentsline {section}{\numberline {4.4}Ongoing work}{45}
+\contentsline {subsection}{\numberline {4.4.1}Improved TMC activity data}{45}
+\contentsline {paragraph}{STATUS:}{45}
+\contentsline {subsection}{\numberline {4.4.2}System architecture}{46}
+\contentsline {chapter}{\numberline {5}TODO}{48}
