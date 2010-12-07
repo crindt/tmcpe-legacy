@@ -56,10 +56,13 @@ class TestbedController {
         def json = [];
         theList.each() { 
             if ( it.section ) {
+		def url = createLink(absolute:true,controller:'incident',action:'showCustom',id:it.id)
                 json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, 
                         //properties: it
                         properties: [ locString: "Incident " + it.cad + ": " + it.section.toString(), 
-                                      memo: '<p>it.memo</p><p><a href="https://parsons.its.uci.edu/tmcpe-devel/incident/showCustom/'+it.id+'">Click to see the incident analysis on the TMCPE Website</a>']  
+                                      memo: '<p>it.memo</p><p><a href="'+url+'">Click to see the incident analysis on the TMCPE Website</a>',
+				      url: url
+				    ]  
                         ] ) 
             }
         }
@@ -130,11 +133,13 @@ class TestbedController {
         def json = [];
         theList.each() { 
             def memo = it.firstCall ? it.firstCall.memo:it.sigalertBegin?it.sigalertBegin.memo : "<NO MEMO>"
+	    def url = createLink(absolute:true,controller:'incident',action:'showCustom',id:it.id)
             json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, 
                         //properties: it
                         properties: [ locString: "Incident " + it.cad + ": " + it.section.toString(), 
                                       //memo: '[it.memo](http://parsons.its.uci.edu/tmcpe-devel/incident/showCustom/'+it.id+')'
-                                      memo: '<a href="http://parsons.its.uci.edu/tmcpe-devel/incident/showCustom/'+it.id+'">detail:'+memo+'</a>'
+                                      memo: '<a href="'+url+'">detail:'+memo+'</a>',
+				      url: url
                                     ]
                         ] ) 
         }
