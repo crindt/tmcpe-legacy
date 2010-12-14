@@ -3,6 +3,8 @@ package edu.uci.its.tmcpe
 import grails.converters.*
 import org.hibernate.criterion.*
 
+import grails.plugins.springsecurity.Secured
+
 @Secured(["IS_AUTHENTICATED_FULLY"])
 class TestbedController {
 
@@ -133,7 +135,7 @@ class TestbedController {
 	
         def json = [];
         theList.each() { 
-            def memo = it.firstCall ? it.firstCall.memo:it.sigalertBegin?it.sigalertBegin.memo : "<NO MEMO>"
+            def memo = it.firstCall ? it.firstCall.memoOnly:it.sigalertBegin?it.sigalertBegin.memoOnly : "<NO MEMO>"
 	    def url = createLink(absolute:true,controller:'incident',action:'showCustom',id:it.id)
             json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, 
                         //properties: it
