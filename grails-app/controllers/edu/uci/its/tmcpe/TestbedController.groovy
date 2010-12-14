@@ -3,6 +3,7 @@ package edu.uci.its.tmcpe
 import grails.converters.*
 import org.hibernate.criterion.*
 
+@Secured(["IS_AUTHENTICATED_FULLY"])
 class TestbedController {
 
     def incidentSummary = {
