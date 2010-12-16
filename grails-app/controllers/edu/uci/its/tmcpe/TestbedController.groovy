@@ -112,26 +112,15 @@ class TestbedController {
                 }
             }
         }
-     
-        // Get the total number...
-        def c = Incident.createCriteria()
-        int totalCount = c.get {
-            projections {
-                count( 'id' )
-            }
-            or( incidentCriteria )
-        }
 
         // now get the page...
-        c = Incident.createCriteria()
+        def c = Incident.createCriteria()
         def theList = c.list {
             maxResults(maxl)
             if ( params.offset ) { firstResult( params.offset.toInteger() ) }
             or( incidentCriteria )
-            order( 'startTime', 'asc' )
+            order( 'startTime', 'desc' )  // order descending to show most recent if max is reached
         }
-
-        System.err.println( "============COUNT: " + totalCount )
 	
         def json = [];
         theList.each() { 
