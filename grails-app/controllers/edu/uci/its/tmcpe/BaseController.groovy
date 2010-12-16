@@ -10,9 +10,10 @@ class BaseController {
 
     def beforeInterceptor = {
 	def ver = userAgentIdentService.getBrowserVersion().split("\\.")
+	log.info( "BROWSER VERSION: " + ver.join("..") )
 	switch ( userAgentIdentService.getBrowserType() ) {
 	case UserAgentIdentService.FIREFOX:
-	    if ( (ver[0] < 3) || (ver[0].toInteger() == 3 && ver[1].toInteger() < 5) ) {
+	    if ( [ver[0],ver[1]].join(".").toFloat() < 3.5 ) {
 		redirect(controller:'help',action:'browserHelp');
 	    }
 	    break;
