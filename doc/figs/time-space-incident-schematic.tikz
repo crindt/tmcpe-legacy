@@ -1,6 +1,6 @@
 \scriptsize
-\newcounter{time}
-\newcounter{space}
+\setcounter{time}{0}
+\setcounter{space}{0}
 \begin{tikzpicture}
   [incident/.style={draw,color=black!30,,fill=yellow!50,text=black},
   feasible/.style={draw,color=black!30,fill=cyan!30,text=black},

@@ -37,7 +37,7 @@
 
   \draw [latex'-] (d3) ..controls +(140:0.05) and +(0:0.05) .. ++(-0.25,0.05) node [anchor=east] {Effects of incident totally dissipated};
 
-  \path (t0) -- coordinate[pos=0.7] (tresp) (t1);
+  \path (tbot) -- coordinate[pos=0.7] (tresp) (t1);
   \draw [-latex'] (t0lab) -- coordinate (respptr) node [below=2em,anchor=north,text width=15em] (resplab) {Incident detection, verification, and response deployment} (t0lab -| tresp) coordinate (tmp);
   \path (tmp |- t0lab.south) coordinate(tmp);
   \draw (tmp) -- (tmp |- 0,0);

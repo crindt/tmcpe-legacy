@@ -207,15 +207,15 @@
     \setcounter{space}{0}
     \\
     \node (tM)[heading] {$t_M$}; \setcounter{space}{0} &
-    \node (n$M$ \arabic{space})[infeasible]{}; &
-    \node (n$M$ \arabic{space})[infeasible]{}; &
-    \node (n$M$ \arabic{space})[infeasible]{}; &
-    \node (n$M$ \arabic{space})[infeasible]{}; &
-    \node (n$M$ \arabic{space})[infeasible]{}; &
-    \node (n$M$ \arabic{space})[infeasible]{}; &
-    \node (n$M$ \arabic{space})[infeasible]{}; &
-    \node (n$M$ \arabic{space})[infeasible]{}; &
-    \node (n$M$ F1)[infeasible]{}; \\
+    \node (nM \arabic{space})[infeasible]{}; &
+    \node (nM \arabic{space})[infeasible]{}; &
+    \node (nM \arabic{space})[infeasible]{}; &
+    \node (nM \arabic{space})[infeasible]{}; &
+    \node (nM \arabic{space})[infeasible]{}; &
+    \node (nM \arabic{space})[infeasible]{}; &
+    \node (nM \arabic{space})[infeasible]{}; &
+    \node (nM \arabic{space})[infeasible]{}; &
+    \node (nM F1)[infeasible]{}; \\
   };
 
   % draw true impacted region
