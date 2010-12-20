@@ -15,3 +15,10 @@ web-app/js/dojo-link/
 pems/
 location-parse*.log
 import-*.log
+*.aux
+*.lof
+*.log
+*.toc
+*_latexmk
+*.blg
+*.bbl
