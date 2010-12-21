@@ -9,6 +9,7 @@
 \usepackage{units}
 %\usepackage{nomencl}
 \usepackage{graphicx}
+\usepackage{rotating}
 \usepackage{paralist} 
 \usepackage{natbib}
 \usepackage{multirow}
@@ -21,6 +22,7 @@
 \usepackage{acronym}
 \usepackage{setspace}
 \usepackage{url}
+\usepackage[noauto]{chappg}
 
 \DeclareMathOperator{\poisson}{P} %
 \DeclareMathOperator{\nbin}{NBin} %
@@ -32,6 +34,9 @@
 \newif\iffull
 \fulltrue
 
+\newif\ifuserguide % introduce a switch for including the user guide as an appendix or not
+\userguidefalse
+
 % [more preamble that in my case also uses \iffinal for other stuff]
 
 \pgfrealjobname{final-report}
@@ -42,6 +47,7 @@
     \input{#1.tikz}%
     \end{singlespace}
   }
+%  \renewcommand{\fixme}[3][1][]{}
 \else
   \newcommand{\inputTikZ}[1]{%
     \begin{singlespace}
@@ -102,8 +108,11 @@
 
 \includepdf{65A0252_Technical_Report_Documentation_(APP-3).pdf}
 
+\setcounter{page}{0}
 
 \clearpage
+
+\pagenumbering{roman}
 
 %\chapter*{Executive Summary}
 {\noindent\huge\bfseries\centering Executive Summary\par\nobreak
@@ -120,17 +129,19 @@
 \listoffigures
 \addcontentsline{toc}{chapter}{\protect\numberline{}List of Figures}
 
-% \clearpage
+\clearpage
 
-% \listoftables
-% \addcontentsline{toc}{chapter}{\protect\numberline{}List of Tables}
+\listoftables
+\addcontentsline{toc}{chapter}{\protect\numberline{}List of Tables}
 
 \clearpage
 
-%\setcounter{page}{0}
-
+\includepdf[pages={1},pagecommand={\thispagestyle{plain}},trim=0in 1in 0in 1in,clip]{appendix_3-2_disclaimer_page.pdf}
 
 \acresetall
+
+\setcounter{page}{0}
+\pagenumbering{arabic}
 
 \chapter{Introduction and Background}
 \label{sec:intro}
@@ -149,8 +160,7 @@ managers to evaluate the performance of various bundles of \ac{TMC}
 technologies and operational policies by mapping their effects onto
 events in the system that can be measured using existing surveillance
 systems and daily activity logs. The resulting tool provides managers
-with the long needed capabilities \fixme[to]{crindt}{synchronize these
-  in the results and conclusion}:
+with the long needed capabilities to:
 \begin{itemize}
 \item justify valuable technology, personnel allocations, and
   maintenance costs,
@@ -270,20 +280,17 @@ three groups:
 \item kinematic wave (i.e., shockwave) theory \citep[e.g.,]{chow74:_study_of_traff_perfor_model,wirasinghe78:_deter_of_traff_delay_from,heydecker94:_incid_and_inter_freew,al-deek95:_new_method_for_estim_freew_incid_conges}
 \item heuristic methods \citep[e.g.,]{skabardonis96:_i_field_exper,skabardonis03:_measur_recur_and_nonrec_traff_conges}
 \end{enumerate}
-The results from these approaches have been applied both alone and in
-concert with each other. But, since virtually none of these studies
-uses a source of incident data with descriptive variables and
-reporting techniques in common with the others, comparisons between
-different methods are difficult
-\citep{goolsby71:_influen_of_incid_freew_qualit_of_servic}, and their
-spatial transferability is limited. To date there has been only
-limited research into models that can estimate how long, how far, and
-to what extent any particular incident will affect traffic and, by
-extension, little research into understanding how \acp{TMC} perform at
-minimizing the impact of such incidents.  The \fixme[focus in this
-project]{crindt}{tie back to inconclusion} has been the development of
-incident-specific delay-estimation metrics that can be used to
-evaluate \ac{TMC} performance.
+The results from these approaches have been applied both alone and in concert
+with each other. But, since virtually none of these studies uses a source of
+incident data with descriptive variables and reporting techniques in common with
+the others, comparisons between different methods are difficult
+\citep{goolsby71:_influen_of_incid_freew_qualit_of_servic}, and their spatial
+transferability is limited. To date there has been only limited research into
+models that can estimate how long, how far, and to what extent any particular
+incident will affect traffic and, by extension, little research into
+understanding how \acp{TMC} perform at minimizing the impact of such incidents.
+The focus in this project has been the development of incident-specific
+delay-estimation metrics that can be used to evaluate \ac{TMC} performance.
 % The next section
 % details the methods developed to date and suggests an approach for
 % applying these delay metrics to analyzing the impacts of \ac{TMC} processes
@@ -346,7 +353,7 @@ For greater transferability, the \ac{TMCPE} system can also make use
 of the \emph{devices} implementation in the District 12's SOAP
 interface.  This interface implements portions of the center-to-center
 interface of the National ITS Architecture standard---including the
-VDS interface standard which streams 30-second sensor readings from
+\ac{VDS} interface standard which streams 30-second sensor readings from
 all detectors in the district.  In order to make use of this
 interface, the \ac{TMCPE} system would need to build its own archive
 of sensor data received.  Since this is already being done as part of
@@ -429,21 +436,21 @@ be straightforward given their common ancestry.
 
 
 The remainder of this report is structured as follows.
-Chapter~\ref{chap:tmc-activity} describes the processes used in the Caltrans \ac{D12}
-\ac{TMC} during the management of accidents, which is the initial target of this
-performance evaluation effort.  Chapter~\ref{sec:method} details the methods
-being used for performance measurement---with a focus on the calculation of
-delay attributable to specific incidents as well as a discussion of how to model
-the impacts of \ac{TMC} actions on the dynamics of such incidents.
+Chapter~\ref{chap:tmc-activity} describes the processes used in the Caltrans
+\ac{D12} \ac{TMC} during the management of accidents, which is the initial
+target of this performance evaluation effort.  Chapter~\ref{sec:method} details
+the methods being used for performance measurement---with a focus on the
+calculation of delay attributable to specific incidents as well as a discussion
+of how to model the impacts of \ac{TMC} actions on the dynamics of such
+incidents.
 %Section \ref{} offers a preliminary
 %analysis of three representative incidents used to evaluate the
 %method. 
-Chapter~\ref{sec:system-architecture} describes the system
-architecture that is being developed to deploy the system as an
-operational tool for the \ac{TMC} as part of the \ac{CTMLabs}.  In
-chapter~\ref{chap:results}, we discuss representative results from the
-system and we conclude in chapter~\ref{chap:conclusion} with some
-recommendations for continued development of the \ac{TMCPE} system.
+Chapter~\ref{sec:system-architecture} describes the system architecture that was
+developed to deploy the system as an operational tool for the \ac{TMC} as part
+of the \ac{CTMLabs}.  In chapter~\ref{chap:results}, we discuss representative
+results from the system and we conclude in chapter~\ref{chap:conclusion} with
+some recommendations for continued development of the \ac{TMCPE} system.
 %Finally, section \ref{} offers some recommendations for
 %modifications to existing processes and tools in the District 12 \ac{TMC}
 %(particularly the \ac{TMC} activity log) that will support more complete
@@ -454,32 +461,29 @@ recommendations for continued development of the \ac{TMCPE} system.
 
 At the onset of this project, the district 12 \ac{TMC} employed
 locally-developed \ac{TMC} activity log software
-(section~\ref{sec:tmc-activity-log}) to record traffic management
-activity carried out by the \ac{TMC}.  This software was developed
-over a number of years with a variety of purposes in mind.  Though the
-initial analyses have been conducted using this existing logging data,
-the data is unsuitable for general purpose automated processing to
-identify critical events in \ac{TMC} operations that impact system
-performance.  As such, work was initiated under this contract to
-improve the activity logging system to better meet such performance
+(section~\ref{sec:tmc-activity-log}) to record traffic management activity
+carried out by the \ac{TMC}.  This software was developed over a number of years
+with a variety of purposes in mind.  Though the initial analyses have been
+conducted using this existing logging data, the data is unsuitable for general
+purpose automated processing to identify critical events in \ac{TMC} operations
+that impact system performance.  As such, work was initiated under this contract
+to improve the activity logging system to better meet such performance
 monitoring needs going forward.
 
-A critical first step in this process was the identification of core
-events in incident management that can be directly recorded by the
-activity logging system through a set of interviews and communications
-with district 12 staff and contractors.  The following summarizes the
-\ac{TMC} processes used to manage accidents occurring in the managed
-system.  Note that this effort was carried out in parallel to a number
-of efforts in district 12 and beyond to capture and organize event
-management, including \acs{D12}'s event management system development
-and the Caltrans-wide effort to develop the \ac{TMCAL} system.  Any
-findings below should be considered one characterization of the larger
-problem of organizing \ac{TMC} processes to best manage, monitor, and
-evaluate Caltrans traffic management in general, and \ac{TMC} activity
-in particular.
+A critical first step in this process was the identification of core events in
+incident management that can be directly recorded by the activity logging system
+through a set of interviews and communications with district 12 staff and
+contractors.  The following summarizes the \ac{TMC} processes used to manage
+accidents occurring in the managed system.  Note that this effort was carried
+out in parallel to a number of efforts in district 12 and beyond to capture and
+organize event management, including \acs{D12}'s event management system
+development and the Caltrans-wide effort to develop the \ac{TMCAL} system.  Any
+findings below should be considered one characterization of the larger problem
+of organizing \ac{TMC} processes to best manage, monitor, and evaluate Caltrans
+traffic management in general, and \ac{TMC} activity in particular.
 
-Based upon our interviews, incident management by the \ac{TMC} can be described as
-four major subprocesses that are traversed sequentially as shown in
+Based upon our interviews, incident management by the \ac{TMC} can be described
+as four major subprocesses that are traversed sequentially as shown in
 figure~\ref{fig:flowchart}
 \begin{sidewaysfigure}
   \pgfpagesuselayout{resize to}[letterpaper,landscape,border shrink=5mm]
@@ -492,17 +496,17 @@ figure~\ref{fig:flowchart}
     events whose dynamics are dictated by events in the field.}
   \label{fig:flowchart}
 \end{sidewaysfigure}
-Each subprocess dictates a series of actions to be carried out by the
-\ac{TMC}.  The transition between the subprocesses is governed by a
-series of events whose dynamics are dictated by events in the field.
+Each subprocess dictates a series of actions to be carried out by the \ac{TMC}.
+The transition between the subprocesses is governed by a series of events whose
+dynamics are dictated by events in the field.
 
 \section{Identification}
 \label{sec:identification}
 
 
-\ac{TMC} management of an incident always begins with the {\sc First Call} to the
-\ac{TMC}, which notifies operators that there has been a disruption to what is
-considered ``normal'' operating conditions.  From an operational perspective,
+\ac{TMC} management of an incident always begins with the {\sc First Call} to
+the \ac{TMC}, which notifies operators that there has been a disruption to what
+is considered ``normal'' operating conditions.  From an operational perspective,
 these disruptions can affect the capacity of particular sections of roadway (as
 in a traffic accident), the prevailing demand to use particular stretches of
 roadway (as in a special event), or some combination of the two.  Our emphasis
@@ -518,12 +522,12 @@ The {\sc First Call} can come from any number of sources including:
 \item Media
 \item Neighboring districts
 \end{itemize}
-The vast majority come by way of the \ac{CHP} \ac{iCAD} system and the local \ac{CHP} liason to
-the \ac{TMC}.
+The vast majority come by way of the \ac{CHP} \ac{iCAD} system and the local
+\ac{CHP} liaison to the \ac{TMC}.
 
 When a {\sc First Call} is received, initial details are collected about the
-location, type, and likely impact on the system.  \ac{TMC} staff is notified and a
-decision is made to manage the incident, which we term an {\sc Open Incident}
+location, type, and likely impact on the system.  \ac{TMC} staff is notified and
+a decision is made to manage the incident, which we term an {\sc Open Incident}
 event, at which point the process transitions to the Verification stage.
 
 
@@ -532,14 +536,14 @@ event, at which point the process transitions to the Verification stage.
 
 The purpose of verification is to identify and confirm the details of the
 incident to support response including the location, type, severity, and any
-other special conditions that are necessary to support \ac{TMC} operations.  Strictly
-speaking, the \ac{TMC} cannot respond to the incident until its characteristics are
-known.  This is particularly true in situations requiring special response, such
-as incidents requiring hazardous material spills.  Since total queuing delay is
-proportional to the fourth power of the response time (see
-section~\ref{sec:total-delay}), the speed with which verification is carried out
-can be a significant determinant to the quality of the response and the
-subsequent degree of disruption experienced by users of the system.
+other special conditions that are necessary to support \ac{TMC} operations.
+Strictly speaking, the \ac{TMC} cannot respond to the incident until its
+characteristics are known.  This is particularly true in situations requiring
+special response, such as incidents requiring hazardous material spills.  Since
+total queuing delay is proportional to the fourth power of the response time
+(see section~\ref{sec:total-delay}), the speed with which verification is
+carried out can be a significant determinant to the quality of the response and
+the subsequent degree of disruption experienced by users of the system.
 
 The \ac{TMC} has a number of resources to support verification including:
 \begin{itemize}
@@ -550,55 +554,53 @@ The \ac{TMC} has a number of resources to support verification including:
 \end{itemize}
 \ac{TMC} operators use information collected via resources to characterize the
 incident---which we term a diagnosis---for the purpose of formulating a
-response.  Once a diagnosis is produced, verification is complete and the \ac{TMC}
-moves to the {\sc Response} subprocess.
+response.  Once a diagnosis is produced, verification is complete and the
+\ac{TMC} moves to the {\sc Response} subprocess.
 
 \section{Response}
 \label{sec:response}
 
 The response subprocess is understandably the most involved activity carried out
-by the \ac{TMC}.  The collection of activities carried fall into four categories:
-Information dissemination, Field Response, Coordination, and Control.
+by the \ac{TMC}.  The collection of activities carried fall into four
+categories: Information dissemination, Field Response, Coordination, and
+Control.
 
 \subsection{Information dissemination}
 \label{sec:inf-dis}
 
 The sharing of information regarding the incident is one of the most critical
-actions carried out by the \ac{TMC}.  Information must flow to a number of audiences.
-Among the most important recipients are the operators and management of other
-agencies---including neighboring Caltrans districts and management, whose
-actions may depend on or involve the affected facilities.  Dedicated procedures
-exist for providing this communication, and for specifying when such
+actions carried out by the \ac{TMC}.  Information must flow to a number of
+audiences.  Among the most important recipients are the operators and management
+of other agencies---including neighboring Caltrans districts and management,
+whose actions may depend on or involve the affected facilities.  Dedicated
+procedures exist for providing this communication, and for specifying when such
 communication must occur.  For instance, headquarters is always notified when a
 SIGALERT is issued, updated, and terminated.
 
-Similarly, the users of the system must be notified of disruptions.
-This serves the purpose of providing both higher quality of service to
-users, since lack of information degrades the user experience, as well
-as acting as a control mechanism to initiate unmanaged diversion (see
-below for prescribed diversion).  A number of communications channels
-exist for notifying the public.  The media is informed through various
-information feeds that are provided directly or indirectly by Caltrans
-and its partner agencies.  For instance, members of the media can
-access the public \ac{CHP} \ac{iCAD} feed as well as speed information
-derived from Caltrans freeway sensors and exposed to various traffic
-information providers by via the \ac{ATMS} software system.  Issuance
-of a SIGALERT (by the \ac{CHP}) or a Traffic Advisory (by Caltrans)
-triggers specific interactions with the media.  Information can be
-provided directly to users in the vicinity of the incident using the
-fixed or mobile \ac{CMS} and \ac{HAR} systems.
+Similarly, the users of the system must be notified of disruptions.  This serves
+the purpose of providing both higher quality of service to users, since lack of
+information degrades the user experience, as well as acting as a control
+mechanism to initiate unmanaged diversion (see below for prescribed diversion).
+A number of communications channels exist for notifying the public.  The media
+is informed through various information feeds that are provided directly or
+indirectly by Caltrans and its partner agencies.  For instance, members of the
+media can access the public \ac{CHP} \ac{iCAD} feed as well as speed information
+derived from Caltrans freeway sensors and exposed to various traffic information
+providers by via the \ac{ATMS} software system.  Issuance of a SIGALERT (by the
+\ac{CHP}) or a Traffic Advisory (by Caltrans) triggers specific interactions
+with the media.  Information can be provided directly to users in the vicinity
+of the incident using the fixed or mobile \ac{CMS} and \ac{HAR} systems.
 
 \subsection{Field response}
 \label{sec:field-response}
 
-The field response to a particular incident is governed by the
-diagnosis generated during the {\sc Verification} process.  The
-Caltrans \ac{TMC} is responsible for managing the actions of
-\acp{TMT}, \ac{HAZMAT} crews, maintenance crews, and the coroner
-(managed by the \ac{CHP}) that are dispatched to mitigate the impacts
-of an incident on traffic operations and system infrastructure.  These
-actions are critical to restoring the performance of the system to
-normal and are therefore time critical events that must be logged
+The field response to a particular incident is governed by the diagnosis
+generated during the {\sc Verification} process.  The Caltrans \ac{TMC} is
+responsible for managing the actions of \acp{TMT}, \ac{HAZMAT} crews,
+maintenance crews, and the coroner (managed by the \ac{CHP}) that are dispatched
+to mitigate the impacts of an incident on traffic operations and system
+infrastructure.  These actions are critical to restoring the performance of the
+system to normal and are therefore time critical events that must be logged
 effectively to support performance evaluation.
 
 \subsection{Coordinate}
@@ -606,15 +608,16 @@ effectively to support performance evaluation.
 
 Though the transportation system is divided into multiple jurisdictions for
 management purposes, its global performance is linked by the actions of other
-agencies, most notably the \ac{CHP}, neighboring Caltrans districts, and neighboring
-municipalities.  From interviews with \ac{TMC} staff, coordination with \ac{CHP} is fluid,
-with the \ac{CHP} and the \ac{TMC} working in concert to manage incidents.  Coordination
-with neighboring districts also involves fluid communications regarding actions
-and responsibilities.  Coordination with municipal entities is limited except in
-the case of severe incidents.  In those instances, response coordination is
-typically governed by pre-defined coordinated response plans that govern
-actions, for instance, in the case of a freeway closure and subsequent diversion
-to a municipality's surface street network.
+agencies, most notably the \ac{CHP}, neighboring Caltrans districts, and
+neighboring municipalities.  From interviews with \ac{TMC} staff, coordination
+with \ac{CHP} is fluid, with the \ac{CHP} and the \ac{TMC} working in concert to
+manage incidents.  Coordination with neighboring districts also involves fluid
+communications regarding actions and responsibilities.  Coordination with
+municipal entities is limited except in the case of severe incidents.  In those
+instances, response coordination is typically governed by pre-defined
+coordinated response plans that govern actions, for instance, in the case of a
+freeway closure and subsequent diversion to a municipality's surface street
+network.
 
 
 \subsection{Control}
@@ -630,56 +633,52 @@ settings) may be modified to account for shifts in prevailing traffic flow.
 \section{Monitoring}
 \label{sec:monitoring}
 
-Each discrete response activity described above has an explicit or
-implicit intended outcome that would, in an ideal system, be directly
-measurable via the monitoring subprocess.  In reality, the impact of
-only a subset of the response actions can be measured directly.  For
-instance, the efforts of \ac{CHP}, \acp{TMT}, etc. to clear the roadway
-can be recorded directly in the \ac{TMC} activity logs as lanes
-restored.  The impact of information dissemination, on the other hand,
-is very difficult to infer from the course sensor data available.  The
-monitoring process should also track when additional event(s) occur
-that may impact the mitigation efforts for a prevailing incident.
-Management of multiple incidents may be handled separately or combined
-into a single management problem.
+Each discrete response activity described above has an explicit or implicit
+intended outcome that would, in an ideal system, be directly measurable via the
+monitoring subprocess.  In reality, the impact of only a subset of the response
+actions can be measured directly.  For instance, the efforts of \ac{CHP},
+\acp{TMT}, etc. to clear the roadway can be recorded directly in the \ac{TMC}
+activity logs as lanes restored.  The impact of information dissemination, on
+the other hand, is very difficult to infer from the course sensor data
+available.  The monitoring process should also track when additional event(s)
+occur that may impact the mitigation efforts for a prevailing incident.
+Management of multiple incidents may be handled separately or combined into a
+single management problem.
 
-Generally, the monitoring process should keep track of changes to the
-system as they relate to the incident in question.  Changes might
-include arrival of \ac{TMT}s or other response crews, lane clearance,
-completion of \ac{HAZMAT} efforts, length of queuing (for validation
-purposes) and any other information that is potentially relevant to
-incident post analysis.  Each such (verified) {\sc Status Change}
-could produce an updated diagnosis and possibly changes to the
-\ac{TMC} response, as indicated by the feedback loop in
+Generally, the monitoring process should keep track of changes to the system as
+they relate to the incident in question.  Changes might include arrival of
+\ac{TMT}s or other response crews, lane clearance, completion of \ac{HAZMAT}
+efforts, length of queuing (for validation purposes) and any other information
+that is potentially relevant to incident post analysis.  Each such (verified)
+{\sc Status Change} could produce an updated diagnosis and possibly changes to
+the \ac{TMC} response, as indicated by the feedback loop in
 figure~\ref{fig:flowchart}.
 
 
 \section{Practical Concerns}
 \label{sec:practical-concerns}
 
-The \ac{TMC} is a complex environment with a vast array of hardware
-and software collecting, managing, and disseminating information
-regarding the performance and operation of the Caltrans highway
-network.  It is notable that a number of these systems have functions
-that occasionally overlap.  For instance, the activity logging
-software is the \emph{de facto} interface for \ac{TMC} operators in
-\ac{D12} engaged in traffic management.  However, a subset of \ac{TMC}
-actions, like setting the \ac{CMS} messages are carried out via the
-\ac{ATMS} software system.  Logging of \ac{CMS} messages in the
-activity log must (currently) be done manually.  Furthermore, Caltrans
-continues to actively develop an expert system for event management to
-improve event management processes by formalizing them and mandating
-that certain information is recorded and that particular actions are
-carried out.
+The \ac{TMC} is a complex environment with a vast array of hardware and software
+collecting, managing, and disseminating information regarding the performance
+and operation of the Caltrans highway network.  It is notable that a number of
+these systems have functions that occasionally overlap.  For instance, the
+activity logging software is the \emph{de facto} interface for \ac{TMC}
+operators in \ac{D12} engaged in traffic management.  However, a subset of
+\ac{TMC} actions, like setting the \ac{CMS} messages are carried out via the
+\ac{ATMS} software system.  Logging of \ac{CMS} messages in the activity log
+must (currently) be done manually.  Furthermore, Caltrans continues to actively
+develop an expert system for event management to improve event management
+processes by formalizing them and mandating that certain information is recorded
+and that particular actions are carried out.
 
 In this complex environment, additional logging burdens are not likely to be
-well received.  Ideally, many \ac{TMC} actions would be automatically logged using
-messages passed between the various software systems (including the \ac{TMC} activity
-log interface) to a logging service that maintains the backend logging database.
-With this in mind, we recommend a simple, extensible event tagging system that
-captures key points of the incident management process consistent with the above
-description.  These event tags correspond to the red events in
-figure~\ref{fig:flowchart} and are summarized in
+well received.  Ideally, many \ac{TMC} actions would be automatically logged
+using messages passed between the various software systems (including the
+\ac{TMC} activity log interface) to a logging service that maintains the backend
+logging database.  With this in mind, we recommend a simple, extensible event
+tagging system that captures key points of the incident management process
+consistent with the above description.  These event tags correspond to the red
+events in figure~\ref{fig:flowchart} and are summarized in
 table~\ref{tab:tmc-event-summary}.
 \begin{table}[ht]
   \centering
@@ -717,14 +716,13 @@ table~\ref{tab:tmc-event-summary}.
   \label{tab:tmc-event-summary}
 \end{table}
 
-The {\sc Response Action} and {\sc Status Change} tags will ideally
-include a complete set of possible response/condition pairs that
-characterizes \ac{TMC} actions and their effects.  To the extent that
-the \ac{TMC} Logging system can standardize logging to produce
-unambiguous tags for these events, the performance evaluation system
-will be able to reconstruct historical incidents for post-analysis.
-The next chapter describes that modeling methodology used in the
-\ac{TMCPE} system.
+The {\sc Response Action} and {\sc Status Change} tags will ideally include a
+complete set of possible response/condition pairs that characterizes \ac{TMC}
+actions and their effects.  To the extent that the \ac{TMC} Logging system can
+standardize logging to produce unambiguous tags for these events, the
+performance evaluation system will be able to reconstruct historical incidents
+for post-analysis.  The next chapter describes that modeling methodology used in
+the \ac{TMCPE} system.
 
 \fixme{crindt}{Show better before and after logs}
 
@@ -777,17 +775,16 @@ consecutively as $(i - 1), (i - 2), \ldots{}$.
 \subsection{Stream state estimation using single loops}
 \label{sec:state-est}
 
-This method relies upon access to the prior one-year of historical
-traffic data--- specifically: traffic counts and occupancy for each
-lane at each detector station every 30 seconds. Lane-by-lane traffic
-data is aggregated to 5-minute intervals at each detector station in
-order to obtain stable traffic data from each point.
+This method relies upon access to the prior one-year of historical traffic
+data--- specifically: traffic counts and occupancy for each lane at each
+detector station every 30 seconds. Lane-by-lane traffic data is aggregated to
+5-minute intervals at each detector station in order to obtain stable traffic
+data from each point.
 
-Loop detectors in Orange County predominantly are single loop
-detectors that provide only traffic counts and occupancies; travel
-speeds need to be estimated from these measures assuming a so-called
-``$g$-factor,'' the summation of the average vehicle length and
-effective detection length
+Loop detectors in Orange County predominantly are single loop detectors that
+provide only traffic counts and occupancies; travel speeds need to be estimated
+from these measures assuming a so-called ``$g$-factor,'' the summation of the
+average vehicle length and effective detection length
 \citep{hall89:_evaluat_of_speed_estim_made,jia01:_pems_algor_for_accur_real,wang03:_can_singl_loop_detec_do}.
 The average speed, $\overline{s}$ , can be calculated as:
 \begin{equation}
@@ -1210,14 +1207,13 @@ These conditions can be enforced by the following relationships:
     \delta_{j,m+k} & \le \left[1 + (\delta_{j,m} - \delta_{j+1,m})\right]\cdot{}R; \forall{}j, m; \forall{}k \le M - m
   \end{align}
 \end{subequations}
-where $R$ is a large number, $J$ is the maximum number of upstream
-sections, and $M$ is the maximum number of time period, in 5-minute
-intervals (e.g., if the analysis time period is 4 hours in the study,
-$M$ = 48).  Equations~(\ref{eq:best-as-minimum-w-delta}) and
-(\ref{eq:constraint-relationships}) are in the form of the objective
-function and constraint, respectively, of ``Binary Integer Programming
-(BIP).'' The determination problem described above can be represented
-in the form of the following BIP problem:
+where $R$ is a large number, $J$ is the maximum number of upstream sections, and
+$M$ is the maximum number of time period, in 5-minute intervals (e.g., if the
+analysis time period is 4 hours in the study, $M$ = 48).
+Equations~(\ref{eq:best-as-minimum-w-delta}) and
+(\ref{eq:constraint-relationships}) are in the form of the objective function
+and constraint, respectively, of \ac{BIP} The determination problem described
+above can be represented in the form of the following \ac{BIP} problem:
 \begin{equation}
   \begin{split}
   \label{eq:bip-formulation}
@@ -1251,6 +1247,7 @@ critical both to keeping the calculations for each event tractable, as
 well as to prevent spurious
 
 \fixme[]{crindt}{Discuss the use of leading and trailing shockwave constraints}
+
 
 \subsubsection{Distance weighting}
 \label{sec:dist-weight}
@@ -1327,13 +1324,12 @@ coordinates from the \ac{CHP} \ac{iCAD} system to the incident logs
 \subsubsection{Maximum incident speed}
 \label{sec:max-inc-spd}
 
-Empirical analysis of incidents analyzed using the original delay
-calculation method showed that in some cases the use of the $\alpha$
-threshold to identify likely areas of incident-induced congestion
-would occasionally produce evidence that extended significantly beyond
-what was apparent to the analyst.  An example of this situation is
-show in \fixme[figure~\ref{fig:max-inc-spd}]{crindt}{Make this a side
-  by side before/after comparison}.
+Empirical analysis of incidents analyzed using the original delay calculation
+method showed that in some cases the use of the $\alpha$ threshold to identify
+likely areas of incident-induced congestion would occasionally produce evidence
+that extended significantly beyond what was apparent to the analyst.  An example
+of this situation is shown in \fixme[figure~\ref{fig:max-inc-spd}]{crindt}{Make
+  this a side by side before/after comparison}.
 \begin{figure}[t]
   \centering
   \caption{Illustrating the need for a maximum incident speed}
@@ -1530,27 +1526,6 @@ Poisson distribution, and is thus able to model a ``catch-all'' event
 type that gives some probability mass to event counts from
 various-sized event types.
 
-
-\subsubsection{Improved solver}
-\label{sec:improved-solver}
-
-\fixme{crindt}{transition!!}
-
-The initial implementation for the proof of concept formulates the
-binary integer program (BIP) in equations~(\ref{eq:bip-formulation})
-for solution using the \texttt{GAMS} solver, which is a general
-purpose solver.  At present, the solution time for determining the
-impacted region on a single facility for a major incident is on the
-order of 60 seconds.  Since the number of major incidents per day is
-relatively small, this performance is suitable for batch processes
-that compute the baseline delays for a given day during the course of
-the following night.  Still, it is likely that the (time) performance
-of the solver can be improved by using algorithms more tuned for
-solving BIP problems.  Improved performance would give the analyst
-more flexibility for re-running the solver with different parameters
-(e.g., $\alpha$, the maximum duration, etc.) for a given incident.
-This would, in turn, allow the web-based interface to provide a better
-end-user experience.
 
 
 
@@ -2006,84 +1981,77 @@ under active development in the \ac{CTMLabs}.
 
 The \ac{TMC} performance evaluation system could potentially be used in a
 variety of settings. The primary use-case is to allow \ac{TMC} personnel to
-perform post-analysis of incidents that have occurred in order to
-produce a measure of the value of \acp{TMC} to Caltrans and the State of
-California. In this role, the system must operate as an easy-to-use
-reporting system with which the analyst can specify a set of
-analytical parameters defining the incidents to analyze, any necessary
-modeling assumptions, and \ac{TMC} components to model. The ideal interface
-will be accessible from any authenticated computer and will use
-technology already familiar to operators.
+perform post-analysis of incidents that have occurred in order to produce a
+measure of the value of \acp{TMC} to Caltrans and the State of California. In
+this role, the system must operate as an easy-to-use reporting system with which
+the analyst can specify a set of analytical parameters defining the incidents to
+analyze, any necessary modeling assumptions, and \ac{TMC} components to
+model. The ideal interface will be accessible from any authenticated computer
+and will use technology already familiar to operators.
 
-A second potential use-case for the evaluation system is a real-time
-tmode that attempts to forecast the cost of delaying action on current
-incidents. While this use is not be part of this initial project, it
-would be a potentially straightforward extension of the core models to
-provide real-time decision support to \ac{TMC} personnel actively
-engaged in managing multiple simultaneous incidents. In this role, the
-evaluation system would operate in the background, occasionally
-broadcasting estimates to other software components for them to
+A second potential use-case for the evaluation system is a real-time tmode that
+attempts to forecast the cost of delaying action on current incidents. While
+this use is not be part of this initial project, it would be a potentially
+straightforward extension of the core models to provide real-time decision
+support to \ac{TMC} personnel actively engaged in managing multiple simultaneous
+incidents. In this role, the evaluation system would operate in the background,
+occasionally broadcasting estimates to other software components for them to
 integrate into existing \ac{TMC} processes.
 
-A third use-case is that the performance evaluation system might be
-integrated into existing or future software systems used by Caltrans
-and its partners. One obvious example includes the \ac{PeMS} system, which
-performs similar functions with less detail. This project is a natural
-extension to that existing work and may therefore be a candidate for
-integration.
+A third use-case is that the performance evaluation system might be integrated
+into existing or future software systems used by Caltrans and its partners. One
+obvious example includes the \ac{PeMS} system, which performs similar functions
+with less detail. This project is a natural extension to that existing work and
+may therefore be a candidate for integration.
 
-This software is intended to support a process or set of processes
-carried out by \ac{TMC} operators and traffic engineers.  Toward that end,
-the system should integrate as cleanly as possible with existing
-processes and the software used to support them.  We note, however,
-that existing systems in the Caltrans \ac{D12} \ac{TMC} tend to be monolithic
-(and generally proprietary) applications---particularly as regards
-their user interfaces.  This makes integrating new software into the
-\ac{TMC} very challenging and potentially expensive.
+This software is intended to support a process or set of processes carried out
+by \ac{TMC} operators and traffic engineers.  Toward that end, the system should
+integrate as cleanly as possible with existing processes and the software used
+to support them.  We note, however, that existing systems in the Caltrans
+\ac{D12} \ac{TMC} tend to be monolithic (and generally proprietary)
+applications---particularly as regards their user interfaces.  This makes
+integrating new software into the \ac{TMC} very challenging and potentially
+expensive.
 
-To overcome these barriers, \ac{TMCPE} system is being deployed using
-horizontal integration strategies that separate core logic and data
-from the user interfaces used to interact with them.  The initial
-interface to the system will focus on the post-analysis use-case and
-will be web-browser based since that is a platform that will be
-familiar to virtually all users.  Integration of the system into any
-real-time operations will require further study.  Nonetheless, the
-architecture of the system should be flexible enough to allow such
+To overcome these barriers, \ac{TMCPE} system is being deployed using horizontal
+integration strategies that separate core logic and data from the user
+interfaces used to interact with them.  The initial interface to the system will
+focus on the post-analysis use-case and will be web-browser based since that is
+a platform that will be familiar to virtually all users.  Integration of the
+system into any real-time operations will require further study.  Nonetheless,
+the architecture of the system should be flexible enough to allow such
 deployment in the future.
 
 \section{Service-Oriented Architecture}
 \label{sec:soa}
 
-The \ac{TMC} performance evaluation system is being implemented using a
+The \ac{TMC} performance evaluation system was being implemented using a
 service-oriented architecture (SOA) whose logical flows as shown in
-figure~\ref{fig:system-arch}. A collection of existing databases
-provide raw data to the Incident Impact Model.  An analysis scheduler
-is configured to regularly execute performance analysis of incidents
-to generate baseline delays estimates.  Analysts can use the \ac{TMC}
-impact model via a web interface to analyze the benefits of the \ac{TMC}
-for any identified incident.
+figure~\ref{fig:logical-system-arch}. A collection of existing databases provide
+raw data to the Incident Impact Model.  An analysis scheduler is configured to
+regularly execute performance analysis of incidents to generate baseline delays
+estimates.  Analysts can use the \ac{TMC} impact model via a web interface to
+analyze the benefits of the \ac{TMC} for any identified incident.
 
-A possible future extension of the system for real-time delay
-estimation is not shown in the figure. In this mode, a Real-time Delay
-Estimator component would actively monitor the system for identified
-incidents, and would query the incident impact model to estimate the
-relative costs of delaying action on all active incidents. These
-results could be broadcast to any \ac{TMC} management application to assist
-operators in prioritizing \ac{TMC} actions.  
-
+A possible future extension of the system for real-time delay estimation is not
+shown in the figure. In this mode, a Real-time Delay Estimator component would
+actively monitor the system for identified incidents, and would query the
+incident impact model to estimate the relative costs of delaying action on all
+active incidents. These results could be broadcast to any \ac{TMC} management
+application to assist operators in prioritizing \ac{TMC} actions.  We discuss
+each of these components in the following sections.
 \begin{figure}[t]
   \begin{center}
     %\inputTikZ{figs/tmcpe-system-arch}
 %    \inputTikZ{figs/software-arch}
     %\includegraphics[width=\textwidth]{figs/software-arch.png}
     \inputTikZ{figs/status}
-    \caption{System architecture of the TMC performance evaluation
-      system.  \fixme{crindt}{Show only functional}}
-    \label{fig:system-arch}
+    \caption{The logical system architecture of the TMC performance evaluation
+      system.  \fixme{crindt}{Elaborate}}
+    \label{fig:logical-system-arch}
   \end{center}
 \end{figure}
 
-We discuss each of these components in the following sections.
 
 
 \section{Databases}
@@ -2096,19 +2064,18 @@ The first interim report for this project
 \citep{rindt08:_measur_based_system_for_tmc_perfor_evaluat} we noted
 that
 \begin{quote}
-  The \ac{D12} \ac{TMC} activity log records sufficient \ac{TMC} activity to perform
-  the basic delay calculation and evaluate a limited portion of the
-  benefits provided by the \ac{TMC}. For the activity log to be more
-  generally useful to performance evaluation, entries in the log
-  should be tied both to specific technologies that offer notable
-  impacts on \ac{TMC} processes or to procedures that are designed to have
-  intended effects.
+  The \ac{D12} \ac{TMC} activity log records sufficient \ac{TMC} activity to
+  perform the basic delay calculation and evaluate a limited portion of the
+  benefits provided by the \ac{TMC}. For the activity log to be more generally
+  useful to performance evaluation, entries in the log should be tied both to
+  specific technologies that offer notable impacts on \ac{TMC} processes or to
+  procedures that are designed to have intended effects.
 \end{quote}
-These recommendations were folded into a set of modifications made to
-the \ac{D12} \ac{TMC} activity log application under UCI subaward \#2009-2291
+These recommendations were folded into a set of modifications made to the
+\ac{D12} \ac{TMC} activity log application under UCI subaward \#2009-2291
 between Caltrans \ac{D12} and UCI.  The details of this work is included in
-Appendix A.  The most signficant changes with respect to the \ac{TMCPE}
-analysis is that the activity log was modified to:
+Appendix~\ref{chap:actlog-sub}.  The most significant changes with respect to
+the \ac{TMCPE} analysis is that the activity log was modified to:
 \begin{itemize}
 \item log the specific critical events outlined in
   chapter~\ref{chap:tmc-activity};
@@ -2123,73 +2090,85 @@ analysis is that the activity log was modified to:
 \end{itemize}
 
 In order to shield the production database from unnecessary loads from
-\ac{TMCPE} users, the development team decided to mirror the \ac{TMC}
-activity log database to a secure \ac{CTMLabs} server.  This mirror is
-further processed during \ac{TMCPE} analysis to remove any sensitive
-data such as phone numbers.  Consequently, the web application has no
-access to the raw sensitive data of the source database.
+\ac{TMCPE} users, the development team decided to mirror the \ac{TMC} activity
+log database to a secure \ac{CTMLabs} server.  This mirror is further processed
+during \ac{TMCPE} analysis to remove any sensitive data such as phone numbers.
+Consequently, the web application has no access to the raw sensitive data of the
+source database.
 
 
 \subsection{PeMS 5 minute database}
 \label{sec:pems-5-min}
 
-The \ac{TMCPE} service depends on the availability of 5-minute speed
-and volume data for each section of roadway being analyzed.  Though
-\ac{CTMLabs} has multiple sources for this data (see
-section~\ref{sec:system-data}), the team concluded that the \ac{PeMS}
-dataset was the most reliable.  The \ac{CTMLabs} deployment therefore
-mirrors the \ac{PeMS} ``value-added reseller'' (VAR) feed, which
-provides 5-minute section speeds and volumes.  These are mirrored onto
-the \ac{CTMLabs} dataserver at 5 minute intervals and are loaded into
-the \ac{CTMLabs} \ac{PeMS} database.
+The \ac{TMCPE} service depends on the availability of 5-minute speed and volume
+data for each section of roadway being analyzed.  Though \ac{CTMLabs} has
+multiple sources for this data (see section~\ref{sec:system-data}), the team
+concluded that the \ac{PeMS} dataset was the most reliable.  The \ac{CTMLabs}
+deployment therefore mirrors the \ac{PeMS} \ac{VAR} feed, which provides
+5-minute section speeds and volumes.  These are mirrored onto the \ac{CTMLabs}
+dataserver at 5 minute intervals and are loaded into the \ac{CTMLabs} \ac{PeMS}
+database.
 
-In addition to the 5-minute speeds and volumes, the \ac{TMCPE} delay
-calculation requires the computation of the expected distribution of
-flow and speed for affected sections by time-of-day and day-of-week.
-This is computed using a rolling 52-week horizon as described in
-equation~(\ref{eq:nominal-speed-obs}).  Since this is a relatively
-expensive computation, it is performed only once on demand the first
-time an analysis needs it, and then is cached in the database local
-\ac{PeMS} database.  A saved query, or 'view' is stored in the database
-that automatically selects the distribution from the cache, if
-available, or triggers the computation of a new distribution if it is
-missing.  This caching improves the performance of the web application
-signficantly.
+In addition to the 5-minute speeds and volumes, the \ac{TMCPE} delay calculation
+requires the computation of the expected distribution of flow and speed for
+affected sections by time-of-day and day-of-week.  This is computed using a
+rolling 52-week horizon as described in equation~(\ref{eq:nominal-speed-obs}).
+Since this is a relatively expensive computation, it is performed only once on
+demand the first time an analysis needs it, and then is cached in the database
+local \ac{PeMS} database.  A saved query, or 'view' is stored in the database
+that automatically selects the distribution from the cache, if available, or
+triggers the computation of a new distribution if it is missing.  This caching
+improves the performance of the web application significantly.
 
 
 \subsection{TMCPE application database}
 \label{sec:tmcpe-app-database}
 
-All domain data generated by the \ac{TMCPE} application are stored in
-the application database.  This includes all incident analyses and
-their components (such as individual facility analyses).  For
-development purposes, the generation of these databases is handled
-automatically by the Hibernate persistence system
-\citep{king10:_hiber_relat_persis_idiom_java} built into the
-\fixme[grails]{crindt}{first mention} framework
-\citep{rocher09:_grail_framew_refer_docum} used to deploy the
-\ac{TMCPE} application and its services.  The next section discusses
-these in more detail.
+All domain data generated by the \ac{TMCPE} application are stored in the
+application database.  This includes all incident analyses and their components
+(such as individual facility analyses).  The details of the domain objects
+stored in this database are discussed in section~\ref{sec:components} below.
 
 
 \section{Components}
 \label{sec:components}
 
 The main components of the performance evaluation system fall into two
-categories: business logic components that process data to produce new
-metrics for use in the \ac{TMC} and interface components that expose
-that data to other software or to users in the \ac{TMC}.
+categories: business logic components that process data to produce new metrics
+for use in the \ac{TMC} and interface components that expose that data to other
+software or to users in the \ac{TMC}.  
+
+Currently, the core business logic, including the \ac{TMCPE} computations is
+implemented using custom \texttt{perl} scripts and the commercial
+\ac{GAMS} optimization software \citep{GAMS}.  The user interface is implemented
+using the \texttt{Grails} web application framework \citep{grails}.  Both
+\texttt{perl} and \texttt{Grails} offer persistence mechanisms for reading and
+writing data to/from the databases.  However, because \texttt{Grails} is a
+convention-oriented framework while \texttt{perl} is more of a general purpose
+toolkit that is easier to adapt, we decided to allow \texttt{Grails} to manage
+the database schemas where they are shared between the business and user
+interface components.  The \texttt{Grails} persistence mechanism is built atop
+the industry standard \texttt{Hibernate} persistence
+\citep{king10:_hiber_relat_persis_idiom_java} engine, and consequently has
+enterprise stability and scalability.
+
+Thus, the general flow of development is to define the domain classes in the
+\texttt{Grails} framework, allow \texttt{Hibernate} to generate (and update) the
+database schemas as necessary, and then automatically pull the new schemas into
+the \texttt{perl} business logic using the \texttt{DBIx::Class} \texttt{perl}
+module.  This approach has proven robust and flexible in the development of the
+system.
 
 
 \subsection{Business Logic}
 \label{sec:logic}
 
-Except where noted, the core business logic is executed via scheduled
-services.  The core analysis is scheduled to run daily at 2am to
-process the events of the previous day and make them available for
-users.
 
 \subsubsection{Incident impact service}
+
+\label{sec:incident-impact-service}
+
+
 
 This component encapsulates the incident impact model described in
 section~\ref{sec:incident-impact-model}.  It only requires the
@@ -2198,10 +2177,9 @@ database and \ac{CHP} \ac{iCAD} data to obtain further data necessary
 for the analysis.  The service returns a list of impacted sections and
 associated delay calculations.
 
-The core models for the incident impact service have been developed
-using a program written in the \texttt{perl} scripting language
-\citep{FIXME}.  The high-level logic for this service is shown in
-figure~\ref{fig:inc-imp-serv}.
+The core models for the incident impact service have been developed using a
+program written in the \texttt{perl} scripting language.  The high-level logic
+for this service is shown in figure~\ref{fig:inc-imp-serv}.
 \begin{figure}[t]
   \centering
   \begin{enumerate}
@@ -2211,14 +2189,17 @@ figure~\ref{fig:inc-imp-serv}.
     \begin{enumerate}
     \item Loop over the activity and communications logs and:
       \begin{itemize}
-      \item determine the \fixme[event type]{crindt}{discuss}
-      \item import privacy scrubbed data into the application database
+      \item determine the event type based upon the \ac{iCAD} ID of the event,
+        which falls into the following broad categories: incidents (accidents,
+        etc.), special events (like sporting events) 
+        maintenance/construction activities.
+      \item import privacy scrubbed data into the application database.
       \item identify performance measures information needed to
         formulate the delay calculation.
       \item Use \ac{iCAD} geocoding (where available) and activity log
         location strings to identify the approximate time-space
         location of the event's impact on the
-        system.\fixme{crindt}{Discuss this in more detail}
+        system
       \item Create a \ac{TMCPE} event object representing the event and
         store it in the database
       \end{itemize}
@@ -2242,18 +2223,34 @@ figure~\ref{fig:inc-imp-serv}.
   \caption{Incident impact service procedural logic}
   \label{fig:inc-imp-serv}
 \end{figure}
-It involves three main steps: obtaining raw event data from all data
-sources, pre-processing that data to identify the critical incident
-management events, and computing the incident and TMC impacts.
+It involves three main steps: obtaining raw event data from all data sources,
+pre-processing that data to identify the location of the event and the critical
+incident management steps from the logs, and computing the incident and TMC
+impacts.
+
+\fixme{crindt}{Discuss parsing processing, may have to blow up diagram.}
 
 \paragraph{Recommendations for future improvements}
 
-A custom solver could be designed with additional work to solve the
-mathematical program for the delay calculations more efficiently.
+The current implementation formulates the \ac{BIP} in
+equations~(\ref{eq:bip-formulation}) for solution using the \ac{CPLEX} solver
+under \ac{GAMS}.  At present, the solution time for determining the impacted
+region on a single facility for a major incident is on the order of 60 seconds.
+Since the number of major incidents per day is relatively small, this
+performance is suitable for batch processes that compute the baseline delays for
+a given day during the course of the following night.  Still, it is likely that
+the (time) performance of the solver can be improved by using algorithms more
+tuned for solving \ac{BIP} problems.  Improved performance would give the
+analyst more flexibility for re-running the solver with different parameters
+(e.g., $\alpha$, the maximum duration, etc.) for a given incident.  This would,
+in turn, allow the web-based interface to provide a better end-user experience.
 
-We have also engaged data mining experts to develop improved
-statistical techniques for providing congestion evidence for the delay
-calculation in section~\ref{sec:delay-calc}.
+Additionally, the improved statistical techniques discussed in
+section~\ref{sec:alt-tmc-meth} have great promise for providing more robust
+identification of the range of impact for unexpected events in the system.
+While the current implementation is not sufficiently efficient to be
+incorporated into the live application as it stands, it could likely be
+optimized to function with the web application.
 
 
 \subsubsection{TMC impact service}
@@ -2295,19 +2292,26 @@ map-based web interface that allows an analyst to query the model for
 The interface will gives analyst control of relevant input parameters
 to the model, but assumes sensible defaults where possible.
 
-The system uses a web-based interface built atop the grails framework,
-which is an open-source java-based web application system that is
-compatible with existing projects in \ac{CTMLabs}.  Within that framework,
-we are implementing a map-based interface using the OpenLayers
-\texttt{javascript} library \citep{openlayers} and the OpenStreetmap map image
-tiles \citep{openstreetmap} (google maps can also be used as a
-background layer).
+The system uses a web-based interface built atop the grails framework, which is
+an open-source java-based web application system that is compatible with
+existing projects in \ac{CTMLabs}.  Within that framework, we are implementing a
+map-based interface using the OpenLayers \texttt{javascript} library
+\citep{openlayers10:_openl_user_guide} and the OpenStreetMap map image tiles
+\citep{openstreetmap.org10:_opens_devel_guide} (Google maps can also be used as
+a background layer).
 
 Analysis of a particular incident is reflected in the analysis of all
-potentially impacted facilities, whose estimated time-space impacts
-are displayed using a custom \texttt{javascript} widget developed for
-this project.  Additional detail of the user interface is provided in
-chapter~\ref{chap:user-guide}.
+potentially impacted facilities, whose estimated time-space impacts are
+displayed using a custom \texttt{javascript} widget developed for this project.
+
+\fixme{crindt}{Discuss the main features: query screen and its parameters, map
+  view, time-space diagram view, etc.}
+
+\ifuserguide%
+Additional detail of the user interface is provided in
+appendix~\ref{chap:user-guide}.  
+%
+\fi
 
 % \subsubsection{Incident status event channel}
 
@@ -2392,56 +2396,355 @@ the HTTP protocol (HTTPS) to encrypt data over the Internet.
 \subsection{Physical deployment of TMCPE Application}
 \label{sec:arch}
 
-The logical system architecture described above is designed to
-leverage existing software under development for related research
-being carried out in the \ac{CTMLabs}.  The tasks necessary to deploy the
-\ac{TMC} Performance Evaluation platform using this architecture are
-confined to the specification of the data sources, business logic
-(software implementing the models described in
-chapter~\ref{sec:method}), user interfaces, and information flows
-between those components.
+The logical system architecture described above (see
+figure~\ref{fig:logical-system-arch}) is designed to leverage existing software
+under development for related research being carried out in the \ac{CTMLabs}.
+The tasks that were required to deploy the \ac{TMC} Performance Evaluation
+platform using this architecture are confined to the specification of the data
+sources, business logic (software implementing the models described in
+chapter~\ref{sec:method}), user interfaces, and information flows between those
+components.
 
-\fixme{crindt}{Insert as-built about here and discuss}
+Figure~\ref{fig:physical-architecture} shows how the \ac{TMCPE} web application
+was deployed for this project using \ac{CTMLabs} infrastructure.  We discuss
+this architecture from the perspective of the events that drive the system,
+namely:
+\begin{itemize}
+\item the availability of new data,
+\item the processing of new data to produce incident analyses (the business
+  logic), and
+\item user interaction with the analysis product
+\end{itemize}
+\begin{figure}[t]
+  \centering
+  \fixme{crindt}{Insert as-built about here and discuss}
+  \caption{Physical architecture of the TMCPE web application}
+  \label{fig:physical-architecture}
+\end{figure}
+
+\subsubsection{Incoming Data}
+\label{sec:incoming-data}
+
+As noted earlier, the data for the analysis comes from two main sources: the
+\ac{PeMS} 5-minute \ac{VAR} data and the \ac{D12} activity logs (which includes
+the \ac{CHP} \ac{iCAD} data as one component).  The \ac{TMCPE} application is
+designed to mirror this data.  
+
+\paragraph{D12 activity log replication}
+
+In the case of the \ac{D12} activity log, the production \texttt{MySQL} database
+running in the \ac{D12} sub network is replicated via a push mechanism to
+\ac{CTMLabs}.  The mirroring occurs nightly at approximately 2am in order to
+minimize the impact on the live activity log application in the \ac{TMC}.  The
+scheduled process uses standard \texttt{MySQL} replication methods to push the
+data to the firewalled \ac{CTMLabs} data server over the \ac{CTMLabs} data
+intertie with \ac{D12}.
+
+\paragraph{PeMS 5-minute data mirror}
+
+The structure of the \ac{PeMS} data mirror differs slightly in that it is a
+scheduled pull mechanism rather than a push.  \ac{PeMS} offers \acf{VAR}accounts
+to users who can demonstrate a need for the data.  To support \ac{TMCPE}, we
+established a \ac{VAR} account for \ac{CTMLabs}.  \ac{PeMS} publishes new
+5-minute summary data for every \ac{VDS} in the system at roughly 5 minute
+intervals to an authenticated \texttt{ftp} server.  The data remains on the
+system for roughly an hour before it is deleted to make way for new data.  To
+mirror this data, we created a \texttt{perl} script to check the \ac{PeMS}
+\texttt{ftp} site for new data, download it, and push it into a \ac{CTMLabs}
+database.  This script is scheduled to run every 5 minutes.
 
 
+\subsubsection{New incident processing}
+\label{sec:incident-processing}
 
-\fixme{crindt}{%
-  Discuss portability somewhere around here---don't forget to mention
-  TMCAL.  Things to note:
-  \begin{itemize}
-  \item CAS integration would need to be rolled back (minor)
-  \item Help system not integrated (minor)
-  \item Requirement for a GAMS license
-  \item Database requirements
-    \begin{itemize}
-    \item PeMS data
-    \item Activity data (incl. steps to interface with TMCAL or similar)
-    \item use of map tiles
-    \end{itemize}
-  \end{itemize}
-}
+To provided up-to-date incident analyses and statistics, the \ac{D12} activity
+log data received nightly is processed by \texttt{perl} scripts implementing the
+core business logic.  These scripts are currently deployed across two servers.
+The first machine is used to parse the newly received activity log data to
+create incident summary objects and scrubbed activity log data in the \ac{TMCPE}
+application database.  
+
+\fixme{crindt}{Discuss location parsing.  Mentioned in results!!}
+
+Once these objects are created, they are processed through the incident impact
+and \ac{TMCPE} impact models, which use the second server to execute analysis
+jobs---particularly the solving of the mathematical program in
+equations~\eqref{eq:bip-formulation} using the \ac{GAMS} solver.  The current
+implementation uses a synchronous model which pushes the generated mathematical
+program to the solution server using the \texttt{rsync} protocol, executes the
+\ac{GAMS} solver on that data via \texttt{ssh}, transfers the results back using
+\texttt{rsync}, and processes those results into the \ac{TMCPE} application
+domain objects to that they can be served by the \ac{TMCPE} web application.
+
+
+\subsubsection{Web application}
+\label{sec:web-app}
+
+The \texttt{grails} web application is deployed on a \ac{CTMLabs}
+\texttt{tomcat} server.  The \texttt{grails} application is configured to use
+the \ac{TMCPE} application database and the \ac{PeMS} mirror database.  We
+emphasize here that the web application is completely disconnected from the raw
+activity log database.  
+
+Because some of the data provided by the \ac{TMCPE} application is sensitive,
+the web application requires that users authenticate using the \ac{CTMLabs}
+\acf{CAS} and its underlying \ac{LDAP} user database.  The system is configured
+so that only users belonging to the \texttt{tmcpe} group on the \ac{LDAP} server
+have access to the application and its underlying data.  Membership in this
+group is limited to \ac{D12} staff and researchers directly affiliated with the
+\ac{TMCPE} project.  We will add new users to this group on an as-needed basis
+based upon guidance given by \ac{D12} staff.
+
+
+\subsection{Portability of the TMCPE system}
+\label{sec:portability}
+
+\subsubsection{Licensing restrictions}
+\label{sec:portability-licensing}
+
+The \ac{TMCPE} system was designed from the beginning to be as portable as
+possible.  Where possible, we used open-source off-the-shelf software that runs
+on multiple architectures and made an effort to select mature products over
+unproven technology.  Table~\ref{tab:software-components} summarize the main
+software components used.  Unless noted, all licenses are open source and freely
+available for Caltrans use (with proper attribution.)  Not listed in this table
+are the \ac{CAS} and \ac{LDAP} systems used for user authentication.  We assume
+that any new deployment would need to be integrated with authentications already
+in place at the site.  If not, free and open source \ac{CAS} and \ac{LDAP}
+implementations are readily available for use.
+\begin{sidewaystable}[t]
+  \centering
+  \footnotesize
+  \begin{tabularx}{\textwidth}{llllX}
+    \hline
+    \textbf{Component} & \texttt{Function} & \texttt{Maturity} & License\footnote{Except where noted as proprietary, all licenses used in this project are open source.} & \texttt{Notes} \\
+    \hline
+    \texttt{MySQL} & \ac{D12} activity log mirror &  v5, since 1994 & GPL & ~ \\
+    \texttt{Postgresql} & \ac{PeMS} mirror and \ac{TMCPE} app database & v9, since 1986 & Postgresql & Chosen for its speed and \acs{GIS} capabilities\\
+    \texttt{perl} & Scripting language (and modules) used to process incident data & v5, since 1987 & GPL & Perl runs on virtually any platform \\
+    \texttt{GAMS} & Solving the \ac{TMCPE} delay computations & v2.22, since 1987 & Proprietary & Perpetual license approx \$10,000 \\
+    \texttt{Grails} & \texttt{java}-based web application framework (and modules) & v1.33, since 2006 & Apache & ~ \\
+    \texttt{Tomcat} & \texttt{java} servlet (web application) container & v6, since 1999 & Apache & The \texttt{Grails} application is deployed to tomcat \\
+    \texttt{Dojo} & \texttt{javascript} user interface toolkit & v1.4, since 2005 & Academic Free & ~ \\
+    \texttt{OpenLayers} & \texttt{javascript} map interface toolkit & v2.1, since 2004 & Clear BSD & ~ \\
+    \texttt{OpenStreetMap} & Map tiles in the user interface & since 2005 & CC-by-SA & ~ \\
+    \hline
+  \end{tabularx}
+  \caption{Main software components used in the TMCPE application}
+  \label{tab:software-components}
+\end{sidewaystable}
+
+The only obvious major licensing barrier to portability is that the \ac{TMCPE}
+system currently uses the commercial \ac{GAMS} modeling language and \ac{CPLEX}
+solver.  This is a powerful and expensive modeling system that was used
+primarily for convenience and speed.  As noted in
+section~\ref{sec:incident-impact-service}, however, it would be possible to
+develop a custom (and unencumbered) solver that would perform similarly.
+
+\subsubsection{Hardware requirements}
+\label{sec:portability-hardware}
+
+Beyond the licensing issues, the system requires 1-5 servers for data storage,
+processing, and for serving the web application.  Performance of the system
+improves when distributed across multiple servers, but nothing precludes
+deploying everything to a single server.  
+
+\subsubsection{Network requirements}
+\label{sec:portability-network}
+
+Because the user interface of the \ac{TMCPE} system is a web application, the
+server must be on a network accessible to the users.  Note that it is easier to
+secure the raw activity log data if the system is spread across several servers
+as in the current deployment.  If a new deployment wishes to use \ac{PeMS} data,
+then a connection to the \ac{PeMS} \texttt{ftp} server is also necessary.
+
+\subsubsection{Data requirements}
+\label{sec:portability-data}
+
+As discussed above, the external data required for the \ac{TMCPE} application
+include (current sources in parentheses):
+\begin{itemize}
+\item Current and historical 5-minute \ac{VDS} speed and volume data (\ac{PeMS})
+\item Geocoded \ac{TMC} activity data with critical events labeled per
+  chapter~\ref{chap:tmc-activity} (\ac{D12} activity log, \ac{iCAD})
+\item Map image tiles (for the user interface) (Any tile server compatible with
+  OpenLayers; currently using OpenStreetMap data)
+\end{itemize}
+In theory, the \ac{TMCPE} application is data agnostic as long as the data
+sources can be mapped onto this input requirements.  For the \ac{VDS} data and
+the tiled map data, there are likely many available choices that would be
+suitable.  To date, however, we know of no other \ac{TMC} activity logging
+application that would meet the activity data requirements.  It is probable that
+Caltrans efforts to develop \ac{TMCAL} will compatible or could be made
+compatible with relative ease.
+
+\subsubsection{Steps to porting the application}
+\label{sec:portability-general}
+
+The following summarizes the anticipated steps to port the \ac{TMCPE} application.
+\begin{enumerate}
+\item Confirm availability of \ac{VDS}, activity log, and map tile data.
+\item Obtain deployment server(s).
+\item Allocate logical components to physical infrastructure.
+\item Install all required software from table~\ref{tab:software-components},
+  obtaining the necessary \ac{GAMS}/\ac{CPLEX} license for the deployment.
+\item Install core \ac{TMCPE} services and configure for datasources.
+  \textbf{NOTE: \emph{If the datasources differ from those used in this project, new
+  adaptors would need to be written to bring the data into the analysis
+  framework.}}
+\item Install \ac{TMCPE} web application to tomcat and configure for data sources.
+\item Run deployment tests.
+\item Go live.
+\end{enumerate}
 
 
 
 \chapter{Representative results}
 \label{chap:results}
 
+In this chapter we discuss representative results from the \ac{TMCPE} system.
+The system went live as a beta in September of 2010 with incidents processed
+from January 1\textsuperscript{st}, 2007.  The system will continue to process
+new incident data nightly using the \ac{CTMLabs} infrastructure.  In the
+following sections, we discuss the characteristics of the data and what they
+imply for incident performance.
+
+\section{General statistics}
+\label{sec:general-stats}
+
+At the time of writing, the \ac{TMCPE} system had processed a total of $15,135$
+events recorded by the \ac{D12} \ac{TMC} between January 1\textsuperscript{st},
+2007 and December 1\textsuperscript{st}, 2010.  The general statistics are shown
+in table~\ref{tab:anal-inc}.  The events are broken down into various types
+according to the classification given to the event in the activity log entry.
+\begin{table}[t]
+  \centering
+  \footnotesize
+  \begin{tabularx}{1.0\linewidth}{Xrrrr}
+\hline
+  \parbox[b][][b]{0.20\textwidth}{\textbf{Event type}}&	\parbox[b][][b]{0.1\textwidth}{\raggedleft \textbf{Analyzed}}& \raggedleft \parbox[b][][b]{0.1\textwidth}{\raggedleft \textbf{Total}}&	\parbox[b][][b]{0.2\textwidth}{\raggedleft \textbf{Analyzed Delay}\\(veh-hr)} & \parbox[b][][b]{0.2\textwidth}{\raggedleft \textbf{Average Delay}\\(veh-hr)}\\
+\hline  \onehalfspacing
+
+Incident&	1,933&	5,909&	542,936 & 280.9\\	
+Construction&	101&	6,110&	481 &     4.8  \\	
+Angel Stadium&	30&	90&	4,682 &   156.1\\	
+Maintenance&	24&	258&	2,146&    89.4 \\	
+Honda Center&	16&	134&	716 &     44.8 \\	
+Emergency&	4&	109&	35 &      8.8  \\
+\\
+Unknown&   	29&	2,491&	3,184 &   109.8\\	
+\hline                                    
+Total& 	        2,137&	15,135&	554,179	& 259.3 
+  \end{tabularx}
+\caption{Characteristics of analyzed incidents}
+\label{tab:anal-inc}
+\end{table}
+
+The most common type are general \texttt{incidents}.  The common characteristic
+of these incidents are that their \ac{iCAD} ID in the system was assigned by the
+\ac{iCAD} system rather than in the \ac{TMC}.  This generally means that they
+are disruptions to the system for which no planning has taken place, which
+include accidents, medical emergencies, and other capacity reducing
+events---including most Sigalerts in the database.  As such, the severity of
+this class of event (in terms of average $\unit{veh-hr}$ of delay) is higher
+than any other.
+
+The remaining analyzed entries include special events at Angel Stadium and the
+Honda Center---both in Anaheim---which have active pre-planned traffic
+management.  We see lower levels of average delay associated with these events,
+which are in proportion to their impact on the system (in particular, attendence
+at Angel Stadium events is typically higher than Honda Center events).
+
+The other major class of events are construction and maintenance events that are
+similarly planned, but usually occur overnight during periods of low demand and
+therefore have a relatively small impact on the system in terms of delay.
+
+The \texttt{emergency} category comes from a legacy \ac{CAD} ID type that should
+be classified as a general incident.  The final \texttt{unknown} category
+reflects CAD IDs that weren't readily classifiable based upon the information
+available.  Most of these events are likely general incidents as well.
+
+The data shows that roughly 15\% of the incidents in the database were analyzed,
+which is a relatively small number.  Breaking it down by type, however, we see
+that about one third of the general incidents have been processed
+($1,933/5,9090\approx{}33\%$) while very few of the construction and maintenance
+events have been ($\frac{101+24}{6,110+258} \approx 2\%$).  There are several
+reasons for these relatively low numbers.  
+
+The first is that for the system to perform an analysis, it must be able to
+identify the incident location.  Prior to the middle of 2009, the only source of
+location information available to the system was to parse the activity log
+strings to try to identify the route, direction, and location (e.g., nearest
+ramp) recorded for the incident as discussed in
+section~\ref{sec:incident-processing}.  The general success rate for our parsing
+algorithm is approximately $50\%$.  Those events whose locations could not be
+determined were left unprocessed until the algorithm can be fine-tuned or their
+locations are manually identified.
+
+The second major reason that no processing occurs is if there is no evidence of
+an impact to the system.  This can occur if:
+\begin{itemize}
+\item there is no valid data for the estimated time-space region bounds for the event,
+\item there is insufficient valid historical data to generate the expected speed
+  distribution for the time-space region bounds for the event, and/or
+\item no measured speeds in the region indicate a disruption to the system (and
+  therefore there is no impact on the system.)
+\end{itemize}
+
+
+\begin{itemize}
+\item range of incident severity
+\item compare to D35
+\end{itemize}
+
+\section{Comparison to conventional delay calculation}
+\label{sec:compare-conv}
+
+A major component of the \ac{TMCPE} application is the 
+
+
+\section{Computational performance}
+\label{sec:comp-perf}
+
+
+
+
 \begin{itemize}
 \item Discuss performance/processing, etc
-\item General statistics (total incidents, types, etc.)
-\item Discuss how the delay method differs
-  \begin{itemize}
-  \item Max speed threshold
-  \item Capturing of more delay, not just D35
-  \item Accounting for spectator slowing
-  \item Accounting for network effects (not complete)
-  \end{itemize}
 \end{itemize}
+
+\section{Sample incident analyses}
+\label{sec:inc-anal}
+
+\begin{itemize}
+\item Max speed threshold
+\item Capturing of more delay, not just D35
+\item Accounting for spectator slowing
+\item Accounting for network effects (not complete)
+\end{itemize}
+
+
 
 \chapter{Conclusion}
 \label{chap:conclusion}
 
+\fixme[]{crindt}{Flesh these out; ties to section~\ref{sec:intro}.}
 
+Purpose:
+\begin{itemize}
+\item justify valuable technology, personnel allocations, and
+  maintenance costs,
+\item identify technologies that aren't meeting their initial promise,
+  and
+\item identify gaps in current operational strategies that might be
+  filled with new technology deployments.
+\end{itemize}
+
+and, from section~\ref{sec:event-man}:
+\begin{quote}
+  The focus in this project has been the development of incident-specific
+  delay-estimation metrics that can be used to evaluate \ac{TMC} performance.
+\end{quote}
 
 
 
@@ -2451,20 +2754,29 @@ between those components.
 %\printnomenclature 
 
 
+\bibliographystyle{apalike}
+\bibliography{refs}
+
+
 \appendix
+
+\pagenumbering{bychapter}
 
 \chapter{Summary of Work Performed Under UCI Subaward \#2009-2291}
 \label{chap:actlog-sub}
 
 \clearpage
 
-%% This 
+%% clip the header/footer from the source document and put in our own page
+%% numbers
 \includepdf[pages={1-9},pagecommand={\thispagestyle{plain}},trim=0in 1in 0in 1in,clip]{AL_Summary_Report_9-10.pdf}
 
 \clearpage
 
 
-\chapter{Using the web application}
+\ifuserguide%
+
+\chapter{TMCPE Web Application User Guide}
 \label{chap:user-guide}
 
 \fixme{crindt}{Link to the use cases (section~\ref{sec:use-cases}.)}
@@ -2582,6 +2894,9 @@ between those components.
 
 \fixme{crindt}{Map, TSD, interactions between them, etc.}
 
+%
+\fi %userguide
+
 
 \clearpage
 
@@ -2608,10 +2923,12 @@ between those components.
   \acro{REST}{REpresentational State Transfer}
   \acro{GeoJSON}{Geographic JavaScript Object Notation}
   \acro{JSONP}{JavaScript Object Notation with Padding}
+  \acro{BIP}{Binary Integer Program}
+  \acro{GAMS}{General Algebraic Modeling System}
+  \acro{CPLEX}{ILOG CPLEX (``C''/Simplex)}
+  \acro{GIS}{Graphical Information System}
+  \acro{VDS}{Vehicle Detector Stations}
+  \acro{VAR}{Value Added Reseller}
 \end{acronym}
-
-
-\bibliographystyle{apalike}
-\bibliography{refs}
 
 \end{document}

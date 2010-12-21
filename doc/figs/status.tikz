@@ -26,34 +26,37 @@
   label right/.style={llabel,right,text badly ragged},
   label left/.style={llabel,left,text badly ragged left},
   node distance=5em]
-  \draw node (iim) [component,partial] {Incident Impact Model};
-  \draw node (tmcpedb) [datanode partial,below=of iim]{\scriptsize{}TMCPEDB};
-  \draw node (atms) [datanode complete,below=of tmcpedb]{\scriptsize{}ATMS};
-  \draw node (actlog) [datanode partial,left=of tmcpedb]{\scriptsize{}ACTLOG};
-  \draw node (sched) [component,above=of iim,planned] {Analysis Scheduler};
+  \draw node (iim) [component,complete] {Incident Impact Model};
+  \draw node (tmcpedb) [datanode complete,below=of iim]{\scriptsize{}TMCPEDB};
+  \draw node (pems) [datanode complete,below=of tmcpedb]{\scriptsize{}PEMS};
+  \draw node (actlog) [datanode complete,left=of tmcpedb]{\scriptsize{}ACTLOG};
+  \draw node (icad) [datanode complete,below=of actlog]{\scriptsize{}iCAD};
+  \draw node (sched) [component,above=of iim,complete] {Analysis Scheduler};
   \umlactor[left=of sched]{admin}{Admin};
-  \draw node (tim) [component,planned,right=of iim] {TMC impact model}; 
+  \draw node (tim) [component,partial,right=of iim] {TMC impact model}; 
   \draw node (webint) [component,partial,below=of tim] {Web Interface};
   \umlactor[below=of webint]{analyst}{Analyst};
 
   % legend
   {
     \scriptsize
-    \draw node (legend planned) [node distance=5em,above=of tim,component,planned,text width=1em,text width=3em,xshift=-4em] {};
-    \draw (legend planned.east) node (lpllab) [right] {planned feature};
-    \draw node (legend partial) [node distance=0.75em,above=of legend planned,component,partial,text width=1em,text width=3em] {};
-    \draw (legend partial.east) node (lplab) [right] {partially functional feature};
+%    \draw node (legend planned) [node distance=5em,above=of tim,component,planned,text width=1em,text width=3em,xshift=-4em] {};
+%    \draw (legend planned.east) node (lpllab) [right] {planned feature};
+    \draw node (legend partial) [node distance=6em,right=of sched,component,partial,text width=3em] {};
+    \draw (legend partial.east) node (lplab) [right] {complete w/planned enhancements};
     \draw node (legend complete) [node distance=0.75em,above=of legend partial,component,complete,text width=1em,text width=3em] {};
     \draw (legend complete.east) node (lclab) [right] {fully functional feature};
-    \draw node[draw,fit=(legend planned) (lclab) (lplab) (lpllab)] {};
+%    \draw node[draw,fit=(legend planned) (lclab) (lplab) (lpllab)] {};
+    \draw node[draw,fit=(legend partial) (lclab) (lplab)] {};
   }
   
 
-  \draw[-latex'] ($0.5*(actlog.before top) + 0.5*(actlog.after top)$) |- node [label left,pos=0.23] {\emph{critical events}} (iim);
-%  \draw[-latex'] ($0.5*(atms.after top) + 0.5*(atms.before bottom)$) -- node [label above] {\emph{5-minute sensor data}} ($0.5*(tmcpedb.before top) + 0.5*(tmcpedb.after bottom)$);
-  \draw[-latex'] ($0.5*(atms.after top) + 0.5*(atms.before top)$) -- node [label left,text width=6em] {\emph{5-minute\\sensor data}} (tmcpedb.bottom);
-  \draw[-latex'] ($0.5*(tmcpedb.before top) + 0.5*(tmcpedb.after top)$) -- node [label left,text width=8em] {\emph{processed sensor data relevant to selected incident}} (iim);
-  \draw[-latex'] (sched) -- node[label left,text width=6em] {\emph{automated processing jobs}} (iim);
+  \draw[-latex'] ($0.5*(actlog.before top) + 0.5*(actlog.after top)$) |- node [label right,pos=0.23] {\emph{critical events}} (iim);
+%  \draw[-latex'] ($0.5*(pems.after top) + 0.5*(pems.before bottom)$) -- node [label above] {\emph{5-minute sensor data}} ($0.5*(tmcpedb.before top) + 0.5*(tmcpedb.after bottom)$);
+  \draw[-latex'] ($0.5*(pems.after top) + 0.5*(pems.before top)$) -- node [label right,text width=6em] {\emph{5-minute\\sensor data}} (tmcpedb.bottom);
+  \draw[-latex'] ($0.5*(icad.after top) + 0.5*(icad.before top)$) -- node [label right,text width=6em] {\emph{iCAD Log and geocode}} (actlog.bottom);
+  \draw[-latex'] ($0.5*(tmcpedb.before top) + 0.5*(tmcpedb.after top)$) -- node [label right,text width=8em] {\emph{processed sensor data relevant to selected incident}} (iim);
+  \draw[-latex'] (sched) -- node[label right,text width=6em] {\emph{automated processing jobs}} (iim);
   \draw[-latex'] (admin) -- node[label above,text width=5em] {\emph{baseline analysis params}} (sched);
   \draw[-latex'] (iim) -- node[label above] {\emph{baseline delay}} (tim);
   \draw[latex'-] (tim.south) ++(-0.5em,0) coordinate (t) -- 

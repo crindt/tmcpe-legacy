@@ -54,7 +54,7 @@ environments {
 		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	development {
-		grails.serverURL = "https://192.168.0.2:8443/${appName ? appName : ( appname ? appname :  'tmcpe' )}"
+		grails.serverURL = "https://localhost:8443/${appName ? appName : ( appname ? appname :  'tmcpe' )}"
 		grails.casURL = "https://cas.ctmlabs.net/cas"
 	}
 	test {

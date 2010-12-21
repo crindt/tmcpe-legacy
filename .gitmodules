@@ -13,3 +13,6 @@
 [submodule "web-app/js/dojo-src/dijit"]
 	path = web-app/js/dojo-src/dijit
 	url = /home/crindt/dojo-src/dijit
+[submodule "doc/reports/hutchins"]
+	path = doc/reports/hutchins
+	url = /home/crindt/hutchins
