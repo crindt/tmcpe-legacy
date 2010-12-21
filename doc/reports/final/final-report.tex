@@ -124,7 +124,11 @@
 
 
 \clearpage{}
-\tableofcontents
+
+\begin{singlespace}
+  \tableofcontents
+
+\clearpage
 
 \listoffigures
 \addcontentsline{toc}{chapter}{\protect\numberline{}List of Figures}
@@ -133,6 +137,8 @@
 
 \listoftables
 \addcontentsline{toc}{chapter}{\protect\numberline{}List of Tables}
+
+\end{singlespace}
 
 \clearpage
 
@@ -1230,6 +1236,8 @@ other speeds.  In this study, various values were applied to find the
 best threshold. The best value was empirically found from the relation
 between traffic data and traffic accident as $\alpha = 0.25$.
 
+\fixme{crindt}{Define final equation for delay here.}
+
 \subsection{Improvements to the core delay model}
 \label{sec:delay-improvements}
 
@@ -1282,7 +1290,7 @@ than a correct attribution of congestion to the given event.
 
 We considered two approaches to improving the ability of the model to
 account for such cases.  The first approach was to bias the objective
-function to make false positives more 'costly' to the algorithm than
+function to make false positives more ``costly'' to the algorithm than
 false negatives.  More specifically, this altered the objective
 function in \eqref{eq:bip-formulation} to be:
 \begin{equation}
@@ -1313,7 +1321,7 @@ matching the evidence near the event disruption more than that
 evidence further away from the incident.  
 
 \fixme{crindt}{Create before and after figure of the importance of
-  this method.}
+   this method.}
 
 We note that the use of this method was made possible by the
 improvements made to the \ac{TMC} activity log to add geospatial
@@ -1336,20 +1344,19 @@ of this situation is shown in \fixme[figure~\ref{fig:max-inc-spd}]{crindt}{Make
   \label{fig:max-inc-spd}
 \end{figure}
 
-After analyzing a number of incident exhibiting this problem, we
-noticed that these incidents all tended to have relatively high
-observed speeds ($\hat{s}_j(t_m)>65\unitfrac{mi}{h}$) and low standard
-deviations ($\sigma_{s_j(t_m)}<2\unitfrac{mi}{h}$).  In these
-situations, minor fluctuations in observed speeds are tagged as
-evidence of incident conditions when they likely are not (though the
-may indicate the imminent onset of delay).  Such noise in the evidence
-results in poor performance for the algorithm.  
+After analyzing a number of incident exhibiting this problem, we noticed that
+these incidents all tended to have relatively high observed speeds
+($\hat{s}_j(t_m)>65\unitfrac{mi}{h}$) and low standard deviations
+($\sigma_{s_j(t_m)}<2\unitfrac{mi}{h}$).  In these situations, minor
+fluctuations in observed speeds are tagged as evidence of incident conditions
+when they likely are not (though the may indicate the imminent onset of delay).
+Such noise in the evidence results in poor performance for the algorithm.
 
-The obvious solution to this problem was to adjust the $\alpha$
-parameter to be greater than 0.25 value determined in earlier
-research.  However, we found that in many cases the problem would only
-disappear with $\alpha>3.5$.  However, such a high $\alpha$ degraded
-the method's performance for incidents where $\hat{s}_j(t_m)<65$.  
+The obvious solution to this problem was to adjust the $\alpha$ parameter to be
+greater than 0.25 value determined in earlier research.  However, we found that
+in many cases the problem would only disappear with $\alpha>3.5$, but such a
+high $\alpha$ degraded the method's performance for incidents where
+$\hat{s}_j(t_m)<65\unitfrac{mi}{h}$.
 
 The best solution we found, however, was to alter the evidence
 definition to adjust the definition of the evidence $P_{jm}$ to always
@@ -1391,7 +1398,7 @@ spatio-temporal signature of accidents, and creating a ranked list of
 traffic
 disruptions.  % The concluding section discusses ??? %other traffic modeling problems we would like to pursue in the future.
 
-\subsection{Model Description}\label{sec:model}
+\subsubsection{Model Description}\label{sec:model}
 Figure~\ref{fig:model} shows three time-segments of the graphical
 model for the loop sensor event model. The flow and occupancy
 processes are joined together via a Markov event process forming two
@@ -1970,10 +1977,9 @@ using the legacy logs.
 \label{sec:system-architecture}
 
 
-In this chapter we detail how the \ac{TMC} incident performance
-evaluation system has been made available for use in regular \ac{TMC}
-operations using a flexible service-oriented architecture that is
-under active development in the \ac{CTMLabs}.
+In this chapter we detail how the \ac{TMC} incident performance evaluation
+system has been made available for use in regular \ac{TMC} operations using the
+flexible service-oriented architecture deployed at the \ac{CTMLabs}.
 
 \section{Use Cases}
 \label{sec:use-cases}
@@ -1989,7 +1995,7 @@ analyze, any necessary modeling assumptions, and \ac{TMC} components to
 model. The ideal interface will be accessible from any authenticated computer
 and will use technology already familiar to operators.
 
-A second potential use-case for the evaluation system is a real-time tmode that
+A second potential use-case for the evaluation system is a real-time mode that
 attempts to forecast the cost of delaying action on current incidents. While
 this use is not be part of this initial project, it would be a potentially
 straightforward extension of the core models to provide real-time decision
@@ -2115,10 +2121,11 @@ affected sections by time-of-day and day-of-week.  This is computed using a
 rolling 52-week horizon as described in equation~(\ref{eq:nominal-speed-obs}).
 Since this is a relatively expensive computation, it is performed only once on
 demand the first time an analysis needs it, and then is cached in the database
-local \ac{PeMS} database.  A saved query, or 'view' is stored in the database
-that automatically selects the distribution from the cache, if available, or
-triggers the computation of a new distribution if it is missing.  This caching
-improves the performance of the web application significantly.
+local \ac{PeMS} database.  A saved query (also known as a database \emph{view})
+is stored in the database that automatically selects the distribution from the
+cache, if available, or triggers the computation of a new distribution if it is
+missing.  This caching improves the performance of the web application
+significantly.
 
 
 \subsection{TMCPE application database}
@@ -2128,6 +2135,7 @@ All domain data generated by the \ac{TMCPE} application are stored in the
 application database.  This includes all incident analyses and their components
 (such as individual facility analyses).  The details of the domain objects
 stored in this database are discussed in section~\ref{sec:components} below.
+\fixme{crindt}{Too short to be a standalone section}
 
 
 \section{Components}
@@ -2139,11 +2147,11 @@ for use in the \ac{TMC} and interface components that expose that data to other
 software or to users in the \ac{TMC}.  
 
 Currently, the core business logic, including the \ac{TMCPE} computations is
-implemented using custom \texttt{perl} scripts and the commercial
-\ac{GAMS} optimization software \citep{GAMS}.  The user interface is implemented
-using the \texttt{Grails} web application framework \citep{grails}.  Both
-\texttt{perl} and \texttt{Grails} offer persistence mechanisms for reading and
-writing data to/from the databases.  However, because \texttt{Grails} is a
+implemented using custom \texttt{perl} scripts and the commercial \ac{GAMS}
+optimization software \citep{rosenthal10:_gams}.  The user interface is
+implemented using the \texttt{Grails} web application framework \citep{grails}.
+Both \texttt{perl} and \texttt{Grails} offer persistence mechanisms for reading
+and writing data to/from the databases.  However, because \texttt{Grails} is a
 convention-oriented framework while \texttt{perl} is more of a general purpose
 toolkit that is easier to adapt, we decided to allow \texttt{Grails} to manage
 the database schemas where they are shared between the business and user
@@ -2235,15 +2243,17 @@ impacts.
 The current implementation formulates the \ac{BIP} in
 equations~(\ref{eq:bip-formulation}) for solution using the \ac{CPLEX} solver
 under \ac{GAMS}.  At present, the solution time for determining the impacted
-region on a single facility for a major incident is on the order of 60 seconds.
-Since the number of major incidents per day is relatively small, this
-performance is suitable for batch processes that compute the baseline delays for
-a given day during the course of the following night.  Still, it is likely that
-the (time) performance of the solver can be improved by using algorithms more
-tuned for solving \ac{BIP} problems.  Improved performance would give the
-analyst more flexibility for re-running the solver with different parameters
-(e.g., $\alpha$, the maximum duration, etc.) for a given incident.  This would,
-in turn, allow the web-based interface to provide a better end-user experience.
+region on a single facility for a major incident is on the order of 60 seconds,
+though actual solution time varies with the maximum possible range of impact for
+a given incident and with the complexity of the evidence.  Since the number of
+major incidents per day is relatively small, this performance is suitable for
+batch processes that compute the baseline delays for a given day during the
+course of the following night.  Still, it is likely that the (time) performance
+of the solver can be improved by using algorithms more tuned for solving
+\ac{BIP} problems.  Improved performance would give the analyst more flexibility
+for re-running the solver with different parameters (e.g., $\alpha$, the maximum
+duration, etc.) for a given incident.  This would, in turn, allow the web-based
+interface to provide a better end-user experience.
 
 Additionally, the improved statistical techniques discussed in
 section~\ref{sec:alt-tmc-meth} have great promise for providing more robust
@@ -2292,9 +2302,9 @@ map-based web interface that allows an analyst to query the model for
 The interface will gives analyst control of relevant input parameters
 to the model, but assumes sensible defaults where possible.
 
-The system uses a web-based interface built atop the grails framework, which is
+The system uses a web-based interface built atop the Grails framework, which is
 an open-source java-based web application system that is compatible with
-existing projects in \ac{CTMLabs}.  Within that framework, we are implementing a
+existing projects in \ac{CTMLabs}.  Within that framework, we implemented a
 map-based interface using the OpenLayers \texttt{javascript} library
 \citep{openlayers10:_openl_user_guide} and the OpenStreetMap map image tiles
 \citep{openstreetmap.org10:_opens_devel_guide} (Google maps can also be used as
@@ -2457,14 +2467,37 @@ database.  This script is scheduled to run every 5 minutes.
 \subsubsection{New incident processing}
 \label{sec:incident-processing}
 
-To provided up-to-date incident analyses and statistics, the \ac{D12} activity
+To provide up-to-date incident analyses and statistics, the \ac{D12} activity
 log data received nightly is processed by \texttt{perl} scripts implementing the
 core business logic.  These scripts are currently deployed across two servers.
 The first machine is used to parse the newly received activity log data to
 create incident summary objects and scrubbed activity log data in the \ac{TMCPE}
-application database.  
+application database.
 
-\fixme{crindt}{Discuss location parsing.  Mentioned in results!!}
+A critical part of this processing is to determine the approximate location of
+the event's impact on the system.  For events prior to mid-2009, the locations
+are determined by applying a recursive-descent parser to the activity log memo
+field to identify operator-typed route/direction/cross street entries.  The
+parser is designed to identify locations similar to the following:
+\begin{quote}
+\begin{verbatim}
+   NB-405 JSO JEFFREY RD
+   EB-22 CONNECTOR TO SB-55
+   5 N @ KATELLA
+\end{verbatim}
+\end{quote}
+The output from the parser is the \texttt{id} of the nearest mainline \ac{VDS}
+matching the route, direction, and cross street parsed from the log.  The
+\ac{VDS} lookup is performed using a database query that searches for the
+\ac{VDS} on the given route and direction whose cross street name most closely
+matches that given in the log using a trigram indexing method to identify
+similarity.
+
+For events after mid-2009, the activity log database contains the \ac{iCAD} data
+corresponding to the event in question, and in particular, it contains the
+\ac{iCAD} geocode which helps locate the incident.  If such a geocode exists,
+the above database query is modified to bound the result to \ac{VDS} within 1.5
+miles of the geocoded location.
 
 Once these objects are created, they are processed through the incident impact
 and \ac{TMCPE} impact models, which use the second server to execute analysis
@@ -2659,26 +2692,28 @@ The other major class of events are construction and maintenance events that are
 similarly planned, but usually occur overnight during periods of low demand and
 therefore have a relatively small impact on the system in terms of delay.
 
-The \texttt{emergency} category comes from a legacy \ac{CAD} ID type that should
-be classified as a general incident.  The final \texttt{unknown} category
-reflects CAD IDs that weren't readily classifiable based upon the information
-available.  Most of these events are likely general incidents as well.
+The \texttt{emergency} category comes from a legacy \ac{iCAD} ID type that
+should be classified as a general incident.  The final \texttt{unknown} category
+reflects \ac{iCAD} IDs that weren't readily classifiable based upon the
+information available.  Most of these events are likely general incidents as
+well.
 
 The data shows that roughly 15\% of the incidents in the database were analyzed,
 which is a relatively small number.  Breaking it down by type, however, we see
 that about one third of the general incidents have been processed
-($1,933/5,9090\approx{}33\%$) while very few of the construction and maintenance
+($\frac{1,933}{5,909}\approx{}33\%$) while very few of the construction and maintenance
 events have been ($\frac{101+24}{6,110+258} \approx 2\%$).  There are several
 reasons for these relatively low numbers.  
 
 The first is that for the system to perform an analysis, it must be able to
-identify the incident location.  Prior to the middle of 2009, the only source of
-location information available to the system was to parse the activity log
-strings to try to identify the route, direction, and location (e.g., nearest
-ramp) recorded for the incident as discussed in
-section~\ref{sec:incident-processing}.  The general success rate for our parsing
-algorithm is approximately $50\%$.  Those events whose locations could not be
-determined were left unprocessed until the algorithm can be fine-tuned or their
+identify the incident location.  As noted earlier in
+section~\ref{sec:incident-processing}, prior to the middle of 2009, the only
+source of location information available to the system was to parse the activity
+log strings to try to identify the route, direction, and location (e.g., nearest
+ramp) recorded for the incident.  The general success rate for our parsing
+algorithm is approximately $50\%$, with the remainder missed due primarily to
+syntax and spelling variations.  Those events whose locations could not be
+determined are left unprocessed until the algorithm can be fine-tuned or their
 locations are manually identified.
 
 The second major reason that no processing occurs is if there is no evidence of
@@ -2700,7 +2735,37 @@ an impact to the system.  This can occur if:
 \section{Comparison to conventional delay calculation}
 \label{sec:compare-conv}
 
-A major component of the \ac{TMCPE} application is the 
+A major component of the \ac{TMCPE} application is the delay calculation.  The
+current method used by Caltrans computes delay as the total travel time added
+for vehicles traveling under \fixme[$35\unitfrac{mi}{h}$]{crindt}{refer to the
+  original equation}.  By definition, this method implies there is no delay if
+the average speed on the roadway is $35\unitfrac{mi}{h}$ or greater.
+
+By contrast, the delay calculation method used in this research treats delay as
+travel time above and beyond \emph{average} conditions for the given stretch of
+road for that time-of-day and day-of-way.  Consequently, it will attribute
+delays to incidents that, for instance, slow prevailing traffic from a mean
+value of $70\unitfrac{mi}{h}$ down to $35\unitfrac{mi}{h}$ where the
+conventional method will not attribute any delay to these conditions.  This will
+tent to increase the new delay values compared to the original method.
+
+The use of mean speeds to determine the baseline conditions (instead of
+$35\unitfrac{mi}{h}$) also means that if an incident occurs in a typically
+congested area with mean speeds below $35\unitfrac{mi}{h}$, then the new method
+will attribute lower delays to an incident than the \fixme[$D_{35}$
+method]{crindt}{define} for the same time-space region.
+
+Finally, the conventional delay calculation method uses analyst-determined
+time-space boundaries for the incident impact while the new method determines
+them empirically.  We speculate that analysts will tend to select a larger
+time-space region than the new method, though we cannot be certain.  If this is
+true, then this will tend to reduce the new delay values compared to the
+original method.
+
+The net effects of these factors on the final delay values computed for an
+incident will vary with the characteristics of the incident.  Empirically,
+however, we have seen generally higher delay values using the new method versus
+the original method.  \fixme{crindt}{Elaborate here by pulling stats}
 
 
 \section{Computational performance}
