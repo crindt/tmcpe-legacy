@@ -1,159 +1,46 @@
 % \section*{Overview}
 % \label{execsum-overview}
 
-This document reports on the results of contract \#65A0252, \emph{A
-  Measurement-based System for TMC Performance Evaluation}.  This
-project developed a TMC performance evaluation system that allows TMC
-managers to evaluate the performance of various bundles of TMC
-technologies and operational policies by mapping their effects onto
-events in the system that can be measured using existing surveillance
-systems and daily activity logs.  The work included tasks to develop a
-method for quantifying the relative benefits of TMC operations as well
-as tasks to provide a user friendly interface for performing benefits
-analysis of past incidents using available data sources.  The system
-was deployed atop the CTMLabs web architecture and is available to
-approved users as part of the secure, authenticated, CTMLabs website.
+This research project developed a web-based \ac{TMCPE} application that
+addresses the problem of identifying the value of the \ac{TMC} in managing
+disruptions to the transportation system.  To achieve this goal, Caltrans needs
+a method that:
+\begin{itemize}
+\item uses available datasources,
+\item makes direct inferences from available data without the use of simulation,
+  and
+\item can be converted directly into dollar values.
+\end{itemize}
 
-\fixme{crindt}{Drop completed work, create summary and abstract.}
+Though a range of techniques are available for valuing the \ac{TMC}, the
+research team focused quantifying the delay savings that can be attributed
+directly to \ac{TMC} actions.  Using event data from \ac{TMC} activity logs and
+traffic state data from the \ac{PeMS} database, the technique developed first
+identifies the time-space impact of events in the activity database using a
+mathematical-programming formulation to match evidence of disruption to computed
+time-space bounds.  Given this boundary, the actual delay associated with the
+impacted region is calculated.  To compute the savings attributable to the
+\ac{TMC}, the activity logs are used to identify when the direct disruption by
+the event is removed (e.g., when an accident is cleared) and models the
+increased delay that would occur if this clearance was delayed.
 
-\section*{Completed Work}
-\label{execsum-sum-of-work}
+Given these calculations, the system allows \ac{TMC} managers to evaluate the
+performance of various bundles of \ac{TMC} technologies and operational policies
+by mapping their effects onto events in the system that can be measured using
+existing surveillance systems and daily activity logs. The resulting tool
+provides managers with the long needed capabilities to:
+\begin{itemize}
+\item justify valuable technology, personnel allocations, and
+  maintenance costs,
+\item identify technologies that aren't meeting their initial promise,
+  and
+\item identify gaps in current operational strategies that might be
+  filled with new technology deployments.
+\end{itemize}
 
-In Q2-2008, the team began a discovery process to determine resources and data
-available for implementing the performance evaluation system. We identified the
-major data available (freeway loop data, TMC activity logs, CHP CAD feed) as
-core sources and obtained representative samples for analysis.  We also started
-a review of the performance evaluation methodology with the input of Caltrans
-TMC personnel.
+The system was deployed atop the \ac{CTMLabs} web architecture and is available
+to approved users as part of the secure, authenticated, \ac{CTMLabs} website.
+The resulting \ac{TMCPE} website allows users to query the analyzed incident
+database to obtain general statistics about \ac{TMC} performance as well as view
+the detailed analysis of each incident in the system.
 
-In Q3-2008, we settled on the delay calculation methodology to be used as the
-primary analysis tool for the performance evaluation project.  As part of this
-process, we developed a prototype software implementation using \texttt{perl}
-scripting that takes inputs from local copies of PeMS freeway data and the TMC
-activity log databases, generates a mathematical program to determine the
-impacted freeway region for given incidents, and solves that program using the
-\texttt{GAMS} solver.  This software was used to successfully analyze a set of
-incidents identified by D12.
-
-In Q4-2008, the team worked on finalizing the complete performance evaluation
-system prototype. This work included creating the ability to accept incident
-data from the CHP CAD XML feed, which is archived for cross referencing with the
-Caltrans activity log.  Further work was carried out on encapsulating the core
-delay calculation algorithm so that it can be integrated into a user-driven
-performance evaluation application.  Discussions during the quarter with the TMC
-team revealed that modifications can be made to the activity log in order to
-better support the performance evaluation system.  The team engaged in a
-fact-finding exercise to better understand the current TMC architecture as well
-as the likely evolution of that system going forward. Based upon these
-assessments, the team developed a set of recommendations for upgrading the
-activity log.
-
-Work during Q1-2009 was disrupted by a suspension of this contract due to
-California's budget crisis.  Work carried out prior to the suspension of the
-contract focused on linking all information sources for the core performance
-evaluation engine developed in earlier work.  A prototype web-based interface
-for viewing performance evaluation results was developed, but this interface has
-not yet been connected to the analytical back end due to the suspension of work
-on the contract.  Additional work included developing interfaces for ITS's ATMS
-database, which will replace the static copy of sensor data that was used in
-initial development. Switching to the ATMS database will eventually speed
-deployment in the TMC.
-
-Work during Q2-2009 continued on two fronts: developing and deploying a
-web-based interface for viewing performance evaluation results and the back-end
-system that will perform the performance evaluation. The prototype visually
-displays incident conditions and estimated impacted regions using a time-space
-block diagram of impacted facilities, similar to the figures generated in the
-original research. Work also continued on developing an efficient database
-containing rolling 1-year of historical sensor measurements from the ITS ATMS
-database. Work on linking the back-end data sources and the interface prototype
-was carried out off-line, but used data formats (JSON) that will be identical to
-those eventually produced by the back-end processing. Efforts to directly link
-the live data sources (ATMS, TMC activity log, and the CHP CAD XML feed) to the
-front end were put on hold until the revisions to the log discussed during
-November 2008 are completed by subcontractors during Q2-2009.
-
-Work during Q3-2009 focused on three areas.  On the modeling side, signficant
-progress was made in developing a more rigorous approach to converting sensor
-data into evidence of incident impacts.  This work uses more advanced
-statistical methods to identify behavior at each sensor that differs from mean
-patterns.  It is anticipated that this work will replace the existing
-threshold-based approach to generating evidence.  Work also continued on
-readying the database to support the performance evaluation model and interface.
-These efforts are being synchronized with work on the related Safety project
-that relies on similar datasets.  Additionally, progress was made on developing
-a consistent analytical representation of the D12 network to support the
-modeling of network effects.  Toward this end, the freely available
-openstreetmap dataset was imported into the Testbed database for use in modeling
-and visualization.  This will give the Testbed a map dataset that is
-unencumbered by license restrictions and which can be extended to meet Testbed
-needs in the future.  Finally, work on the front-end interface continued,
-including the preliminary development of a map-based front end for viewing
-incident histories.
-
-In parallel with the above efforts, the team continued to collaborate on the
-development of the activity log upgrade which will better support performance
-evaluation as it goes live.  The team also engaged in a fact finding interview
-with TMC staff to document TMC processes used during incident management.
-
-
-\section*{Ongoing and Planned Work}
-\label{execsum-ongoing-work}
-
-Going forward, work is slated to continue in several areas.  We are exploring
-some better methods to use in the incident impact model
-%
-\iffull
-(see section~\ref{sec:incident-impact-model})
-\fi
-%
-for identifying when traffic conditions are statistically significant from the
-norm.  Notably, we are working with members of the Department of Computer
-Science to apply Bayesian techniques to the analysis of traffic state data.  We
-anticipate that these approaches will prove more robust than the course
-techniques currently being used.
-
-In parallel to the above effort, we will begin developing an implementation of
-the
-%%
-\iffull%
-TMC impact model (described in section~\ref{sec:mod-tmc-impacts}).%
-\else%
-TMC impact model.%
-\fi
-%
-In this task, we will use a derived theoretical relationship between response
-time and delay magnitude and compare these predictions to the estimated total
-delays from the incident impact model for a subset of incidents managed by the
-D12 TMC.  The goal is to demonstrate that the theoretical relationship generally
-holds and can therefore be used as a basis for predicting TMC benefits.
-
-Finally, we will also bring the TMC interface to the performance evaluation
-system on-line.  Initially, this will focus on the display of
-%
-\iffull%
-previously analyzed incidents (a prototype interface is shown in section~\ref{sec:interfaces}).%
-\else%
-previously analyzed incidents.%
-\fi%
-%
-Fundamental to this effort is integration of the incident impact and TMC impact
-models into the Testbed's Enterprise Service Bus architecture that is currently
-under development.  Furthermore, the system must be connected to the two main
-sources of data that support the analysis: the ATMS database (or UCI's copy of
-it) and the activity log database (or a shadowed version of it).  Once these
-components are integrated, the web-based interface can be connected to live data
-and released for initial testing by potential users.
-
-
-% Going forward, we will make the prototype web interface available on a
-% limited basis for analysis of incidents from the latter half of 2007
-% (for which we have data from the D12 activity log). The purpose of
-% this delivery is to get feedback from Caltrans regarding the interface
-% and the type of analysis data made available.
-
-% At the same time, once the revisions to the activity log are
-% completed, we will finalize plans to integrate the system with TMC
-% activity log data sources and begin work on a live version of the
-% web-based prototype for recent incidents that incorporates feedback
-% offered regarding the interface.

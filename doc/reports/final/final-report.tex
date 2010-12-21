@@ -23,14 +23,15 @@
 \usepackage{setspace}
 \usepackage{url}
 \usepackage[noauto]{chappg}
+\usepackage{xspace}
 
 \DeclareMathOperator{\poisson}{P} %
 \DeclareMathOperator{\nbin}{NBin} %
 
 
 \newif\iffinal % introduce a switch for draft vs. final document
-%\finaltrue % use this to compile the final document
-\finalfalse
+\finaltrue % use this to compile the final document
+%\finalfalse
 \newif\iffull
 \fulltrue
 
@@ -47,7 +48,6 @@
     \input{#1.tikz}%
     \end{singlespace}
   }
-%  \renewcommand{\fixme}[3][1][]{}
 \else
   \newcommand{\inputTikZ}[1]{%
     \begin{singlespace}
@@ -56,6 +56,9 @@
     \endpgfgraphicnamed%
     \end{singlespace}
   }
+\fi
+\iffinal
+  \renewcommand{\fixme}[3][]{#1\xspace}
 \fi
 
 %\makenomenclature
@@ -730,7 +733,7 @@ performance evaluation system will be able to reconstruct historical incidents
 for post-analysis.  The next chapter describes that modeling methodology used in
 the \ac{TMCPE} system.
 
-\fixme{crindt}{Show better before and after logs}
+%%\fixme{crindt}{Show better before and after logs}
 
 
 \chapter{Modeling Methodology}
@@ -782,10 +785,10 @@ consecutively as $(i - 1), (i - 2), \ldots{}$.
 \label{sec:state-est}
 
 This method relies upon access to the prior one-year of historical traffic
-data--- specifically: traffic counts and occupancy for each lane at each
-detector station every 30 seconds. Lane-by-lane traffic data is aggregated to
-5-minute intervals at each detector station in order to obtain stable traffic
-data from each point.
+data---specifically: traffic counts and occupancy for each lane at each detector
+station every 30 seconds. Lane-by-lane traffic data is aggregated to 5-minute
+intervals at each detector station in order to obtain stable traffic data from
+each point.
 
 Loop detectors in Orange County predominantly are single loop detectors that
 provide only traffic counts and occupancies; travel speeds need to be estimated
@@ -1236,7 +1239,7 @@ other speeds.  In this study, various values were applied to find the
 best threshold. The best value was empirically found from the relation
 between traffic data and traffic accident as $\alpha = 0.25$.
 
-\fixme{crindt}{Define final equation for delay here.}
+%%\fixme{crindt}{Define final equation for delay here.}
 
 \subsection{Improvements to the core delay model}
 \label{sec:delay-improvements}
@@ -1247,14 +1250,13 @@ real world.  In the case of \ac{TMCPE}, this technology transfer required
 some fine tuning of the assumptions in a number of areas, which are
 outlined below.
 
-\subsubsection{Bounding the incident}
-\label{sec:incident-bounds}
+% \subsubsection{Bounding the incident}
+% \label{sec:incident-bounds}
 
-Computing maximum feasible time-space bounds of an incident impact is
-critical both to keeping the calculations for each event tractable, as
-well as to prevent spurious
+% Computing maximum feasible time-space bounds of an incident impact is
+% critical both to keeping the calculations for each event tractable.
 
-\fixme[]{crindt}{Discuss the use of leading and trailing shockwave constraints}
+%%\fixme[]{crindt}{Discuss the use of leading and trailing shockwave constraints}
 
 
 \subsubsection{Distance weighting}
@@ -1270,11 +1272,17 @@ sufficiently close in time and space to a known incident locations.
 
 In such cases, a poorly tuned delay algorithm might erroneously
 attribute the random congestion to the known event.  One such case is
-shown in \fixme[]{crindt}{THE FOLLOWING FIGURE}.
+shown in the following figure.
 \begin{figure}[t]
   \begin{center}
-    %\inputTikZ{figs/time-space-incident-schematic-infeasible-3}
-    \caption[Random congestion in proximity to a known event]{Random congestion in proximity to a known event}
+    \includegraphics[width=\textwidth]{images/distance-weighting-helpful.png}
+    \caption[A case where distance weighting is helpful]{A case where distance
+      weighting is helpful.  In this plot, traffic travels from the top right
+      corner to the bottom left.  The incident occurred where the two blue lines
+      cross.  The small congestion plume adjacent to the cross is the
+      appropriate extent of impact.  However, the algorithm attaches the
+      unrelated upstream congestion because the resulting false positives don't
+      outweigh the addition of new correct positives.}
     \label{fig:time-space-random-versus-known}
   \end{center}
 \end{figure}
@@ -1304,7 +1312,7 @@ makes a false negative 10\% less important than a false positive.
 %
 This method, however tended to be too conservative and would result in
 the algorithm calculating \fixme[very small regions of
-delay]{crindt}{Give an example of this}.
+delay.]{crindt}{Give an example of this}
 
 The second method was to alter the objective function to weight the
 cells based upon their time-space proximity to the estimated location
@@ -1320,8 +1328,8 @@ expected location of the incident higher, this objective emphasizes
 matching the evidence near the event disruption more than that
 evidence further away from the incident.  
 
-\fixme{crindt}{Create before and after figure of the importance of
-   this method.}
+%%\fixme{crindt}{Create before and after figure of the importance of
+%%   this method.}
 
 We note that the use of this method was made possible by the
 improvements made to the \ac{TMC} activity log to add geospatial
@@ -1335,16 +1343,16 @@ coordinates from the \ac{CHP} \ac{iCAD} system to the incident logs
 Empirical analysis of incidents analyzed using the original delay calculation
 method showed that in some cases the use of the $\alpha$ threshold to identify
 likely areas of incident-induced congestion would occasionally produce evidence
-that extended significantly beyond what was apparent to the analyst.  An example
-of this situation is shown in \fixme[figure~\ref{fig:max-inc-spd}]{crindt}{Make
-  this a side by side before/after comparison}.
-\begin{figure}[t]
-  \centering
-  \caption{Illustrating the need for a maximum incident speed}
-  \label{fig:max-inc-spd}
-\end{figure}
-
-After analyzing a number of incident exhibiting this problem, we noticed that
+that extended significantly beyond what was apparent to the analyst.  
+% An example
+% of this situation is shown in \fixme[figure~\ref{fig:max-inc-spd}]{crindt}{Make
+%   this a side by side before/after comparison}.
+% \begin{figure}[t]
+%   \centering
+%   \caption{Illustrating the need for a maximum incident speed}
+%   \label{fig:max-inc-spd}
+% \end{figure}
+After analyzing a number of incidents exhibiting this problem, we noticed that
 these incidents all tended to have relatively high observed speeds
 ($\hat{s}_j(t_m)>65\unitfrac{mi}{h}$) and low standard deviations
 ($\sigma_{s_j(t_m)}<2\unitfrac{mi}{h}$).  In these situations, minor
@@ -1380,158 +1388,153 @@ produced consistent results for a range of incident severities and
 speeds.
 
 
-\subsection{Alternative method for computing TMC impacts}
-\label{sec:alt-tmc-meth}
+% \subsection{Alternative method for computing TMC impacts}
+% \label{sec:alt-tmc-meth}
 
-The statistical techniques described in section~\ref{sec:det-cong-reg}
-used to determine the evidence that a given time-space freeway segment
-is experiencing abnormal conditions is admittedly simple.  In this
-section, we present a bottom-up, data-driven approach to modeling
-traffic behavior from loop-sensor measurements.  In
-section~\ref{sec:model} we describe an unsupervised method that
-simultaneously filters out sensor failure, learns the underlying
-normal traffic pattern, and separates and characterizes unusual event
-activity.  Section~\ref{sec:applications} shows how the output of the
-model can be used in various applications, including detecting unusual
-activity, detecting and filtering sensor failure, finding the
-spatio-temporal signature of accidents, and creating a ranked list of
-traffic
-disruptions.  % The concluding section discusses ??? %other traffic modeling problems we would like to pursue in the future.
+% The statistical techniques described in section~\ref{sec:det-cong-reg} used to
+% determine the evidence that a given time-space freeway segment is experiencing
+% abnormal conditions is admittedly simple.  In this section, we present a
+% bottom-up, data-driven approach to modeling traffic behavior from loop-sensor
+% measurements.  In section~\ref{sec:model} we describe an unsupervised method
+% that simultaneously filters out sensor failure, learns the underlying normal
+% traffic pattern, and separates and characterizes unusual event activity.
+% Section~\ref{sec:applications} shows how the output of the model can be used in
+% various applications, including detecting unusual activity, detecting and
+% filtering sensor failure, finding the spatio-temporal signature of accidents,
+% and creating a ranked list of traffic
+% disruptions.  % The concluding section discusses ??? %other traffic modeling problems we would like to pursue in the future.
 
-\subsubsection{Model Description}\label{sec:model}
-Figure~\ref{fig:model} shows three time-segments of the graphical
-model for the loop sensor event model. The flow and occupancy
-processes are joined together via a Markov event process forming two
-Markov modulated nonhomogeneous Poisson processes[scott00] (MMNHPP).
-We will discuss each component process in turn.
-\begin{figure}
-  \centering
-  \includegraphics[width=4.5in, height=3.5in]{eps/mmppNew.pdf}
-  \caption{Three time segments of the Markov model }\label{fig:model}
-\end{figure}
+% \subsubsection{Model Description}\label{sec:model}
+% Figure~\ref{fig:model} shows three time-segments of the graphical
+% model for the loop sensor event model. The flow and occupancy
+% processes are joined together via a Markov event process forming two
+% Markov modulated nonhomogeneous Poisson processes[scott00] (MMNHPP).
+% We will discuss each component process in turn.
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=4.5in, height=3.5in]{eps/mmppNew.pdf}
+%   \caption{Three time segments of the Markov model }\label{fig:model}
+% \end{figure}
 
 
 
 
-\paragraph{Event Process: Modeling Rare, Persistent Events}\label{sec:event}
-\begin{figure}
-  \centering
-%  \includegraphics[width=3.5in, height=2in]{eps/event.eps}
-  \caption{Three time segments of the }\label{fig:eventGM}
-\end{figure}
+% \paragraph{Event Process: Modeling Rare, Persistent Events}\label{sec:event}
+% \begin{figure}
+%   \centering
+% %  \includegraphics[width=3.5in, height=2in]{eps/event.eps}
+%   \caption{Three time segments of the }\label{fig:eventGM}
+% \end{figure}
 
 
-The anomalous measurements that occur during an event caused by a
-traffic accident or a large concert for example, can be intuitively
-thought of as being due to a random process changes the observed
-behavior, increasing or decreasing the measurement for a short period
-of time.  We characterize events as high or low, indicating that the
-anomalous measurements are larger or smaller than what we would
-normally expect.  In addition, we expect the event type to have
-continuity; i.e. continuously positive rather than alternating between
-positive and negative from one time segment to the next.  Modeling the
-event process using a Markov chain, as seen in
-Figure~\ref{fig:eventGM}, allows us to encode the concept that an
-event has persistence, but is relatively short in duration and
-relatively rare and the concept of continuity.
+% The anomalous measurements that occur during an event caused by a
+% traffic accident or a large concert for example, can be intuitively
+% thought of as being due to a random process changes the observed
+% behavior, increasing or decreasing the measurement for a short period
+% of time.  We characterize events as high or low, indicating that the
+% anomalous measurements are larger or smaller than what we would
+% normally expect.  In addition, we expect the event type to have
+% continuity; i.e. continuously positive rather than alternating between
+% positive and negative from one time segment to the next.  Modeling the
+% event process using a Markov chain, as seen in
+% figure~\ref{fig:eventGM}, allows us to encode the concept that an
+% event has persistence, but is relatively short in duration and
+% relatively rare and the concept of continuity.
 
-Continuity is achieved in part by defining the event state variable,
-$z_t$.  In our system we define 8 event states
-\begin{equation}
- z_t = \begin{cases} 0 & \mbox{if there is no event at time $t$} \\
-                      1 & \mbox{if there is a high flow, high occupancy event at time $t$} \\
-                      2 & \mbox{if there is a high flow, low occupancy event at time $t$} \\
-                      3 & \mbox{if there is a low flow, low occupancy event at time $t$} \\
-                      4 & \mbox{if there is a low flow, high occupancy event at time $t$} \\
-                      5 & \mbox{if there is a high flow, normal occupancy event at time $t$} \\
-                      6 & \mbox{if there is a normal flow, high occupancy event at time $t$} \\
-                      7 & \mbox{if there is a sensor failure at time $t$ }
-       \end{cases}
-\end{equation}
-and define the probability distribution over $z_t$ to be Markov in
-time, with transition probability matrix $A$
-\begin{equation}
-  A = \left( \begin{matrix} a_{00} & a_{01} & \cdots \\ a_{10} & a_{11} & \cdots \\ \vdots & \vdots & \ddots  \end{matrix} \right)
-\end{equation}\label{singleSensor:transitionMatrix}
-where $a_{ij}$ is the probability of transitioning from state $i$ to
-state $j$, and where each row of $A$ sums to 1.
+% Continuity is achieved in part by defining the event state variable,
+% $z_t$.  In our system we define 8 event states
+% \begin{equation}
+%  z_t = \begin{cases} 0 & \mbox{if there is no event at time $t$} \\
+%                       1 & \mbox{if there is a high flow, high occupancy event at time $t$} \\
+%                       2 & \mbox{if there is a high flow, low occupancy event at time $t$} \\
+%                       3 & \mbox{if there is a low flow, low occupancy event at time $t$} \\
+%                       4 & \mbox{if there is a low flow, high occupancy event at time $t$} \\
+%                       5 & \mbox{if there is a high flow, normal occupancy event at time $t$} \\
+%                       6 & \mbox{if there is a normal flow, high occupancy event at time $t$} \\
+%                       7 & \mbox{if there is a sensor failure at time $t$ }
+%        \end{cases}
+% \end{equation}
+% and define the probability distribution over $z_t$ to be Markov in
+% time, with transition probability matrix $A$
+% \begin{equation}
+%   A = \left( \begin{matrix} a_{00} & a_{01} & \cdots \\ a_{10} & a_{11} & \cdots \\ \vdots & \vdots & \ddots  \end{matrix} \right)
+% \end{equation}\label{singleSensor:transitionMatrix}
+% where $a_{ij}$ is the probability of transitioning from state $i$ to
+% state $j$, and where each row of $A$ sums to 1.
 
-The parameters of the transition matrix enable us to build in the
-concepts of persistence and rarity of events, as well as consistency
-of events.  Persistency is encoded in the event self-transition
-parameters. For example, the expected value of the length of a {high
-  flow, high occupancy} event is $1/(1-a_{11})$.  Rarity of events is
-encoded in the no-event to no-event transition parameter, the expected
-number of time segments before seeing an event being $1/(1-a_{00})$.
-Continuity is managed by making the event self-transition parameters
-much larger than the event-to-event transition parameters (eg. $a_{11}
->> a_{12}, a_{13}$ etc.).
+% The parameters of the transition matrix enable us to build in the
+% concepts of persistence and rarity of events, as well as consistency
+% of events.  Persistency is encoded in the event self-transition
+% parameters. For example, the expected value of the length of a {high
+%   flow, high occupancy} event is $1/(1-a_{11})$.  Rarity of events is
+% encoded in the no-event to no-event transition parameter, the expected
+% number of time segments before seeing an event being $1/(1-a_{00})$.
+% Continuity is managed by making the event self-transition parameters
+% much larger than the event-to-event transition parameters (eg. $a_{11}
+% >> a_{12}, a_{13}$ etc.).
 
-These parameters create ``soft'' rules that guide the model to
-recognize events as we understand them.  We will show later in
-Section~\ref{sec:eventDetect} that these parameters do not
-
-
-
-
-\fixme[Failure... event to event transition not unusual, but frequent]{crindt}{wha?}
+% These parameters create ``soft'' rules that guide the model to
+% recognize events as we understand them.  
+% % We will show later in
+% % Section~\ref{sec:eventDetect} that these parameters do not
+% % \fixme[Failure... event to event transition not unusual, but frequent]{crindt}{wha?}
 
 
-the number of time-segments between events is geometric with expected
-value $1/z^{01}$ (in units of time-segments), and the length of each
-event is geometric with expected value $1/z^{10}$.  We give $z^{00}$,
-$z^{11}$ priors
-\begin{equation}
- z^{00} \sim \beta(z^{00};a_{00},b_{00}) \qquad \qquad \qquad \qquad
- z^{11} \sim \beta(z^{11};a_{11},b_{11})
-\end{equation}
-where $\beta(\cdot)$ is the Beta distribution, and $a_{00}$, $b_{00}$, and $a_{11}$, $b_{11}$ are parameters for the two Beta priors.
+% The number of time-segments between events is geometric with expected value
+% $1/z^{01}$ (in units of time-segments), and the length of each event is
+% geometric with expected value $1/z^{10}$.  We give $z^{00}$, $z^{11}$ priors
+% \begin{equation}
+%  z^{00} \sim \beta(z^{00};a_{00},b_{00}) \qquad \qquad \qquad \qquad
+%  z^{11} \sim \beta(z^{11};a_{11},b_{11})
+% \end{equation}
+% where $\beta(\cdot)$ is the Beta distribution, and $a_{00}$, $b_{00}$, and
+% $a_{11}$, $b_{11}$ are parameters for the two Beta priors.
 
-The event process is modeled as an HMM (see
-Chapter~\ref{background:HMM}), as illustrated in
-Figure~\ref{singleSensor:eventGM}.  Given $z_t$, we can model the
-increase in observation counts due to the event, $e_t$, as Poisson
-with rate $\gamma$
-\begin{equation}
- e_t \sim \begin{cases} 0 & z_t = 0 \\ \poisson(e ; \gamma) & z_t = 1 \end{cases}
-\end{equation}\label{singleSensor:eventCount1}
-and $\gamma$ is independent at each time $t$
-\begin{equation}
- \gamma \sim \Gamma(\gamma ; a^E, b^E).
-\end{equation}\label{singleSensor:eventCount2}
-where a and b are parameters of the Gamma distribution and the
-superscript $E$ indicates the event process.
+% The event process is modeled as an HMM (see
+% Chapter~\ref{background:HMM}), as illustrated in
+% Figure~\ref{singleSensor:eventGM}.  Given $z_t$, we can model the
+% increase in observation counts due to the event, $e_t$, as Poisson
+% with rate $\gamma$
+% \begin{equation}
+%  e_t \sim \begin{cases} 0 & z_t = 0 \\ \poisson(e ; \gamma) & z_t = 1 \end{cases}
+% \end{equation}\label{singleSensor:eventCount1}
+% and $\gamma$ is independent at each time $t$
+% \begin{equation}
+%  \gamma \sim \Gamma(\gamma ; a^E, b^E).
+% \end{equation}\label{singleSensor:eventCount2}
+% where a and b are parameters of the Gamma distribution and the
+% superscript $E$ indicates the event process.
 
-Just as there are different Poisson rate parameters for different
-times-of-day in the normal process, one can imagine different Poisson
-rate parameters for the event process based on time.  However,
-although the observed time and day indicate the appropriate normal
-process rate parameter to use (e.g. traffic Monday mornings at 11am at
-a specific sensor location is generally predictable), the same cannot
-be said for the event process (event traffic on Monday morning at 11am
-might be due to a small event with relatively little extra traffic or
-due to a large event with more traffic).
+% Just as there are different Poisson rate parameters for different
+% times-of-day in the normal process, one can imagine different Poisson
+% rate parameters for the event process based on time.  However,
+% although the observed time and day indicate the appropriate normal
+% process rate parameter to use (e.g. traffic Monday mornings at 11am at
+% a specific sensor location is generally predictable), the same cannot
+% be said for the event process (event traffic on Monday morning at 11am
+% might be due to a small event with relatively little extra traffic or
+% due to a large event with more traffic).
 
-One method of approaching this problem of different sized events would
-be to define several event types and let the model learn the
-appropriate rate parameters for each type (perhaps extra traffic due
-to large sporting events has one distribution and extra traffic due to
-concerts has a different distribution); however, not only does this
-increase computational complexity, it could make the model overly
-flexible and too sensitive to naturally occurring noise in the count
-measurements (see Section~\ref{singleSensor:poisson} and
-Chapter~\ref{sensitivity}).  A more robust solution is to marginalize
-over $\gamma$ analytically
-\begin{equation}\label{eq:nbin}
-  \int \poisson(e; \gamma) \Gamma(\gamma; a^E,b^E) = \nbin(e; a^E, b^E/(1+b^E))
-\end{equation}
-where $\nbin$ is the negative binomial distribution with parameters
-$a^E$ and $b^E/(1+b^E)$.
+% One method of approaching this problem of different sized events would
+% be to define several event types and let the model learn the
+% appropriate rate parameters for each type (perhaps extra traffic due
+% to large sporting events has one distribution and extra traffic due to
+% concerts has a different distribution); however, not only does this
+% increase computational complexity, it could make the model overly
+% flexible and too sensitive to naturally occurring noise in the count
+% measurements (see Section~\ref{singleSensor:poisson} and
+% Chapter~\ref{sensitivity}).  A more robust solution is to marginalize
+% over $\gamma$ analytically
+% \begin{equation}\label{eq:nbin}
+%   \int \poisson(e; \gamma) \Gamma(\gamma; a^E,b^E) = \nbin(e; a^E, b^E/(1+b^E))
+% \end{equation}
+% where $\nbin$ is the negative binomial distribution with parameters
+% $a^E$ and $b^E/(1+b^E)$.
 
-This negative binomial distribution has a larger variance than the
-Poisson distribution, and is thus able to model a ``catch-all'' event
-type that gives some probability mass to event counts from
-various-sized event types.
+% This negative binomial distribution has a larger variance than the
+% Poisson distribution, and is thus able to model a ``catch-all'' event
+% type that gives some probability mass to event counts from
+% various-sized event types.
 
 
 
@@ -1943,33 +1946,32 @@ oversaturation, $[\lambda-\mu(t1)]$, \textbf{or} to the 4\textsuperscript{th} po
 \subsection{Estimating tangible TMC benefits}
 \label{sec:est-benefits}
 
-Equations (\ref{dtot-final}) offer a tool for estimating \ac{TMC} benefits
-from measurable events in the \ac{TMC} activity logs.  Specifically, if we
-can determine from \ac{TMC} logs how much the time to initial response to
-an incident $t_1$ is shortened by \ac{TMC} actions, we can estimate the
-delay savings attributable to \ac{TMC} functions.  Furthermore, if these
-actions can be associated with specific processes or technologies, we
-can make statements regarding the delay savings attributable to
-specific \ac{TMC} assets (or bundles of them). The extent to which this is
-possible depends on the quality of data in the \ac{TMC} logs, which has
-been a motivating factor behind the planned improvements to the \ac{TMC}
-activity logs discussed in chapter~\ref{chap:tmc-activity}.
+Equations (\ref{dtot-final}) offer a tool for estimating \ac{TMC} benefits from
+measurable events in the \ac{TMC} activity logs.  Specifically, if we can
+determine from \ac{TMC} logs how much the time to initial response to an
+incident $t_1$ is shortened by \ac{TMC} actions, we can estimate the delay
+savings attributable to \ac{TMC} functions.  Furthermore, if these actions can
+be associated with specific processes or technologies, we can make statements
+regarding the delay savings attributable to specific \ac{TMC} assets (or bundles
+of them). The extent to which this is possible depends on the quality of data in
+the \ac{TMC} logs, which has been a motivating factor behind the improvements to
+the \ac{TMC} activity logs discussed in chapter~\ref{chap:tmc-activity}.
 
 
-\subsection{Ongoing work}
-\label{sec:ongoing-work-tmc-impact}
+% \subsection{Ongoing work}
+% \label{sec:ongoing-work-tmc-impact}
 
-\fixme[
-To date, the incident impact model has not been applied to data.  The
-next step in developing this model is to compare baseline delay
-predictions of the theoretical model (equations~\ref{dtot-final}) to
-the observed delay estimates obtained from the incident impact model
-(section~\ref{sec:incident-impact-model}).  The features of the
-incident impact model will be determined, in large part, by the
-improvements to the activity logging system, but we will also make an
-effort to infer the critical points during past incident management
-using the legacy logs.
-]{crindt}{uh}
+% \fixme[
+% To date, the incident impact model has not been applied to data.  The
+% next step in developing this model is to compare baseline delay
+% predictions of the theoretical model (equations~\ref{dtot-final}) to
+% the observed delay estimates obtained from the incident impact model
+% (section~\ref{sec:incident-impact-model}).  The features of the
+% incident impact model will be determined, in large part, by the
+% improvements to the activity logging system, but we will also make an
+% effort to infer the critical points during past incident management
+% using the legacy logs.
+% ]{crindt}{uh}
 
 
 
@@ -2053,7 +2055,10 @@ each of these components in the following sections.
     %\includegraphics[width=\textwidth]{figs/software-arch.png}
     \inputTikZ{figs/status}
     \caption{The logical system architecture of the TMC performance evaluation
-      system.  \fixme{crindt}{Elaborate}}
+      system.  Data from various sources are used in the Incident Impact Model
+      and TMC Impact Model to provide analysis results to the analyst over the
+      web interface.  Fine tuning of the analysis algorithms is handled by an
+      adminstrator working with the Analysis Scheduler.}
     \label{fig:logical-system-arch}
   \end{center}
 \end{figure}
@@ -2135,7 +2140,7 @@ All domain data generated by the \ac{TMCPE} application are stored in the
 application database.  This includes all incident analyses and their components
 (such as individual facility analyses).  The details of the domain objects
 stored in this database are discussed in section~\ref{sec:components} below.
-\fixme{crindt}{Too short to be a standalone section}
+%%\fixme{crindt}{Too short to be a standalone section}
 
 
 \section{Components}
@@ -2149,9 +2154,10 @@ software or to users in the \ac{TMC}.
 Currently, the core business logic, including the \ac{TMCPE} computations is
 implemented using custom \texttt{perl} scripts and the commercial \ac{GAMS}
 optimization software \citep{rosenthal10:_gams}.  The user interface is
-implemented using the \texttt{Grails} web application framework \citep{grails}.
-Both \texttt{perl} and \texttt{Grails} offer persistence mechanisms for reading
-and writing data to/from the databases.  However, because \texttt{Grails} is a
+implemented using the \texttt{Grails} web application framework
+\citep{rocher09:_grail_framew_refer_docum}.  Both \texttt{perl} and
+\texttt{Grails} offer persistence mechanisms for reading and writing data
+to/from the databases.  However, because \texttt{Grails} is a
 convention-oriented framework while \texttt{perl} is more of a general purpose
 toolkit that is easier to adapt, we decided to allow \texttt{Grails} to manage
 the database schemas where they are shared between the business and user
@@ -2176,8 +2182,6 @@ system.
 
 \label{sec:incident-impact-service}
 
-
-
 This component encapsulates the incident impact model described in
 section~\ref{sec:incident-impact-model}.  It only requires the
 activity log ID as input and will automatically query the sensor
@@ -2187,58 +2191,53 @@ associated delay calculations.
 
 The core models for the incident impact service have been developed using a
 program written in the \texttt{perl} scripting language.  The high-level logic
-for this service is shown in figure~\ref{fig:inc-imp-serv}.
-\begin{figure}[t]
-  \centering
+for this service is as follows.
+\begin{enumerate}
+\item {\sc \textbf{Obtain Event Data}}: Query activity log database
+  for unanalyzed events since last run
+\item {\sc\textbf{Preprocess Events}}: For each unanalyzed event
   \begin{enumerate}
-  \item {\sc \textbf{Obtain Event Data}}: Query activity log database
-    for unanalyzed events since last run
-  \item {\sc\textbf{Preprocess Events}}: For each unanalyzed event
-    \begin{enumerate}
-    \item Loop over the activity and communications logs and:
-      \begin{itemize}
-      \item determine the event type based upon the \ac{iCAD} ID of the event,
-        which falls into the following broad categories: incidents (accidents,
-        etc.), special events (like sporting events) 
-        maintenance/construction activities.
-      \item import privacy scrubbed data into the application database.
-      \item identify performance measures information needed to
-        formulate the delay calculation.
-      \item Use \ac{iCAD} geocoding (where available) and activity log
-        location strings to identify the approximate time-space
-        location of the event's impact on the
-        system
-      \item Create a \ac{TMCPE} event object representing the event and
-        store it in the database
-      \end{itemize}
-    \end{enumerate}
-  \item {\sc\textbf{Compute Incident Impact}}: For each \ac{TMCPE} event object
-    \begin{enumerate}
-    \item Using the geocoded location of the approximate event site and
-      the critical incident management events from the activity log,
-      \fixme[estimate the maximum time-space bounds]{crindt}{more
-        detail} of the event on primary and secondary facilities
-    \item Query the \ac{PeMS} mirror database for observed speeds and flows
-      for the maximum time-space impact region.
-    \item Generate the mathematical program that estimates the range
-      of incident impact
-    \item Send the program to the \fixme[GAMS
-      service]{crindt}{explain} to be solved.
-    \item Parse the results of the GAMS solution back into the \ac{TMCPE}
-      domain classes for use by the \acp{API}
-    \end{enumerate}
+  \item Loop over the activity and communications logs and:
+    \begin{itemize}
+    \item determine the event type based upon the \ac{iCAD} ID of the event,
+      which falls into the following broad categories: incidents (accidents,
+      etc.), special events (like sporting events) 
+      maintenance/construction activities.
+    \item import privacy scrubbed data into the application database.
+    \item identify performance measures information needed to
+      formulate the delay calculation.
+    \item Use \ac{iCAD} geocoding (where available) and activity log
+      location strings to identify the approximate time-space
+      location of the event's impact on the
+      system
+    \item Create a \ac{TMCPE} event object representing the event and
+      store it in the database
+    \end{itemize}
   \end{enumerate}
-  \caption{Incident impact service procedural logic}
-  \label{fig:inc-imp-serv}
-\end{figure}
-It involves three main steps: obtaining raw event data from all data sources,
-pre-processing that data to identify the location of the event and the critical
-incident management steps from the logs, and computing the incident and TMC
-impacts.
+\item {\sc\textbf{Compute Incident Impact}}: For each \ac{TMCPE} event object
+  \begin{enumerate}
+  \item Using the geocoded location of the approximate event site and
+    the critical incident management events from the activity log,
+    \fixme[estimate the maximum time-space bounds]{crindt}{more
+      detail} of the event on primary and secondary facilities
+  \item Query the \ac{PeMS} mirror database for observed speeds and flows
+    for the maximum time-space impact region.
+  \item Generate the mathematical program that estimates the range
+    of incident impact
+  \item Send the program to the \fixme[\ac{GAMS} service]{crindt}{explain} to
+    be solved.
+  \item Parse the results of the GAMS solution back into the \ac{TMCPE}
+    domain classes for use by the \acp{API}
+  \end{enumerate}
+\end{enumerate}
+% It involves three main steps: obtaining raw event data from all data sources,
+% pre-processing that data to identify the location of the event and the critical
+% incident management steps from the logs, and computing the incident and TMC
+% impacts.
 
-\fixme{crindt}{Discuss parsing processing, may have to blow up diagram.}
+% \fixme{crindt}{Discuss parsing processing, may have to blow up diagram.}
 
-\paragraph{Recommendations for future improvements}
+%%\paragraph{Recommendations for future improvements}
 
 The current implementation formulates the \ac{BIP} in
 equations~(\ref{eq:bip-formulation}) for solution using the \ac{CPLEX} solver
@@ -2255,26 +2254,28 @@ for re-running the solver with different parameters (e.g., $\alpha$, the maximum
 duration, etc.) for a given incident.  This would, in turn, allow the web-based
 interface to provide a better end-user experience.
 
-Additionally, the improved statistical techniques discussed in
-section~\ref{sec:alt-tmc-meth} have great promise for providing more robust
-identification of the range of impact for unexpected events in the system.
-While the current implementation is not sufficiently efficient to be
-incorporated into the live application as it stands, it could likely be
-optimized to function with the web application.
+Additionally, the improved statistical techniques considered during this
+research
+% discussed in
+% section~\ref{sec:alt-tmc-meth} 
+have great promise for providing more robust identification of the range of
+impact for unexpected events in the system.  However, the implementation of
+these methods are not sufficiently efficient to be incorporated into the live
+application as it stands.  As they mature, however, they could be optimized to
+function with the web application.
 
 
 \subsubsection{TMC impact service}
 \label{sec:tmc-impact-service}
 The \ac{TMC} impact service encapsulates the \ac{TMC} impact model resulting
-from the work described in section~\ref{sec:mod-tmc-impacts}.  This
-service requires as input the activity log ID of the incident to be
-analyzed, the output from the incident impact service in order to
-characterize the critical section and estimate the arrival pattern to
-the impacted region, and any parameters characterizing changes to the
-observed incident response As with the incident impact service, this
-model independently accesses additional databases as necessary to
-support its analysis.  The service updates the \ac{TMCPE} domain classes
-for the event to include the estimated delay savings attributable to
+from the work described in section~\ref{sec:mod-tmc-impacts}.  This service
+requires as input the activity log ID of the incident to be analyzed, the output
+from the incident impact service in order to characterize the critical section
+and estimate the arrival pattern to the impacted region, and any parameters
+characterizing changes to the observed incident response As with the incident
+impact service, this model independently accesses additional databases as
+necessary to support its analysis.  The service updates the \ac{TMCPE} domain
+classes for the event to include the estimated delay savings attributable to
 actions characterized by the input parameters.
 
 \fixme{crindt}{flesh this out some.  Probably just collapse with the
@@ -2290,7 +2291,7 @@ use-cases described in section~\ref{sec:use-cases}.  To support these
 applications, the architecture includes two main interfaces to the
 core logical services.  
 
-\subsubsection{Web-based incident post-analysis tool}
+\paragraph{Web-based incident post-analysis tool}
 
 The primary interface to the performance evaluation system is a
 map-based web interface that allows an analyst to query the model for
@@ -2299,23 +2300,47 @@ map-based web interface that allows an analyst to query the model for
 \item \ac{TMC} benefits for a set of incidents meeting particular criteria
   (location, time of day, severity, etc.)
 \end{itemize}
-The interface will gives analyst control of relevant input parameters
-to the model, but assumes sensible defaults where possible.
+The interface will gives analyst control of relevant input parameters to the
+model, but assumes sensible defaults where possible.
 
-The system uses a web-based interface built atop the Grails framework, which is
-an open-source java-based web application system that is compatible with
-existing projects in \ac{CTMLabs}.  Within that framework, we implemented a
-map-based interface using the OpenLayers \texttt{javascript} library
-\citep{openlayers10:_openl_user_guide} and the OpenStreetMap map image tiles
-\citep{openstreetmap.org10:_opens_devel_guide} (Google maps can also be used as
-a background layer).
+The system uses a web-based interface built atop the Grails framework.  Within
+that framework, we implemented a map-based interface using the OpenLayers
+\texttt{javascript} library \citep{openlayers10:_openl_user_guide} and the
+OpenStreetMap map image tiles \citep{openstreetmap.org10:_opens_devel_guide}
+(Google maps can also be used as a background layer).  The web interface
+consists of two main screens.  
 
-Analysis of a particular incident is reflected in the analysis of all
-potentially impacted facilities, whose estimated time-space impacts are
+The first is a general query interface (figure~\ref{fig:tmcpe-query-interface})
+that allows the analyst to select incidents using a variety of parameters
+ranging from the time and date of the event to the event type.
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=\textwidth]{images/tmcpe-query-interface.png}
+    \caption{The TMCPE query interface.}
+    \label{fig:tmcpe-query-interface}
+  \end{center}
+\end{figure}
+The query screen includes a map view and a scrollable table with summary
+statistics for all incidents meeting the query criteria.  This interface allows
+the user to select a particular incident to view a more detailed analysis.
+
+The more detailed analysis of a particular incident is shown in the second
+screen, which shows the analysis of the impacted facilities.  In this screen
+(figure~\ref{fig:tmcpe-incident-detail-interface}) the time-space impacts are
 displayed using a custom \texttt{javascript} widget developed for this project.
-
-\fixme{crindt}{Discuss the main features: query screen and its parameters, map
-  view, time-space diagram view, etc.}
+This widget displays a time-space diagram of the impacted region.  The screen
+also includes a scrollable table holding the TMC activity and communications
+logs for this event, which can be overlayed on the time-space diagram by
+hovering over it.  A map view shows the location and prevailing conditions
+during the event and detailed statistics from the analysis are displayed across
+the top.
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=\textwidth]{images/tmcpe-incident-detail.png}
+    \caption{The TMCPE incident detail view.}
+    \label{fig:tmcpe-incident-detail-interface}
+  \end{center}
+\end{figure}
 
 \ifuserguide%
 Additional detail of the user interface is provided in
@@ -2391,7 +2416,7 @@ Using this \ac{API}, the \ac{TMCPE} application has been integrated into the
 \ac{CTMLabs} project interface, which shows the extent of the \ac{TMCPE} data
 available, but does not expose the underlying details to
 unauthenticated users.
-\fixme{crindt}{Project interface picture}
+%%\fixme{crindt}{Project interface picture}
 
 \subsubsection{Interface security}
 \label{sec:interface-security}
@@ -2415,22 +2440,28 @@ sources, business logic (software implementing the models described in
 chapter~\ref{sec:method}), user interfaces, and information flows between those
 components.
 
-Figure~\ref{fig:physical-architecture} shows how the \ac{TMCPE} web application
-was deployed for this project using \ac{CTMLabs} infrastructure.  We discuss
-this architecture from the perspective of the events that drive the system,
-namely:
+% Figure~\ref{fig:physical-architecture} shows how the \ac{TMCPE} web application
+% was deployed for this project using \ac{CTMLabs} infrastructure.  
+The \ac{TMCPE} web application was deployed for this project using existing
+\ac{CTMLabs} infrastructure.  The system uses two \ac{CTMLabs} data servers for
+its raw and application databases, two processing servers to implement the core
+business logic and perform the computationally intense analysis, and one server
+for deploying the web and API interfaces to users.  
+
+Below, we discuss this architecture from the perspective of the events that
+drive the system, namely:
 \begin{itemize}
 \item the availability of new data,
 \item the processing of new data to produce incident analyses (the business
   logic), and
 \item user interaction with the analysis product
 \end{itemize}
-\begin{figure}[t]
-  \centering
-  \fixme{crindt}{Insert as-built about here and discuss}
-  \caption{Physical architecture of the TMCPE web application}
-  \label{fig:physical-architecture}
-\end{figure}
+% \begin{figure}[t]
+%   \centering
+%   \fixme{crindt}{Insert as-built about here and discuss}
+%   \caption{Physical architecture of the TMCPE web application}
+%   \label{fig:physical-architecture}
+% \end{figure}
 
 \subsubsection{Incoming Data}
 \label{sec:incoming-data}
@@ -2685,7 +2716,7 @@ than any other.
 The remaining analyzed entries include special events at Angel Stadium and the
 Honda Center---both in Anaheim---which have active pre-planned traffic
 management.  We see lower levels of average delay associated with these events,
-which are in proportion to their impact on the system (in particular, attendence
+which are in proportion to their impact on the system (in particular, attendance
 at Angel Stadium events is typically higher than Honda Center events).
 
 The other major class of events are construction and maintenance events that are
@@ -2738,22 +2769,23 @@ an impact to the system.  This can occur if:
 A major component of the \ac{TMCPE} application is the delay calculation.  The
 current method used by Caltrans computes delay as the total travel time added
 for vehicles traveling under \fixme[$35\unitfrac{mi}{h}$]{crindt}{refer to the
-  original equation}.  By definition, this method implies there is no delay if
-the average speed on the roadway is $35\unitfrac{mi}{h}$ or greater.
+  original equation}.  We refer to this delay calculation as $D_{35}$.  By
+definition, this method implies there is no delay if the average speed on the
+roadway is $35\unitfrac{mi}{h}$ or greater.
 
-By contrast, the delay calculation method used in this research treats delay as
-travel time above and beyond \emph{average} conditions for the given stretch of
-road for that time-of-day and day-of-way.  Consequently, it will attribute
-delays to incidents that, for instance, slow prevailing traffic from a mean
-value of $70\unitfrac{mi}{h}$ down to $35\unitfrac{mi}{h}$ where the
+By contrast, the delay calculation method used in this research, $D_{TMCPE}$
+treats delay as travel time above and beyond \emph{average} conditions for the
+given stretch of road for that time-of-day and day-of-way.  Consequently, it
+will attribute delays to incidents that, for instance, slow prevailing traffic
+from a mean value of $70\unitfrac{mi}{h}$ down to $35\unitfrac{mi}{h}$ where the
 conventional method will not attribute any delay to these conditions.  This will
 tent to increase the new delay values compared to the original method.
 
 The use of mean speeds to determine the baseline conditions (instead of
 $35\unitfrac{mi}{h}$) also means that if an incident occurs in a typically
 congested area with mean speeds below $35\unitfrac{mi}{h}$, then the new method
-will attribute lower delays to an incident than the \fixme[$D_{35}$
-method]{crindt}{define} for the same time-space region.
+will attribute lower delays to an incident than the $D_{35}$ method for the same
+time-space region.
 
 Finally, the conventional delay calculation method uses analyst-determined
 time-space boundaries for the incident impact while the new method determines
@@ -2765,54 +2797,104 @@ original method.
 The net effects of these factors on the final delay values computed for an
 incident will vary with the characteristics of the incident.  Empirically,
 however, we have seen generally higher delay values using the new method versus
-the original method.  \fixme{crindt}{Elaborate here by pulling stats}
+the original method.  For instance, for the 610 incidents evaluated for 2010,
+the computed delays by the respective methods are:
+\begin{eqnarray*}
+    D_{35}   & = 145,680\:\unit{veh\cdot{}hr} \\
+    D_{TMCPE} & = 183,987\:\unit{veh\cdot{}hr}
+\end{eqnarray*}
+This is a 26\% increase in the computed delay compared to the conventional
+method.  The discrepancy between these two methods should be taken into
+consideration when comparing delay numbers computed using other systems, such as
+\ac{PeMS}.
 
 
-\section{Computational performance}
-\label{sec:comp-perf}
+% \section{Computational performance}
+% \label{sec:comp-perf}
+
+
+% \begin{itemize}
+% \item Discuss performance/processing, etc
+% \end{itemize}
+
+% \section{Sample incident analyses}
+% \label{sec:inc-anal}
+
+% \begin{itemize}
+% \item Max speed threshold
+% \item Capturing of more delay, not just D35
+% \item Accounting for spectator slowing
+% \item Accounting for network effects (not complete)
+% \end{itemize}
 
 
 
-
-\begin{itemize}
-\item Discuss performance/processing, etc
-\end{itemize}
-
-\section{Sample incident analyses}
-\label{sec:inc-anal}
-
-\begin{itemize}
-\item Max speed threshold
-\item Capturing of more delay, not just D35
-\item Accounting for spectator slowing
-\item Accounting for network effects (not complete)
-\end{itemize}
-
-
-
-\chapter{Conclusion}
+\chapter{Conclusion and Recommendations}
 \label{chap:conclusion}
 
-\fixme[]{crindt}{Flesh these out; ties to section~\ref{sec:intro}.}
-
-Purpose:
+This research project developed a web-based \ac{TMCPE} application that
+addresses the problem of identifying the value of the \ac{TMC} in managing
+disruptions to the transporation system.  To achieve this goal, the research
+team wanted a method that:
 \begin{itemize}
-\item justify valuable technology, personnel allocations, and
-  maintenance costs,
-\item identify technologies that aren't meeting their initial promise,
+\item used available datasources,
+\item made direct inferences from available data without the use of simulation,
   and
-\item identify gaps in current operational strategies that might be
-  filled with new technology deployments.
+\item could be converted directly into dollar values.
 \end{itemize}
 
-and, from section~\ref{sec:event-man}:
-\begin{quote}
-  The focus in this project has been the development of incident-specific
-  delay-estimation metrics that can be used to evaluate \ac{TMC} performance.
-\end{quote}
+Though a range of techniques are available for valuing the \ac{TMC}, the
+research team focused quantifying the delay savings that can be attributed
+directly to \ac{TMC} actions.  Using event data from \ac{TMC} activity logs and
+traffic state data from the \ac{PeMS} database, the technique determines the
+time-space region impacted by each event.  Using these results, the system
+estimates the baseline delay for these events as well the impact that the
+\ac{TMC} has on reducing delay by computing the delay implications of removing
+particular logged \ac{TMC} actions from an incident response.
 
+Given these calculations, the system allows \ac{TMC} managers to evaluate the
+performance of various bundles of \ac{TMC} technologies and operational policies
+by mapping their effects onto events in the system that can be measured using
+existing surveillance systems and daily activity logs.  
 
+The system is deployed on the \ac{CTMLabs} website with a query interface that
+allows the analyst to select specific incidents or a range of them.  The web
+interface is ready for general use by authenticated \ac{CTMLabs} users.
 
+Looking ahead, we offer the following recommendations for continuing the
+development of the \ac{TMCPE} application.  
+
+\paragraph{TMC impact model improvements}
+
+First, we recommend continued development and fine-tuning of the TMC Impact
+model that estimates savings attributable to the \ac{TMC}.  The current
+technique could be improved to make better use of activity logging data to
+relate \ac{TMC} actions to possible changes in the performance of the system.  
+
+Second, we explored alternative statistical techniques that
+%research described in section~\ref{sec:alt-tmc-meth} 
+offer an alternative and more robust approach to determining which time-space
+sections are impacted by external disruptions.  These data-mining methods
+% developed in this research
+are currently too computationally intensive to be included in the live website,
+but the techniques show promise for later deployment as the algorithms are
+optimized.
+
+Third, the system is currently limited to analyzing incidents managed by
+Caltrans \ac{D12}.  This is solely due to the system's reliance on the augmented
+data now available from \ac{D12} activity log due to improvements made in
+support of this project.  The methods used, however, are completely transferable
+to any system with similar activity logging data and speed and volume estimates
+for impacted sections.  Because the \ac{TMCAL} system currently being deployed
+by Caltrans appears to be a developing standard for recording \ac{TMC} actions,
+we recommend that the \ac{TMCPE} system be augmented to accept data from the
+\ac{TMCAL} data source as well as its current \ac{D12} activity log backend.
+
+Finally, because the site is integrated into the \ac{CTMLabs} architecture, the
+\ac{CTMLabs} team can continue to support and improve the system as directed by
+Caltrans users making use of the system for analysis and reporting tasks.  We
+believe this development and support model will continue to improve the system
+into a potentially invaluable tool for Caltrans operations and management.
 
 %\includegraphics[width=\textwidth]{images/inc-61-ss.png}
 
