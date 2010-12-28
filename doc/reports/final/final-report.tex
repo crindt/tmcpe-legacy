@@ -24,6 +24,7 @@
 \usepackage{url}
 \usepackage[noauto]{chappg}
 \usepackage{xspace}
+\usepackage{fancyhdr}
 
 \DeclareMathOperator{\poisson}{P} %
 \DeclareMathOperator{\nbin}{NBin} %
@@ -34,6 +35,7 @@
 %\finalfalse
 \newif\iffull
 \fulltrue
+
 
 \newif\ifuserguide % introduce a switch for including the user guide as an appendix or not
 \userguidefalse
@@ -61,9 +63,41 @@
   \renewcommand{\fixme}[3][]{#1\xspace}
 \fi
 
+\newlength{\arrayrulewidthOriginal}
+\newcommand{\Cline}[2]{%
+  \noalign{\global\setlength{\arrayrulewidthOriginal}{\arrayrulewidth}}%
+  \noalign{\global\setlength{\arrayrulewidth}{#1}}\cline{#2}%
+  \noalign{\global\setlength{\arrayrulewidth}{\arrayrulewidthOriginal}}}
+
 %\makenomenclature
 
+%\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+%\lhead{Final Report \#UCI-0252}
+%\rhead{September 2010}
+
+
+\pagestyle{fancyplain} %Note the \fancyplain command !!!
+
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+\lhead[\fancyplain{Final Report \#UCI-0252}{Final Report \#UCI-0252}]{\fancyplain{Final Report \#UCI-0252}{Final Report \#UCI-0252}}
+\chead[\fancyplain{}{}]                 {\fancyplain{}{}}
+\rhead[\fancyplain{September 2010}{September 2010}]       {\fancyplain{September 2010}{September 2010}}
+\lfoot[\fancyplain{}{}]                 {\fancyplain{}{}}
+\cfoot[\fancyplain{\thepage}{\thepage}]         {\fancyplain{\thepage}{\thepage}}
+\rfoot[\fancyplain{}{}]  {\fancyplain{}{}}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\plainheadrulewidth}{0.4pt}
+\renewcommand{\plainfootrulewidth}{0pt}
+
+
+
 \renewcommand{\bibname}{References}
+
+\date{September 30\textsuperscript{th}, 2010}
 
 
 \title{A Measurement-based System for TMC Performance Evaluation\\[1em]
@@ -101,21 +135,82 @@
 %%% COVER PAGE
 
 
+\begin{titlepage}
+  
+  \begin{center}
+    ~\\[2in]
+    {\LARGE A Measurement-based System for \\[0.25em]TMC Performance Evaluation}\\[1in]
+
+    Craig Rindt and Will Recker\\[1in]
+
+    Final Report \#CA11-0975\\[0.25em]
+    \emph{Prepared for}\\[0.25em]
+    California Department of Transporation\\
+    Division of Research and Innovation
+    
+    
+    \vfill
+    September 30\textsuperscript{th}, 2010
+    
+  \end{center}
+
+\end{titlepage}
+
 %%% TITLE PAGE
 
 
-\maketitle{}
+\begin{titlepage}
+  
+  \begin{center}
+    ~\\[1.75in]
+    {\Huge \textbf{A Measurement-based System for \\[0.25em]TMC Performance Evaluation}}\\[0.5in]
+
+    Final Report \#CA11-0975 for contract \#65A0252\\[0.25em]
+    {\small \emph{Prepared for}}\\[0.25em]
+    California Department of Transporation\\
+    Division of Research and Innovation
+    
+    
+    \vfill
+    
+  \end{center}
+  \newlength{\authorblockwidth}
+  \settowidth{\authorblockwidth}{Institute of Transportation Studies}
+  {\hfill
+  \parbox{\authorblockwidth}{
+    Craig Rindt (\url{crindt@uci.edu})\\
+    Will Recker (\url{wwrecker@uci.edu})\\
+    Institute of Transportation Studies\\
+    University of California, Irvine\\
+    Irvine, CA 92697-3600
+    }
+  }
+
+\end{titlepage}
+
+
+
 
 
 %%% TECH REPORT DOC PAGE
 
-\includepdf{65A0252_Technical_Report_Documentation_(APP-3).pdf}
+\fancypagestyle{plain}{%
+  \fancyhf{} % clear all header and footer fields
+  \fancyfoot[C]{\thepage} % except the center
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
 
-\setcounter{page}{0}
+\pagenumbering{roman}
+
+\setcounter{page}{3}
+
+\includepdf[pages={1},pagecommand={\thispagestyle{plain}},trim=0in 1in 0in 1in,clip]{65A0252_Technical_Report_Documentation_(APP-3).pdf}
+
 
 \clearpage
 
-\pagenumbering{roman}
+\pagestyle{fancyplain}
 
 %\chapter*{Executive Summary}
 {\noindent\huge\bfseries\centering Executive Summary\par\nobreak
@@ -131,30 +226,33 @@
 \begin{singlespace}
   \tableofcontents
 
-\clearpage
-
-\listoffigures
-\addcontentsline{toc}{chapter}{\protect\numberline{}List of Figures}
-
-\clearpage
-
-\listoftables
-\addcontentsline{toc}{chapter}{\protect\numberline{}List of Tables}
-
+  \clearpage
+  
+  \listoffigures
+  \addcontentsline{toc}{chapter}{\protect\numberline{}List of Figures}
+  
+  \clearpage
+  
+  \listoftables
+  \addcontentsline{toc}{chapter}{\protect\numberline{}List of Tables}
+  
 \end{singlespace}
 
 \clearpage
 
+\addcontentsline{toc}{chapter}{\protect\numberline{}Disclaimer Statement}
 \includepdf[pages={1},pagecommand={\thispagestyle{plain}},trim=0in 1in 0in 1in,clip]{appendix_3-2_disclaimer_page.pdf}
+
+\clearpage
 
 \acresetall
 
 \setcounter{page}{0}
-\pagenumbering{arabic}
 
 \chapter{Introduction and Background}
 \label{sec:intro}
 
+\pagenumbering{arabic}
 
 Caltrans has a significant investment in \ac{TMC} throughout the
 state. These operations centers are tasked with maintaining the safety
@@ -353,7 +451,7 @@ accessing detector data because the \ac{CTMLabs} receive identical
 data to that available in the \ac{TMC} by way of the \ac{CTMLabs}
 real-time data intertie and the associated database.  As such,
 development can proceed in the \ac{CTMLabs} and later be transferred
-seamlessly to operation in \ac{D12}.
+seamlessly to operation in District 12.
 
 \subsubsection{Caltrans Distrct 12 XML/SOAP interface}
 \label{sec:d12-soap}
@@ -373,7 +471,7 @@ the \ac{TMCPE} application is not necessary.
 \label{sec:tmc-actions}
 
 The actions of the \ac{TMC} and other event response personnel are
-recorded by available from several sources as outlined below.
+recorded and available from several sources as outlined below.
 
 \subsubsection{CHP iCAD log (XML feed)}
 \label{sec:chp-icad-log}
@@ -393,10 +491,10 @@ the Activity Log (see section~\ref{sec:tmc-activity-log} below), the
 direct dependence of the \ac{TMCPE} system on the \ac{CHP} \ac{iCAD}
 log can be removed.
 
-\subsubsection{D12 SOAP interface (events, devices)}
+\subsubsection{District 12 SOAP interface (events, devices)}
 \label{sec:d12-soap-interface}
 
-The \ac{D12} SOAP interface also streams event data from the \ac{TMC} and
+The District 12 SOAP interface also streams event data from the \ac{TMC} and
 control states of \acp{CMS} and \acp{RMS}.  The event data could be
 tapped to obtain incident verification details, while the \ac{CMS} and
 \ac{RMS} settings could be parsed to infer control actions carried out
@@ -407,7 +505,7 @@ for further discussion on relating actions to \ac{TMC} processes).
 \subsubsection{TMC activity log}
 \label{sec:tmc-activity-log}
 
-The \ac{D12} \ac{TMC} activity log records a range of actions carried
+The District 12 \ac{TMC} activity log records a range of actions carried
 out by \ac{TMC} operators that they manually record using a web-based
 interface to the log database.  Transactions in the database are cross
 referenced with \ac{CHP} \ac{iCAD} IDs, which allows additional data
@@ -422,7 +520,7 @@ and construction closures were useful for cross checking, but
 generally were not able to be used in the calculations described in
 chapter~\ref{sec:method} in their present form.  Nonetheless, the
 activity log's comprehensive nature and integration into \ac{TMC}
-processes in \ac{D12} made it the natural choice for obtaining
+processes in District 12 made it the natural choice for obtaining
 information about incident management in the \ac{TMC}.
 
 
@@ -432,13 +530,14 @@ information about incident management in the \ac{TMC}.
 During the course of this project, Caltrans began work on developing
 the \ac{TMCAL} system to provide a common, statewide standard for
 recording information about managed incidents in the state of
-California.  The users and developers of the \ac{D12} activity have
-participated in the specification of \ac{TMCAL} to ensure that the
-functionality of the \ac{D12} \ac{TMC} activity log is replicated in
-TMCAL.  As such, we proceeded to develop of the \ac{TMCPE} system
-using the \ac{D12} \ac{TMC} activity log as the reference data source
-under the assumption that a later shift to the \ac{TMCAL} system would
-be straightforward given their common ancestry.
+California.  The users and developers of the District 12 activity log
+have participated in the specification of \ac{TMCAL} to ensure that
+the functionality of the District 12 \ac{TMC} activity log is
+replicated in TMCAL.  As such, we proceeded to develop of the
+\ac{TMCPE} system using the District 12 \ac{TMC} activity log as the
+reference data source under the assumption that a later shift to the
+\ac{TMCAL} system would be straightforward given their common
+ancestry.
 
 \section{Organization of this report}
 \label{sec:organization}
@@ -446,7 +545,7 @@ be straightforward given their common ancestry.
 
 The remainder of this report is structured as follows.
 Chapter~\ref{chap:tmc-activity} describes the processes used in the Caltrans
-\ac{D12} \ac{TMC} during the management of accidents, which is the initial
+District 12 \ac{TMC} during the management of accidents, which is the initial
 target of this performance evaluation effort.  Chapter~\ref{sec:method} details
 the methods being used for performance measurement---with a focus on the
 calculation of delay attributable to specific incidents as well as a discussion
@@ -485,7 +584,7 @@ through a set of interviews and communications with district 12 staff and
 contractors.  The following summarizes the \ac{TMC} processes used to manage
 accidents occurring in the managed system.  Note that this effort was carried
 out in parallel to a number of efforts in district 12 and beyond to capture and
-organize event management, including \acs{D12}'s event management system
+organize event management, including District 12's event management system
 development and the Caltrans-wide effort to develop the \ac{TMCAL} system.  Any
 findings below should be considered one characterization of the larger problem
 of organizing \ac{TMC} processes to best manage, monitor, and evaluate Caltrans
@@ -524,7 +623,7 @@ for the current discussion is capacity-reducing accidents.
 The {\sc First Call} can come from any number of sources including:
 \begin{itemize}
 \item \ac{CHP} \ac{iCAD}
-\item \ac{ATMS} software map
+\item \acl{ATMS} software map
 \item Caltrans field units
 \item Public---via phone
 \item CCTV
@@ -598,14 +697,14 @@ derived from Caltrans freeway sensors and exposed to various traffic information
 providers by via the \ac{ATMS} software system.  Issuance of a SIGALERT (by the
 \ac{CHP}) or a Traffic Advisory (by Caltrans) triggers specific interactions
 with the media.  Information can be provided directly to users in the vicinity
-of the incident using the fixed or mobile \ac{CMS} and \ac{HAR} systems.
+of the incident using the fixed or mobile \acf{CMS} and \ac{HAR} systems.
 
 \subsection{Field response}
 \label{sec:field-response}
 
 The field response to a particular incident is governed by the diagnosis
 generated during the {\sc Verification} process.  The Caltrans \ac{TMC} is
-responsible for managing the actions of \acp{TMT}, \ac{HAZMAT} crews,
+responsible for managing the actions of \acfp{TMT}, \ac{HAZMAT} crews,
 maintenance crews, and the coroner (managed by the \ac{CHP}) that are dispatched
 to mitigate the impacts of an incident on traffic operations and system
 infrastructure.  These actions are critical to restoring the performance of the
@@ -672,7 +771,7 @@ collecting, managing, and disseminating information regarding the performance
 and operation of the Caltrans highway network.  It is notable that a number of
 these systems have functions that occasionally overlap.  For instance, the
 activity logging software is the \emph{de facto} interface for \ac{TMC}
-operators in \ac{D12} engaged in traffic management.  However, a subset of
+operators in District 12 engaged in traffic management.  However, a subset of
 \ac{TMC} actions, like setting the \ac{CMS} messages are carried out via the
 \ac{ATMS} software system.  Logging of \ac{CMS} messages in the activity log
 must (currently) be done manually.  Furthermore, Caltrans continues to actively
@@ -852,7 +951,7 @@ speeds are calculated every 5 minutes for all 52 weeks.
 \subsection{Nominal speed distribution}
 \label{sec:nom-speed-dist}
 For each freeway section j , for each specific 5-minute time interval
-$t_m$ on each day of the week, a nominal total of 52 observations1 are
+$t_m$ on each day of the week, a nominal total of 52 observations are
 available during the one-year observation period on which to base
 calculations of flow $q_j(t_m)$ and occupancy $\mathrm{occ}_j(t_m)$
 under conditions that are incident free. For example, section $j$ on
@@ -888,11 +987,13 @@ figure~\ref{tab:speed-base-case-dist}.
   \centering
   \scriptsize
   \renewcommand\arraystretch{2} 
-  \newcolumntype{A}{>{\columncolor{black!5}}c}
+  %\newcolumntype{A}{>{\columncolor{black!5}}c}  %% messes with line widths
+  \newcolumntype{A}{c}
   \begin{tabular}{|c|A|A|A|A|A|A|}
-    \hline
-             & \multicolumn{6}{c|}{Freeway Section} \\ \cline{2-7} 
-    \rowcolor{white} 
+    %\hline 
+    \Cline{4pt}{1-7} 
+             & \multicolumn{6}{c|}{Freeway Section} \\ \Cline{4pt}{2-7} 
+%    \rowcolor{white} %% messes with line widths
     Time     & $i$& $i-1$ & $i-2$ & $\cdots{}$ & 2 & 1 \\ \hline
     $t_1$    & $\Omega_{i,1}  =\Omega(\overline{s}_i(t_1),\sigma_{s_i(t_1)})$ 
              & $\Omega_{i-1,1}=\Omega(\overline{s}_{i-1}(t_1),\sigma_{s_{i-1}(t_1)})$ 
@@ -930,14 +1031,15 @@ m = 1,2,\ldots{},M
 \end{equation}
 from which we can then compose a matrix of incident case speed conditions (i.e.,
 conditions that were observed to prevail following the incident) as in
-figure~\ref{tab:speed-base-case-dist}.
+figure~\ref{tab:speed-obs-dist}.
 \begin{figure}[t]
   \centering \scriptsize \renewcommand\arraystretch{2}
-  \newcolumntype{A}{>{\columncolor{black!5}}c}
+%  \newcolumntype{A}{>{\columncolor{black!5}}c}
+  \newcolumntype{A}{c}
   \begin{tabular}{|c|A|A|A|A|A|A|}
     \hline
              & \multicolumn{6}{c|}{Freeway Section} \\ \cline{2-7} 
-    \rowcolor{white} 
+%    \rowcolor{white}  %% messes with lines
     Time     & $i$& $i-1$ & $i-2$ & $\cdots{}$ & 2 & 1 \\ \hline
     $t_1$    & $\hat{s}_i(t_1)$ 
              & $\hat{s}_{i-1}(t_1)$ 
@@ -961,9 +1063,9 @@ figure~\ref{tab:speed-base-case-dist}.
              & $\hat{s}_{1}(t_{M})$ \\ \hline
   \end{tabular}
   \caption{Observed incident speeds $s_{jn}(t_m)$}
-  \label{fig:speed-base-case-dist}
+  \label{tab:speed-obs-dist}
 \end{figure}
-Using figure~\ref{tab:speed-base-case-dist}, we can identify the
+Using figure~\ref{tab:speed-obs-dist}, we can identify the
 negative effects (i.e., speed reduction) of the incident schematically
 as shown in figure~\ref{fig:incident-impact}.  The negative effect by
 the incident will be propagated from the incident section to upstream
@@ -1058,8 +1160,8 @@ level of confidence that the speed was not drawn from the distribution
 of $s_{jn}(t_m)$ to those that compute to be at least
 $\alpha\cdot\sigma_{s_j(t_m)}$ , where $\alpha$ is a positive number,
 below the mean speed of the distribution of $s_{jn}(t_m)$, we can
-define two cases according the difference between the mean speed and
-the threshold as shown in figure~\ref{fig:incident-speed-case}.
+define two cases according to the difference between the mean speed
+and the threshold as shown in figure~\ref{fig:incident-speed-case}.
 \begin{figure}[t]
   \begin{center}
     \inputTikZ{figs/incident-speed-classification}
@@ -1290,8 +1392,8 @@ Here, a known incident causes a congestion plume that is clearly
 spatially distinct from some random upstream disturbance.  Nonetheless
 the simplified delay calculation model attributes the random
 congestion to the known event because in the algorithm's objective, it
-is ``cheaper'' to incorrectly identify the uncongested are between the
-plumes as congested rather than miss out on the opportunity to
+is ``cheaper'' to incorrectly identify the uncongested area between
+the plumes as congested rather than miss out on the opportunity to
 identify upstream congestion as related to the known incident.  This
 bundling of plumes, however, is an artifact of the objective rather
 than a correct attribution of congestion to the given event.
@@ -1588,7 +1690,7 @@ These conditions are shown in figure~\ref{fig:queuing-constant-rates}.
       constant arrival rate $A(t)=\lambda$.  The figure on the left
       shows the dissipation of the queue when the arrival rate is less
       than the service rate $\lambda<\mu$.  The figure on the right
-      shows the increasing queue cased by the oversaturated conditions
+      shows the increasing queue caused by the oversaturated conditions
       $\lambda>\mu$.}
     \label{fig:queuing-constant-rates}
   \end{center}
@@ -1997,13 +2099,14 @@ analyze, any necessary modeling assumptions, and \ac{TMC} components to
 model. The ideal interface will be accessible from any authenticated computer
 and will use technology already familiar to operators.
 
-A second potential use-case for the evaluation system is a real-time mode that
-attempts to forecast the cost of delaying action on current incidents. While
-this use is not be part of this initial project, it would be a potentially
-straightforward extension of the core models to provide real-time decision
-support to \ac{TMC} personnel actively engaged in managing multiple simultaneous
-incidents. In this role, the evaluation system would operate in the background,
-occasionally broadcasting estimates to other software components for them to
+A second potential use-case for the evaluation system is a real-time
+mode that attempts to forecast the cost of delaying action on current
+incidents. While this use is not a part of this initial project, it
+would be a potentially straightforward extension of the core models to
+provide real-time decision support to \ac{TMC} personnel actively
+engaged in managing multiple simultaneous incidents. In this role, the
+evaluation system would operate in the background, occasionally
+broadcasting estimates to other software components for them to
 integrate into existing \ac{TMC} processes.
 
 A third use-case is that the performance evaluation system might be integrated
@@ -2016,7 +2119,7 @@ This software is intended to support a process or set of processes carried out
 by \ac{TMC} operators and traffic engineers.  Toward that end, the system should
 integrate as cleanly as possible with existing processes and the software used
 to support them.  We note, however, that existing systems in the Caltrans
-\ac{D12} \ac{TMC} tend to be monolithic (and generally proprietary)
+District 12 \ac{TMC} tend to be monolithic (and generally proprietary)
 applications---particularly as regards their user interfaces.  This makes
 integrating new software into the \ac{TMC} very challenging and potentially
 expensive.
@@ -2071,11 +2174,11 @@ each of these components in the following sections.
 \subsection{TMC activity data}
 \label{sec:activity-data}
 
-The first interim report for this project
+In the first interim report for this project
 \citep{rindt08:_measur_based_system_for_tmc_perfor_evaluat} we noted
 that
 \begin{quote}
-  The \ac{D12} \ac{TMC} activity log records sufficient \ac{TMC} activity to
+  The District 12 \ac{TMC} activity log records sufficient \ac{TMC} activity to
   perform the basic delay calculation and evaluate a limited portion of the
   benefits provided by the \ac{TMC}. For the activity log to be more generally
   useful to performance evaluation, entries in the log should be tied both to
@@ -2083,8 +2186,8 @@ that
   procedures that are designed to have intended effects.
 \end{quote}
 These recommendations were folded into a set of modifications made to the
-\ac{D12} \ac{TMC} activity log application under UCI subaward \#2009-2291
-between Caltrans \ac{D12} and UCI.  The details of this work is included in
+District 12 \ac{TMC} activity log application under UCI subaward \#2009-2291
+between \emph{Special Solutions} 12 and UCI.  The details of this work is included in
 Appendix~\ref{chap:actlog-sub}.  The most significant changes with respect to
 the \ac{TMCPE} analysis is that the activity log was modified to:
 \begin{itemize}
@@ -2199,19 +2302,18 @@ for this service is as follows.
   \begin{enumerate}
   \item Loop over the activity and communications logs and:
     \begin{itemize}
-    \item determine the event type based upon the \ac{iCAD} ID of the event,
+    \item Determine the event type based upon the \ac{iCAD} ID of the event,
       which falls into the following broad categories: incidents (accidents,
-      etc.), special events (like sporting events) 
+      etc.), special events (like sporting events,) 
       maintenance/construction activities.
-    \item import privacy scrubbed data into the application database.
-    \item identify performance measures information needed to
+    \item Import privacy scrubbed data into the application database.
+    \item Identify performance measures information needed to
       formulate the delay calculation.
     \item Use \ac{iCAD} geocoding (where available) and activity log
-      location strings to identify the approximate time-space
-      location of the event's impact on the
-      system
+      location strings to identify the approximate time-space location
+      of the event's impact on the system.
     \item Create a \ac{TMCPE} event object representing the event and
-      store it in the database
+      store it in the database.
     \end{itemize}
   \end{enumerate}
 \item {\sc\textbf{Compute Incident Impact}}: For each \ac{TMCPE} event object
@@ -2267,15 +2369,17 @@ function with the web application.
 
 \subsubsection{TMC impact service}
 \label{sec:tmc-impact-service}
-The \ac{TMC} impact service encapsulates the \ac{TMC} impact model resulting
-from the work described in section~\ref{sec:mod-tmc-impacts}.  This service
-requires as input the activity log ID of the incident to be analyzed, the output
-from the incident impact service in order to characterize the critical section
-and estimate the arrival pattern to the impacted region, and any parameters
-characterizing changes to the observed incident response As with the incident
-impact service, this model independently accesses additional databases as
-necessary to support its analysis.  The service updates the \ac{TMCPE} domain
-classes for the event to include the estimated delay savings attributable to
+The \ac{TMC} impact service encapsulates the \ac{TMC} impact model
+resulting from the work described in
+section~\ref{sec:mod-tmc-impacts}.  This service requires as input the
+activity log ID of the incident to be analyzed, the output from the
+incident impact service in order to characterize the critical section
+and estimate the arrival pattern to the impacted region, and any
+parameters characterizing changes to the observed incident
+response. As with the incident impact service, this model
+independently accesses additional databases as necessary to support
+its analysis.  The service updates the \ac{TMCPE} domain classes for
+the event to include the estimated delay savings attributable to
 actions characterized by the input parameters.
 
 \fixme{crindt}{flesh this out some.  Probably just collapse with the
@@ -2310,9 +2414,10 @@ OpenStreetMap map image tiles \citep{openstreetmap.org10:_opens_devel_guide}
 (Google maps can also be used as a background layer).  The web interface
 consists of two main screens.  
 
-The first is a general query interface (figure~\ref{fig:tmcpe-query-interface})
-that allows the analyst to select incidents using a variety of parameters
-ranging from the time and date of the event to the event type.
+The first screen is a general query interface
+(figure~\ref{fig:tmcpe-query-interface}) that allows the analyst to
+select incidents using a variety of parameters ranging from the time
+and date of the event to the event type.
 \begin{figure}[t]
   \begin{center}
     \includegraphics[width=\textwidth]{images/tmcpe-query-interface.png}
@@ -2366,8 +2471,8 @@ appendix~\ref{chap:user-guide}.
 \label{sec:ctmlabs-api}
 
 As part of its integration into the \ac{CTMLabs} architecture, the
-\ac{TMCPE} analyses are offered as a using the \ac{REST} style of
-exposing services on the Internet
+\ac{TMCPE} analyses are offered as a service using the \ac{REST} style
+of exposing services on the Internet
 \citep{fielding00:_archit_styles_desig_networ_softw_archit} using the
 CTMLabs \ac{API}.
 
@@ -2467,19 +2572,19 @@ drive the system, namely:
 \label{sec:incoming-data}
 
 As noted earlier, the data for the analysis comes from two main sources: the
-\ac{PeMS} 5-minute \ac{VAR} data and the \ac{D12} activity logs (which includes
+\ac{PeMS} 5-minute \ac{VAR} data and the District 12 activity logs (which includes
 the \ac{CHP} \ac{iCAD} data as one component).  The \ac{TMCPE} application is
 designed to mirror this data.  
 
-\paragraph{D12 activity log replication}
+\paragraph{District 12 activity log replication}
 
-In the case of the \ac{D12} activity log, the production \texttt{MySQL} database
-running in the \ac{D12} sub network is replicated via a push mechanism to
+In the case of the District 12 activity log, the production \texttt{MySQL} database
+running in the District 12 sub network is replicated via a push mechanism to
 \ac{CTMLabs}.  The mirroring occurs nightly at approximately 2am in order to
 minimize the impact on the live activity log application in the \ac{TMC}.  The
 scheduled process uses standard \texttt{MySQL} replication methods to push the
 data to the firewalled \ac{CTMLabs} data server over the \ac{CTMLabs} data
-intertie with \ac{D12}.
+intertie with District 12.
 
 \paragraph{PeMS 5-minute data mirror}
 
@@ -2498,7 +2603,7 @@ database.  This script is scheduled to run every 5 minutes.
 \subsubsection{New incident processing}
 \label{sec:incident-processing}
 
-To provide up-to-date incident analyses and statistics, the \ac{D12} activity
+To provide up-to-date incident analyses and statistics, the District 12 activity
 log data received nightly is processed by \texttt{perl} scripts implementing the
 core business logic.  These scripts are currently deployed across two servers.
 The first machine is used to parse the newly received activity log data to
@@ -2530,15 +2635,17 @@ corresponding to the event in question, and in particular, it contains the
 the above database query is modified to bound the result to \ac{VDS} within 1.5
 miles of the geocoded location.
 
-Once these objects are created, they are processed through the incident impact
-and \ac{TMCPE} impact models, which use the second server to execute analysis
-jobs---particularly the solving of the mathematical program in
-equations~\eqref{eq:bip-formulation} using the \ac{GAMS} solver.  The current
-implementation uses a synchronous model which pushes the generated mathematical
-program to the solution server using the \texttt{rsync} protocol, executes the
-\ac{GAMS} solver on that data via \texttt{ssh}, transfers the results back using
-\texttt{rsync}, and processes those results into the \ac{TMCPE} application
-domain objects to that they can be served by the \ac{TMCPE} web application.
+Once these objects are created, they are processed through the
+incident impact and \ac{TMCPE} impact models, which use the second
+server to execute analysis jobs---particularly the solving of the
+mathematical program in equations~\eqref{eq:bip-formulation} using the
+\ac{GAMS} solver.  The current implementation uses a synchronous model
+which pushes the generated mathematical program to the solution server
+using the \texttt{rsync} protocol, executes the \ac{GAMS} solver on
+that data via \texttt{ssh}, transfers the results back using
+\texttt{rsync}, and processes those results into the \ac{TMCPE}
+application domain objects so that they can be served by the
+\ac{TMCPE} web application.
 
 
 \subsubsection{Web application}
@@ -2555,9 +2662,9 @@ the web application requires that users authenticate using the \ac{CTMLabs}
 \acf{CAS} and its underlying \ac{LDAP} user database.  The system is configured
 so that only users belonging to the \texttt{tmcpe} group on the \ac{LDAP} server
 have access to the application and its underlying data.  Membership in this
-group is limited to \ac{D12} staff and researchers directly affiliated with the
+group is limited to District 12 staff and researchers directly affiliated with the
 \ac{TMCPE} project.  We will add new users to this group on an as-needed basis
-based upon guidance given by \ac{D12} staff.
+based upon guidance given by District 12 staff.
 
 
 \subsection{Portability of the TMCPE system}
@@ -2583,7 +2690,7 @@ implementations are readily available for use.
     \hline
     \textbf{Component} & \texttt{Function} & \texttt{Maturity} & License\footnote{Except where noted as proprietary, all licenses used in this project are open source.} & \texttt{Notes} \\
     \hline
-    \texttt{MySQL} & \ac{D12} activity log mirror &  v5, since 1994 & GPL & ~ \\
+    \texttt{MySQL} & District 12 activity log mirror &  v5, since 1994 & GPL & ~ \\
     \texttt{Postgresql} & \ac{PeMS} mirror and \ac{TMCPE} app database & v9, since 1986 & Postgresql & Chosen for its speed and \acs{GIS} capabilities\\
     \texttt{perl} & Scripting language (and modules) used to process incident data & v5, since 1987 & GPL & Perl runs on virtually any platform \\
     \texttt{GAMS} & Solving the \ac{TMCPE} delay computations & v2.22, since 1987 & Proprietary & Perpetual license approx \$10,000 \\
@@ -2630,17 +2737,18 @@ include (current sources in parentheses):
 \begin{itemize}
 \item Current and historical 5-minute \ac{VDS} speed and volume data (\ac{PeMS})
 \item Geocoded \ac{TMC} activity data with critical events labeled per
-  chapter~\ref{chap:tmc-activity} (\ac{D12} activity log, \ac{iCAD})
+  chapter~\ref{chap:tmc-activity} (District 12 activity log, \ac{iCAD})
 \item Map image tiles (for the user interface) (Any tile server compatible with
   OpenLayers; currently using OpenStreetMap data)
 \end{itemize}
-In theory, the \ac{TMCPE} application is data agnostic as long as the data
-sources can be mapped onto this input requirements.  For the \ac{VDS} data and
-the tiled map data, there are likely many available choices that would be
-suitable.  To date, however, we know of no other \ac{TMC} activity logging
-application that would meet the activity data requirements.  It is probable that
-Caltrans efforts to develop \ac{TMCAL} will compatible or could be made
-compatible with relative ease.
+In theory, the \ac{TMCPE} application is data agnostic as long as the
+data sources can be mapped onto this input requirements.  For the
+\ac{VDS} data and the tiled map data, there are likely many available
+choices that would be suitable.  To date, however, we know of no other
+\ac{TMC} activity logging application that would meet the activity
+data requirements.  It is probable that Caltrans efforts to develop
+\ac{TMCAL} will be compatible or could be made compatible with
+relative ease.
 
 \subsubsection{Steps to porting the application}
 \label{sec:portability-general}
@@ -2677,7 +2785,7 @@ imply for incident performance.
 \label{sec:general-stats}
 
 At the time of writing, the \ac{TMCPE} system had processed a total of $15,135$
-events recorded by the \ac{D12} \ac{TMC} between January 1\textsuperscript{st},
+events recorded by the District 12 \ac{TMC} between January 1\textsuperscript{st},
 2007 and December 1\textsuperscript{st}, 2010.  The general statistics are shown
 in table~\ref{tab:anal-inc}.  The events are broken down into various types
 according to the classification given to the event in the activity log entry.
@@ -2773,13 +2881,15 @@ for vehicles traveling under \fixme[$35\unitfrac{mi}{h}$]{crindt}{refer to the
 definition, this method implies there is no delay if the average speed on the
 roadway is $35\unitfrac{mi}{h}$ or greater.
 
-By contrast, the delay calculation method used in this research, $D_{TMCPE}$
-treats delay as travel time above and beyond \emph{average} conditions for the
-given stretch of road for that time-of-day and day-of-way.  Consequently, it
-will attribute delays to incidents that, for instance, slow prevailing traffic
-from a mean value of $70\unitfrac{mi}{h}$ down to $35\unitfrac{mi}{h}$ where the
-conventional method will not attribute any delay to these conditions.  This will
-tent to increase the new delay values compared to the original method.
+By contrast, the delay calculation method used in this research,
+$D_{TMCPE}$ treats delay as travel time above and beyond
+\emph{average} conditions for the given stretch of road for that
+time-of-day and day-of-week.  Consequently, it will attribute delays
+to incidents that, for instance, slow prevailing traffic from a mean
+value of $70\unitfrac{mi}{h}$ down to $35\unitfrac{mi}{h}$ where the
+conventional method will not attribute any delay to these conditions.
+This will tend to increase the new delay values compared to the
+original method.
 
 The use of mean speeds to determine the baseline conditions (instead of
 $35\unitfrac{mi}{h}$) also means that if an incident occurs in a typically
@@ -2881,14 +2991,14 @@ but the techniques show promise for later deployment as the algorithms are
 optimized.
 
 Third, the system is currently limited to analyzing incidents managed by
-Caltrans \ac{D12}.  This is solely due to the system's reliance on the augmented
-data now available from \ac{D12} activity log due to improvements made in
+Caltrans District 12.  This is solely due to the system's reliance on the augmented
+data now available from District 12 activity log due to improvements made in
 support of this project.  The methods used, however, are completely transferable
 to any system with similar activity logging data and speed and volume estimates
 for impacted sections.  Because the \ac{TMCAL} system currently being deployed
 by Caltrans appears to be a developing standard for recording \ac{TMC} actions,
 we recommend that the \ac{TMCPE} system be augmented to accept data from the
-\ac{TMCAL} data source as well as its current \ac{D12} activity log backend.
+\ac{TMCAL} data source as well as its current District 12 activity log backend.
 
 Finally, because the site is integrated into the \ac{CTMLabs} architecture, the
 \ac{CTMLabs} team can continue to support and improve the system as directed by
@@ -2903,7 +3013,9 @@ into a potentially invaluable tool for Caltrans operations and management.
 
 \bibliographystyle{apalike}
 \bibliography{refs}
+\addcontentsline{toc}{chapter}{\protect\numberline{}References}
 
+\clearpage
 
 \appendix
 
