@@ -138,19 +138,23 @@
 \begin{titlepage}
   
   \begin{center}
-    ~\\[2in]
-    {\LARGE A Measurement-based System for \\[0.25em]TMC Performance Evaluation}\\[1in]
+     {\Large
+       ~\\[1in]
+       {\LARGE A Measurement-based System for \\[0.25em]TMC Performance Evaluation}\\[1in]
 
-    Craig Rindt and Will Recker\\[1in]
+       Final Report\\[0.5em]
+       Federal Report CA11-0975\\[3em]
+       \emph{Prepared for}\\[0.25em]
+       State of California Department of Transportation
 
-    Final Report \#CA11-0975\\[0.25em]
-    \emph{Prepared for}\\[0.25em]
-    California Department of Transporation\\
-    Division of Research and Innovation
-    
-    
-    \vfill
-    September 30\textsuperscript{th}, 2010
+       Division of Research and Innovation
+
+       Office of Technology Applications
+
+
+       \vfill
+       September 2010
+     }
     
   \end{center}
 
@@ -162,29 +166,35 @@
 \begin{titlepage}
   
   \begin{center}
-    ~\\[1.75in]
-    {\Huge \textbf{A Measurement-based System for \\[0.25em]TMC Performance Evaluation}}\\[0.5in]
+    {\Large
+      State of California Department of Transportation
 
-    Final Report \#CA11-0975 for contract \#65A0252\\[0.25em]
-    {\small \emph{Prepared for}}\\[0.25em]
-    California Department of Transporation\\
-    Division of Research and Innovation
-    
-    
-    \vfill
-    
-  \end{center}
-  \newlength{\authorblockwidth}
-  \settowidth{\authorblockwidth}{Institute of Transportation Studies}
-  {\hfill
-  \parbox{\authorblockwidth}{
-    Craig Rindt (\url{crindt@uci.edu})\\
-    Will Recker (\url{wwrecker@uci.edu})\\
-    Institute of Transportation Studies\\
-    University of California, Irvine\\
-    Irvine, CA 92697-3600
+      Division of Research and Innovation
+
+      Office of Technology Applications\\[0.5in]
+
+
+
+      {\Huge \textbf{A Measurement-based System for \\[0.25em]TMC Performance Evaluation}}\\[0.5in]
+
+      Final Report\\[0.25em]
+      \#UCI-0252
+      
+      \vfill
+      
+      Authors:\\[0.5em]
+
+      Craig Rindt (\url{crindt@uci.edu})
+
+      Will Recker (\url{wwrecker@uci.edu})
+
+      Institute of Transportation Studies
+
+      University of California\\[0.5em]
+
+      Irvine, CA 92697-3600
     }
-  }
+  \end{center}
 
 \end{titlepage}
 
@@ -453,7 +463,7 @@ real-time data intertie and the associated database.  As such,
 development can proceed in the \ac{CTMLabs} and later be transferred
 seamlessly to operation in District 12.
 
-\subsubsection{Caltrans Distrct 12 XML/SOAP interface}
+\subsubsection{Caltrans District 12 XML/SOAP interface}
 \label{sec:d12-soap}
 
 For greater transferability, the \ac{TMCPE} system can also make use
@@ -567,23 +577,24 @@ some recommendations for continued development of the \ac{TMCPE} system.
 \chapter{TMC Activity}
 \label{chap:tmc-activity}
 
-At the onset of this project, the district 12 \ac{TMC} employed
+At the onset of this project, the District 12 \ac{TMC} employed
 locally-developed \ac{TMC} activity log software
-(section~\ref{sec:tmc-activity-log}) to record traffic management activity
-carried out by the \ac{TMC}.  This software was developed over a number of years
-with a variety of purposes in mind.  Though the initial analyses have been
-conducted using this existing logging data, the data is unsuitable for general
-purpose automated processing to identify critical events in \ac{TMC} operations
-that impact system performance.  As such, work was initiated under this contract
-to improve the activity logging system to better meet such performance
+(section~\ref{sec:tmc-activity-log}) to record traffic management
+activity carried out by the \ac{TMC}.  This software was developed
+over a number of years with a variety of purposes in mind.  Though the
+initial analyses have been conducted using this existing logging data,
+the data is unsuitable for general purpose automated processing to
+identify critical events in \ac{TMC} operations that impact system
+performance.  As such, work was initiated under this contract to
+improve the activity logging system to better meet such performance
 monitoring needs going forward.
 
 A critical first step in this process was the identification of core events in
 incident management that can be directly recorded by the activity logging system
-through a set of interviews and communications with district 12 staff and
+through a set of interviews and communications with District 12 staff and
 contractors.  The following summarizes the \ac{TMC} processes used to manage
 accidents occurring in the managed system.  Note that this effort was carried
-out in parallel to a number of efforts in district 12 and beyond to capture and
+out in parallel to a number of efforts in District 12 and beyond to capture and
 organize event management, including District 12's event management system
 development and the Caltrans-wide effort to develop the \ac{TMCAL} system.  Any
 findings below should be considered one characterization of the larger problem
@@ -623,7 +634,7 @@ for the current discussion is capacity-reducing accidents.
 The {\sc First Call} can come from any number of sources including:
 \begin{itemize}
 \item \ac{CHP} \ac{iCAD}
-\item \acl{ATMS} software map
+\item \acf{ATMS} software map
 \item Caltrans field units
 \item Public---via phone
 \item CCTV
@@ -1374,7 +1385,7 @@ sufficiently close in time and space to a known incident locations.
 
 In such cases, a poorly tuned delay algorithm might erroneously
 attribute the random congestion to the known event.  One such case is
-shown in the following figure.
+shown in figure~\ref{fig:distance-weighting-helpful}.
 \begin{figure}[t]
   \begin{center}
     \includegraphics[width=\textwidth]{images/distance-weighting-helpful.png}
@@ -1385,18 +1396,20 @@ shown in the following figure.
       appropriate extent of impact.  However, the algorithm attaches the
       unrelated upstream congestion because the resulting false positives don't
       outweigh the addition of new correct positives.}
-    \label{fig:time-space-random-versus-known}
+    \label{fig:distance-weighting-helpful}
   \end{center}
 \end{figure}
 Here, a known incident causes a congestion plume that is clearly
 spatially distinct from some random upstream disturbance.  Nonetheless
 the simplified delay calculation model attributes the random
-congestion to the known event because in the algorithm's objective, it
-is ``cheaper'' to incorrectly identify the uncongested area between
-the plumes as congested rather than miss out on the opportunity to
-identify upstream congestion as related to the known incident.  This
-bundling of plumes, however, is an artifact of the objective rather
-than a correct attribution of congestion to the given event.
+congestion to the known event.  This is because in the mathematical
+programming objective, it is ``cheaper'' to incorrectly identify the
+uncongested area between the plumes as congested rather than miss out
+on the opportunity to identify upstream congestion as related to the
+known incident.  This bundling of plumes, however, is an artifact of
+how the objective function is defined rather than a correct
+attribution of congestion to the given event.  In short, the objective
+function as defined fails to produce a result that matches reality.
 
 We considered two approaches to improving the ability of the model to
 account for such cases.  The first approach was to bias the objective
@@ -1740,8 +1753,8 @@ shown in figure~\ref{fig:arrival-service-and-queuing}.
     \inputTikZ{figs/arrival-service-and-queuing}
     \caption[The relationship between the arrival rate, the service
     rate, and queuing during an incident response]{The relationship
-      between the arrival rate ($\mu(t)$), the service rate
-      ($\lambda$), and queuing ($Q(t)$) during an incident response.}
+      between the arrival rate ($\lambda(t)$), the service rate
+      ($\mu$), and queuing ($Q(t)$) during an incident response.}
     \label{fig:arrival-service-and-queuing}
   \end{center}
 \end{figure}
@@ -1764,11 +1777,16 @@ We now turn to the problem of computing delay as a function of the
 critical time points of incident response that can be influenced by
 \ac{TMC} actions.
 
-
 \subsubsection*{Case of slight oversaturation}
 
-Suppose the time period during which $\lambda > \mu$ is relatively short, i.e., $t_3 - t_0$ is relatively
-small. Then, expand $\mu(t)$ as a Taylor series about $t_1$:
+Suppose the time period during which $\lambda > \mu$ is relatively
+short, i.e., $t_2 - t_0$ is relatively small.\fixme{caltrans}{Demand
+  is greater than capacity between t0 and t2.  From t2 to t3 the
+  capacity exceeds the demand.  From your explanation, it appears that
+  this time period should be t2-t0 rather than t3-t0!  Please
+  explain. To be consistent with equation 3.25, this time period
+  should be t2-t0.  crindt: The critique is correct, it should be
+  $t_2-t_0$} Then, expand $\mu(t)$ as a Taylor series about $t_1$:
 \begin{equation}
   \label{eq:mu-expansion}
   \mu(t) = \mu(t_1)+\frac{d\mu}{dt}\Biggr\rvert_{t=t_1} \cdot{}(t-t_1)
@@ -1776,6 +1794,18 @@ small. Then, expand $\mu(t)$ as a Taylor series about $t_1$:
   +O(t-t_1)^3
 \end{equation}
 But, $\frac{d\mu}{dt} = 0 \Rightarrow$
+%
+\fixme{caltrans}{What are the reasons and the logic that are needed to
+  make Taylor Series applicable.  Can this assumption be used during a
+  major incident where blockage is present for over an hour?  crindt:
+  Indeed, the longer the incident, the less valid this result is.
+  However, keep in mind that the methods described herein are focused
+  on identifying delay savings due to TMC actions that speed the
+  clearance of accidents.  In the case of an incident that requires a
+  long duration to clear, the importance of the speed of the response
+  is diminished.  Put more bluntly, if it takes 6 hours to clear an
+  incident, then it matter little in terms of total delay whether the
+  first response is 10 minutes slower or faster.}
 \begin{equation}
 \begin{split}
   \label{eq:mu-expansion-simpl}
@@ -2036,7 +2066,7 @@ So, substituting (\ref{eq:t3-t0-def}) into~(\ref{eq:dtot-ito-phi}), we get
   \end{split}
 \end{equation}
 So, total delay is proportional to the square of the amount of
-oversaturation, $[\lambda-\mu(t1)]$, \textbf{or} to the 4\textsuperscript{th} power of the peak, $(t_3-t_0)$; i.e.,
+oversaturation, $[\lambda-\mu(t_1)]$, \textbf{or} to the 4\textsuperscript{th} power of the peak, $(t_3-t_0)$; i.e.,
 \begin{subequations}
   \label{dtot-final}
   \begin{align}
@@ -2048,16 +2078,30 @@ oversaturation, $[\lambda-\mu(t1)]$, \textbf{or} to the 4\textsuperscript{th} po
 \subsection{Estimating tangible TMC benefits}
 \label{sec:est-benefits}
 
-Equations (\ref{dtot-final}) offer a tool for estimating \ac{TMC} benefits from
-measurable events in the \ac{TMC} activity logs.  Specifically, if we can
-determine from \ac{TMC} logs how much the time to initial response to an
-incident $t_1$ is shortened by \ac{TMC} actions, we can estimate the delay
-savings attributable to \ac{TMC} functions.  Furthermore, if these actions can
-be associated with specific processes or technologies, we can make statements
-regarding the delay savings attributable to specific \ac{TMC} assets (or bundles
-of them). The extent to which this is possible depends on the quality of data in
-the \ac{TMC} logs, which has been a motivating factor behind the improvements to
-the \ac{TMC} activity logs discussed in chapter~\ref{chap:tmc-activity}.
+Equations (\ref{dtot-final}) offer a tool for estimating \ac{TMC}
+benefits from measurable events in the \ac{TMC} activity logs.  Note,
+however, that the longer the incident, the less valid this result is.
+Still, we note that the methods described herein are focused on
+identifying delay savings due to TMC actions that speed the clearance
+of accidents.  In the case of an incident that requires a long
+duration to clear, the importance of the speed of the response is
+diminished.  For example, if it takes 6 hours to clear an incident,
+then it matters little \emph{in terms of total delay} whether the
+first response is 10 minutes slower or faster.  In these cases,
+alternative measures of benefit are warranted, such as the value of
+information provided that leads to diversion or altered travel
+choices.
+
+For incidents of shorter duration, however, if we can determine from
+\ac{TMC} logs how much the time to initial response to an incident
+$t_1$ is shortened by \ac{TMC} actions, we can estimate the delay
+savings attributable to \ac{TMC} functions.  Furthermore, if these
+actions can be associated with specific processes or technologies, we
+can make statements regarding the delay savings attributable to
+specific \ac{TMC} assets (or bundles of them). The extent to which
+this is possible depends on the quality of data in the \ac{TMC} logs,
+which has been a motivating factor behind the improvements to the
+\ac{TMC} activity logs discussed in chapter~\ref{chap:tmc-activity}.
 
 
 % \subsection{Ongoing work}
@@ -2187,7 +2231,7 @@ that
 \end{quote}
 These recommendations were folded into a set of modifications made to the
 District 12 \ac{TMC} activity log application under UCI subaward \#2009-2291
-between \emph{Special Solutions} 12 and UCI.  The details of this work is included in
+between \emph{Special Solutions} and UCI.  The details of this work is included in
 Appendix~\ref{chap:actlog-sub}.  The most significant changes with respect to
 the \ac{TMCPE} analysis is that the activity log was modified to:
 \begin{itemize}
@@ -2223,17 +2267,18 @@ deployment therefore mirrors the \ac{PeMS} \ac{VAR} feed, which provides
 dataserver at 5 minute intervals and are loaded into the \ac{CTMLabs} \ac{PeMS}
 database.
 
-In addition to the 5-minute speeds and volumes, the \ac{TMCPE} delay calculation
-requires the computation of the expected distribution of flow and speed for
-affected sections by time-of-day and day-of-week.  This is computed using a
-rolling 52-week horizon as described in equation~(\ref{eq:nominal-speed-obs}).
-Since this is a relatively expensive computation, it is performed only once on
-demand the first time an analysis needs it, and then is cached in the database
-local \ac{PeMS} database.  A saved query (also known as a database \emph{view})
-is stored in the database that automatically selects the distribution from the
-cache, if available, or triggers the computation of a new distribution if it is
-missing.  This caching improves the performance of the web application
-significantly.
+In addition to the 5-minute speeds and volumes, the \ac{TMCPE} delay
+calculation requires the computation of the expected distribution of
+flow and speed for affected sections by time-of-day and day-of-week.
+This is computed using a rolling 52-week horizon as described in
+equation~(\ref{eq:nominal-speed-obs}).  Since this is a relatively
+expensive computation, it is performed only once on demand the first
+time an analysis needs it, and then is cached in the local copy of the
+\ac{PeMS} database.  A saved query (also known as a database
+\emph{view}) is stored in the database that automatically selects the
+distribution from the cache, if available, or triggers the computation
+of a new distribution if it is missing.  This caching improves the
+performance of the web application significantly.
 
 
 \subsection{TMCPE application database}
@@ -2375,16 +2420,22 @@ section~\ref{sec:mod-tmc-impacts}.  This service requires as input the
 activity log ID of the incident to be analyzed, the output from the
 incident impact service in order to characterize the critical section
 and estimate the arrival pattern to the impacted region, and any
-parameters characterizing changes to the observed incident
-response. As with the incident impact service, this model
-independently accesses additional databases as necessary to support
-its analysis.  The service updates the \ac{TMCPE} domain classes for
-the event to include the estimated delay savings attributable to
-actions characterized by the input parameters.
+parameters characterizing changes to the observed incident response.
+As with the incident impact service, this model independently accesses
+additional databases as necessary to support its analysis.  The
+service updates the \ac{TMCPE} domain classes for the event to include
+the estimated delay savings attributable to actions characterized by
+the input parameters.
 
-\fixme{crindt}{flesh this out some.  Probably just collapse with the
-  above section.}
-
+As with the incident impact service, the core TMC impact service model
+is implemented using the \texttt{perl} scripting language.  In its
+current form, this service is a simplified version of the queuing
+model described in section~\ref{sec:mod-tmc-impacts}.  This approach
+focuses on identifying how a delay in incident response extends the
+maximum length of an incident queue using shockwave analysis.  The
+subsequent lengths of this projected queue over time is modeled using
+maximum service rates measured during clearance of the actual
+incident, which are in turn used to estimate additional delays.
 
 
 \subsection{Interfaces}
@@ -2404,15 +2455,16 @@ map-based web interface that allows an analyst to query the model for
 \item \ac{TMC} benefits for a set of incidents meeting particular criteria
   (location, time of day, severity, etc.)
 \end{itemize}
-The interface will gives analyst control of relevant input parameters to the
-model, but assumes sensible defaults where possible.
+The interface gives the analyst control of relevant input parameters
+to the model, but assumes sensible defaults where possible.
 
-The system uses a web-based interface built atop the Grails framework.  Within
-that framework, we implemented a map-based interface using the OpenLayers
-\texttt{javascript} library \citep{openlayers10:_openl_user_guide} and the
-OpenStreetMap map image tiles \citep{openstreetmap.org10:_opens_devel_guide}
-(Google maps can also be used as a background layer).  The web interface
-consists of two main screens.  
+The system uses a web-based interface built atop the Grails framework.
+Within that framework, we implemented a map-based interface using the
+OpenLayers \texttt{javascript} library
+\citep{openlayers10:_openl_user_guide} and the OpenStreetMap map image
+tiles \citep{openstreetmap.org10:_opens_devel_guide} (Google maps can
+also be used as a background layer).  The web interface consists of
+two main screens.
 
 The first screen is a general query interface
 (figure~\ref{fig:tmcpe-query-interface}) that allows the analyst to
@@ -2990,21 +3042,30 @@ are currently too computationally intensive to be included in the live website,
 but the techniques show promise for later deployment as the algorithms are
 optimized.
 
-Third, the system is currently limited to analyzing incidents managed by
-Caltrans District 12.  This is solely due to the system's reliance on the augmented
-data now available from District 12 activity log due to improvements made in
-support of this project.  The methods used, however, are completely transferable
-to any system with similar activity logging data and speed and volume estimates
-for impacted sections.  Because the \ac{TMCAL} system currently being deployed
-by Caltrans appears to be a developing standard for recording \ac{TMC} actions,
-we recommend that the \ac{TMCPE} system be augmented to accept data from the
-\ac{TMCAL} data source as well as its current District 12 activity log backend.
+Third, many benefits offered by the \ac{TMC} are not currently
+included in this tool.  These include the many direct and indirect
+benefits attributable to information dissemination.  We recommend
+continued work on enhancements to the \ac{TMC} impact model to
+consider diversionary effects due to such information.
 
-Finally, because the site is integrated into the \ac{CTMLabs} architecture, the
-\ac{CTMLabs} team can continue to support and improve the system as directed by
-Caltrans users making use of the system for analysis and reporting tasks.  We
-believe this development and support model will continue to improve the system
-into a potentially invaluable tool for Caltrans operations and management.
+Fourth, the system is currently limited to analyzing incidents managed
+by Caltrans District 12.  This is solely due to the system's reliance
+on the augmented data now available from District 12 activity log due
+to improvements made in support of this project.  The methods used,
+however, are completely transferable to any system with similar
+activity logging data and speed and volume estimates for impacted
+sections.  Because the \ac{TMCAL} system currently being deployed by
+Caltrans appears to be a developing standard for recording \ac{TMC}
+actions, we recommend that the \ac{TMCPE} system be augmented to
+accept data from the \ac{TMCAL} data source as well as its current
+District 12 activity log backend.
+
+Finally, because the site is integrated into the \ac{CTMLabs}
+architecture, the \ac{CTMLabs} team can continue to support and
+improve the system as directed by Caltrans users making use of the
+system for analysis and reporting tasks.  We believe this development
+and support model will continue to improve the system into a
+potentially invaluable tool for Caltrans operations and management.
 
 %\includegraphics[width=\textwidth]{images/inc-61-ss.png}
 
