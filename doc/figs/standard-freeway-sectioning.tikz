@@ -63,7 +63,7 @@
   \path (\fw,0 |- m12) coordinate (m45);
   \path (\fw,0 |- topsec12) coordinate (topsec45);
 
-  \foreach \ldet/\det/\ndet/\dir/\sec in {0/1/2/1/(i+1),1/2/3/-1/(i),2/3/4/1/(i-1),3/4/5/-1/(i-2)} {
+  \foreach \ldet/\det/\ndet/\dir/\sec in {0/1/2/1/(i-2),1/2/3/-1/(i-1),2/3/4/1/(i),3/4/5/-1/(i+1)} {
     \draw (cctr\det |- 0,0) ++(0,7pt) -- ++(0,\lw-7pt) coordinate (topdet\det);
     \ifnum\dir>0
       \draw[latex'-latex'] (topdet\det) ++(0,-3pt) coordinate (this) -- node[inner sep=0pt] {\tiny //} (this -| m\det\ndet);
@@ -76,7 +76,7 @@
 
     \draw[latex'-latex'] (topsec\ldet\det) ++(0,-5pt) coordinate (last) -- node[above] {\it section \sec} (last -| topsec\det\ndet);
 
-    \draw (botsec23) ++(0,-0.5em) node [draw,shape border rotate=180,single arrow,anchor=north] {Direction of flow};
+    \draw (botsec23) ++(0,-0.5em) node [draw,shape border rotate=0,single arrow,anchor=north] {Direction of flow};
   }
 \end{tikzpicture}
 %% Standard caption
