@@ -13,19 +13,51 @@ class IncidentFacilityImpactAnalysis implements Comparable {
     Date            startTime
     Date            endTime
 
+    // These come from the logs
+    Date firstCall      // equivalent to t0
+    Date verification   // equivalent to t1
+    Date lanesClear     // equivalent to t2
+
+    // This is computed as the furthest upstream disrupted section
+    Date            computedStartTime
+    FacilitySection computedStartLocation
+
+    // This is computed based upon the last delayed vehicle
+    Date            computedIncidentClearTime    // equivalent to t3
+    
+
     //////// PARAMETERS ////////
+    String commandLine       // The command line of the delay computation
     Double band
+    Double bias
+    Double downstreamWindow
+    Double upstreamWindow
+    Double preWindow
+    Double postWindow
+    byte[] gamsInputFile
+    byte[] gamsOutputFile
+    Double minObservationPercent
+    Double limitLoadingShockwave
+    Double limitClearingShockwave
+    Double unknownEvidenceValue
+    Double weightForDistance
+    Boolean weightForLength
+    Boolean BoundIncidentTime
+    Double d12DelaySpeed
     Double maxIncidentSpeed
 
-    // Treat this as a sorted set.  IncidentSectionData has an induced ordering upstream to downstream by absolute postmile
+    // Treat this as a sorted set.  IncidentSectionData has an induced ordering
+    // upstream to downstream by absolute postmile
     SortedSet       analyzedSections
 
     static hasMany = [ analyzedSections: AnalyzedSection ]
 
-    static belongsTo = [incidentImpactAnalysis: IncidentImpactAnalysis]
+    static belongsTo = [ incidentImpactAnalysis: IncidentImpactAnalysis ]
 
 
     ///////// OUTPUTS ////////
+    Boolean solutionTimeBounded
+    Boolean solutionSpaceBounded
     Double d12Delay
     Double totalDelay
     Double netDelay
@@ -37,6 +69,10 @@ class IncidentFacilityImpactAnalysis implements Comparable {
 
     static constraints = {
         totalDelay( min:(Double)0.0, nullable: true )
+	commandLine( maxSize:2048 )
+	gamsInputFile( maxSize: 2000000 )  // 2 million bytes, or an megabyte in SI units
+	gamsOutputFile( maxSize: 2000000 ) // 2 million bytes, or an megabyte in SI units, generally must be gzipped
+	unknownEvidenceValue( min: (Double)0.0, max:(Double)1.0)
     }
 
     static mapping = {
