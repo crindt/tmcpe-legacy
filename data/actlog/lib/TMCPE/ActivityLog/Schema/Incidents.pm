@@ -71,6 +71,24 @@ __PACKAGE__->table("actlog.incidents");
   data_type: 'geometry'
   is_nullable: 1
 
+=head2 verification
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 lanes_clear
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 incident_clear
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -97,11 +115,31 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 80 },
   "location_geom",
   { data_type => "geometry", is_nullable => 1 },
+  "verification",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  "lanes_clear",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  "incident_clear",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("incidents_cad_key", ["cad"]);
 
 =head1 RELATIONS
+
+=head2 incident_clear
+
+Type: belongs_to
+
+Related object: L<TMCPE::ActivityLog::Schema::D12ActivityLog>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "incident_clear",
+  "TMCPE::ActivityLog::Schema::D12ActivityLog",
+  { keyfield => "incident_clear" },
+);
 
 =head2 first_call
 
@@ -115,6 +153,20 @@ __PACKAGE__->belongs_to(
   "first_call",
   "TMCPE::ActivityLog::Schema::D12ActivityLog",
   { keyfield => "first_call" },
+);
+
+=head2 verification
+
+Type: belongs_to
+
+Related object: L<TMCPE::ActivityLog::Schema::D12ActivityLog>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "verification",
+  "TMCPE::ActivityLog::Schema::D12ActivityLog",
+  { keyfield => "verification" },
 );
 
 =head2 sigalert_end
@@ -145,9 +197,23 @@ __PACKAGE__->belongs_to(
   { keyfield => "sigalert_begin" },
 );
 
+=head2 lanes_clear
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:24:24
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Y1MNzWRgcJ1f+FvYwQZl0Q
+Type: belongs_to
+
+Related object: L<TMCPE::ActivityLog::Schema::D12ActivityLog>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "lanes_clear",
+  "TMCPE::ActivityLog::Schema::D12ActivityLog",
+  { keyfield => "lanes_clear" },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:12:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Nw0i9g9IJGMxqPTdpTGcqw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

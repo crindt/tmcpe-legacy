@@ -222,6 +222,21 @@ __PACKAGE__->has_many(
   {},
 );
 
+=head2 incidents_incident_clears
+
+Type: has_many
+
+Related object: L<TMCPE::ActivityLog::Schema::Incidents>
+
+=cut
+
+__PACKAGE__->has_many(
+  "incidents_incident_clears",
+  "TMCPE::ActivityLog::Schema::Incidents",
+  { "foreign.incident_clear" => "self.keyfield" },
+  {},
+);
+
 =head2 incidents_first_calls
 
 Type: has_many
@@ -234,6 +249,21 @@ __PACKAGE__->has_many(
   "incidents_first_calls",
   "TMCPE::ActivityLog::Schema::Incidents",
   { "foreign.first_call" => "self.keyfield" },
+  {},
+);
+
+=head2 incidents_verifications
+
+Type: has_many
+
+Related object: L<TMCPE::ActivityLog::Schema::Incidents>
+
+=cut
+
+__PACKAGE__->has_many(
+  "incidents_verifications",
+  "TMCPE::ActivityLog::Schema::Incidents",
+  { "foreign.verification" => "self.keyfield" },
   {},
 );
 
@@ -267,18 +297,18 @@ __PACKAGE__->has_many(
   {},
 );
 
-=head2 performance_measures_log_ids
+=head2 incidents_lanes_clears
 
 Type: has_many
 
-Related object: L<TMCPE::ActivityLog::Schema::PerformanceMeasures>
+Related object: L<TMCPE::ActivityLog::Schema::Incidents>
 
 =cut
 
 __PACKAGE__->has_many(
-  "performance_measures_log_ids",
-  "TMCPE::ActivityLog::Schema::PerformanceMeasures",
-  { "foreign.log_id" => "self.keyfield" },
+  "incidents_lanes_clears",
+  "TMCPE::ActivityLog::Schema::Incidents",
+  { "foreign.lanes_clear" => "self.keyfield" },
   {},
 );
 
@@ -297,9 +327,24 @@ __PACKAGE__->has_many(
   {},
 );
 
+=head2 performance_measures_log_ids
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:24:24
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qaarycLcG8mg+TtlCeDHhQ
+Type: has_many
+
+Related object: L<TMCPE::ActivityLog::Schema::PerformanceMeasures>
+
+=cut
+
+__PACKAGE__->has_many(
+  "performance_measures_log_ids",
+  "TMCPE::ActivityLog::Schema::PerformanceMeasures",
+  { "foreign.log_id" => "self.keyfield" },
+  {},
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:12:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:m9b9H+65YeSp30EwdZo9XQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

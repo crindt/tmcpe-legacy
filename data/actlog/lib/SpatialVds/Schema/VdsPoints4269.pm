@@ -64,8 +64,8 @@ Related object: L<SpatialVds::Schema::GeomPoints4269>
 __PACKAGE__->belongs_to("gid", "SpatialVds::Schema::GeomPoints4269", { gid => "gid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:njXE9VZw5QBhoRifnE4p9w
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:13:42
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YCmZ1X6i8ZKQyDP8NTMWDQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
