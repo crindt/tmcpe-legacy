@@ -47,8 +47,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("ml_vds_id", "r_vds_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:juUuF+q8XryxYo0HyplZKQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:13:42
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:L08ugCZmadB2vCC4af3dhg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

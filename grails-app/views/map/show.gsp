@@ -213,6 +213,12 @@
 			     />
 		    </td>
 		  </tr>
+		  <tr>
+		    <td>
+		      <input type="checkbox" dojoType="dijit.form.CheckBox" id="onlySigalerts" name="onlySigalerts" checked="false" value="onlySigalerts"/>
+		      <label for="onlySigalerts" id="onlySigalertsLabel">Limit to Sigalerts</label><br/>
+		    </td>
+		  </tr>
 		</table>
 	      </td>
 	      <td style="width:33%;">

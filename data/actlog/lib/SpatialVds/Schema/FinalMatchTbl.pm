@@ -69,8 +69,8 @@ __PACKAGE__->set_primary_key("gid");
 __PACKAGE__->add_unique_constraint("match_vds_taz_uniq", ["vds_id", "taz_id"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:t5N4hePBpU4H/iM5+Mracg
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:13:42
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hWejxohkrNUbmmnqv1vbHw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

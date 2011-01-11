@@ -185,6 +185,11 @@ class IncidentController extends BaseController {
                         isNull( 'section' )
                     }
                 } 
+
+		// Limit to sigalerts
+		if ( params.onlySigalerts == "onlySigalerts" ) {
+		    not { isNull( 'sigalertBegin' ) }
+		}
             }
         }
 

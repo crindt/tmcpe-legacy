@@ -79,9 +79,14 @@ CREATE TABLE actlog.incidents (
        id SERIAL PRIMARY KEY NOT NULL,
        cad VARCHAR(40) UNIQUE,-- REFERENCES actlog.d12_activity_log( cad ),
        start_time TIMESTAMP,
-       first_call     INTEGER REFERENCES actlog.d12_activity_log( keyfield ),
        sigalert_begin INTEGER REFERENCES actlog.d12_activity_log( keyfield ),
        sigalert_end   INTEGER REFERENCES actlog.d12_activity_log( keyfield ),
+
+       first_call     INTEGER REFERENCES actlog.d12_activity_log( keyfield ),
+       verification   INTEGER REFERENCES actlog.d12_activity_log( keyfield ),
+       lanes_clear    INTEGER REFERENCES actlog.d12_activity_log( keyfield ),
+       incident_clear INTEGER REFERENCES actlog.d12_activity_log( keyfield ),
+
        location_vdsid INTEGER, -- REFERENCES...
        event_type VARCHAR( 80 )
 );

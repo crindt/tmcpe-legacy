@@ -68,8 +68,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("tfid");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:25:11
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:v8VIOUY5iHh4/TJi6v/cVg
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:13:42
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Joveh5Ydjze5Gaj2QfIv2w
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

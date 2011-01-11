@@ -24,6 +24,8 @@ use Devel::Comments '###', '###';
 
 my %opt = ();
 
+my $cmdline = join( ' ', 'import-al.pl', @ARGV );
+
 GetOptions( \%opt, 
 	    "skip-al-import",
 	    "skip-rl-import",
@@ -237,11 +239,10 @@ sub process_performance_measures {
 	    $pmtype = 'FIRST CALL';
 
 	    ############################# VERIFICATION ############################
-	} elsif ( /VERIFICATION/ ) {
-	    $pmtype = 'VERIFICATION';
-	} elsif ( /VERIFICATION BY CCTV\'S/ || /VERIFIED BY CCTV/) {
-	    $pmtype = 'VERIFICATION';
-	} elsif ( /VERIFIED BY CHP/ ) {
+	} elsif ( /VERIFICATION/ ||
+		  /VERIFICATION BY CCTV\'S/ || 
+		  /VERIFIED BY CCTV/ || 
+		  /VERIFIED BY CHP/ ) {
 	    $pmtype = 'VERIFICATION';
 
 	    ############################# STATUS ############################
@@ -815,9 +816,18 @@ eval {
 			}
 		    }
 		} elsif ( /Performance_Measures:(.*)/ ) {
-		    my $type = process_performance_measures( $inc, $log, $1, $memo );
-		    if ( $type->{pmtype} eq 'FIRST CALL' ) {
+		    my $pm = process_performance_measures( $inc, $log, $1, $memo );
+
+		    if ( $pm->{pmtype} eq 'FIRST CALL' ) {
 			$inc->first_call( $log );
+
+		    } elsif ( $pm->{pmtype} eq 'VERIFICATION' && 
+				not defined( $inc->verification ) ) {
+			$inc->verification( $log );
+
+		    } elsif ( $pm->{pmtype} eq 'STATUS' && $pm->{pmtext} eq 'LANES CLEAR' ) {
+			$inc->lanes_clear( $log );
+			
 		    }
 		}
 	    }
@@ -928,6 +938,7 @@ INCDEL: while( my $inc = $incrs->next ) {
     $dc->tmcpe_db_password( $tmcpe_db_password );
     $dc->cad( $inc->cad );
     $dc->incid( $inc->id );
+    $dc->cmdline( $cmdline );
 
   DCOPT:
     foreach my $o ( keys %{$procopt->{dc}} ) {
@@ -958,6 +969,16 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->pm( $vds->abs_pm );
 	$dc->vdsid( $vds->id );
 	$dc->logstart( $inc->start_time );
+
+
+	# set the critical event types in the incident management
+	$dc->first_call( $inc->start_time );
+
+	
+	$dc->verification( $inc->verification->stamp );
+	$dc->lanes_clear( $inc->lanes_clear->stamp );
+
+
 	$dc->bad_solution( 0 );
 
 	my @incloc = $tmcpeal->resultset( 'D12ActivityLog' )->search( 
@@ -974,6 +995,8 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->compute_delay;
 
 	$dc->write_to_db;
+
+	$dc->compute_incident_clear();
     };
     if ( $@ ) {
 	$_ = ref $@;

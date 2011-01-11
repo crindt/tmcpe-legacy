@@ -82,6 +82,162 @@ __PACKAGE__->table("tmcpe.incident_facility_impact_analysis");
   data_type: 'double precision'
   is_nullable: 1
 
+=head2 command_line
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 2048
+
+=head2 bias
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 bound_incident_time
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 d12delay_speed
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 downstream_window
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 gams_input_file
+
+  data_type: 'bytea'
+  is_nullable: 1
+
+=head2 gams_output_file
+
+  data_type: 'bytea'
+  is_nullable: 1
+
+=head2 limit_clearing_shockwave
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 limit_loading_shockwave
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 min_observation_percent
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 post_window
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 pre_window
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 unknown_evidence_value
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 upstream_window
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 weight_for_distance
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 weight_for_length
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 space_restricted
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 time_restricted
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 solution_space_bounded
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 solution_time_bounded
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 first_call
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
+=head2 incident_clear
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
+=head2 lanes_clear
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
+=head2 verification
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
+=head2 computed_location_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 computed_start
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
+=head2 computed_start_location_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 computed_start_time
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
+=head2 incident_clear_location
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
+=head2 incident_clear_time
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
+=head2 computed_incident_clear_time
+
+  data_type: 'timestamp'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -114,6 +270,68 @@ __PACKAGE__->add_columns(
   { data_type => "double precision", is_nullable => 1 },
   "max_incident_speed",
   { data_type => "double precision", is_nullable => 1 },
+  "command_line",
+  { data_type => "varchar", is_nullable => 1, size => 2048 },
+  "bias",
+  { data_type => "double precision", is_nullable => 1 },
+  "bound_incident_time",
+  { data_type => "boolean", is_nullable => 1 },
+  "d12delay_speed",
+  { data_type => "double precision", is_nullable => 1 },
+  "downstream_window",
+  { data_type => "double precision", is_nullable => 1 },
+  "gams_input_file",
+  { data_type => "bytea", is_nullable => 1 },
+  "gams_output_file",
+  { data_type => "bytea", is_nullable => 1 },
+  "limit_clearing_shockwave",
+  { data_type => "double precision", is_nullable => 1 },
+  "limit_loading_shockwave",
+  { data_type => "double precision", is_nullable => 1 },
+  "min_observation_percent",
+  { data_type => "double precision", is_nullable => 1 },
+  "post_window",
+  { data_type => "double precision", is_nullable => 1 },
+  "pre_window",
+  { data_type => "double precision", is_nullable => 1 },
+  "unknown_evidence_value",
+  { data_type => "double precision", is_nullable => 1 },
+  "upstream_window",
+  { data_type => "double precision", is_nullable => 1 },
+  "weight_for_distance",
+  { data_type => "double precision", is_nullable => 1 },
+  "weight_for_length",
+  { data_type => "boolean", is_nullable => 1 },
+  "space_restricted",
+  { data_type => "boolean", is_nullable => 1 },
+  "time_restricted",
+  { data_type => "boolean", is_nullable => 1 },
+  "solution_space_bounded",
+  { data_type => "boolean", is_nullable => 1 },
+  "solution_time_bounded",
+  { data_type => "boolean", is_nullable => 1 },
+  "first_call",
+  { data_type => "timestamp", is_nullable => 1 },
+  "incident_clear",
+  { data_type => "timestamp", is_nullable => 1 },
+  "lanes_clear",
+  { data_type => "timestamp", is_nullable => 1 },
+  "verification",
+  { data_type => "timestamp", is_nullable => 1 },
+  "computed_location_id",
+  { data_type => "integer", is_nullable => 1 },
+  "computed_start",
+  { data_type => "timestamp", is_nullable => 1 },
+  "computed_start_location_id",
+  { data_type => "integer", is_nullable => 1 },
+  "computed_start_time",
+  { data_type => "timestamp", is_nullable => 1 },
+  "incident_clear_location",
+  { data_type => "timestamp", is_nullable => 1 },
+  "incident_clear_time",
+  { data_type => "timestamp", is_nullable => 1 },
+  "computed_incident_clear_time",
+  { data_type => "timestamp", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -149,8 +367,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-03 22:24:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RCjAzyYMvKTaeqUk+tqNhQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:12:56
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wWSA1OWTT9aTGkGFqEKujQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

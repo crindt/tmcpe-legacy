@@ -41,7 +41,7 @@ use TMCPE::Schema;
 use TBMAP::Schema;
 use Date::Format;
 use POSIX;
-use Devel::Comments '###', '###';
+#use Devel::Comments '###', '###';
 
 our $VERSION = '0.3.4';
 
@@ -92,8 +92,9 @@ use Class::MethodMaker
 		   }
 		 }, 'tbmap_db' ],
 
+     scalar => [ qw/ cmdline / ],
      scalar => [ qw/ incid cad facil dir pm vdsid / ],
-     scalar => [ qw/ data cell stationdata timemap / ],
+     scalar => [ qw/ rawdata data cell stationdata timemap / ],
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".gms" } }, 
 		 'gamsfile' ],
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".lst" } }, 
@@ -133,8 +134,13 @@ use Class::MethodMaker
      scalar => [ { -default => {} }, 'force' ],
      scalar => [ qw/ logstart logend / ],
      scalar => [ qw/ calcstart calcend / ],
+     scalar => [ qw/ first_call verification lanes_clear incident_clear / ],
+     scalar => [ qw/ computed_max_extent_time computed_max_extent_location / ],
+     scalar => [ qw/ computed_incident_clear_time computed_incident_clear_location / ],
+     scalar => [ qw/ computed_start_time computed_start_location / ],
      scalar => [ qw/ mintimeofday mindate / ],
      scalar => [ qw/ bad_solution d12_delay tot_delay avg_delay net_delay / ],
+     scalar => [ qw/ solution_time_bounded solution_space_bounded / ],
      scalar => [ { -default => 'tmcpe_test' }, 'tmcpe_db_name' ],
      scalar => [ { -default => 'localhost' }, 'tmcpe_db_host' ],
      scalar => [ { -default => 'postgres' }, 'tmcpe_db_user' ],
@@ -157,6 +163,8 @@ use Class::MethodMaker
      scalar => [ { -default => '0' }, "cplex_mipemphasis" ],
      scalar => [ { -default => 35.0 }, "d12_delay_speed" ],
      scalar => [ { -default => 60.0 }, "max_incident_speed" ],  # the speed over which a section is always classified as clear
+
+     scalar => [ qw/ ifa / ],
 #     scalar => [ { -type => 'Parse::RecDescent',
 #		   -default_ctor => sub { return TMCPE::ActivityLog::LocationParser::create_parser() },
 #		 }, 'parser' ],
@@ -946,7 +954,9 @@ sub write_gams_program {
     my $LIMROW = "*";
     $LIMROW = join( " = ", "OPTIONS LIMROW", $self->gams_limrow ) if $self->gams_limrow;
     
+    my $cmdline = $self->cmdline;
     $of < qq{
+*** COMMAND LINE [$cmdline]
 \$ONUELLIST
 OPTIONS ITERLIM = 500000000
 $RESLIM
@@ -1183,6 +1193,8 @@ VARIABLES
 	Y		total incident delay
 	A		average delay
 	N		net delay
+        STB             solution time bound sum
+        SSB             solution space bound sum
 
 BINARY VARIABLE D
 BINARY VARIABLE S
@@ -1214,6 +1226,8 @@ $startlim START_BOUNDARY
 $startlim$use_boundary_constraint START_CONSTRAINT
 $startlim$use_boundary_constraint START_CONSTRAINT2
 $bound_incident_time BOUND_INCIDENT_TIME
+SOLUTION_BOUNDED_IN_TIME
+SOLUTION_BOUNDED_IN_SPACE
 };
 
     if ( $self->force ) {
@@ -1287,6 +1301,11 @@ $startlim$use_boundary_constraint START_CONSTRAINT2(J1,M1) .. S(J1,M1) =l= (1 - 
 
 ** Incident time bound constraint: All cells with time index less than the incident start time must be zero
 $bound_incident_time BOUND_INCIDENT_TIME .. SUM( J1, SUM( M1\$(ORD(M1)<$incstart_index+1), D(J1,M1) ) ) =L= 0;
+
+** Compute if the solution is bounded in time and/or space
+SOLUTION_BOUNDED_IN_TIME  .. STB=E=SUM(M1\$(ORD(M1) eq CARD(M1)), SUM(J1, D(J1,M1)));
+SOLUTION_BOUNDED_IN_SPACE .. SSB=E=SUM(J1\$(ORD(J1) eq 1), SUM(M1, D(J1,M1)));
+
 };
     if ( $self->force ) {
 	foreach my $k ( keys %{$self->force} ) {
@@ -1367,6 +1386,8 @@ sub solve_program {
 sub parse_results {
     my ( $self ) = @_;
 
+    $self->rawdata( [] );
+
     my $resf = io( $self->get_lst_file );
     my $found = 0;
     my $error = 0;
@@ -1376,6 +1397,8 @@ sub parse_results {
     my $tot_delay;
     my $avg_delay;
     my $net_delay;
+    my $solution_time_bounded;
+    my $solution_space_bounded;
 
   LINE: 
     while( my $line = $resf->getline() ) { ### PROCESSING RESULTS |===[%]              |
@@ -1428,6 +1451,18 @@ sub parse_results {
 	    $avg_delay = $1;
 	    $avg_delay = 0 if $avg_delay eq '.';
 	};
+	/^----\s+VAR STB\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
+	{
+	    $solution_time_bounded = $1;
+	    $solution_time_bounded = 0 if $solution_time_bounded eq '.';
+	    next LINE;
+	};
+	/^----\s+VAR SSB\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
+	{
+	    $solution_space_bounded = $1;
+	    $solution_space_bounded = 0 if $solution_space_bounded eq '.';
+	    next LINE;
+	};
       
 	/^----\s+VAR S/ && do
 	{
@@ -1477,6 +1512,8 @@ sub parse_results {
     $self->tot_delay( $tot_delay );
     $self->net_delay( $net_delay );
     $self->avg_delay( $avg_delay );
+    $self->solution_time_bounded( $solution_time_bounded );
+    $self->solution_space_bounded( $solution_space_bounded );
 
     $self->cell( $cell );
 }
@@ -1545,10 +1582,29 @@ sub write_to_db {
 	
 	$ifa = $ia->create_related( 'incident_facility_impact_analyses',
 				    {
+					command_line => $self->cmdline,
+					band => $self->band,
+					bias => $self->bias,
+					downstream_window => $self->vds_downstream_fudge,
+					upstream_window => $self->vds_upstream_fallback,
+					pre_window => $self->prewindow,
+					post_window => $self->postwindow,
+					gams_input_file => undef,
+					gams_output_file => undef,
+					min_observation_percent => $self->min_obs_pct,
+					limit_loading_shockwave => $self->limit_loading_shockwave,
+					limit_clearing_shockwave => $self->limit_clearing_shockwave,
+					unknown_evidence_value => $self->unknown_evidence_value,
+					weight_for_distance => $self->weight_for_distance,
+					weight_for_length => $self->weight_for_length,
+					bound_incident_time => $self->bound_incident_time,
+					d12delay_speed => $self->d12_delay_speed,
+					max_incident_speed => $self->max_incident_speed,
+					solution_time_bounded => ($self->solution_time_bounded?1:0),
+					solution_space_bounded => ($self->solution_space_bounded?1:0),
+
 					start_time => time2str( "%Y-%m-%d %T", $self->calcstart ),
 					end_time => time2str( "%Y-%m-%d %T", $self->calcend ),
-					band => $self->band,
-					max_incident_speed => $self->max_incident_speed,
 					location_id => $loc->id,
 					d12delay => 0,
 					total_delay => $self->tot_delay,
@@ -1595,24 +1651,24 @@ sub write_to_db {
 		}
 #		printf STDERR "\t* ".join( ' ', '(',$j,$m,')', $secdat->{date}, $secdat->{timeofday}, $iflag,
 #		    $secdat->{incspd}, $secdat->{avg_spd}) . "\n";
-		$at = $as->create_related( 'incident_section_datas', 
-					   {
-					       fivemin => join( ' ', $secdat->{date}, $secdat->{timeofday} ),
-					       vol => $secdat->{incflw},
-					       spd => $secdat->{incspd},
-					       occ => $secdat->{incocc},
-					       days_in_avg => $secdat->{days_in_avg},
-					       pct_obs_avg => $secdat->{avg_pctobs},
-					       vol_avg => $secdat->{avg_flw},
-					       spd_avg => $secdat->{avg_spd},
-					       spd_std => $secdat->{stddev_spd},
-					       occ_avg => $secdat->{avg_occ},
-					       p_j_m => $secdat->{p_j_m},
-					       
-					       incident_flag => $iflag,
-					       tmcpe_delay => $tmcpedelay * $iflag,
-					       d12_delay => $d12delay * $iflag,
-					   } );
+		$self->rawdata->[$stnidx][$m]= {
+		    fivemin => join( ' ', $secdat->{date}, $secdat->{timeofday} ),
+		    vol => $secdat->{incflw},
+		    spd => $secdat->{incspd},
+		    occ => $secdat->{incocc},
+		    days_in_avg => $secdat->{days_in_avg},
+		    pct_obs_avg => $secdat->{avg_pctobs},
+		    vol_avg => $secdat->{avg_flw},
+		    spd_avg => $secdat->{avg_spd},
+		    spd_std => $secdat->{stddev_spd},
+		    occ_avg => $secdat->{avg_occ},
+		    p_j_m => $secdat->{p_j_m},
+		    
+		    incident_flag => $iflag,
+		    tmcpe_delay => $tmcpedelay * $iflag,
+		    d12_delay => $d12delay * $iflag,
+		};
+		$at = $as->create_related( 'incident_section_datas', $self->rawdata->[$stnidx][$m] );
 	    };
 	    if ( $@ ) {
 		croak $@->{msg};
@@ -1623,6 +1679,8 @@ sub write_to_db {
     }
     $ifa->d12delay( $d12delaysum );
     $ifa->update();
+
+    $self->ifa( $ifa );
 }
 
 sub update_time_bounds() {
@@ -1664,6 +1722,126 @@ sub compute_delay {
     }
 
     $self->parse_results( );
+}
+
+sub time_from_index() {
+    my ( $self, $index ) = ( @_ );
+    my $calcstart = $self->calcstart;
+    my $cs5 = ($calcstart % 300) ? POSIX::floor( $calcstart/300 ) * 300 : $calcstart;
+    my $time = $cs5 + 300*$index;
+    return $time;
+}
+
+sub section_from_index() {
+    my ( $self, $index ) = ( @_ );
+    return $self->stationdata->[$index]->{vds};
+}
+
+sub compute_incident_start() {
+    my ( $self ) = @_;
+
+    croak "No incident facility analysis has been performed" if ( !$self->ifa );
+
+    # OK, the jist here is to find from the earliest and furthest downstream
+    # disturbance
+    my ( $J, $M ) = ( (scalar @{$self->rawdata}) - 1, (scalar @{$self->rawdata->[0]}) - 1);
+    my ( $mm, $jj ) = (0,0);
+    my $j = 0;
+  TIMELOOPSTART:
+    foreach my $j ( reverse 0..$J ) {
+	foreach my $m ( 0..$M ) {
+	    my $dat = $self->rawdata->[$j][$m];
+	    if ( $dat->{incident_flag} ) {
+		( $mm, $jj ) = ( $m, $j );
+		last TIMELOOPSTART;
+	    }
+	    $m++;
+	}
+	$j++;
+    }
+
+    $self->computed_start_time( $mm );
+    $self->computed_start_location( $jj );
+
+    my $ss = time2str( "%Y-%m-%d %T", $self->time_from_index( $mm ) );
+    $self->ifa->computed_start_time( $ss );
+    $self->ifa->computed_start_location_id( $self->section_from_index( $jj )->id );
+
+    $self->ifa->update;
+}
+
+sub compute_incident_clear() {
+    my ( $self ) = @_;
+
+    croak "No incident facility analysis has been performed" if ( !$self->ifa );
+
+    $self->compute_incident_start();
+
+    # OK, the jist here is to project from the latest and furthest upstream
+    # disturbance to the incident location, thus computing the latest possible
+    # affects at the point of the incident
+    my ( $J, $M ) = ( (scalar @{$self->rawdata}) - 1, (scalar @{$self->rawdata->[0]}) - 1);
+    my ( $mm, $jj );
+  TIMELOOP:
+    foreach my $m ( reverse 0..$M ) {
+	foreach my $j ( 0..$J ) {
+	    my $dat = $self->rawdata->[$j][$m];
+	    if ( $dat->{incident_flag} ) {
+		( $mm, $jj ) = ( $m, $j );
+		last TIMELOOP;
+	    }
+	    $j++;
+	}
+    }
+
+    my $ss = time2str( "%Y-%m-%d %T", $self->time_from_index( $mm ) );
+    $self->computed_max_extent_time( $mm );
+    $self->computed_max_extent_location( $jj );
+    1;
+
+    # At this point, ($mm, $jj) is the time, space index of the atest and
+    # furthest upstream disturbance.  Now we want to model how fast the last
+    # impacted vehicle moving through this cell will reach the site of the
+    # incident.  First, we assume this vehicle touches the upstream latest edge
+    # of this cell, which implies that th vehicle actually starts traversing
+    # this section during the next latest timestep
+    my $m = $mm+1;
+    my $j = $jj;
+    my $timeres  = 1.0;
+    my $spaceres = $self->stationdata->[$j]->{seglen};
+
+    # now we compute how much of the 5 minute time step it takes for this
+    # vehicle to cross the section of interest
+    while( $j <= $self->computed_start_location ) {
+	my $dat = $self->rawdata->[$j][ $m ];
+	my $spd = $dat->{spd}; #mph
+
+	my $time_used = $spaceres/$spd*60.0/5.0;  # frac of 5 minutes used
+
+	if ( $time_used > $timeres ) {
+	    # if time_used is > timeres, it means that the vehicle didn't traverse the
+	    # whole section in the time step, compute how far and set space res
+	    my $dtrav = ($spd/60.0)*(5.0*$timeres);
+	    $spaceres -= $dtrav;
+	    croak "BAD DISTANCE" if ( $spaceres < 0 );
+	    $m++;
+
+	} else {
+	    # traversed to end during timestep, compute how much is left
+	    $timeres -= $time_used;
+	    $j++;
+	    $spaceres = $self->stationdata->[$j]->{seglen};
+	}
+    }
+    # at this point, (j-1,m) should be the cell where the vehicle reaches the
+    # incident location
+    $ss = time2str( "%Y-%m-%d %T", $self->time_from_index( $m ) );
+    $self->ifa->computed_incident_clear_time($ss);
+
+    $self->computed_incident_clear_time( $m );
+    $self->computed_incident_clear_location( $self->stationdata->[$j-1] );
+
+    $self->ifa->update();
 }
 
 1;
