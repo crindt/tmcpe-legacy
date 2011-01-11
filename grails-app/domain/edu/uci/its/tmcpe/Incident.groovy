@@ -31,10 +31,13 @@ class Incident {
 
     Date startTime
 
-
-    TmcLogEntry firstCall
     TmcLogEntry sigalertBegin
     TmcLogEntry sigalertEnd
+
+    TmcLogEntry firstCall        // equivalent to t0
+    TmcLogEntry verification     // equivalent to t1
+    TmcLogEntry lanesClear       // equivalent to t2
+    TmcLogEntry incidentClear // equivalent to t3
     
     
     // The estimated freeway section where the incident occurred (the
@@ -69,6 +72,10 @@ class Incident {
         bestGeom type:GeometryType 
         section column: 'location_vdsid'
         eventType column: 'event_type'
+
+	verification  column: 'verification'
+	lanesClear    column: 'lanes_clear'    // equivalent to t2
+	incidentClear column: 'incident_clear' // equivalent to t3
         
         // turn off optimistic locking, i.e., versioning.  This class is mapped to an externally generated table
         version false
