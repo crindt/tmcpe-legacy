@@ -138,6 +138,8 @@ use Class::MethodMaker
      scalar => [ qw/ computed_max_extent_time computed_max_extent_location / ],
      scalar => [ qw/ computed_incident_clear_time computed_incident_clear_location / ],
      scalar => [ qw/ computed_start_time computed_start_location / ],
+     scalar => [ qw/ computed_avg_vol computed_obs_vol computed_diversion / ],
+     scalar => [ qw/ computed_delay2 computed_maxq computed_maxq_time/ ],
      scalar => [ qw/ mintimeofday mindate / ],
      scalar => [ qw/ bad_solution d12_delay tot_delay avg_delay net_delay / ],
      scalar => [ qw/ solution_time_bounded solution_space_bounded / ],
@@ -163,6 +165,8 @@ use Class::MethodMaker
      scalar => [ { -default => '0' }, "cplex_mipemphasis" ],
      scalar => [ { -default => 35.0 }, "d12_delay_speed" ],
      scalar => [ { -default => 60.0 }, "max_incident_speed" ],  # the speed over which a section is always classified as clear
+
+     scalar => [ qw/ J M / ], # number of sections and number of timesteps
 
      scalar => [ qw/ ifa / ],
 #     scalar => [ { -type => 'Parse::RecDescent',
@@ -480,6 +484,9 @@ sub get_gams_data {
     } values %{$data->{$i}->{$facilkey}->{stations}};
 
     my $j = $J;
+
+    $self->M( $M );
+    $self->J( $J );
 
     $self->stationdata( [] );
     $self->timemap( {} );
@@ -813,14 +820,18 @@ sub get_pems_data {
 
 
     my $facilkey = join( ":", $self->facil, $self->dir );
+
     my $J = keys %{$data->{$i}->{$facilkey}->{stations}};
     $J -= 1;
     my $M = 0;
     map { 
-	$M = @{$_->{data}} if $M < @{$_->{data}} 
+	$M = @{$_->{data}} if $M < @{$_->{data}}; 
     } values %{$data->{$i}->{$facilkey}->{stations}};
 
-    my $j = $J;
+    $self->J( $J );
+    $self->M( $M );
+
+    my $j = $self->J;
 
     $self->stationdata( [] );
     $self->timemap( {} );
@@ -895,14 +906,10 @@ sub write_gams_program {
     my $of = io ( $self->get_gams_file );
 
     # compute number of sections
-    my $J = keys %{$data->{$i}->{$facilkey}->{stations}};
-    $J -= 1;
+    my $J = $self->J;
 
     # compute number of time steps
-    my $M = 0;
-    map { 
-	$M = @{$_->{data}} if $M < @{$_->{data}}
-    } values %{$data->{$i}->{$facilkey}->{stations}};
+    my $M = $self->M;
 
     my $R = 1;
     my $RR = 2*$J*$M; # maximum number of upstream + time cells
@@ -1618,11 +1625,8 @@ sub write_to_db {
     	croak ( ref $@ ? $@->{msg} : $@ );
     }
     
-    # now shove the station data in there...
-    my $J = @stations;
-#    $J--;
-    my $M = 0;
-    map { my $sz = @{$_->{data}}; $M = $sz if $M < $sz; } values %{$self->data->{$i}->{$facilkey}->{stations}};
+    my $J = $self->J;
+    my $M = $self->M;
 
     my $j = 0;
     my $d12delaysum = 0;
@@ -1732,6 +1736,22 @@ sub time_from_index() {
     return $time;
 }
 
+sub time_string_from_index() {
+    my ( $self, $index ) = ( @_ );
+    return time2str( "%Y-%m-%d %T", $self->time_from_index( $index ) );
+}
+
+
+sub index_from_timestring() {
+    my ( $self, $string ) = ( @_ );
+    my @cs = Localtime($self->calcstart);
+    my @tt = Localtime(str2time($string));
+    my @delta = Delta_DHMS(@cs[0..5],
+                 @tt[0..5]);
+    my $index = POSIX::floor($delta[0]*24*12+$delta[1]*12+$delta[2]/5);
+    return $index;
+}
+
 sub section_from_index() {
     my ( $self, $index ) = ( @_ );
     return $self->stationdata->[$index]->{vds};
@@ -1744,12 +1764,13 @@ sub compute_incident_start() {
 
     # OK, the jist here is to find from the earliest and furthest downstream
     # disturbance
-    my ( $J, $M ) = ( (scalar @{$self->rawdata}) - 1, (scalar @{$self->rawdata->[0]}) - 1);
+    my $J = $self->J;
+    my $M = $self->M;
     my ( $mm, $jj ) = (0,0);
     my $j = 0;
   TIMELOOPSTART:
-    foreach my $j ( reverse 0..$J ) {
-	foreach my $m ( 0..$M ) {
+    foreach my $j ( reverse 0..($J-1) ) {
+	foreach my $m ( 0..($M-1) ) {
 	    my $dat = $self->rawdata->[$j][$m];
 	    if ( $dat->{incident_flag} ) {
 		( $mm, $jj ) = ( $m, $j );
@@ -1760,11 +1781,11 @@ sub compute_incident_start() {
 	$j++;
     }
 
+    # FIXME: sanity check these
     $self->computed_start_time( $mm );
     $self->computed_start_location( $jj );
 
-    my $ss = time2str( "%Y-%m-%d %T", $self->time_from_index( $mm ) );
-    $self->ifa->computed_start_time( $ss );
+    $self->ifa->computed_start_time( $self->time_string_from_index( $mm ) );
     $self->ifa->computed_start_location_id( $self->section_from_index( $jj )->id );
 
     $self->ifa->update;
@@ -1780,11 +1801,12 @@ sub compute_incident_clear() {
     # OK, the jist here is to project from the latest and furthest upstream
     # disturbance to the incident location, thus computing the latest possible
     # affects at the point of the incident
-    my ( $J, $M ) = ( (scalar @{$self->rawdata}) - 1, (scalar @{$self->rawdata->[0]}) - 1);
+    my $J = $self->J;
+    my $M = $self->M;
     my ( $mm, $jj );
   TIMELOOP:
-    foreach my $m ( reverse 0..$M ) {
-	foreach my $j ( 0..$J ) {
+    foreach my $m ( reverse 0..($M-1) ) {
+	foreach my $j ( 0..($J-1) ) {
 	    my $dat = $self->rawdata->[$j][$m];
 	    if ( $dat->{incident_flag} ) {
 		( $mm, $jj ) = ( $m, $j );
@@ -1794,8 +1816,7 @@ sub compute_incident_clear() {
 	}
     }
 
-    my $ss = time2str( "%Y-%m-%d %T", $self->time_from_index( $mm ) );
-    $self->computed_max_extent_time( $mm );
+    $self->computed_max_extent_time( $self->time_string_from_index( $mm ) );
     $self->computed_max_extent_location( $jj );
     1;
 
@@ -1835,13 +1856,95 @@ sub compute_incident_clear() {
     }
     # at this point, (j-1,m) should be the cell where the vehicle reaches the
     # incident location
-    $ss = time2str( "%Y-%m-%d %T", $self->time_from_index( $m ) );
-    $self->ifa->computed_incident_clear_time($ss);
+    $self->ifa->computed_incident_clear_time( $self->time_string_from_index( $m ) );
 
     $self->computed_incident_clear_time( $m );
     $self->computed_incident_clear_location( $self->stationdata->[$j-1] );
 
     $self->ifa->update();
+}
+
+=item compute_diversion()
+
+Estimates the diversion as a deviation from total flow moving past the incident
+location over the computed range of impact.
+
+=cut
+sub compute_diversion() {
+    my ( $self ) = @_;
+
+    my ($avol,$ovol) = (0,0);
+    foreach my $m ( ($self->computed_start_time)..($self->computed_incident_clear_time) ) {
+	my $dat = $self->rawdata->[$self->computed_start_location][ $m ];
+	# fixme: account for missing data
+	$avol += $dat->{vol_avg};
+	$ovol += $dat->{vol};
+    }
+    $self->computed_avg_vol( $avol );
+    $self->computed_obs_vol( $avol );
+    $self->computed_diversion( $avol-$ovol );
+
+    $self->ifa->computed_diversion( $self->computed_diversion );
+
+    $self->ifa->update();
+
+    return $self->computed_diversion;
+}
+
+=item compute_delay2()
+
+Estimates delay using flow deviations and deterministic queuing theory
+
+=cut
+sub compute_delay2() {
+    my ( $self ) = @_;
+
+    my $ver_index = $self->index_from_timestring( $self->verification );
+
+    # FIXME: confirm ver_index  >= start_time
+
+    $ver_index = $ver_index ? $ver_index : $self->computed_start_time;
+#    $ver_index = $self->computed_start_time;
+
+    my $incdur = ( $self->computed_incident_clear_time - $ver_index + 1 );
+
+    my $div_per_period = $self->computed_diversion / $incdur;
+
+    my ($qdel,$qlen) = (0,0);
+    my ($maxq,$maxq_time) = (0,0);
+    my @qq;
+    foreach my $m ( ($self->computed_start_time)..($self->computed_incident_clear_time) ) {
+	my $dat = $self->rawdata->[ $self->computed_start_location ][ $m ];
+
+	# determine the queue length during period m
+	my $delvol = $dat->{vol_avg} - $dat->{vol};
+	$delvol -=  $div_per_period if $m >= $ver_index;
+	$qlen += $delvol;
+
+	if ( $qlen > $maxq ) { 
+	    $maxq = $qlen; 
+	    $maxq_time = $m;
+	}
+#	if ( $qlen < 0 ) {
+#	    $delvol = $qlen-$delvol;
+#	    $qlen = 0;
+#	}
+
+	push @qq, [ $qlen, $delvol ];
+	
+	$qdel += $qlen * 5.0/60.0;  # delay for period m in veh-hr
+    }
+
+    $self->computed_delay2( $qdel );
+    $self->computed_maxq( $maxq );
+    $self->computed_maxq_time( $self->time_string_from_index( $maxq_time ) );
+    
+    $self->ifa->computed_delay2( $self->computed_delay2 );
+    $self->ifa->computed_maxq( $self->computed_maxq );
+    $self->ifa->computed_maxq_time( $self->computed_maxq_time );
+
+    $self->ifa->update();
+
 }
 
 1;

@@ -42,6 +42,7 @@
 	   dojo.require("dojo.data.ItemFileReadStore");
 	   dojo.require("dojox.grid.DataGrid");
 	   dojo.require("dijit.InlineEditBox");
+	   dojo.require("dijit.form.TextBox");
 	   dojo.require("dijit.form.NumberTextBox");
 	   dojo.require("dijit.form.Form");
 	   dojo.require("dijit.form.CheckBox");
@@ -169,6 +170,23 @@
 	      <!-- Facility Data -->
               <td style="width:33%;">
 		<table style="padding:0.5em;border-style=none;">
+		  <tr>
+		    <td>
+		      <label for="cad" id="cadLabel">
+			CAD
+		      </label>
+		    </td>
+		    <td>
+		      <input id="cad" 
+			     jsId="cad"
+			     type="text" 
+			     style="width:15em;" 
+			     dojoType="dijit.form.TextBox" 
+			     name="cad"
+			     value="" 
+			     />
+		    <td>
+		  </tr>
 		  <tr>
 		    <td>
 		      <label for="fwydir" id="fwydirLabel">

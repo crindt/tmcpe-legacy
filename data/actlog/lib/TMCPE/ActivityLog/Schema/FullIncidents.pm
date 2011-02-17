@@ -66,6 +66,21 @@ __PACKAGE__->table("actlog.full_incidents");
   data_type: 'geometry'
   is_nullable: 1
 
+=head2 verification
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 lanes_clear
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 incident_clear
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 best_geom
 
   data_type: 'geometry'
@@ -92,13 +107,19 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 80 },
   "location_geom",
   { data_type => "geometry", is_nullable => 1 },
+  "verification",
+  { data_type => "integer", is_nullable => 1 },
+  "lanes_clear",
+  { data_type => "integer", is_nullable => 1 },
+  "incident_clear",
+  { data_type => "integer", is_nullable => 1 },
   "best_geom",
   { data_type => "geometry", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:12:55
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:r/lLgQYIoCnH2PaUzUaBLw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-11 14:06:12
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:e0FJ70VSR8Uu5aMSFzc9Qw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -997,6 +997,10 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->write_to_db;
 
 	$dc->compute_incident_clear();
+
+	$dc->compute_diversion();
+
+	$dc->compute_delay2();
     };
     if ( $@ ) {
 	$_ = ref $@;

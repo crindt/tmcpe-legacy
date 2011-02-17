@@ -17,13 +17,6 @@ class IncidentFacilityImpactAnalysis implements Comparable {
     Date firstCall      // equivalent to t0
     Date verification   // equivalent to t1
     Date lanesClear     // equivalent to t2
-
-    // This is computed as the furthest upstream disrupted section
-    Date            computedStartTime
-    FacilitySection computedStartLocation
-
-    // This is computed based upon the last delayed vehicle
-    Date            computedIncidentClearTime    // equivalent to t3
     
 
     //////// PARAMETERS ////////
@@ -62,6 +55,19 @@ class IncidentFacilityImpactAnalysis implements Comparable {
     Double totalDelay
     Double netDelay
     Double avgDelay
+
+
+    // This is computed as the furthest upstream disrupted section
+    Date            computedStartTime
+    FacilitySection computedStartLocation
+
+    // This is computed based upon the last delayed vehicle
+    Date            computedIncidentClearTime    // equivalent to t3
+
+    Double computedDiversion
+    Double computedDelay2
+    Double computedMaxq
+    Date   computedMaxqTime
 
 
     // time discontinuities
