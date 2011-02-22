@@ -240,6 +240,71 @@ class IncidentFacilityImpactAnalysisController {
         }
     }
 
+    def tsdData = {
+        def incidentFacilityImpactAnalysisInstance = IncidentFacilityImpactAnalysis.get(params.id)
+        if (!incidentFacilityImpactAnalysisInstance) {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis'), params.id])}"
+            redirect(action: "list")
+        }
+        else {
+            withFormat {
+                json {
+                    def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
+                    def timesteps = null
+                    incidentFacilityImpactAnalysisInstance.analyzedSections.collect {
+                        if ( it.analyzedTimestep != null && ( timesteps == null || ( it.analyzedTimestep.size() > timesteps.size() ) ) ) {
+                           timesteps = it.analyzedTimestep
+                        }
+                    }
+                    def cnt = timesteps.size();
+                    System.err.println( "A total of " + incidentFacilityImpactAnalysisInstance.analyzedSections.size() + " analyzed sections!\n" )
+		    def i = 0;
+		    def json = [ 
+			sections: incidentFacilityImpactAnalysisInstance.analyzedSections.collect {
+			    [ vdsid: it.section.id,
+			      fwy: it.section.freewayId,
+			      dir: it.section.freewayDir,
+			      pm:  it.section.absPostmile,
+			      name: it.section.name,
+			      seglen: it.section.segmentLength
+			    ]
+			},
+			sec: incidentFacilityImpactAnalysisInstance.computedStartLocation.id,
+			t0: incidentFacilityImpactAnalysisInstance.computedStartTime,
+			t1: incidentFacilityImpactAnalysisInstance.verification?:null,
+			t2: incidentFacilityImpactAnalysisInstance.lanesClear?:null,
+			t3: incidentFacilityImpactAnalysisInstance.computedIncidentClearTime?:null,
+                        timesteps: timesteps.collect { it?.fivemin /*df.format( it?.fivemin )*/ },
+			data: incidentFacilityImpactAnalysisInstance.analyzedSections.collect {
+			    def j = 0
+			    def a = it.analyzedTimestep.size() > 0 ? it.analyzedTimestep.collect { 
+				[ i: i,
+				  j: j++,
+				  vol: it.vol, 
+				  spd: it.spd, 
+				  occ: it.occ, 
+				  days_in_avg: it.days_in_avg, 
+				  vol_avg: it.vol_avg, 
+				  spd_avg: it.spd_avg, 
+				  spd_std: it.spd_std, 
+				  pct_obs_avg: it.pct_obs_avg, 
+				  p_j_m: it.p_j_m, 
+				  inc: it.incident_flag, 
+				  tmcpe_delay: (it.tmcpe_delay>=0?it.tmcpe_delay:0), 
+				  d12_delay: it.d12_delay 
+				]
+			    } : []
+			    i++;
+			    a;
+			}
+		    ]
+
+                    render json as JSON
+                }
+	    }
+	}
+    }
+
     def edit = {
         def incidentFacilityImpactAnalysisInstance = IncidentFacilityImpactAnalysis.get(params.id)
         if (!incidentFacilityImpactAnalysisInstance) {

@@ -364,6 +364,17 @@ class IncidentController extends BaseController {
         }
     }
 
+    def d3_tsd = {
+	def ii = Incident.get(params.id)
+        if (!ii) {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+            redirect(action: "list")
+        }
+        else {
+            return [incidentInstance: ii]
+        }
+    }
+
     def update = {
         def ii = Incident.get(params.id)
         if (ii) {
