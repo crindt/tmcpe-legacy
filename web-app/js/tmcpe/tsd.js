@@ -67,7 +67,7 @@
       dw = data[0].length,
       dh = data.length;
       szs = 20,
-      szt = 20,
+      szt = 800/data[0].length,
       grid = grid1,
       p = 20;
       var twidth = szt*dw,
