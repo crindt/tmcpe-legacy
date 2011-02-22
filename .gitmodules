@@ -16,3 +16,12 @@
 [submodule "doc/reports/hutchins"]
 	path = doc/reports/hutchins
 	url = /home/crindt/hutchins
+[submodule "web-app/js/d3"]
+	path = web-app/js/d3
+	url = https://github.com/mbostock/d3.git
+[submodule "web-app/js/jquery"]
+	path = web-app/js/jquery
+	url = http://github.com/jquery/jquery.git
+[submodule "web-app/js/jquery-ui"]
+	path = web-app/js/jquery-ui
+	url = http://github.com/jquery/jquery-ui.git

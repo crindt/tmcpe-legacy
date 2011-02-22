@@ -20,7 +20,7 @@ use SQL::Abstract;
 use TMCPE::ActivityLog::LocationParser;
 use TMCPE::DelayComputation;
 use Pod::Usage;
-#use Devel::Comments '###', '###';
+use Devel::Comments '###', '###';
 
 my %opt = ();
 
@@ -981,8 +981,8 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->first_call( $inc->start_time );
 
 	
-	$dc->verification( $inc->verification->stamp );
-	$dc->lanes_clear( $inc->lanes_clear->stamp );
+	$dc->verification( $inc->verification->stamp ) if $inc->verification;
+	$dc->lanes_clear( $inc->lanes_clear->stamp ) if $inc->verification;
 
 
 	$dc->bad_solution( 0 );

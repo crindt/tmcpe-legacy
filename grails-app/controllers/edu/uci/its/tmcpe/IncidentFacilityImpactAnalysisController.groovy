@@ -266,14 +266,15 @@ class IncidentFacilityImpactAnalysisController {
 			      dir: it.section.freewayDir,
 			      pm:  it.section.absPostmile,
 			      name: it.section.name,
-			      seglen: it.section.segmentLength
+			      seglen: it.section.segmentLength,
+			      lanes: it.section.lanes
 			    ]
 			},
-			sec: incidentFacilityImpactAnalysisInstance.computedStartLocation.id,
+			sec: incidentFacilityImpactAnalysisInstance.computedStartLocation?.id,
 			t0: incidentFacilityImpactAnalysisInstance.computedStartTime,
-			t1: incidentFacilityImpactAnalysisInstance.verification?:null,
-			t2: incidentFacilityImpactAnalysisInstance.lanesClear?:null,
-			t3: incidentFacilityImpactAnalysisInstance.computedIncidentClearTime?:null,
+			t1: incidentFacilityImpactAnalysisInstance.verification,
+			t2: incidentFacilityImpactAnalysisInstance.lanesClear,
+			t3: incidentFacilityImpactAnalysisInstance.computedIncidentClearTime,
                         timesteps: timesteps.collect { it?.fivemin /*df.format( it?.fivemin )*/ },
 			data: incidentFacilityImpactAnalysisInstance.analyzedSections.collect {
 			    def j = 0

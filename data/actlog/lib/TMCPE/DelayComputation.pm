@@ -1835,7 +1835,7 @@ sub compute_incident_clear() {
 
     # now we compute how much of the 5 minute time step it takes for this
     # vehicle to cross the section of interest
-    while( $j <= $self->computed_start_location ) {
+    while( $j <= $self->computed_start_location && $m < $M ) {
 	my $dat = $self->rawdata->[$j][ $m ];
 	my $spd = $dat->{spd}; #mph
 
@@ -1858,10 +1858,19 @@ sub compute_incident_clear() {
     }
     # at this point, (j-1,m) should be the cell where the vehicle reaches the
     # incident location
-    $self->ifa->computed_incident_clear_time( $self->time_string_from_index( $m ) );
+    # OR: if $m == $M, then the congestion plume is bounded
+    if ( $m == $M ) {
+	# bounded plume, just assume $M-1 for now
+	warn "CONGESTION PLUME IS BOUNDED, CANNOT COMPUTE incident clear time";
+	$self->ifa->computed_incident_clear_time( $self->time_string_from_index( $M-1 ) );
+	$self->computed_incident_clear_time( $M-1 );
+	$self->computed_incident_clear_location( $self->computed_start_location );
+    } else {
+	$self->ifa->computed_incident_clear_time( $self->time_string_from_index( $m ) );
+	$self->computed_incident_clear_time( $m );
+	$self->computed_incident_clear_location( $self->stationdata->[$j-1] );
+    }
 
-    $self->computed_incident_clear_time( $m );
-    $self->computed_incident_clear_location( $self->stationdata->[$j-1] );
 
     $self->ifa->update();
 }
