@@ -20,7 +20,7 @@ use SQL::Abstract;
 use TMCPE::ActivityLog::LocationParser;
 use TMCPE::DelayComputation;
 use Pod::Usage;
-use Devel::Comments '###', '###';
+#use Devel::Comments '###', '###';
 
 my %opt = ();
 
@@ -320,7 +320,12 @@ sub process_performance_measures {
 		# got a good match.  Create info necessary to put them in the type eval table
 		$lanes = join( ",", map { join( "", "-", $_ ) } @{$which->[0]} );
 		$detail = $which->[1];
+
+	    } else {
+		# no match.  Assume all lanes clear.  FIXME: crindt: think about this
+		
 	    }
+
 	    
 	    ############################# MISC? ############################
 	} elsif ( /CHP/ || /CT MAINT/ || /CT CLOSURE CREW/ || /RESPONDING/ ) {
@@ -823,6 +828,7 @@ eval {
 
 		    } elsif ( $pm->{pmtype} eq 'VERIFICATION' && 
 				not defined( $inc->verification ) ) {
+			# assume first verification is t1
 			$inc->verification( $log );
 
 		    } elsif ( $pm->{pmtype} eq 'STATUS' && $pm->{pmtext} eq 'LANES CLEAR' ) {

@@ -1612,6 +1612,8 @@ sub write_to_db {
 
 					start_time => time2str( "%Y-%m-%d %T", $self->calcstart ),
 					end_time => time2str( "%Y-%m-%d %T", $self->calcend ),
+					lanes_clear => $self->lanes_clear,
+					verification => $self->verification, #time2str( "%Y-%m-%d %T", $self->verification ),
 					location_id => $loc->id,
 					d12delay => 0,
 					total_delay => $self->tot_delay,
