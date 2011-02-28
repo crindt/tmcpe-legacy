@@ -25,3 +25,6 @@
 [submodule "web-app/js/jquery-ui"]
 	path = web-app/js/jquery-ui
 	url = http://github.com/jquery/jquery-ui.git
+[submodule "web-app/js/polymaps"]
+	path = web-app/js/polymaps
+	url = https://github.com/simplegeo/polymaps.git
