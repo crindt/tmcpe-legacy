@@ -9,9 +9,18 @@
 -->
 
 
+    <p:css name="960-fluid" /> <!-- Load the 960 css -->
     <p:css name="jquery/themes/base/jquery-ui" /> <!-- Load the openlayers css -->
 
 <style type='text/css'> 
+
+#maptext {
+   border: 1px;
+   background-color: yellow;
+}
+  #databox table {
+  margin-top:1em;
+}
  svg {
   border: solid 1px #aaa;
 }
@@ -157,60 +166,78 @@ td.unit {
 
       var tsd;
 
-      $(document).ready(function(){
-          var themeScale=1.0;
-	  function updateData( json ) {
-	      json.timesteps = json.timesteps.map( function( d ) { return new Date(d); } ); // convert date strings to date objects
-	      tsd = tmcpe.tsd.redraw(json);
-	      tmcpe.cumflow.doChart( json )
-	      updateStats( json );
-	      doMap( json );
-	  }
-	  
-	  function handleFailure( e ) {
-	      return "poof";
-	  }
+      var themeScale=1.0;
+      function updateData( json ) {
+      json.timesteps = json.timesteps.map( function( d ) { return new Date(d); } ); // convert date strings to date objects
+      tsd = tmcpe.tsd.redraw(json);
+      tmcpe.cumflow.doChart( json )
+      updateStats( json );
+      doMap( json );
+      }
+      
+      function handleFailure( e ) {
+      return "poof";
+      }
 
-	  function updateStats( json ) {
-/*
-	      var delay2 = 0;
-	      $.each( tsd.data, function(i, d) {
-	         delay2 += (d.y3-d.y)*1000*5/60;
-              });
-	      json.analysis["chartDelay2"] = delay2;
-*/
+      function updateStats( json ) {
+      /*
+      var delay2 = 0;
+      $.each( tsd.data, function(i, d) {
+      delay2 += (d.y3-d.y)*1000*5/60;
+      });
+      json.analysis["chartDelay2"] = delay2;
+      */
 
-	      for ( var key in json.analysis ) {
-		  var val = json.analysis[key];
-		  $( '#'+key ).text( isNaN(val) ? val : val.toFixed(0) );
-	      }
-	  }
-	  
-      // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
+      for ( var key in json.analysis ) {
+      var val = json.analysis[key];
+      $( '#'+key ).text( isNaN(val) ? val : val.toFixed(0) );
+      }
+      }
+
+      function updateTsd() {
+      
+      var themeWid = $("#theme")[0];
+      var theme = themeWid.options[themeWid.selectedIndex].value;
+
+      tsd.selectAll("g")
+      .selectAll("rect")
+      .attr("style", function(d) { 
+      if ( theme == "stdspd" ) {
+         return "fill:"+tmcpe.util.color(d, function( dd ) { 
+	     return (dd.spd-dd.spd_avg)/dd.spd_std;
+	 }, -1*$("#scaleslider").slider("option","value") )+";stroke:#eee;"
+      } else if ( theme == "spd" ) {
+	  return "fill:"+tmcpe.util.color(d, function( dd ) { 
+	      return dd.spd;
+	  }, $("#maxspdslider").slider("option","value") )+";stroke:#eee;"
+      }
+      });
+
+      tsd.selectAll("g")
+      .selectAll("circle")
+      .attr("style", function(d) { 
+      var v1 = $("#scaleslider").slider("option","value");
+      var v2 = $("#maxspdslider").slider("option","value");
+      var ev = tmcpe.util.evidenceOfIncident( d, v1, v2 );
+      return ev ? "fill:black;" : "fill:none;";
+      });
+      }
+
 
           function updateAnalysis( id ) {
 //	     new Ajax.Request('/tmcpe/incidentFacilityImpactAnalysis/tsdData/'+id,{asynchronous:false,evalScripts:true,onSuccess:function(e){updateData(e)},onFailure:function(e){handleFailure(e)},method:'get'});
              d3.json('/tmcpe/incidentFacilityImpactAnalysis/tsdData/'+id,function(e){updateData(e)});
 	  }
 
+
+      $(document).ready(function(){
+
+	  
+      // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
+
 	  $("#ifia").each(function() {
   	     updateAnalysis( this.value ); 
 	  });
-
-	  function updateTsd() {
-	        tsd.selectAll("g")
-		   .selectAll("rect")
-		   .attr("style", function(d) { return "fill:"+tmcpe.util.color(d,$("#scaleslider").slider("option","value"))+";stroke:#eee;"; });
-
-		   tsd.selectAll("g")
-		   .selectAll("circle")
-		   .attr("style", function(d) { 
-		      var v1 = $("#scaleslider").slider("option","value");
-		      var v2 = $("#maxspdslider").slider("option","value");
-		      var ev = tmcpe.util.evidenceOfIncident( d, v1, v2 );
-		      return ev ? "fill:black;" : "fill:none;";
-			});
-	  }
 
 	  $("#scaleslider").slider({
 	     value:1,
@@ -236,44 +263,88 @@ td.unit {
 	     slide: function(event,ui) {
   	        $("#maxspd").text( $("#maxspdslider").slider("option","value") );
 		updateTsd();
-	     },
-	     change: function( event, ui ) { 
-  	        $("#maxspd").text( $("#maxspdslider").slider("option","value") );
-	        updateTsd() ;
-             }
-	  });
-	  $("#maxspd").text("60");
-      });
-			
+		},
+		change: function( event, ui ) { 
+		$("#maxspd").text( $("#maxspdslider").slider("option","value") );
+		updateTsd() ;
+		}
+		});
+		$("#maxspd").text("60");
+		});
+		
     </g:javascript>     
 
   </head>
   <body>
-    <select id="ifia" onchange="updateAnalysis(this.options[this.selectedIndex].value);">
-      <g:each in="${incidentInstance.analyses}">
-	<g:each var="ifia" in="${it.incidentFacilityImpactAnalyses}">
-	  <option selected value="${ifia.id}">${ifia.location.freewayId}-${ifia.location.freewayDir}</option>
-	</g:each>
-      </g:each>
-    </select>
-    <div id="scaleslider"></div><span id="alpha">1.0</span>
-    <div id="maxspdslider"></div><span id="maxspd">60</span>
-    <p id="msgtxt"></p>
 
-    <div style="float:right;width:600px">
-      <div id="map" style="width:600px;height:500px;"></div>
-      <table>
-	<tr><td class="label">tmcpe delay:</td><td class="value" id="netDelay"></td><td class="unit" id="netDelayUnit">veh-hr</td></tr>
-	<tr><td class="label">tmcpe delay2:</td><td class="value" id="computedDelay2"></td><td class="unit" id="computedDelayUnit">veh-hr</td></tr>
-	<tr><td class="label">chart delay2:</td><td class="value" id="chartDelay2"></td><td class="unit" id="chartDelayUnit">veh-hr</td></tr>
-	<tr><td class="label">d12 delay:</td><td class="value" id="d12Delay"></td><td class="unit" id="d12DelayUnit">veh-hr</td></tr>
-	<tr><td class="label">diversion:</td><td class="value" id="computedDiversion"></td><td class="unit" id="computedDiversionUnit">veh</td></tr>
-	<tr><td class="label">maxq:</td><td class="value" id="computedMaxq"></td><td class="unit" id="computedMaxqUnit">veh</td></tr>
-	<tr><td class="label">maxq time:</td><td class="value" id="ComputedMaxqTime"></td><td class="unit" id="ComputedMaxqTimeUnit">hr</td></tr>
-	<tr><td class="label">TMC savings:</td><td class="value" id="tmcSavings"></td><td class="unit" id="tmcSavingsUnit">veh-hr</td></tr>
-      </table>
+    <div id="header" class="container_16">
+
+      <div id="" class="grid_1 ">
+      </div>
+
+      <div id="" class="grid_14 ">
+
+	<select id="ifia" onchange="updateAnalysis(this.options[this.selectedIndex].value);">
+	  <g:each in="${incidentInstance.analyses}">
+	    <g:each var="ifia" in="${it.incidentFacilityImpactAnalyses}">
+	      <option selected="true" value="${ifia.id}">${ifia.location.freewayId}-${ifia.location.freewayDir}</option>
+	      <option value="${ifia.id}">Bogus</option>
+	    </g:each>
+	  </g:each>
+	</select>
+	<select id="theme" onChange="updateTsd()">
+	  <option selected="true" value="stdspd">Standard Deviation of Speed from Mean</option>
+	  <option value="spd">Speed Scaled between max speed and jam speed</option>
+	</select>
+	<div id="scaleslider"></div><span id="alpha">1.0</span>
+	<div id="maxspdslider"></div><span id="maxspd">60</span>
+	<p id="msgtxt"></p>
+
+      </div>
+
     </div>
 
+
+    <div id="content" class="container_16">
+
+      <div id="" class="grid_16 ">
+	<div id="tsdbox" style="height:500px;text-align:right;" class="grid_8 alpha">
+	</div>
+	<div id="mapbox" style="height:500px;" class="grid_8 omega">
+	  <div id="map"></div>
+	</div>
+      </div>
+      <div id="" class="grid_16 ">
+	<div id="chartbox" style="text-align:right;" class="grid_8 alpha">
+	</div>
+	<div id="databox" class="grid_8 omega">
+	  <table>
+	    <tr><td class="label">tmcpe delay:</td><td class="value" id="netDelay"></td><td class="unit" id="netDelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">tmcpe delay2:</td><td class="value" id="computedDelay2"></td><td class="unit" id="computedDelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">chart delay2:</td><td class="value" id="chartDelay2"></td><td class="unit" id="chartDelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">d12 delay:</td><td class="value" id="d12Delay"></td><td class="unit" id="d12DelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">diversion:</td><td class="value" id="computedDiversion"></td><td class="unit" id="computedDiversionUnit">veh</td></tr>
+	    <tr><td class="label">maxq:</td><td class="value" id="computedMaxq"></td><td class="unit" id="computedMaxqUnit">veh</td></tr>
+	    <tr><td class="label">maxq time:</td><td class="value" id="ComputedMaxqTime"></td><td class="unit" id="ComputedMaxqTimeUnit">hr</td></tr>
+	    <tr><td class="label">TMC savings:</td><td class="value" id="tmcSavings"></td><td class="unit" id="tmcSavingsUnit">veh-hr</td></tr>
+	  </table>
+	</div>
+      </div>
+	</div>
+
+      </div>
+
+    </div>
+
+    <div id="footer" class="container_16">
+
+      <div id="" class="grid_1 ">
+      </div>
+
+      <div id="" class="grid_14 ">
+      </div>
+
+    </div>
 
   </body>
 

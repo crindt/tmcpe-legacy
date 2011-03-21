@@ -52,15 +52,16 @@
       return val;
   };
 
-  tmcpe.util.color = function( d, scale ) {
+  tmcpe.util.color = function( d, trans, scale ) {
       var col = "#ccc";
-      var themeScale=scale?scale:1.0;
+      trans = trans ? trans : function( dd ) { return (dd.spd-dd.spd_avg)/dd.spd_std };
+      var themeScale=scale?scale:-1.0;
       if ( d != null && d.spd != null && d.spd_avg != null && d.spd_std != null 
 	   && ( d.p_j_m == 0 || d.p_j_m == 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
 	   //		 && d.days_in_avg < 30  // fixme: make this a parameter
 	   //		 && d.pct_obs_avg < 30  // fixme: make this a parameter
 	 ) {
-	  col = tmcpe.util.getGRColor( (d.spd-d.spd_avg)/d.spd_std, -themeScale, 0, '#ff0000','#00ff00' );
+	  col = tmcpe.util.getGRColor( trans( d ), -themeScale, 0, '#ff0000','#00ff00' );
       }
       return col;
   };
@@ -86,18 +87,21 @@
       
   }
 
+  tmcpe.hh = 500;
+  tmcpe.ww = 600;
+
   tmcpe.tsd.redraw = function( json ) {
       var data = json.data;
       var sections = json.sections;
       var fn = [grid0, grid1],
       dw = data[0].length,
       dh = data.length;
-      szs = 20,
-      szt = 800/data[0].length,
       grid = grid1,
-      p = 20;
+      p = 20,  // padding
+      szs = (tmcpe.hh-2*p)/dh,
+      szt = tmcpe.ww/dw;
       var twidth = szt*dw,
-      theight = szs*dh;
+         theight = szs*dh;
       var seclensum = 0;
       $.each(sections, function(i,s)
 		    {
@@ -153,20 +157,20 @@
 	  // update cross hatch
  	  var cross = svg.selectAll("#tsdtime")
 	      .data([1])
-	      .attr("x1",(d.j+1)*20)
+	      .attr("x1",(d.j+1)*szt)
 	      .attr("y1",0)
-	      .attr("x2",(d.j+1)*20)
-	      .attr("y2",500-1)
+	      .attr("x2",(d.j+1)*szt)
+	      .attr("y2",theight-1)
 	      .attr("style","stroke:purple;stroke-width:3");
 
 	  // create cross hatch if it doesn't yet exist
 	  cross.enter()
 	      .append("svg:line")
 	      .attr("id","tsdtime" )
-	      .attr("x1",(d.j+1)*20)
+	      .attr("x1",(d.j+1)*szt)
 	      .attr("y1",0)
-	      .attr("x2",(d.j+1)*20)
-	      .attr("y2",500-1)
+	      .attr("x2",(d.j+1)*szt)
+	      .attr("y2",theight-1)
 	      .attr("style","stroke:purple;stroke-width:3");
 
 
@@ -179,21 +183,27 @@
 		  // update segment colors
 		  var seg = $('path[id^='+sections[e.__data__.i].vdsid+']');
 		  seg.map( function (jj, s) { 
-		      s.style.stroke=e.style.fill } );
+		      s.style.setProperty("stroke",e.style.getPropertyValue("fill"),"important") } );
 
 		  // update node colors
 		  var nod = $('circle[id^="node:'+sections[e.__data__.i].vdsid+'"]');
 		  nod.map( function (jj, s) { 
-		      s.style.fill=e.__data__.inc ? "yellow" : "blue" } );
+		      s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
+		      s.setAttribute("r", e.__data__.inc ? 4 : 2 );
+		  } );
 	      }
 	  });
+
+	  // finally, update the map text
+	  d3.select("#maptext")
+	      .text(json.timesteps[d.j]);
       }
 
 
       function syncchart( json ) {
 	  return function( d, i ) { 
 	      d3.selectAll(".flowchart").remove();
-	      tmcpe.cumflow.doChart( json, d.i/*sections[d.i].vdsid*/ ); 
+	      tmcpe.cumflow.doChart( json, d.i ); 
 
 	      // update cross hatch
 	      var cross = svg.selectAll("#tsdsec")
@@ -213,7 +223,7 @@
 		  .attr("style","stroke:purple;stroke-width:3");
 
 
-
+	      // create cross hatch if it doesn't exist
 	      cross.enter()
 		  .append("svg:line")
 		  .attr("id","tsdsec")
@@ -230,6 +240,12 @@
 		  .attr("x2",twidth)
 		  .attr("y2",0)
 		  .attr("style","stroke:purple;stroke-width:3");
+
+	      // highlight edge
+	      var seg = $('path[id^='+sections[d.i].vdsid+']');
+	      seg.map( function (jj, s) { 
+		  s.style.setProperty("stroke-width",6 ) } );
+
 	  };
       };
 
@@ -240,7 +256,7 @@
 
 
       // create the svg box
-      var svg0 = d3.select("body")
+      var svg0 = d3.select("#tsdbox")
           .append("svg:svg")
           .attr("width", twidth + 6*p/*theight/*twidth*/ )
           .attr("height", theight + 2*p/*twidth/*theight*/ )
@@ -265,15 +281,12 @@
 	      console.log( k );
 	  });
 
-
-      d3.select("body").append("br");
-
       // create a transform for the svg box that rotates it 90 degrees clockwise
       //	  var svg = svg0.append("svg:g").attr("transform","translate(0,"+(-theight)+")" + " rotate(90,0,"+theight+")" );
       var svg = svg0;     
       
       // now, create the rows of data.
-      var gg = svg.selectAll("g")
+      var gg = svg.selectAll("g.sectionrow")
           .data(data)
           .enter().append("svg:g")
 	  .attr("class","sectionrow")
@@ -294,7 +307,9 @@
           .enter().append("svg:rect")
       //.attr("class", function(d) { return "d"+d.inc; })
 	  .attr("style", function(d) { 
-	      return "fill:"+tmcpe.util.color(d)+";fill-opacity:1;stroke:#eee;"; })
+	      return "fill:"+tmcpe.util.color(d,function( dd ) { 
+		  return (dd.spd-dd.spd_avg)/dd.spd_std;
+	      }, -1 )+";fill-opacity:1;stroke:#eee;"; })
 	  .attr("i", function(d){return d.i;} )
 	  .attr("j", function(d){return d.j;} )
           .attr("width", szt )
@@ -309,7 +324,7 @@
 	      return theight*sections[d[0].i].seglen/seclensum/2+5; } ) // put midway down
 	  .attr("text-anchor","end")
 	  .text(function(d,i){ 
-	      return i%2 ? sections[i].name : ""; 
+	      return i%2 ? "" : sections[i].name; 
 	  })
 	  .attr("class","ylabels");
 
@@ -319,6 +334,7 @@
       var g = svg.selectAll("g.evidence")
           .data(data)
           .enter().append("svg:g")
+	  .attr("class","evidence")
           .attr("transform", function(d, i) { 
 	      var dist = 0;
 	      var j;
@@ -360,6 +376,7 @@
   }
 
   tmcpe.cumflow = {};
+
   tmcpe.cumflow.doChart = function( json, loc ) {
 
       var text = d3.select("#msgtxt");
@@ -416,13 +433,13 @@
       } ) );
 
 
-      var w = 800,
-      h = 300,
+      var w = tmcpe.ww,
+      h = 400,
       x = d3.scale.linear().domain([json.timesteps[0].getTime()/1000,json.timesteps[json.timesteps.length-1].getTime()/1000+300]).range([0, w]),
       y = d3.scale.linear().domain(/*[0,20]*/[0, tt]).range([h, 0]),
       now = new Date();
       
-      var vis = d3.select("body")
+      var vis = d3.select("#chartbox")
 	  .append("svg:svg")
 	  .attr("class", "flowchart" )
 	  .data([data])
@@ -458,7 +475,7 @@
 	  .attr("x1", 0)
 	  .attr("x2", w + 1);
       
-      function val (xx) {
+      function xlabel_rotate (xx) {
 	  return "rotate("+[90,x(xx),(h+3)].join(",")+")"
       }
       
@@ -475,7 +492,7 @@
 	  .attr("y", h + 5 - szt )
 	  .attr("dy", ".25em")
 	  .attr("text-anchor", "start")
-	  .attr("transform",function(d) { return val(d); } )
+	  .attr("transform",function(d) { return xlabel_rotate(d); } )
 	  .text(/*x.tickFormat(10)*/ function (x) { 
 	      return new Date( x*1000 ).toLocaleTimeString()
 	  } )

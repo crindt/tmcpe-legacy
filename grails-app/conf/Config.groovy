@@ -201,6 +201,8 @@ uiperformance.exclusions = [
     "**/navigation*/**",
     "**/tmcpe/**",
     "**/openlayers*/**",
+    "**/jquery*/**",
+    "**/d3/**",
 ]
 
 uiperformance.bundles = [
