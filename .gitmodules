@@ -37,3 +37,9 @@
 [submodule "web-app/js/protovis"]
 	path = web-app/js/protovis
 	url = https://github.com/mbostock/protovis.git
+[submodule "web-app/js/tablesorter"]
+	path = web-app/js/tablesorter
+	url = https://github.com/crowdsavings/tablesorter.git
+[submodule "web-app/js/tablescroll"]
+	path = web-app/js/tablescroll
+	url = https://github.com/farinspace/jquery.tableScroll
