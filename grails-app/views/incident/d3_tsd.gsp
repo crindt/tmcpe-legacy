@@ -159,17 +159,16 @@ td.unit {
     <p:javascript src='jquery/dist/jquery.min' />
     <p:javascript src='jquery-ui/1.8/ui/minified/jquery-ui.min' />
     <p:javascript src='polymaps/polymaps' />
+    <p:javascript src='protovis/protovis' />
     <p:javascript src='tmcpe/po' />
     
     <g:javascript>
       var i = 0;
 
-      var tsd;
-
       var themeScale=1.0;
       function updateData( json ) {
       json.timesteps = json.timesteps.map( function( d ) { return new Date(d); } ); // convert date strings to date objects
-      tsd = tmcpe.tsd.redraw(json);
+      tmcpe.tsd.redraw(json);
       tmcpe.cumflow.doChart( json )
       updateStats( json );
       doMap( json );
@@ -181,6 +180,8 @@ td.unit {
 
       function updateStats( json ) {
       /*
+      var tsd = d3.select("#tsdbox");
+
       var delay2 = 0;
       $.each( tsd.data, function(i, d) {
       delay2 += (d.y3-d.y)*1000*5/60;
@@ -199,17 +200,24 @@ td.unit {
       var themeWid = $("#theme")[0];
       var theme = themeWid.options[themeWid.selectedIndex].value;
 
+      var tsd = d3.select("#tsdbox");
+
       tsd.selectAll("g")
       .selectAll("rect")
       .attr("style", function(d) { 
       if ( theme == "stdspd" ) {
-         return "fill:"+tmcpe.util.color(d, function( dd ) { 
-	     return (dd.spd-dd.spd_avg)/dd.spd_std;
-	 }, -1*$("#scaleslider").slider("option","value") )+";stroke:#eee;"
+         var color = pv.Scale.linear(-$("#scaleslider").slider("option","value"),-($("#scaleslider").slider("option","value")/2),0 ).range("#ff0000","#ffff00","#00ff00");
+	 var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
+	 var col = "fill:"+color(vv).color+";stroke:#eee;"
+	 return col;
       } else if ( theme == "spd" ) {
-	  return "fill:"+tmcpe.util.color(d, function( dd ) { 
-	      return dd.spd;
-	  }, $("#maxspdslider").slider("option","value") )+";stroke:#eee;"
+         var minspd = 15;
+         var color = pv.Scale.linear(minspd,
+	                             minspd+($("#maxspdslider").slider("option","value")-minspd)/2,
+                                     $("#maxspdslider").slider("option","value")
+                     ).range("#ff0000","#ffff00","#00ff00");
+	 var col = "fill:"+color(d.spd).color+";stroke:#eee;"
+	 return col;
       }
       });
 

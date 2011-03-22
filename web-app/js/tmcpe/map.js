@@ -1,7 +1,6 @@
 var doQueryMap = function( data, parent ) {
 
     var theight = 500;
-    var tt; // the main incident table
 
     var po = org.polymaps;
 
@@ -38,23 +37,49 @@ var doQueryMap = function( data, parent ) {
 
     var incs;
 
+    var theData;
+    var allTheData;
+
+    var boundedScale = function( dom, ran ) {
+	var dommin = dom[0];
+	var dommax = dom[dom.length-1];
+	return function( val ) {
+	    var vv = Math.max( Math.min( val, dommax ), dommin );
+	    var scale;
+	    if ( dom.length == 2 ) {
+		scale = pv.Scale.linear(dom[0], dom[1] ).range(ran[0], ran[1]);
+	    } else if ( dom.length == 3 ) {
+		scale = pv.Scale.linear(dom[0], dom[1], dom[2] ).range(ran[0], ran[1], ran[2]);
+	    } else {
+		scale = pv.Scale.linear(dom).range(ran);
+	    }
+	    return scale( val );
+	}
+    }
+
     d3.json("/tmcpe/incident/list.geojson"
-	    +"?startDate=2010-10-01"
+//	    +"?startDate=2010-01-01"
+	    +"?startDate=2010-09-01"
 	    +"&Analyzed=onlyAnalyzed"
 	    +"&max=1000",
 	    function(e) {
 		var dd = $.map( e.features, function( f ) { return f.properties.tmcpe_delay; } );
 		var fmin = Array.min(dd);
 		var fmax = Array.max(dd);
-		var color = pv.Scale.linear(fmin,(fmax-fmin)/2,fmax).range("green","yellow","red");
+//		var color = pv.Scale.linear(fmin,(fmax-fmin)/2,fmax).range("green","yellow","red");
+		var color = boundedScale( [100, 600, 1100], [ "#00ff00", "#ffff00", "#ff0000" ] );
+//		var color = boundedScale( [100, 600, 1100], [ "rgba(0,255,0,128)", "rgba(255,255,0,128)", "rgba(255,0,0,128)" ] );
+
+		theData = e.features;
+		allTheData = e.features;
 
 		incs = po.geoJson()
 		    .tile(true)
-		    .features(e.features)
+		    .features(theData)
 		    .id("incidents")
 		    .zoom( 13 )
 		    .on("load",function(a,b,c) {
-			$("#incidents circle").click( incidentClicked );
+			$("#incidents circle").click( function(d) { return incidentClicked( d.currentTarget.cad ) } );
 //			d3.selectAll("#incidents circle")
 //			    .data(e.features)
 //			    .on("click", incidentClicked )
@@ -78,13 +103,14 @@ var doQueryMap = function( data, parent ) {
 		       );
 		map.add(incs);
 
-		map.add(incs)
-		    .on("move",function(d){
+		map.on("move",function(d){
 //			d3.selectAll("#incidents circle")
-//			    .data(e.features)
-//			    .on("click", incidentClicked )
-			$("#incidents circle").click( function ( d ) { 
-			    incidentClicked( d.currentTarget ); } );
+//			.append("div")
+//			.data(e.features)
+//			.on("click", incidentClicked )
+		    $("#incidents circle").click( function ( el ) { 
+			var cad = el.currentTarget.getAttribute("cad");
+			incidentClicked( cad ); } );
 		    });
 
 		function RenderDecimalNumber(oObj,oCustomInfo) {	
@@ -108,7 +134,7 @@ var doQueryMap = function( data, parent ) {
 
 
 		// construct table of incident data using the given fields...
-		var fields = [ "id", "cad", "timestamp", "locString", "memo", "d12_delay", "tmcpe_delay", "savings" ];
+		var fields = [ "cad", "timestamp", "locString", "memo", "d12_delay", "tmcpe_delay", "savings" ];
 		var settings =  [ {sType:"numeric",sWidth:'20px'},
 				  {sType:"string",bSortable:true}, 
 				  {sClass:"datefield mono",sType:"date",bSortable:true,
@@ -143,7 +169,7 @@ var doQueryMap = function( data, parent ) {
 		    .attr("name",function(d,i){ return "search_"+d; })
 		    .attr("value",function(d,i){ return "Search "+d; })
 		    // append the classes from the settings object
-		    .attr("class",function(d,i){ ["search_init",settings[i].sClass].join(" ") } );
+		    .attr("class",function(d,i){ return "search_init"; } );
 
 		head.append("tr").selectAll("th").data(fields).enter()
 		    .append("th")
@@ -151,11 +177,122 @@ var doQueryMap = function( data, parent ) {
 		    .text(function(d){return d;});
 		
 
+		// Use D3 magic to create rows for each incident
+		var rows = body.selectAll("tr")
+		    .data(theData,function(d) { return d.cad })
+		    .enter().append("tr")
+		    .attr("id", function( d ) { 
+			return d.id 
+		    } )
+		    .attr("cad", function( d ) { 
+			return d.cad
+		    } )
+		    .attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
+		    .attr("style", function(d,i) { 
+			return "background-color:"+color(d.properties.tmcpe_delay).color/*+";opacity:0.5"*/; })
+		    .on("click",function(d,e) { 
+			if ( !featureVisible(d) ) centerOnIncident( d );
+			incidentClicked( d.cad );
+		    } );
+
+		// Now populate each row with the relevant data
+		rows.selectAll("td")
+		    .data(function(d) {
+			// extract properties
+			var props = [];
+			$.each( fields, function(i, val ) {
+			    props.push( d.properties[val] );
+			});
+			return props;
+		    } )
+		    .enter().append("td")
+		    .text( function (dd) { 
+			return dd } );
+
+
 		$("thead input").keyup( function () {
-		    /* Filter on the column (the index) of this element */
-		    if ( tt ) 
-			tt.fnFilter( this.value, $("thead input").index(this),true,false );
-		} );
+
+		    var newFeatures = theData;
+		    $("thead input").each(function(ee,ii) {
+			if (/search_init/.test(this.className) ) return;
+			var input = this;
+			var name = input.name.replace("search_","");
+			var patt = new RegExp(input.value,"i");
+			newFeatures = $.grep(newFeatures,function(eee,iii){
+			    return patt.test(eee.properties[name]);
+			});
+		    });
+
+		    // var input = this;
+		    // var name = input.name.replace("search_","");
+		    // var patt = new RegExp(input.value,"i");
+		    // var currentData = body.selectAll("tr").filter(function(ee,ii){
+		    // 	return patt.test(ee.properties[name]);
+		    // });
+
+		    var rr = body.selectAll("tr").data(newFeatures,function(d) { return d.cad } );
+
+		    // enter, adding new tr elements for new data.
+		    rr.enter().append("tr")
+			.attr("id", function( d ) { 
+			    return d.id 
+			} )
+			.attr("cad", function( d ) { 
+			    return d.cad
+			} )
+			.attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
+			.attr("style", function(d,i) { 
+			    return "background-color:"+color(d.properties.tmcpe_delay).color; })
+			.on("click",function(d,e) { 
+			    if ( !featureVisible(d) ) centerOnIncident( d );
+			    incidentClicked( d.cad );
+			} )
+			.selectAll("td")
+			.data(function(d) {
+			    // extract properties
+			    var props = [];
+			    $.each( fields, function(i, val ) {
+				props.push( d.properties[val] );
+			    });
+			    return props;
+			} )
+			.enter().append("td")
+			.attr("class",function(d) { return d; })
+			.text( function (dd) { 
+			    return dd } );
+
+		    // update, reseting the odd/even columns
+		    rr.attr("class", function(d,i) {
+			    var cc = this.className;
+			    cc = cc.replace(/\s*(even|odd)/ig,"");
+			    cc += i % 2 ? " even" : " odd"; 
+			    return cc;
+			} );
+
+		    // exit, removing items that have been filtered
+		    rr.exit().remove();
+
+		    // resort
+		    $("#inctable").tablesorter( ).bind("sortEnd",function(){
+			// reset odd/even colors
+			var rr = body.selectAll("tr")
+			    .attr("class", function(d,i) {
+				var cc = this.className;
+				cc = cc.replace(/\s*(even|odd)/ig,"");
+				cc += i % 2 ? " even" : " odd"; 
+				return cc;
+			    } );
+		    }); 
+		    
+//		    $("#inctable").tableScroll({height:400});
+
+		    // Now had all the filtered cicles in the SVG
+                    d3.selectAll("#incidents circle").attr("class","hidden");
+                    $.each( newFeatures, function( i, d ) { 
+                        d3.selectAll('#incidents circle[cad="'+d.cad+'"]').attr("class","");
+                    });
+		    
+		});
 
 		/*
 		 * Support functions to provide a little bit of 'user friendlyness' to the textboxes in 
@@ -181,135 +318,54 @@ var doQueryMap = function( data, parent ) {
 		    }
 		} );
 
+		
+		$("#inctable").tablesorter( ).bind("sortEnd",function(){
+		    // reset odd/even colors
+		    var rr = body.selectAll("tr")
+			.attr("class", function(d,i) {
+			    var cc = this.className;
+			    cc = cc.replace(/\s*(even|odd)/ig,"");
+			    cc += i % 2 ? " even" : " odd"; 
+			    return cc;
+			} );
+		}); 
 
-		// Use D3 magic to create rows for each incident
-		var ii = incs.features();
-		var rows = body.selectAll("tr")
-		    .data(ii)
-		    .enter().append("tr")
-		    .attr("id", function( d ) { 
-			return d.id 
-		    } )
-		    .on("click",function(d,e) { 
-			if ( !featureVisible(d) ) centerOnIncident( d );
-//			raiseIncident( d );
-//			highlightIncident( d ); 
-//			updateIncidentInfo( d );
-			incidentClicked( d );
-		    } );
-
-		// Now populate each row with the relevant data
-		rows.selectAll("td")
-		    .data(function(d) {
-			// extract properties
-			var props = [];
-			$.each( fields, function(i, val ) {
-			    props.push( d.properties[val] );
-			});
-			return props;
-		    } )
-		    .enter().append("td")
-		    .text( function (dd) { 
-			return dd } );
-
-		// datatables plugin function to allow callbacks to get filtered
-		// data
-		$.fn.dataTableExt.oApi.fnGetFilteredData = function ( oSettings ) {
-		    var a = [];
-		    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ ) {
-			a.push(oSettings.aoData[ oSettings.aiDisplay[i] ]._aData);
-		    }
-		    return a;
-		}
-
-		$.fn.dataTableExt.oApi.fnDisplayRow = function ( oSettings, nRow )
-		{
-		    var iPos = -1;
-		    for( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
-		    {
-			if( oSettings.aoData[ oSettings.aiDisplay[i] ].nTr == nRow )
-			{
-			    iPos = i;
-			    break;
-			}
-		    }
-		    
-		    if( iPos >= 0 )
-		    {
-			oSettings._iDisplayStart = ( Math.floor(i / oSettings._iDisplayLength) ) * oSettings._iDisplayLength;
-			this.oApi._fnCalculateEnd( oSettings );
-		    }
-		    
-		    this.oApi._fnDraw( oSettings );
-		}
-
-		tt = $("#inctable").dataTable(
-		    {"aaSorting":[[1,"desc"]],  // selects date
-		     "oSearch":{"sSearch":"","bRegex":true, "bSmart":false},
-		     "aoColumns":settings,
-		     "sDom":'<"top"lf><"info"pi"><"tabletable"rt><"clear">',
-		     "fnInfoCallback": function( oSettings, iStart, iEnd, iMax, iTotal, sPre ) {
-			 // filtering complete, hide filtered data on map
-			 if ( tt ) {
-			     var visible = tt.fnGetFilteredData();
-			     d3.selectAll("#incidents circle").attr("class","hidden");
-			     $.each( visible, function( i, d ) { 
-				 // NOTE: d[1] corresponds to the "CAD" item
-				 d3.selectAll('#incidents circle[cad="'+d[1]+'"]').attr("class","");
-			     });
-			 }
-			 return " items "+iStart+" to "+iEnd+" of "+iTotal+" (with "+(iMax-iTotal)+ " filtered)";
-		     }
-		    }
-		);
-
-
-		// rows.append("td").text(function(d){return d.cad;});
-		// rows.append("td").text(function(d){
-		//     return d.timestamp;});
-		// rows.append("td").text(function(d){
-		//     return d.locString;});
-		// rows.append("td").text(function(d){
-		//     return d.memo;});
+		$("#inctable").tableScroll({height:400});
 
 	    });
 
     function incidentClicked( d, e, f ) {
-	//updateIncidentInfo( d );
-//	if ( !d ) 
-//	    d = ff[e];
-//	var dd = d.currentTarget;
-	raiseIncident( d );
-	highlightIncident( d );
-	highlightIncidentRow( d );
-	scrollIncidentTableToItem( d );
-	updateIncidentInfo( d )
+	// restyle row
+	d3.selectAll("#inctable tr.selected").attr("class",function() { 
+	    var ret =  this.className.replace(/\s*\bselected\b/i,""); // remove selected
+	    return ret;
+	});
+	d3.selectAll("#inctable tr[cad='"+d+"']").attr("class",function (dd,e) { 
+	    // ugh, highlight the incident in the map too
+	    raiseIncident( dd );
+	    highlightIncident( dd );
+	    // ugh, and update the info
+	    updateIncidentInfo( dd );
+
+	    return this.className+" selected";
+	} );
+
+	//scrollIncidentTableToItem( el );
+    }
+
+    function removeClass( d ) {
+	var classes = d.attr("class");
+	classes.replace("\b"+d+"\b","");
     }
 
     function highlightIncidentRow( d ) {
-//	d3.selectAll('#inctable tr.selected').attr("class",'selected');
-	var data = tt.fnGetData();
-	
-
-
-//	d3.selectAll('#inctable tr[id="'+d.id+'"]').attr("class","selected");
+	d3.selectAll('#inctable tr.selected').attr("class",function() { 
+	    return "";
+	});
+	d3.selectAll('#inctable tr[id="'+d.id+'"]').attr("class","selected");
     }
 
     function scrollIncidentTableToItem( d ) {
-	var data = tt.fnGetData();
-	var it;
-	for ( it = 0; it < data.length && data[it][0] != d.id; ++it );
-	var pos = it;
-
-	/* Example use */
-	/*
-	  var oTable;
-	  $(document).ready(function() {
-	  oTable = $('#example').dataTable();
-	  oTable.fnDisplayRow( oTable.fnGetNodes()[20] );
-	  } );
-	*/
-	tt.fnDisplayRow( tt.fnGetNodes()[pos] );
     }
 
     function featureVisible( d ) {
@@ -336,8 +392,13 @@ var doQueryMap = function( data, parent ) {
     }
 
     function highlightIncident( d, e ) {
-	d3.selectAll('#incidents circle').attr( "class", "" );
-	d3.selectAll("#incidents circle[id='"+d.id+"']").attr("class","selected");
+	d3.selectAll('#incidents circle.selected').attr( "class", function (d) { 
+	    var ret = this.className.baseVal.replace(/\s*\bselected\b/i,""); // remove selected
+	    return ret;
+	});
+	d3.selectAll("#incidents circle[cad='"+d.cad+"']").attr("class",function (dd,e) { 
+	    return this.className.baseVal+" selected";
+	});
     }
 
     function updateIncidentInfo( d, e ) {
@@ -357,7 +418,7 @@ var doQueryMap = function( data, parent ) {
 	    .attr("id", "incdetail");
 
 	var body = tab.append("tbody");
-	var props = ["id","cad","timestamp","locString","memo","d12_delay","tmcpe_delay","savings","analysisCount"];
+	var props = ["cad","timestamp","locString","memo","d12_delay","tmcpe_delay","savings","analysisCount"];
 	var data = $.map( props, function(e,i) { return [ [ e,d.properties[e] ] ] } );
 	var rows = body.selectAll("tr")
 	    .data(data)
