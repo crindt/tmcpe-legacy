@@ -319,7 +319,7 @@ td.unit {
 	<div id="tsdbox" style="height:500px;text-align:right;" class="grid_8 alpha">
 	</div>
 	<div id="mapbox" style="height:500px;" class="grid_8 omega">
-	  <div id="map"></div>
+	  <div id="map" tabindex="1"></div>
 	</div>
       </div>
       <div id="" class="grid_16 ">

@@ -4,10 +4,17 @@ var doQueryMap = function( data, parent ) {
 
     var po = org.polymaps;
 
+    var theight = $("#map").height();
+    var twidth = $("#map").width();
+
+
     var svg = d3.select("#map")
 	.append("svg:svg")
 	.attr("id","mapsvg")
-	.attr("height",theight)[0][0];
+	.attr("height",theight-4)
+	.attr("tabindex",1)
+	.attr("width",twidth-4)
+    [0][0];
 
     var map = po.map()
 	.container(svg)
@@ -15,6 +22,7 @@ var doQueryMap = function( data, parent ) {
 	.zoom(13)
 	.zoomRange([1,/*6*/, 18])
 	.add(po.interact());
+
 
     map.add(po.image()
 	    .url(po.url("http://{S}tile.openstreetmap.org"
@@ -57,7 +65,20 @@ var doQueryMap = function( data, parent ) {
 	}
     }
 
+    var color = function( ff ) {
+	var colorPV = boundedScale( [0, 400, 800], [ "#00ff00", "#ffff00", "#ff0000" ] );
+	return function( v ) {
+	    var col = colorPV( v ).color;
+	    var rgb = pv.color(col).rgb();
+	    var rcol = pv.rgb( rgb.r < ff ? ff : rgb.r,
+			       rgb.g < ff ? ff : rgb.g,
+			       rgb.b < ff ? ff : rgb.b );
+	    return rcol.color;
+	}
+    }
+
     d3.json("/tmcpe/incident/list.geojson"
+//	    +"?startDate=2009-01-01"
 //	    +"?startDate=2010-01-01"
 	    +"?startDate=2010-09-01"
 	    +"&Analyzed=onlyAnalyzed"
@@ -66,12 +87,76 @@ var doQueryMap = function( data, parent ) {
 		var dd = $.map( e.features, function( f ) { return f.properties.tmcpe_delay; } );
 		var fmin = Array.min(dd);
 		var fmax = Array.max(dd);
-//		var color = pv.Scale.linear(fmin,(fmax-fmin)/2,fmax).range("green","yellow","red");
-		var color = boundedScale( [100, 600, 1100], [ "#00ff00", "#ffff00", "#ff0000" ] );
-//		var color = boundedScale( [100, 600, 1100], [ "rgba(0,255,0,128)", "rgba(255,255,0,128)", "rgba(255,0,0,128)" ] );
 
 		theData = e.features;
 		allTheData = e.features;
+
+
+		function loadFeatures( e ) {
+		    var features = e.features;
+		    var clusters = [];
+
+		    function shouldCluster(cluster, feature) {
+			var cc = cluster.coord;
+			var fc = feature.data.geometry.coordinates;
+			var distance = (
+			    Math.sqrt(
+				Math.pow((cc.x - fc.x), 2) + Math.pow((cc.y - fc.y), 2)
+			    ) /*/ map.zoom()*/
+			);
+			return (distance <= 200);
+		    };
+		    
+		    function addToCluster(cluster, feature) {
+			cluster.cluster.push(feature);
+			//cluster.attributes.count += 1;
+			cluster.count += 1;
+		    };
+
+		    function createCluster(feature) {
+			var center = feature.data.geometry.coordinates;
+			var cluster = {
+			    coord: center,
+			    count: 1
+			};
+			cluster.cluster = [feature];
+			return cluster;
+		    };
+
+
+		    var feature,clustered,cluster;
+		    for( var i = 0; i < features.length; ++ i ) {
+			feature = features[i];
+			if ( feature.data.geometry) {
+			    clustered = false;
+			    for(var j=clusters.length-1; j>=0; --j) {
+				cluster = clusters[j];
+				if(shouldCluster(cluster, feature)) {
+				    addToCluster(cluster, feature);
+				    clustered = true;
+				    break;
+				}
+			    }
+			    if(!clustered) {
+				clusters.push(createCluster(features[i]));
+			    }
+			}
+		    }
+		    var tile = e.tile, g=tile.element;
+		    while (g.lastChild) g.removeChild(g.lastChild); // clear all elements
+
+		    for( var i = 0; i < clusters.length; ++i ) {
+			var cluster = clusters[i], point = g.appendChild(po.svg("circle"));
+			point.setAttribute("id", cluster.cluster[0].data.properties.id);
+			point.setAttribute("cx", cluster.coord.x);
+			point.setAttribute("cy", cluster.coord.y);
+			//point.setAttribute("r", Math.pow(2, tile.zoom - 11) * Math.sqrt(cluster.cluster.length));
+			point.setAttribute("r", 5+2*cluster.cluster.length);
+			point.setAttribute("style","fill:"+color(0)(cluster.cluster[0].data.properties.tmcpe_delay));
+		    }
+		}
+
+ 
 
 		incs = po.geoJson()
 		    .tile(true)
@@ -84,7 +169,8 @@ var doQueryMap = function( data, parent ) {
 //			    .data(e.features)
 //			    .on("click", incidentClicked )
 		    })
-		    .on("load", po.stylist()
+		    .on("load", /*loadFeatures*/
+			po.stylist()
 			.attr("id", function( d ) { return d.id; } )
 			.attr("cad", function( d ) { return d.cad; } )
 			.attr("r", function( d ) { 
@@ -93,11 +179,11 @@ var doQueryMap = function( data, parent ) {
 			    return 25;
 			})
 			.attr("fill",function(d) { 
-			    var cc = color(d.properties.tmcpe_delay).color;
+			    var cc = color(0)(d.properties.tmcpe_delay);
 			    return cc;
 			})
 			.attr("stroke",function(d) { 
-			    var cc = color(d.properties.tmcpe_delay).color;
+			    var cc = color(0)(d.properties.tmcpe_delay);
 			    return cc;
 			})
 		       );
@@ -113,39 +199,35 @@ var doQueryMap = function( data, parent ) {
 			incidentClicked( cad ); } );
 		    });
 
-		function RenderDecimalNumber(oObj,oCustomInfo) {	
+		function renderDecimalNumber(oObj,oCustomInfo) {	
 		    var num = new NumberFormat();
 		    num.setInputDecimal('.');
-		    num.setNumber(oObj.aData[oObj.iDataColumn]); 
-		    num.setPlaces(oCustomInfo.decimalPlaces, true);	
+		    num.setNumber(oObj); 
+		    num.setPlaces(0, true);	
 		    num.setCurrency(false);	
 		    num.setNegativeFormat(num.LEFT_DASH);	
-		    num.setSeparators(true, oCustomInfo.decimalSeparator, oCustomInfo.thousandSeparator);
+		    num.setSeparators(true, ",", ".");
 
 		    return num.toFormatted();
 		}
 
-		function RenderIncidentTimestamp(obj) {
-		    dd = new Date( obj.aData[2] );
-		    return $.format.date(dd,'EEE yyyy-MM-dd kk:mm:ss');
+		function renderIncidentTimestamp(obj) {
+		    dd = new Date( obj );
+		    return $.format.date(dd,'EEE yyyy-MM-dd kk:mm');
 		};
 
 		
 
 
 		// construct table of incident data using the given fields...
-		var fields = [ "cad", "timestamp", "locString", "memo", "d12_delay", "tmcpe_delay", "savings" ];
-		var settings =  [ {sType:"numeric",sWidth:'20px'},
-				  {sType:"string",bSortable:true}, 
-				  {sClass:"datefield mono",sType:"date",bSortable:true,
-				   fnRender: RenderIncidentTimestamp},
-				  {sClass:"locstring", sType:"string"},
-				  {sType:"string"},
-				  {sClass:"numeric",sType:"numeric",bSortable:true, fnRender: function (oDt) { return RenderDecimalNumber( oDt, {"decimalPlaces":0,"thousandSeparator":",","decimalSeparator":"."} ); }},
-				  {sClass:"numeric",sType:"numeric",bSortable:true, fnRender: function (oDt) { return RenderDecimalNumber( oDt, {"decimalPlaces":0,"thousandSeparator":",","decimalSeparator":"."} ); }},
-				  {sClass:"numeric",sType:"numeric",bSortable:true, fnRender: function (oDt) { return RenderDecimalNumber( oDt, {"decimalPlaces":0,"thousandSeparator":",","decimalSeparator":"."} ); }}
-				];
-		var tab = d3.select("#incidentListTablebox")
+		var fields = [ {key:"cad",title:"CAD"}, 
+			       {key:"timestamp",title:"Time",render:renderIncidentTimestamp}, 
+			       {key:"locString",title:"Location"}, 
+			       {key:"memo",title:"Description"}, 
+			       {key:"d12_delay",title:"D<sub>d12</sub>",render:renderDecimalNumber}, 
+			       {key:"tmcpe_delay",title:"D<sub>tmcpe</sub>",render:renderDecimalNumber}, 
+			       {key:"savings",title:"Savings",render:renderDecimalNumber} ];
+		var tab = d3.select("#inctableContainer")
 		    .append("table")
 		    .attr("id", "inctable" );
 
@@ -156,25 +238,29 @@ var doQueryMap = function( data, parent ) {
 		var body = tab.append("tbody");
 
 		var foot = tab.append("tfoot");
-		foot.append("tr").selectAll("th").data(fields).enter()
-		    .append("th")
-		    .attr("class","top-foot")
-		    .text(function(d){return d;});
+
 
 		// add a header row with search columns
 		head.append("tr").selectAll("td").data(fields).enter()
 		    .append("td")
 		    .append("input")
 		    .attr("type","text")
-		    .attr("name",function(d,i){ return "search_"+d; })
-		    .attr("value",function(d,i){ return "Search "+d; })
+		    .attr("name",function(d,i){ return "search_"+d.key; })
+		    .attr("value",function(d,i){ return "Search "+d.key; })
 		    // append the classes from the settings object
 		    .attr("class",function(d,i){ return "search_init"; } );
 
+/*
+		head.selectAll("tr th").append("p")
+		    .attr("class",function(d){return d;})
+		    .text(function(d){ return d;});
+*/
 		head.append("tr").selectAll("th").data(fields).enter()
 		    .append("th")
-		    .attr("class","bottom-head")
-		    .text(function(d){return d;});
+		    .attr("class",function(d){return d.key;})
+		    .html(function(d){return d.title ? d.title : d.key;});
+		
+		    
 		
 
 		// Use D3 magic to create rows for each incident
@@ -189,7 +275,7 @@ var doQueryMap = function( data, parent ) {
 		    } )
 		    .attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
 		    .attr("style", function(d,i) { 
-			return "background-color:"+color(d.properties.tmcpe_delay).color/*+";opacity:0.5"*/; })
+			return "background-color:"+color(160)(d.properties.tmcpe_delay)/*+";opacity:0.5"*/; })
 		    .on("click",function(d,e) { 
 			if ( !featureVisible(d) ) centerOnIncident( d );
 			incidentClicked( d.cad );
@@ -201,17 +287,50 @@ var doQueryMap = function( data, parent ) {
 			// extract properties
 			var props = [];
 			$.each( fields, function(i, val ) {
-			    props.push( d.properties[val] );
+			    var item = d.properties[val.key];
+			    props.push( val.render ? val.render( item ) : item );
 			});
 			return props;
 		    } )
 		    .enter().append("td")
+		    .attr("class", function(d,i) { return fields[ i ].key } )
 		    .text( function (dd) { 
-			return dd } );
+			return dd;
+		    } );
 
 
+		// sum and avg the data in the table
+		foot.append("tr").selectAll("td").data(fields)
+		    .enter()
+		    .append("td")
+		    .attr( "class", function( d ) { return d.key + " summary" } )
+		    .html(function(d,i){
+			var tot = 0;
+			var cnt = 0;
+			$.each($("#inctable td."+d.key), function( index ) {
+			    var val = parseFloat( this.innerText );
+			    if ( !isNaN( val ) && this.innerText == ""+val+"" ) {
+				tot += val;
+				cnt ++;
+			    }
+			});
+			var avg="n/a";
+			if  ( cnt > 0 ) { 
+			    avg = (tot/cnt);
+			    tot = d.render ? d.render( tot ) : tot;
+			    avg = d.render ? d.render( avg ) : avg;
+			    return tot+"<br/>"+avg ;
+			} else {
+			    return "";
+			}
+		    });
+
+
+
+		// Insert the sorting handler
 		$("thead input").keyup( function () {
 
+		    // Now, apply all the active filters to the complete dataset
 		    var newFeatures = theData;
 		    $("thead input").each(function(ee,ii) {
 			if (/search_init/.test(this.className) ) return;
@@ -223,13 +342,9 @@ var doQueryMap = function( data, parent ) {
 			});
 		    });
 
-		    // var input = this;
-		    // var name = input.name.replace("search_","");
-		    // var patt = new RegExp(input.value,"i");
-		    // var currentData = body.selectAll("tr").filter(function(ee,ii){
-		    // 	return patt.test(ee.properties[name]);
-		    // });
-
+		    // At this point, newFeatures will contain only those
+		    // features that match all filters.  Here, we update d3's
+		    // data that are associated with the tr's for the table
 		    var rr = body.selectAll("tr").data(newFeatures,function(d) { return d.cad } );
 
 		    // enter, adding new tr elements for new data.
@@ -242,7 +357,7 @@ var doQueryMap = function( data, parent ) {
 			} )
 			.attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
 			.attr("style", function(d,i) { 
-			    return "background-color:"+color(d.properties.tmcpe_delay).color; })
+			    return "background-color:"+color(160)(d.properties.tmcpe_delay); })
 			.on("click",function(d,e) { 
 			    if ( !featureVisible(d) ) centerOnIncident( d );
 			    incidentClicked( d.cad );
@@ -252,12 +367,15 @@ var doQueryMap = function( data, parent ) {
 			    // extract properties
 			    var props = [];
 			    $.each( fields, function(i, val ) {
-				props.push( d.properties[val] );
+				var item = d.properties[val.key];
+				props.push( val.render ? val.render( item ) : item );
 			    });
 			    return props;
 			} )
 			.enter().append("td")
-			.attr("class",function(d) { return d; })
+			.attr("class",function(d,i) { 
+			    var key = fields[ i ].key;
+			    return key; })
 			.text( function (dd) { 
 			    return dd } );
 
@@ -267,24 +385,42 @@ var doQueryMap = function( data, parent ) {
 			    cc = cc.replace(/\s*(even|odd)/ig,"");
 			    cc += i % 2 ? " even" : " odd"; 
 			    return cc;
-			} );
+			} )
+			.selectAll("td")
+			.attr("class",function(d,i) { 
+			    var key = fields[ i ].key;
+			    return key;  })
+		    ;
 
 		    // exit, removing items that have been filtered
 		    rr.exit().remove();
 
-		    // resort
-		    $("#inctable").tablesorter( ).bind("sortEnd",function(){
-			// reset odd/even colors
-			var rr = body.selectAll("tr")
-			    .attr("class", function(d,i) {
-				var cc = this.className;
-				cc = cc.replace(/\s*(even|odd)/ig,"");
-				cc += i % 2 ? " even" : " odd"; 
-				return cc;
-			    } );
-		    }); 
-		    
-//		    $("#inctable").tableScroll({height:400});
+//		    $("#inctable").tableScroll({height:400,flush:false});
+
+		    // update totals
+		    foot.select("tr").selectAll("td")
+			.html(function(d,i){
+			    var tot = 0;
+			    var cnt = 0;
+			    $.each($("#inctable td."+d.key), function( index ) {
+				var val = parseFloat( this.innerText );
+				if ( !isNaN( val ) && this.innerText == ""+val+"" ) {
+				    tot += val;
+				    cnt ++;
+				}
+			    });
+			    var avg="n/a";
+			    if  ( cnt > 0 ) { 
+				avg = (tot/cnt);
+				tot = d.render ? d.render( tot ) : tot;
+				avg = d.render ? d.render( avg ) : avg;
+				return tot+"<br/>"+avg ;
+			    } else {
+				return "";
+			    }
+			});
+
+		    $("#inctable").trigger("update"); 
 
 		    // Now had all the filtered cicles in the SVG
                     d3.selectAll("#incidents circle").attr("class","hidden");
@@ -318,20 +454,39 @@ var doQueryMap = function( data, parent ) {
 		    }
 		} );
 
+		$.tablesorter.addParser({
+	            // set a unique id 
+		    id: 'formatNum', 
+		    is: function(s) { 
+			// return false so this parser is not auto detected 
+			return false; 
+		    }, 
+		    format: function(s) { 
+			// format your data for normalization (remove commas)
+			return s.replace(/,/,"");
+		    }, 
+		    // set type, either numeric or text 
+		    type: 'numeric' 
+		});
 		
-		$("#inctable").tablesorter( ).bind("sortEnd",function(){
-		    // reset odd/even colors
-		    var rr = body.selectAll("tr")
-			.attr("class", function(d,i) {
-			    var cc = this.className;
-			    cc = cc.replace(/\s*(even|odd)/ig,"");
-			    cc += i % 2 ? " even" : " odd"; 
-			    return cc;
-			} );
-		}); 
+		$("#inctable").tablesorter({
+		    headers: { 4:{ sorter: 'formatNum' },
+			       5:{ sorter: 'formatNum' },
+			       6:{ sorter: 'formatNum' } }
+		}).bind("sortEnd",function(){
+		    // reset scroll
+//		    $("#inctable").tableScroll({height:400,flush:false});
+		});
+		    
+		
+		$("#inctable").tableScroll({height:400,flush:true});
 
-		$("#inctable").tableScroll({height:400});
-
+		window.addEventListener( "resize", function() {
+//		    $("#inctable").tableScroll("undo");
+//		    $("#inctable").tableScroll({height:400,flush:true});
+//		    $("#inctable").width("100%");
+//		    $("#inctable").trigger("update");
+		}, false);
 	    });
 
     function incidentClicked( d, e, f ) {
@@ -339,16 +494,24 @@ var doQueryMap = function( data, parent ) {
 	d3.selectAll("#inctable tr.selected").attr("class",function() { 
 	    var ret =  this.className.replace(/\s*\bselected\b/i,""); // remove selected
 	    return ret;
-	});
-	d3.selectAll("#inctable tr[cad='"+d+"']").attr("class",function (dd,e) { 
-	    // ugh, highlight the incident in the map too
-	    raiseIncident( dd );
-	    highlightIncident( dd );
-	    // ugh, and update the info
-	    updateIncidentInfo( dd );
+	}).attr( "style", function(d,i) { 
+	    return "background-color:"+color(160)(d.properties.tmcpe_delay); 
+	})
 
-	    return this.className+" selected";
-	} );
+	d3.selectAll("#inctable tr[cad='"+d+"']")
+	    .attr("class",function (dd,e) { 
+		// ugh, highlight the incident in the map too
+		raiseIncident( dd );
+		highlightIncident( dd );
+		// ugh, and update the info
+		updateIncidentInfo( dd );
+		scrollIncidentTableToItem( dd,e,this );
+		
+		return this.className+" selected";
+	    } )
+	    .attr( "style", function(d,i) { 
+		return "background-color:"+color(0)(d.properties.tmcpe_delay); 
+	    });
 
 	//scrollIncidentTableToItem( el );
     }
@@ -365,7 +528,13 @@ var doQueryMap = function( data, parent ) {
 	d3.selectAll('#inctable tr[id="'+d.id+'"]').attr("class","selected");
     }
 
-    function scrollIncidentTableToItem( d ) {
+    function scrollIncidentTableToItem( d,e,t ) {
+	var p = $('#inctable').parent();
+	var st = p.scrollTop();
+	if ( st > t.offsetTop
+	     || st+400 < t.offsetTop ) {
+	    p.scrollTop(t.offsetTop);
+	}
     }
 
     function featureVisible( d ) {
@@ -387,7 +556,7 @@ var doQueryMap = function( data, parent ) {
 	// element, just detach it from the dom and append it back to its parent
 	var targets = $("circle[id="+d.id+"]");
 	var target = targets[0];
-	var parent = target.parentElement;
+	var parent = target.parentNode;
 	targets.detach().appendTo( parent );
     }
 
@@ -403,10 +572,10 @@ var doQueryMap = function( data, parent ) {
 
     function updateIncidentInfo( d, e ) {
 	// Update the title
-	if ( d.id ) {
-	    $('#incidentTitle').html( 'Incident <a href="/tmcpe/incident/d3_tsd?id=' + d.id + '">' + d.id + '</a>' );
+	if ( d.cad ) {
+	    $('#incidentTitle').html( 'Incident <a href="/tmcpe/incident/d3_tsd?id=' + d.id + '">' + d.cad + '</a>' );
 	} else {
-	    $('#incidentTitle').html( 'Incident <a href="/tmcpe/incident/d3_tsd?id=' + d.cad + '">' + d.cad + '</a>' );
+	    $('#incidentTitle').html( 'Incident <a href="/tmcpe/incident/d3_tsd?id=' + d.id + '">' + d.id + '</a>' );
 	}
 
 	// Remove the existing table (if any)
@@ -431,6 +600,8 @@ var doQueryMap = function( data, parent ) {
 	    .text( function(dd) { 
 		return dd; } );
 
+	// update the background color
+	d3.select("#infobox").attr("style","background-color:"+color(220)(d.properties.tmcpe_delay)); 
 	
     }
 }
