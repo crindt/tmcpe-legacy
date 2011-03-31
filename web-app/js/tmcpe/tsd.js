@@ -90,19 +90,23 @@
       
   }
 
-  tmcpe.hh = 500;
-  tmcpe.ww = 600;
+  tmcpe.hh = function() { return $("#tsdbox").height()-2; };
+  tmcpe.ww = function() { return $("#tsdbox").width()-2; };
 
   tmcpe.tsd.redraw = function( json ) {
+
+      // remove any existing children
+      $("#tsdbox").children().remove();
+
       var data = json.data;
       var sections = json.sections;
       var fn = [grid0, grid1],
       dw = data[0].length,
       dh = data.length;
       grid = grid1,
-      p = 20,  // padding
-      szs = (tmcpe.hh-2*p)/dh,
-      szt = tmcpe.ww/dw;
+      p = 20,  // padding, in px
+      szs = (tmcpe.hh()-2*p)/dh,
+      szt = (tmcpe.ww()-7*p)/dw;   // leave 100px margin for labels
       var twidth = szt*dw,
          theight = szs*dh;
       var seclensum = 0;
@@ -250,6 +254,10 @@
 		  s.style.setProperty("stroke-width",6 ) } );
 
 	  };
+
+	  $(window).resize(function() { 
+	      tmcpe.tsd.redraw( json ); 
+	  });
       };
 
 
@@ -261,10 +269,10 @@
       // create the svg box
       var svg0 = d3.select("#tsdbox")
           .append("svg:svg")
-          .attr("width", twidth + 6*p/*theight/*twidth*/ )
+          .attr("width", twidth + 7*p/*theight/*twidth*/ )
           .attr("height", theight + 2*p/*twidth/*theight*/ )
 	  .append("svg:g")
-	  .attr("transform", "translate(" + 5*p + "," + p + ")");
+	  .attr("transform", "translate(" + 6*p + "," + p + ")");
       svg0.append("svg:defs")
 	  .append("svg:pattern")
 	  .attr("id","hatch00")
@@ -388,6 +396,9 @@
 
   tmcpe.cumflow.doChart = function( json, loc ) {
 
+      // clear any existing
+      $("#chartbox").children().remove();
+
       var text = d3.select("#msgtxt");
 
       if ( loc == null ) {
@@ -407,6 +418,8 @@
       var t1 = new Date( json.t1 ).getTime()/1000;
       var t2 = new Date( json.t2 ).getTime()/1000;
       var t3 = new Date( json.t3 ).getTime()/1000;
+      var volscale = 1/1000;
+      var volscale = 1;
 
       var startCell = json.timesteps.filter( function (e) {
 	  return !t1 || (e.getTime()/1000 < t1);
@@ -417,45 +430,53 @@
       }).length;
 
       // fixme: crindt: we really want to use the incident section by default, not the downstream section.
-      var diversion = sfunc(json,getSection(json,json.sec)-1,finishCell,function(v){return v.vol_avg/1000.0})
-	  - sfunc(json,getSection(json,json.sec)-1,finishCell,function(v){return v.vol/1000.0});
+      var diversion = sfunc(json,getSection(json,json.sec)-1,finishCell,function(v){
+	  return v == null || v.vol_avg == null ? 0 : v.vol_avg/volscale;
+      }) - sfunc(json,getSection(json,json.sec)-1,finishCell,function(v){
+	  return v == null || v.vol == null ? 0 : v.vol/volscale;
+      });
 
       var data = d3.range( json.timesteps.length ).map(function(j) {
 	  return {x:json.timesteps[j].getTime()/1000+300,
-		  y: sfunc(json,loc,j,function(v){return v.vol/1000.0}), 
-		  y2: sfunc(json,loc,j,function(v){return v.vol_avg/1000.0}),
+		  y: sfunc(json,loc,j,function(v){return v.vol/volscale}), 
+		  y2: sfunc(json,loc,j,function(v){return v.vol_avg/volscale}),
 		  y3: ( j < startCell
-			?  sfunc(json,loc,j,function(v){return v.vol_avg/1000.0})
+			?  sfunc(json,loc,j,function(v){return v.vol_avg/volscale})
 			: ( j > finishCell
-			    ? sfunc(json,loc,j,function(v){return v.vol_avg/1000.0}) - diversion
-			    : sfunc(json,loc,j,function(v){return v.vol_avg/1000.0}) - diversion*(j-startCell)/(finishCell-startCell) ) )
+			    ? sfunc(json,loc,j,function(v){return v.vol_avg/volscale}) - diversion
+			    : sfunc(json,loc,j,function(v){return v.vol_avg/volscale}) - diversion*(j-startCell)/(finishCell-startCell) ) )
 		 }
       });
 
       // add zeroed elements at the beginning
       data.unshift( { x:json.timesteps[0].getTime()/1000,y:0,y2:0,y3:0} );
       
-      // Compute the maximum cumulative flow across all sections (to set the max)
-      var tt = Array.max( json.data.map( function( r ) { 
-	  return Array.max( [ sfunc( json, r[0].i,r.length-1, function(v){return v.vol/1000.0}), 
-			      sfunc( json, r[0].i,r.length-1, function(v){return v.vol_avg/1000.0}) ] );
+      // Compute the maximum cumulative flow across all sections (to set the max scale)
+      var maxflow = Array.max( json.data.map( function( r ) { 
+	  return Array.max( [ sfunc( json, r[0].i,r.length-1, function(v){return v.vol/volscale}), 
+			      sfunc( json, r[0].i,r.length-1, function(v){return v.vol_avg/volscale}) ] );
       } ) );
 
 
-      var w = tmcpe.ww,
-      h = 400,
-      x = d3.scale.linear().domain([json.timesteps[0].getTime()/1000,json.timesteps[json.timesteps.length-1].getTime()/1000+300]).range([0, w]),
-      y = d3.scale.linear().domain(/*[0,20]*/[0, tt]).range([h, 0]),
+      var w = $("#chartbox").width()-2,
+      h = $("#chartbox").height()-2,
+      ww = w - 7*p,       // width available for plot
+      hh = h - 4*p,   // height available for plot
+      x = d3.scale.linear().domain([json.timesteps[0].getTime()/1000,json.timesteps[json.timesteps.length-1].getTime()/1000+300]).range([0, ww]),
+      y = d3.scale.linear().domain(/*[0,20]*/[0, maxflow]).range([hh, 0]),
       now = new Date();
       
       var vis = d3.select("#chartbox")
 	  .append("svg:svg")
 	  .attr("class", "flowchart" )
 	  .data([data])
-	  .attr("width", w + 6*p)
-	  .attr("height", h + p + 100)
+	  .attr("width", w) // margin of 100
+	  .attr("height", h)
 	  .append("svg:g")
-	  .attr("transform", "translate(" + 5*p + "," + p + ")");
+	  .attr("transform", "translate(" 
+		+ 6*p      // shift left 5p (1p margin on right)
+		+ "," + p  // shift down 1p (1p margin on top)
+		+ ")");
       
       var rr = d3.range( json.timesteps[0].getTime()/1000,
 			 json.timesteps[json.timesteps.length-1].getTime()/1000+300,
@@ -470,7 +491,7 @@
 	  .attr("x1", x)
 	  .attr("x2", x)
 	  .attr("y1", 0)
-	  .attr("y2", h - 1);
+	  .attr("y2", hh - 1);
 
       var rules2 = vis.selectAll("g.rule2")
 	  .data(y.ticks(10))
@@ -482,10 +503,10 @@
 	  .attr("y1", y)
 	  .attr("y2", y)
 	  .attr("x1", 0)
-	  .attr("x2", w + 1);
+	  .attr("x2", ww );
       
       function xlabel_rotate (xx) {
-	  return "rotate("+[90,x(xx),(h+3)].join(",")+")"
+	  return "rotate("+[90,x(xx),(hh+3)].join(",")+")"
       }
       
       rules2.append("svg:text")
@@ -498,7 +519,7 @@
 
       rules.append("svg:text")
 	  .attr("x", x )
-	  .attr("y", h + 5 - szt )
+	  .attr("y", hh + 5 - szt )
 	  .attr("dy", ".25em")
 	  .attr("text-anchor", "start")
 	  .attr("transform",function(d) { return xlabel_rotate(d); } )
@@ -514,9 +535,11 @@
 	  .attr("class", "area2")
 	  .append("svg:path")
 	  .attr("d", d3.svg.area()
-		.x(function(d) { return x(d.x); })
-		.y0(h - 1)
-		.y1(function(d) { return y(d.y2); }))
+		.x(function(d) { 
+		    return x(d.x); })
+		.y0(hh - 1)
+		.y1(function(d) { 
+		    return y(d.y2); }))
 	  .on("mouseover", function( d,i ) { 
 	      avgmouseover( ); 
 	      /*
@@ -558,7 +581,7 @@
 	      .append("svg:path")
 	      .attr("d", d3.svg.area()
 		    .x(function(d) { return x(d.x); })
-		    .y0(h - 1)
+		    .y0(hh - 1)
 		    .y1(function(d) { return y(d.y3); }))
 	      .on("mouseover", function( d,i ) { 
 		  updateText( "Delayed non-diverted traffic" );
@@ -594,7 +617,7 @@
 	  .attr("class", "area")
 	  .attr("d", d3.svg.area()
 		.x(function(d) { return x(d.x); })
-		.y0(h - 1)
+		.y0(hh - 1)
 		.y1(function(d) { return y(d.y); }))
 	  .on("mouseover", obsmouseover )
 	  .on("mouseout", function () { updateText( "&nbsp;" ) } );
@@ -619,7 +642,7 @@
 	  .attr("x1", x )
 	  .attr("x2", x )
 	  .attr("y1", 0 )
-	  .attr("y2", h - 1 );
+	  .attr("y2", hh - 1 );
 
 
       function avgmouseover(d,i) {

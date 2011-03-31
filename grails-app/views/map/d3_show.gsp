@@ -22,7 +22,7 @@
     <p:javascript src='polymaps/polymaps' />
     <p:javascript src='protovis/protovis.min' />
     <p:javascript src='tmcpe/map' />
-<!--    <p:javascript src='datatables/jquery.dataTables' />-->
+    <p:javascript src='datatables/jquery.dataTables' />
     <p:javascript src='numberformat/NumberFormat154' />
     <p:javascript src='tablesorter/jquery.tablesorter.min' />
     <p:javascript src='tablescroll/jquery.tablescroll' />
@@ -36,6 +36,12 @@
 	  
       // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
          doQueryMap();
+
+	 $(window).resize(function() { 
+//	    doQueryMap();
+	 });
+
+
       });
 		
     </g:javascript>     

@@ -1,0 +1,313 @@
+#maptext {
+   border: 1px;
+   background-color: yellow;
+}
+  #databox table {
+  margin-top:1em;
+}
+ svg {
+  border: solid 1px #aaa;
+}
+path.incidentBoundary {
+  stroke: blue;
+  stroke-width: 4px;
+  fill: none;
+}
+rect {
+  fill: lightsteelblue;
+  stroke: #eee;
+  stroke-width: 2px;
+}
+rect.d1 {
+  fill: steelblue;
+}
+rect.d2 {
+  fill: darkblue;
+}
+
+ 
+.rule line {
+  stroke: #eee;
+  shape-rendering: crispEdges;
+}
+ 
+.rule2 line {
+  stroke: #eee;
+  shape-rendering: crispEdges;
+}
+ 
+.rule line.axis {
+  stroke: #000;
+}
+ 
+.rule2 line.axis {
+  stroke: #000;
+}
+ 
+.area {
+  fill: steelblue;
+//    fill-opacity: 0.75;
+}
+ 
+.line, circle.area {
+  fill: none;
+  stroke: cyan;
+  stroke-width: 1.5px;
+}
+ 
+.area2 path {
+  fill: green;
+//  fill-opacity: 0.75;
+}
+
+.line3 {
+  fill: none;
+  stroke: orange;
+  stroke-width: 1.5px;
+}
+ 
+.area3 path {
+  fill: red;
+//  fill-opacity: 0.5;
+}
+
+.timebar {
+    stroke: purple;
+    stroke-width: 4px;
+}
+ 
+.line2, circle.area2 {
+  fill: none;
+  stroke: yellow;
+  stroke-width: 1.5px;
+}
+ 
+circle.area {
+  fill: #fff;
+}
+
+.ylabels, .xlabels {
+   font-size: 8pt;
+}
+
+#scaleslider {
+  width: 300px;
+}
+#maxspdslider {
+  width: 300px;
+}
+
+td.label {
+    text-align: right;
+}
+
+td.value {
+    text-align: right;
+    width: 4em;
+}
+
+td.unit {
+    text-align: left;
+}
+
+.compass .back {
+  fill: #256574;
+}
+
+.compass .fore, .compass .chevron {
+  stroke: #1AA398;
+}
+
+#segments path {
+  fill: none;
+  stroke-linecap: round;
+//  stroke-width: 4px;
+}
+
+#ends circle {
+  fill: yellow;
+  stroke: black;
+  r: 1px;
+}
+
+#copy, #copy a {
+  color: #1AA398;
+}
+
+#incidents circle {
+//  fill: #ff0000;
+  fill-opacity: 0.5;
+  stroke: #000000;
+}
+
+.sorting {
+background: url('../images/datatables/sort_both.png') no-repeat center left;
+}
+
+.headerSortDown {
+background: url('../images/datatables/sort_asc.png') no-repeat center left;
+}
+
+.headerSortUp {
+background: url('../images/datatables/sort_desc.png') no-repeat center left;
+}
+
+.mono {
+font-family:monospace;
+}
+
+.odd {
+background-color: #eee;
+}
+
+.even {
+background-color: #bbb;
+}
+
+/*
+tr.odd td, tr.even td {
+   border-bottom: dotted #000000 1px;
+}
+*/
+
+#inctable tr.selected td {
+   font-weight: bold;
+   border-top: solid blue 4px;
+   border-bottom: solid blue 4px;
+}
+
+/*
+#inctable tr.selected td:first-child {
+//background-color: cyan;
+//  border-left: solid cyan 6px;
+}
+#inctable tr.selected td:last-child {
+//background-color: cyan;
+//  border-right: solid cyan 6px;
+}
+*/
+
+/*
+.bottom-head {
+   border-bottom: solid 1px black;
+}
+
+.top-foot {
+   border-top: solid 1px black;
+}
+*/
+
+/*
+.datefield {
+   width: 20em;
+}
+
+.timestamp {
+    width: 15em;
+}
+
+.memo {
+    width: 30em;
+}
+
+.locstring {
+   width: 18em;
+}
+
+.cad  {
+    text-align: right;
+    width: 10em;
+}
+
+
+.d12_delay, .tmcpe_delay, .savings {
+    text-align:right;
+    width: 10em;
+}
+*/
+
+/*
+#inctable th, #inctable td {
+   text-align: left;
+   padding-right: 1em;
+}
+*/
+
+#inctableContainer table td, #inctableContainer table th {
+    border: 1px dotted;
+}
+
+#inctableContainer table th.numeric, #inctableContainer table td.numeric {
+   text-align: right;
+   padding-right: 1em;
+}
+
+#inctableContainer table {
+   overflow: hidden;
+   border-collapse: collapse;
+   border-spacing: 0px;
+}
+
+#inctablecontainer {
+    background-color: #eee;
+    width: 100%;
+}
+
+table td,table th {
+   padding: 3px 10px;
+//   border: 1px dotted black;
+}
+
+.hidden {
+   visibility: hidden;
+}
+
+#incidentListTablebox {
+   margin-top: 1em;
+}
+
+#incidents .selected {
+   stroke-width: 10px;
+   stroke: cyan;
+   fill-opacity: 0.85;
+}
+
+body {
+    background-color: #eee;
+}
+
+#inctableContainer .tablescroll, #inctableContainer .dataTables_scrollHead, #inctableContainer .dataTables_scrollBody, #inctableContainer .dataTables_scrollFoot {
+    background-color: #ddd;
+    border-top: 4px solid #000;
+    border-bottom: 4px solid #000;
+}
+
+#inctableContainer {
+    background-color: #ddd;
+    border: 4px solid #000;
+    padding: 5px;
+    min-height: 400px;
+}
+
+#inctableContainer .tablescroll_wrapper {
+    border-top: 4px solid black;
+    border-bottom: 4px solid black;
+}
+
+#map {
+    height: 500px;
+    border: 4px solid #000;
+}
+
+#infobox {
+    border: 4px solid #000;
+    height: 500px;
+    width: 48%;
+
+}
+
+#info {
+    padding: 1em;
+    width: 100%;
+}
+

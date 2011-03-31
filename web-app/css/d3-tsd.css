@@ -1,0 +1,157 @@
+
+#maptext {
+   border: 1px;
+   background-color: yellow;
+}
+  #databox table {
+  margin-top:1em;
+}
+ svg {
+  border: solid 1px #aaa;
+}
+path.incidentBoundary {
+  stroke: blue;
+  stroke-width: 4px;
+  fill: none;
+}
+rect {
+  fill: lightsteelblue;
+  stroke: #eee;
+  stroke-width: 2px;
+}
+rect.d1 {
+  fill: steelblue;
+}
+rect.d2 {
+  fill: darkblue;
+}
+
+ 
+.rule line {
+  stroke: #eee;
+  shape-rendering: crispEdges;
+}
+ 
+.rule2 line {
+  stroke: #eee;
+  shape-rendering: crispEdges;
+}
+ 
+.rule line.axis {
+  stroke: #000;
+}
+ 
+.rule2 line.axis {
+  stroke: #000;
+}
+ 
+.area {
+  fill: steelblue;
+//    fill-opacity: 0.75;
+}
+ 
+.line, circle.area {
+  fill: none;
+  stroke: cyan;
+  stroke-width: 1.5px;
+}
+ 
+.area2 path {
+  fill: green;
+//  fill-opacity: 0.75;
+}
+
+.line3 {
+  fill: none;
+  stroke: orange;
+  stroke-width: 1.5px;
+}
+ 
+.area3 path {
+  fill: red;
+//  fill-opacity: 0.5;
+}
+
+.timebar {
+    stroke: purple;
+    stroke-width: 4px;
+}
+ 
+.line2, circle.area2 {
+  fill: none;
+  stroke: yellow;
+  stroke-width: 1.5px;
+}
+ 
+circle.area {
+  fill: #fff;
+}
+
+.ylabels, .xlabels {
+   font-size: 8pt;
+}
+
+#scaleslider {
+  width: 300px;
+}
+#maxspdslider {
+  width: 300px;
+}
+
+td.label {
+    text-align: right;
+}
+
+td.value {
+    text-align: right;
+    width: 4em;
+}
+
+td.unit {
+    text-align: left;
+}
+
+.compass .back {
+  fill: #256574;
+}
+
+.compass .fore, .compass .chevron {
+  stroke: #1AA398;
+}
+
+#segments path {
+  fill: none;
+  stroke-linecap: round;
+//  stroke-width: 4px;
+}
+
+#ends circle {
+  fill: yellow;
+  stroke: black;
+  r: 1px;
+}
+
+#copy, #copy a {
+  color: #1AA398;
+}
+
+#mapbox {
+    background-color: #ddd;
+    text-align: left;
+    border: 2px solid black;
+    padding: 0px;
+}
+
+#tsdbox {
+    background-color: #ddd;
+    text-align: right;
+    border: 2px solid black;
+    padding: 0px;
+}
+#chartbox {
+    margin-top:1em;
+    background-color: #ddd;
+    text-align: right;
+    border: 2px solid black;
+    padding: 0px;
+}

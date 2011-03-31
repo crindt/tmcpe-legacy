@@ -1,6 +1,10 @@
 var doMap = function( data, parent ) {
 
-    var theight = 500;
+    // remove any existing children
+    $("#map").children().remove();
+
+    var theight = $("#mapbox").height()-2; // -2 reflects border size of container?
+    var twidth = $("#mapbox").width()-2;   // -2 reflects border size of container?
 
     var po = org.polymaps;
 
@@ -14,14 +18,14 @@ var doMap = function( data, parent ) {
     var svg = d3.select("#map")
 	.append("svg:svg")
 	.attr("id","mapsvg")
-	.attr("height",theight)[0][0];
+	.attr("height",theight)
+	.attr("width",twidth)[0][0];
 
 
     var map = po.map()
 	.container(svg)
-	.center({lat: 33.739, lon: -117.830})
-	.on("move",resize)
-	.on("resize",resize)
+//	.on("move",resize)
+//	.on("resize",resize)
 	.zoom(13)
 	.zoomRange([1,/*6*/, 18])
 	.add(po.interact());

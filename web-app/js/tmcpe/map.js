@@ -1,5 +1,8 @@
 var doQueryMap = function( data, parent ) {
 
+    // remove any existing children
+    $("#map").children().remove();
+
     var theight = 500;
 
     var po = org.polymaps;
@@ -303,7 +306,7 @@ var doQueryMap = function( data, parent ) {
 		foot.append("tr").selectAll("td").data(fields)
 		    .enter()
 		    .append("td")
-		    .attr( "class", function( d ) { return d.key + " summary" } )
+		    .attr( "class", function( d ) { return d.key + " summary_tot" } )
 		    .html(function(d,i){
 			var tot = 0;
 			var cnt = 0;
@@ -319,7 +322,34 @@ var doQueryMap = function( data, parent ) {
 			    avg = (tot/cnt);
 			    tot = d.render ? d.render( tot ) : tot;
 			    avg = d.render ? d.render( avg ) : avg;
-			    return tot+"<br/>"+avg ;
+			    $(this).addClass("numeric");
+			    return tot;
+			} else {
+			    return "";
+			}
+		    });
+		// sum and avg the data in the table
+		foot.append("tr").selectAll("td").data(fields)
+		    .enter()
+		    .append("td")
+		    .attr( "class", function( d ) { return d.key + " summary_avg" } )
+		    .html(function(d,i){
+			var tot = 0;
+			var cnt = 0;
+			$.each($("#inctable td."+d.key), function( index ) {
+			    var val = parseFloat( this.innerText );
+			    if ( !isNaN( val ) && this.innerText == ""+val+"" ) {
+				tot += val;
+				cnt ++;
+			    }
+			});
+			var avg="n/a";
+			if  ( cnt > 0 ) { 
+			    avg = (tot/cnt);
+			    tot = d.render ? d.render( tot ) : tot;
+			    avg = d.render ? d.render( avg ) : avg;
+			    $(this).addClass("numeric");
+			    return avg;
 			} else {
 			    return "";
 			}
@@ -374,8 +404,10 @@ var doQueryMap = function( data, parent ) {
 			} )
 			.enter().append("td")
 			.attr("class",function(d,i) { 
+			    var cc = this.className;
 			    var key = fields[ i ].key;
-			    return key; })
+			    return [cc,key].join(" "); 
+			})
 			.text( function (dd) { 
 			    return dd } );
 
@@ -388,17 +420,17 @@ var doQueryMap = function( data, parent ) {
 			} )
 			.selectAll("td")
 			.attr("class",function(d,i) { 
+			    var cc = this.className;
 			    var key = fields[ i ].key;
-			    return key;  })
+			    return [cc,key].join(" "); 
+			})
 		    ;
 
 		    // exit, removing items that have been filtered
 		    rr.exit().remove();
 
-//		    $("#inctable").tableScroll({height:400,flush:false});
-
 		    // update totals
-		    foot.select("tr").selectAll("td")
+		    foot.selectAll("tr td.summary_tot")
 			.html(function(d,i){
 			    var tot = 0;
 			    var cnt = 0;
@@ -414,7 +446,31 @@ var doQueryMap = function( data, parent ) {
 				avg = (tot/cnt);
 				tot = d.render ? d.render( tot ) : tot;
 				avg = d.render ? d.render( avg ) : avg;
-				return tot+"<br/>"+avg ;
+				$(this).addClass( "numeric" );
+				return tot;
+			    } else {
+				return "";
+			    }
+			});
+
+		    foot.selectAll("tr td.summary_avg")
+			.html(function(d,i){
+			    var tot = 0;
+			    var cnt = 0;
+			    $.each($("#inctable td."+d.key), function( index ) {
+				var val = parseFloat( this.innerText );
+				if ( !isNaN( val ) && this.innerText == ""+val+"" ) {
+				    tot += val;
+				    cnt ++;
+				}
+			    });
+			    var avg="n/a";
+			    if  ( cnt > 0 ) { 
+				avg = (tot/cnt);
+				tot = d.render ? d.render( tot ) : tot;
+				avg = d.render ? d.render( avg ) : avg;
+				$(this).addClass( "numeric" );
+				return avg;
 			    } else {
 				return "";
 			    }
@@ -454,39 +510,18 @@ var doQueryMap = function( data, parent ) {
 		    }
 		} );
 
-		$.tablesorter.addParser({
-	            // set a unique id 
-		    id: 'formatNum', 
-		    is: function(s) { 
-			// return false so this parser is not auto detected 
-			return false; 
-		    }, 
-		    format: function(s) { 
-			// format your data for normalization (remove commas)
-			return s.replace(/,/,"");
-		    }, 
-		    // set type, either numeric or text 
-		    type: 'numeric' 
-		});
-		
-		$("#inctable").tablesorter({
-		    headers: { 4:{ sorter: 'formatNum' },
-			       5:{ sorter: 'formatNum' },
-			       6:{ sorter: 'formatNum' } }
-		}).bind("sortEnd",function(){
-		    // reset scroll
-//		    $("#inctable").tableScroll({height:400,flush:false});
-		});
-		    
-		
-		$("#inctable").tableScroll({height:400,flush:true});
+		$("#inctable").dataTable({
+		    bPaginate:false, sScrollY:"350px","bAutoWidth":false,
+		    "aoColumns": [
+			{ "sWidth": "15%", "sType": "string" }, // CAD
+			{ "sWidth": "10%", "sType": "date" },   // timestamp
+			{ "sWidth": "15%", "sType": "string" }, // location; implement custom type
+			{ "sWidth": "30", "sType": "string" }, // description; implement custom type
+			{ "sWidth": "10%", "sType": "numeric", "sClass":"numeric" }, // d12_delay; implement custom type
+			{ "sWidth": "10%", "sType": "numeric", "sClass":"numeric" }, // tmcpe_delay; implement custom type
+			{ "sWidth": "10%", "sType": "numeric", "sClass":"numeric" } // savings; implement custom type
+		    ]});
 
-		window.addEventListener( "resize", function() {
-//		    $("#inctable").tableScroll("undo");
-//		    $("#inctable").tableScroll({height:400,flush:true});
-//		    $("#inctable").width("100%");
-//		    $("#inctable").trigger("update");
-		}, false);
 	    });
 
     function incidentClicked( d, e, f ) {
