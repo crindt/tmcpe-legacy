@@ -30,12 +30,31 @@
       var i = 0;
 
       var tsd;
+      var qmap;
+      var qtab;
 
       $(document).ready(function(){
 
 	  
       // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
-         doQueryMap();
+      //doQueryMap();
+
+      d3.json
+      ("/tmcpe/incident/list.geojson"
+      //	    +"?startDate=2009-01-01"
+      //	    +"?startDate=2010-01-01"
+      +"?startDate=2010-09-01"
+      +"&Analyzed=onlyAnalyzed"
+      +"&max=1000", 
+      function(e){
+         qmap = tmcpe.query.qmap()
+	 .container($("#map")[0]).data(e.features);
+
+	 qtab = tmcpe.query.table()
+	 .container($("#inctableContainer")[0]).map(qmap.map).data(qmap.data());
+
+	 qmap.table( qtab );
+      });
 
 	 $(window).resize(function() { 
 //	    doQueryMap();

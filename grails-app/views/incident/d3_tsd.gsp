@@ -25,29 +25,108 @@
     <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
     <p:javascript src='polymaps/polymaps' />
     <p:javascript src='protovis/protovis' />
-    <p:javascript src='tmcpe/po' />
+<!--    <p:javascript src='tmcpe/po' /> -->
     
     <g:javascript>
 
 
   var i = 0;
+  var tsd;
+  var cumflow;
+  var map;
 
   var themeScale=1.0;
+
+
+  function cellStyle(d) {
+     var themeWid = $("#theme")[0];
+     var theme = themeWid.options[themeWid.selectedIndex].value;
+     var scale  = $("#scaleslider").slider("option","value");
+     var maxSpd = $("#maxspdslider").slider("option","value");
+
+     if ( theme == "stdspd" ) {
+        var color = pv.Scale.linear(-scale,
+                  -(scale/2),0 ).range("#ff0000","#ffff00","#00ff00");
+        var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
+        var col = "fill:"+color(vv).color+";stroke:#eee;"
+        return col;
+     } else if ( theme == "spd" ) {
+        var minspd = 15;
+        var color = pv.Scale.linear(minspd,
+                                    minspd+(maxSpd-minspd)/2,
+                                    maxSpd)
+                      .range("#ff0000","#ffff00","#00ff00");
+        var col = "fill:"+color(d.spd).color+";stroke:#eee;"
+        return col;
+     }
+  }
+
+  function evidenceOfIncident( d, scale, maxIncidentSpeed ) {
+      var stdlev = (d.spd - d.spd_avg)/d.spd_std;
+      var tmppjm = 1; // no incident probability is default
+      if ( d.p_j_m != 0 && d.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
+	  tmppjm = 0.5;
+      else if ( stdlev < 0 
+		&& stdlev < -scale
+		&& d.spd < maxIncidentSpeed
+	      )
+      {
+	  tmppjm = 0.0;
+      }
+      return tmppjm == 0.0;
+  }
+
+
+  function cellAugmentStyle(d) {
+     var v1 = $("#scaleslider").slider("option","value");
+     var v2 = $("#maxspdslider").slider("option","value");
+     var ev = evidenceOfIncident( d, v1, v2 );
+     return ev ? "fill:black;" : "fill:none;";
+  }
+
+
+  function syncchart(tsd,cumflow) {
+      return function( d, i ) { 
+	  tsd.selectedTime( d.i );
+
+          // updates the chart's data
+	  cumflow.section( d.i );
+      };
+  };
+
+
   function updateData( json ) {
       json.timesteps = json.timesteps.map( function( d ) { return new Date(d); } ); // convert date strings to date objects
-      tmcpe.tsd.redraw(json);
-      tmcpe.cumflow.doChart( json )
-      updateStats( json );
-      doMap( json );
+
+      // create the tsd
+      tsd = tmcpe.tsd()
+                 .container( $("#tsdbox")[0] )
+                 .data(json)
+		 .cellStyle( cellStyle )
+		 .cellAugmentStyle( cellAugmentStyle );
+
+      // create the cumulative flow chart
+      cumflow = tmcpe.cumflow()
+                     .container( $("#chartbox")[0] )
+                     .data(json);
+
+      syncchart(tsd,cumflow)({i:cumflow.section()})
+
+      d3.select(tsd.container()).selectAll("rect").on("click", syncchart( tsd, cumflow ));
+
+      // create the map
+      //doMap( json );
+      map = tmcpe.segmap().container( $("#mapbox")[0] ).data( json );
 
       $(window).resize(function() { 
-         tmcpe.tsd.redraw( json ); 
-	 tmcpe.cumflow.doChart( json )
+         tsd.resize(); 
+         tsd.redraw(); 
+	 cumflow.resize( );
+	 cumflow.redraw( );
 	 updateStats( json );
-	 doMap( json );
+//	 doMap( json );
+         map.redraw();
       });
-
-
   }
 
   function handleFailure( e ) {
@@ -62,39 +141,8 @@
   }
 
   function updateTsd() {
-      
-      var themeWid = $("#theme")[0];
-      var theme = themeWid.options[themeWid.selectedIndex].value;
-
-      var tsd = d3.select("#tsdbox");
-
-      tsd.selectAll("g")
-	  .selectAll("rect")
-	  .attr("style", function(d) { 
-	      if ( theme == "stdspd" ) {
-		  var color = pv.Scale.linear(-$("#scaleslider").slider("option","value"),-($("#scaleslider").slider("option","value")/2),0 ).range("#ff0000","#ffff00","#00ff00");
-		  var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
-		  var col = "fill:"+color(vv).color+";stroke:#eee;"
-		  return col;
-	      } else if ( theme == "spd" ) {
-		  var minspd = 15;
-		  var color = pv.Scale.linear(minspd,
-					      minspd+($("#maxspdslider").slider("option","value")-minspd)/2,
-					      $("#maxspdslider").slider("option","value")
-					     ).range("#ff0000","#ffff00","#00ff00");
-		  var col = "fill:"+color(d.spd).color+";stroke:#eee;"
-		  return col;
-	      }
-	  });
-
-      tsd.selectAll("g")
-	  .selectAll("circle")
-	  .attr("style", function(d) { 
-	      var v1 = $("#scaleslider").slider("option","value");
-	      var v2 = $("#maxspdslider").slider("option","value");
-	      var ev = tmcpe.util.evidenceOfIncident( d, v1, v2 );
-	      return ev ? "fill:black;" : "fill:none;";
-	  });
+     tsd.updateCellStyle( ); // update style
+     tsd.updateCellAugmentation( ); // update style
   }
 
 
@@ -124,10 +172,10 @@
 	     },
 	     change: function( event, ui ) { 
   	        $("#alpha").text( $("#scaleslider").slider("option","value") );
-   	        updateTsd();
+//   	        updateTsd();
 	     }
 	  });
-	  $("#alpha").text("1");
+	  $("#alpha").text($("#scaleslider").slider("option","value"));
 
 	  $("#maxspdslider").slider({
 	     value:60,

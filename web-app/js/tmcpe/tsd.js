@@ -1,13 +1,15 @@
-(function()
- {tmcpe = {version: "1.99.0"};
+if ( !tmcpe ) var tmcpe = {};
 
+(function()
+ {tmcpe.version = 0.1;
+  
   Array.max = function( array ){
       return Math.max.apply( Math, array );
   };
   Array.min = function( array ){
       return Math.min.apply( Math, array );
   };
-
+  
   tmcpe.util = {};
 
   tmcpe.util.getGRColor = function( val, min, max,  minval, maxval ) {
@@ -69,21 +71,6 @@
       return col;
   };
 
-  tmcpe.util.evidenceOfIncident = function( d, scale, maxIncidentSpeed ) {
-      var stdlev = (d.spd - d.spd_avg)/d.spd_std;
-      var tmppjm = 1; // no incident probability is default
-      if ( d.p_j_m != 0 && d.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
-	  tmppjm = 0.5;
-      else if ( stdlev < 0 
-		&& stdlev < -scale
-		&& d.spd < maxIncidentSpeed
-	      )
-      {
-	  tmppjm = 0.0;
-      }
-      return tmppjm == 0.0;
-  }
-
   tmcpe.tsd = {};
 
   tmcpe.plottrajectory = function( d, i ) {
@@ -93,28 +80,75 @@
   tmcpe.hh = function() { return $("#tsdbox").height()-2; };
   tmcpe.ww = function() { return $("#tsdbox").width()-2; };
 
-  tmcpe.tsd.redraw = function( json ) {
+  tmcpe.ns = {
+      svg: "http://www.w3.org/2000/svg",
+      xlink: "http://www.w3.org/1999/xlink"
+  };
 
-      // remove any existing children
-      $("#tsdbox").children().remove();
 
-      var data = json.data;
-      var sections = json.sections;
-      var fn = [grid0, grid1],
-      dw = data[0].length,
-      dh = data.length;
-      grid = grid1,
-      p = 20,  // padding, in px
-      szs = (tmcpe.hh()-2*p)/dh,
-      szt = (tmcpe.ww()-7*p)/dw;   // leave 100px margin for labels
-      var twidth = szt*dw,
-         theight = szs*dh;
-      var seclensum = 0;
-      $.each(sections, function(i,s)
-		    {
-			seclensum+=s.seglen;
-		    }
-		   );
+  tmcpe.svg = function(type) {
+      return document.createElementNS(tmcpe.ns.svg, type);
+  };
+
+
+  tmcpe.tsd = function() {
+      var tsd = {},
+      container,
+      size,
+      sizeActual,
+      json,
+      dw,      // total number of columns
+      dh,      // total numbers of rows
+      szs,     // size per section in px
+      szt,     // size per timestep in px
+      twidth,
+      theight,
+      svg,
+      cellStyle,
+      cellAugmentStyle,
+      selectedTime,
+      seclensum,
+      
+      p = 20  // padding, in px
+      ;
+
+      var rect = tmcpe.svg("rect");
+      rect.setAttribute("visibility", "hidden");
+      rect.setAttribute("pointer-events", "all");
+
+      tsd.container = function(x) {
+	  if (!arguments.length) return container;
+	  container = x;
+	  container.setAttribute("class", "tsd");
+	  //container.appendChild(rect);
+	  return tsd.resize(); // infer size
+      }
+
+      tsd.resize = function() {
+	  if (!size) {
+	      rect.setAttribute("width", "100%");
+	      rect.setAttribute("height", "100%");
+	      b = rect.getBBox();
+	      sizeActual = {x: b.width, y: b.height};
+	      //resizer.add(map);
+	  } else {
+	      sizeActual = size;
+	      //resizer.remove(map);
+	  }
+	  rect.setAttribute("width", sizeActual.x);
+	  rect.setAttribute("height", sizeActual.y);
+	  return tsd;
+      };
+
+      tsd.data = function(x) {
+	  if ( !arguments.length ) return json;
+	  json = x;
+	  tsd.redraw();
+	  return tsd;
+      }
+
+      tsd.hh = function() { return $(container).height()-2; };
+      tsd.ww = function() { return $(container).width()-2; };
 
 
       function translateY(d, i) { return "translate(0,"+(i*szs)+")"; };
@@ -122,543 +156,818 @@
 
       function grid0(x,y) {
 	  if (x < 0 || y < 0 || x >= dw || y >= dh) return 0;
-	  return data[y][x].inc==0;
+	  return json.data[y][x].inc==0;
       }
       function grid1(x,y) {
 	  if (x < 0 || y < 0 || x >= dw || y >= dh) return 0;
-	  return data[y][x].inc==1;
+	  return json.data[y][x].inc==1;
       }
 
-  
-      function contour(grid, start) {
-	  svg.selectAll("path")
-	      .data([d3.geom.contour(grid, start).map(scale)])
-	      .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
-	      .enter().append("svg:path")
-	      .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
-	      .attr("class","incidentBoundary");
-      }
 
-      function scale(p) { 
-	  var dist = 0;
-	  var j;
-	  for ( j = 0; j<p[1]; ++j ) { 
-	      dist += sections[j].seglen; 
-	  }
-	  var val = theight*dist/seclensum;
-	  return [p[0]*szt, val]; 
-      }
-      
-      
+
       function updateText( newText ) {
-	  text.html( newText );
+	  d3.select("#msgtxt").html( newText );
       }
 
-      function updateData( json ) {
-//	  svg.select("#d12d").text( json.
+      tsd.cellStyle = function(x) {
+	  if (!arguments.length) return cellStyle;
+	  cellStyle = x;
+	  return tsd.updateCellStyle();
       }
-      
-      function mouseover(d,i) {
-	  updateText( "inc:" + d.inc + ", spd:" + d.spd + ", occ:" + Math.floor(d.occ*100+0.5) + "%, vol:" + d.vol + ", loc: " +sections[d.i].name + ", time: "+json.timesteps[d.j]+", lanes: " + sections[d.i].lanes );
 
-	  // update cross hatch
- 	  var cross = svg.selectAll("#tsdtime")
+      tsd.cellAugmentStyle = function(x) {
+	  if (!arguments.length) return cellAugmentStyle;
+	  cellAugmentStyle = x;
+	  return tsd.updateCellAugmentation();
+      }
+
+      tsd.updateCellStyle = function() {
+	  d3.select(container).selectAll("g")
+	      .selectAll("rect")
+	      .attr("style", cellStyle );
+	  return tsd;
+      }
+
+      tsd.updateCellAugmentation = function() {
+	  d3.select(container).selectAll("g").selectAll("circle")
+	      .attr("style", cellAugmentStyle );
+	  return tsd;
+      }
+
+      function showSelectedTime() {
+	  var data = json.data,
+	  sections = json.sections
+
+	  // update cross line by translating it to the proper section
+	  var cross = tsd.svg.selectAll("#tsdsec")
 	      .data([1])
-	      .attr("x1",(d.j+1)*szt)
-	      .attr("y1",0)
-	      .attr("x2",(d.j+1)*szt)
-	      .attr("y2",theight-1)
-	      .attr("style","stroke:purple;stroke-width:3");
+	      .attr("transform", function(dd, ii) { 
+		  var dist = 0;
+		  var j;
+		  for ( j = 0; j<selectedTime; ++j ) { dist += sections[j].seglen; }
+		  var val = theight*(dist+sections[selectedTime].seglen/2)
+		      /seclensum;
+		  return "translate(0,"+(val)+")"; 
+	      });
 
-	  // create cross hatch if it doesn't yet exist
+
+	  // create cross line if it doesn't exist
 	  cross.enter()
 	      .append("svg:line")
-	      .attr("id","tsdtime" )
-	      .attr("x1",(d.j+1)*szt)
+	      .attr("id","tsdsec")
+	      .attr("transform", function(dd, ii) { 
+		  var dist = 0;
+		  var j;
+		  for ( j = 0; j<selectedTime; ++j ) { dist += sections[j].seglen; }
+		  var val = theight*(dist+sections[selectedTime].seglen/2)
+		      /seclensum;
+		  return "translate(0,"+(val)+")"; 
+	      })
+	      .attr("x1",0)
 	      .attr("y1",0)
-	      .attr("x2",(d.j+1)*szt)
-	      .attr("y2",theight-1)
+	      .attr("x2",tsd.twidth)
+	      .attr("y2",0)
 	      .attr("style","stroke:purple;stroke-width:3");
 
-
-	  // Get all sections at time == j, these give use the colors
-	  var el = $('rect[j^='+d.j+']');
-
-	  // Next, foreach el, find the corresponding segment and update the stroke
-	  el.map( function (ii, e) {
-	      if ( e != null && !isNaN(e.__data__.i) ) {
-		  // update segment colors
-		  var seg = $('path[id^='+sections[e.__data__.i].vdsid+']');
-		  seg.map( function (jj, s) { 
-		      s.style.setProperty("stroke",e.style.getPropertyValue("fill"),"important") } );
-
-		  // update node colors
-		  var nod = $('circle[id^="node:'+sections[e.__data__.i].vdsid+'"]');
-		  nod.map( function (jj, s) { 
-		      s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
-		      s.setAttribute("r", e.__data__.inc ? 4 : 2 );
-		  } );
-	      }
-	  });
-
-	  // finally, update the map text
-	  d3.select("#maptext")
-	      .text(json.timesteps[d.j]);
+	  // highlight edge
+	  var seg = $('path[id^='+sections[selectedTime].vdsid+']');
+	  seg.map( function (jj, s) { s.style.setProperty("stroke-width",6 ) } );
       }
 
+      tsd.selectedTime = function(x) {
+	  if (!arguments.length) return selectedTime;
+	  selectedTime = x;
 
-      function syncchart( json ) {
-	  return function( d, i ) { 
-	      d3.selectAll(".flowchart").remove();
-	      tmcpe.cumflow.doChart( json, d.i ); 
+	  showSelectedTime();
+
+	  return tsd;
+      }
+
+      tsd.redraw = function() {
+	  // remove any existing children
+	  $(container).children().remove();
+
+	  var data = json.data,
+	  sections = json.sections
+	  fn       = [grid0, grid1],      // contouring functions
+	  grid = grid1;
+
+	  dh = data.length,        // how many time steps
+	  dw = data[0].length,     // how many sections
+
+	  szs = (tsd.hh()-2*p)/dh;
+	  szt = (tsd.ww()-7*p)/dw;
+
+	  twidth = szt*dw;
+	  tsd.twidth = twidth;
+          theight = szs*dh;
+
+	  seclensum = 0;
+	  $.each(sections, function(i,s){ seclensum+=s.seglen; } );
+
+	  function scale(p) { 
+	      var dist = 0;
+	      var j;
+	      for ( j = 0; j<p[1]; ++j ) { 
+		  dist += sections[j].seglen; 
+	      }
+	      var val = theight*dist/seclensum;
+	      return [p[0]*szt, val]; 
+	  }
+
+	  function contour(svg, agrid, start) {
+	      svg.selectAll("path")
+		  .data([d3.geom.contour( agrid, start).map(scale)])
+		  .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
+		  .enter().append("svg:path")
+		  .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
+		  .attr("class","incidentBoundary");
+	  }
+
+
+
+	  function mouseover(d,i) {
+	      updateText( "inc:" + d.inc + ", spd:" + d.spd + ", occ:" + Math.floor(d.occ*100+0.5) + "%, vol:" + d.vol + ", loc: " +sections[d.i].name + ", time: "+json.timesteps[d.j]+", lanes: " + sections[d.i].lanes );
 
 	      // update cross hatch
-	      var cross = svg.selectAll("#tsdsec")
+ 	      var cross = svg.selectAll("#tsdtime")
 		  .data([1])
-		  .attr("transform", function(dd, ii) { 
-		      var dist = 0;
-		      var j;
-		      for ( j = 0; j<d.i; ++j ) { dist += sections[j].seglen; }
-  		      var val = theight*(dist+sections[d.i].seglen/2)
-			  /seclensum;
-		      return "translate(0,"+(val)+")"; 
-		  })
-		  .attr("x1",0)
+		  .attr("x1",(d.j+1)*szt)
 		  .attr("y1",0)
-		  .attr("x2",twidth)
-		  .attr("y2",0)
+		  .attr("x2",(d.j+1)*szt)
+		  .attr("y2",theight-1)
 		  .attr("style","stroke:purple;stroke-width:3");
 
-
-	      // create cross hatch if it doesn't exist
+	      // create cross hatch if it doesn't yet exist
 	      cross.enter()
 		  .append("svg:line")
-		  .attr("id","tsdsec")
-		  .attr("transform", function(dd, ii) { 
-		      var dist = 0;
-		      var j;
-		      for ( j = 0; j<d.i; ++j ) { dist += sections[j].seglen; }
-  		      var val = theight*(dist+sections[d.i].seglen/2)
-			  /seclensum;
-		      return "translate(0,"+(val)+")"; 
-		  })
-		  .attr("x1",0)
+		  .attr("id","tsdtime" )
+		  .attr("x1",(d.j+1)*szt)
 		  .attr("y1",0)
-		  .attr("x2",twidth)
-		  .attr("y2",0)
+		  .attr("x2",(d.j+1)*szt)
+		  .attr("y2",theight-1)
 		  .attr("style","stroke:purple;stroke-width:3");
 
-	      // highlight edge
-	      var seg = $('path[id^='+sections[d.i].vdsid+']');
-	      seg.map( function (jj, s) { 
-		  s.style.setProperty("stroke-width",6 ) } );
 
-	  };
+	      // Get all sections at time == j, these give use the colors
+	      var el = $('rect[j^='+d.j+']');
 
-	  $(window).resize(function() { 
-	      tmcpe.tsd.redraw( json ); 
-	  });
-      };
+	      // Next, foreach el, find the corresponding segment and update the stroke
+	      el.map( function (ii, e) {
+		  if ( e != null && !isNaN(e.__data__.i) ) {
+		      // update segment colors
+		      var seg = $('path[id^='+sections[e.__data__.i].vdsid+']');
+		      seg.map( function (jj, s) { 
+			  s.style.setProperty("stroke",e.style.getPropertyValue("fill"),"important") } );
+
+		      // update node colors
+		      var nod = $('circle[id^="node:'+sections[e.__data__.i].vdsid+'"]');
+		      nod.map( function (jj, s) { 
+			  s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
+			  s.setAttribute("r", e.__data__.inc ? 4 : 2 );
+		      } );
+		  }
+	      });
+
+	      // finally, update the map text
+	      d3.select("#maptext")
+		  .text(json.timesteps[d.j]);
+	  }
 
 
+	  svg = d3.select(container)
+              .append("svg:svg")
+              .attr("width", twidth + 7*p/*theight/*twidth*/ )
+              .attr("height", theight + 2*p/*twidth/*theight*/ )
+	      .append("svg:g")
+	      .attr("transform", "translate(" + 6*p + "," + p + ")")
+	      .on("keydown",function( k ) {
+		  console.log( k );
+	      });
+	  tsd.svg = svg;
 
-      // create a message box for mouseover display
-      var text = d3.select("#msgtxt").text("Nothing selected");
+	  // now, create the rows of data.
+	  var gg = svg.selectAll("g.sectionrow")
+              .data(data)
+              .enter().append("svg:g")
+	      .attr("class","sectionrow")
+	      .attr("id",function(d,i) { return "row"+i; })
+	      .attr("vdsid",function(d,i) { 
+		  return json.sections[i].vdsid; })
+              .attr("transform", function(d, i) { 
+		  var dist = 0;
+		  var j;
+		  for ( j = 0; j<i; ++j ) { dist += sections[j].seglen; }
+  		  var val = theight*dist/seclensum;
+		  return "translate(0,"+(val)+")"; 
+	      });
 
+	  // next, in each row, create the time-space cells
+	  gg.selectAll("rect")
+              .data(function(d) { return d; })
+              .enter().append("svg:rect")
+	      .attr("i", function(d){return d.i;} )
+	      .attr("j", function(d){return d.j;} )
+              .attr("width", szt )
+              .attr("transform", translateX )
+              .attr("height", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum); })
+	      .attr("style", cellStyle)
+              .on("mouseover", mouseover);
 
-      // create the svg box
-      var svg0 = d3.select("#tsdbox")
-          .append("svg:svg")
-          .attr("width", twidth + 7*p/*theight/*twidth*/ )
-          .attr("height", theight + 2*p/*twidth/*theight*/ )
-	  .append("svg:g")
-	  .attr("transform", "translate(" + 6*p + "," + p + ")");
-      svg0.append("svg:defs")
-	  .append("svg:pattern")
-	  .attr("id","hatch00")
-	  .attr("patternUnits","userSpaceOnUse")
-	  .attr("x",0)
-	  .attr("y",0)
-	  .attr("width",5)
-	  .attr("height",5)
-	  .append("svg:g")
-	  .attr("style","fill:none;stroke:black; stroke-width:1")
-          .append("svg:line")
-	  .attr("x1",0)
-	  .attr("y1",0)
-	  .attr("x2",5)
-	  .attr("y2",5)
-	  .on("keydown",function( k ) {
-	      console.log( k );
-	  });
+	  // create ylabels
+	  gg.append("svg:text")
+	      .attr("dy",function (d,i) { 
+		  return theight*sections[d[0].i].seglen/seclensum/2+5; } ) // put midway down
+	      .attr("text-anchor","end")
+	      .text(function(d,i){ 
+		  return i%2 ? "" : sections[i].name; 
+	      })
+	      .attr("class","ylabels");
 
-      // create a transform for the svg box that rotates it 90 degrees clockwise
-      //	  var svg = svg0.append("svg:g").attr("transform","translate(0,"+(-theight)+")" + " rotate(90,0,"+theight+")" );
-      var svg = svg0;     
-      
-      // now, create the rows of data.
-      var gg = svg.selectAll("g.sectionrow")
-          .data(data)
-          .enter().append("svg:g")
-	  .attr("class","sectionrow")
-	  .attr("id",function(d,i) { return "row"+i; })
-	  .attr("vdsid",function(d,i) { 
-	      return json.sections[i].vdsid; })
-          .attr("transform", function(d, i) { 
-	      var dist = 0;
-	      var j;
-	      for ( j = 0; j<i; ++j ) { dist += sections[j].seglen; }
-  	      var val = theight*dist/seclensum;
-	      return "translate(0,"+(val)+")"; 
-	  });
-
-      // next, in each row, create the time-space cells
-      gg.selectAll("rect")
-          .data(function(d) { return d; })
-          .enter().append("svg:rect")
-      //.attr("class", function(d) { return "d"+d.inc; })
-/*
-	  .attr("style", function(d) { 
-              var color = pv.Scale.linear(-$("#scaleslider").slider("option","value"),-($("#scaleslider").slider("option","value")/2),0 ).range("red","yellow","green");
-	      var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
-	      var col = "fill:"+color(vv).color+";stroke:#eee;"
-	      return col;
-	  })
-*/
-	  .attr("i", function(d){return d.i;} )
-	  .attr("j", function(d){return d.j;} )
-          .attr("width", szt )
-          .attr("transform", translateX )
-          .attr("height", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum); })
-          .on("mouseover", mouseover)
-          .on("click", syncchart( json ) );
-
-      updateTsd();
-
-      gg.append("svg:text")
-//	  .attr("dx",twidth)
-	  .attr("dy",function (d,i) { 
-	      return theight*sections[d[0].i].seglen/seclensum/2+5; } ) // put midway down
-	  .attr("text-anchor","end")
-	  .text(function(d,i){ 
-	      return i%2 ? "" : sections[i].name; 
-	  })
-	  .attr("class","ylabels");
-
-      
       // now, create the rows of data to show evidence as black dots in the
-      // center of cells suspected of being impacted by an incident
-      var g = svg.selectAll("g.evidence")
-          .data(data)
-          .enter().append("svg:g")
-	  .attr("class","evidence")
-          .attr("transform", function(d, i) { 
-	      var dist = 0;
-	      var j;
-	      for ( j = 0; j<i; ++j ) { dist += sections[j].seglen; }
-  	      var val = theight*dist/seclensum;
-	      return "translate(0,"+(val)+")"; 
-	  });
-      
-      // next, in each row, create the evidence
-      g.selectAll("circle")
-          .data(function(d) { return d; })
-          .enter().append("svg:circle")
-      //.attr("class", function(d) { return "d"+d.inc; })
-	  .attr("style", function(d) { 
-	      return tmcpe.util.evidenceOfIncident( d, $("#scaleslider").slider("option","value"), $("#maxspdslider").slider("option","value") ) ? "fill:black;" : "fill:none"; })
-          .attr("cx", function (d, i ) { return ((i+0.5)*szt) } )
-          .attr("cy", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum)/2; })
-	  .attr("r", 2 );
+	  // center of cells suspected of being impacted by an incident
+	  var g = svg.selectAll("g.evidence")
+              .data(data)
+              .enter().append("svg:g")
+	      .attr("class","evidence")
+              .attr("transform", function(d, i) { 
+		  var dist = 0;
+		  var j;
+		  for ( j = 0; j<i; ++j ) { dist += sections[j].seglen; }
+  		  var val = theight*dist/seclensum;
+		  return "translate(0,"+(val)+")"; 
+	      });
 
+	  // next, in each row, create the evidence
+	  g.selectAll("circle")
+              .data(function(d) { return d; })
+              .enter().append("svg:circle")
+	  //.attr("class", function(d) { return "d"+d.inc; })
+	      .attr("style", cellAugmentStyle )
+              .attr("cx", function (d, i ) { return ((i+0.5)*szt) } )
+              .attr("cy", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum)/2; })
+	      .attr("r", 2 );
 
-      
+	  contour( svg, grid );
 
-      
-      // finally, draw a contour around the incident region.
-      contour(grid);
+	  return tsd;
 
-      return svg;
+      }
 
+      return tsd;
   }
 
-  function getSection( json, id ) {
-      var sec = json.sections.length-1; // default to the last
-      var ii;
-      for( ii = 0; ii < json.sections.length; ++ii ) {
-	  if ( json.sections[ii].vdsid == id ) 
-	      sec = (ii==json.sections.length-1?ii:ii+1);
+
+  tmcpe.cumflow = function() {
+      var cumflow = {},
+      container,
+      size,
+      sizeActual,
+      json,
+      dw,
+      dh,
+      szs,
+      szt,
+      twidth,
+      theight,
+      svg,
+      section,
+      p = 20
+      ;
+
+
+      // get section index from vdsid
+      getSectionIndex = function( id ) {
+	  var sec = json.sections.length-1; // default to the last
+	  var ii;
+	  for( ii = 0; ii < json.sections.length; ++ii ) {
+	      if ( json.sections[ii].vdsid == id ) 
+		  sec = (ii==json.sections.length-1?ii:ii+1);
+	  }
+	  return sec;
       }
-      return sec;
-  }
 
-  tmcpe.cumflow = {};
-
-  tmcpe.cumflow.doChart = function( json, loc ) {
-
-      // clear any existing
-      $("#chartbox").children().remove();
-
-      var text = d3.select("#msgtxt");
-
-      if ( loc == null ) {
-	  loc = getSection( json, json.sec );
-	  loc--;  // fixme: crindt: we really want to use the incident section by default, not the downstream section.
-      }
-      
-      function sfunc (json,i,j,ff,vol) {
+      // recursive function to sum all of a given cell property from time 0 to time j
+      function sfunc (i,j,ff,vol) {
 	  if ( vol == null ) vol = 0;
 	  if ( j < 0 ) 
 	      return vol;
 	  else 
-	      return sfunc( json, i, j-1, ff, vol + ff(json.data[i][j]) ); 
+	      return sfunc( i, j-1, ff, vol + ff(json.data[i][j]) ); 
       }
 
-      var t0 = new Date( json.t0 ).getTime()/1000;
-      var t1 = new Date( json.t1 ).getTime()/1000;
-      var t2 = new Date( json.t2 ).getTime()/1000;
-      var t3 = new Date( json.t3 ).getTime()/1000;
-      var volscale = 1/1000;
-      var volscale = 1;
+      var rect = tmcpe.svg("rect");
+      rect.setAttribute("visibility", "hidden");
+      rect.setAttribute("pointer-events", "all");
 
-      var startCell = json.timesteps.filter( function (e) {
-	  return !t1 || (e.getTime()/1000 < t1);
-      }).length-1;
-
-      var finishCell = json.timesteps.filter( function (e) {
-	  return !t3 || (e.getTime()/1000 < t3);
-      }).length;
-
-      // fixme: crindt: we really want to use the incident section by default, not the downstream section.
-      var diversion = sfunc(json,getSection(json,json.sec)-1,finishCell,function(v){
-	  return v == null || v.vol_avg == null ? 0 : v.vol_avg/volscale;
-      }) - sfunc(json,getSection(json,json.sec)-1,finishCell,function(v){
-	  return v == null || v.vol == null ? 0 : v.vol/volscale;
-      });
-
-      var data = d3.range( json.timesteps.length ).map(function(j) {
-	  return {x:json.timesteps[j].getTime()/1000+300,
-		  y: sfunc(json,loc,j,function(v){return v.vol/volscale}), 
-		  y2: sfunc(json,loc,j,function(v){return v.vol_avg/volscale}),
-		  y3: ( j < startCell
-			?  sfunc(json,loc,j,function(v){return v.vol_avg/volscale})
-			: ( j > finishCell
-			    ? sfunc(json,loc,j,function(v){return v.vol_avg/volscale}) - diversion
-			    : sfunc(json,loc,j,function(v){return v.vol_avg/volscale}) - diversion*(j-startCell)/(finishCell-startCell) ) )
-		 }
-      });
-
-      // add zeroed elements at the beginning
-      data.unshift( { x:json.timesteps[0].getTime()/1000,y:0,y2:0,y3:0} );
-      
-      // Compute the maximum cumulative flow across all sections (to set the max scale)
-      var maxflow = Array.max( json.data.map( function( r ) { 
-	  return Array.max( [ sfunc( json, r[0].i,r.length-1, function(v){return v.vol/volscale}), 
-			      sfunc( json, r[0].i,r.length-1, function(v){return v.vol_avg/volscale}) ] );
-      } ) );
-
-
-      var w = $("#chartbox").width()-2,
-      h = $("#chartbox").height()-2,
-      ww = w - 7*p,       // width available for plot
-      hh = h - 4*p,   // height available for plot
-      x = d3.scale.linear().domain([json.timesteps[0].getTime()/1000,json.timesteps[json.timesteps.length-1].getTime()/1000+300]).range([0, ww]),
-      y = d3.scale.linear().domain(/*[0,20]*/[0, maxflow]).range([hh, 0]),
-      now = new Date();
-      
-      var vis = d3.select("#chartbox")
-	  .append("svg:svg")
-	  .attr("class", "flowchart" )
-	  .data([data])
-	  .attr("width", w) // margin of 100
-	  .attr("height", h)
-	  .append("svg:g")
-	  .attr("transform", "translate(" 
-		+ 6*p      // shift left 5p (1p margin on right)
-		+ "," + p  // shift down 1p (1p margin on top)
-		+ ")");
-      
-      var rr = d3.range( json.timesteps[0].getTime()/1000,
-			 json.timesteps[json.timesteps.length-1].getTime()/1000+300,
-			 300 );
-      var rr2 = x.ticks(json.timesteps.length);
-      var rules = vis.selectAll("g.rule")
-	  .data( rr )
-	  .enter().append("svg:g")
-	  .attr("class", "rule");
-      
-      rules.append("svg:line")
-	  .attr("x1", x)
-	  .attr("x2", x)
-	  .attr("y1", 0)
-	  .attr("y2", hh - 1);
-
-      var rules2 = vis.selectAll("g.rule2")
-	  .data(y.ticks(10))
-	  .enter().append("svg:g")
-	  .attr("class","rule2");
-      
-      rules2.append("svg:line")
-	  .attr("class", function(d) { return d ? null : "axis"; })
-	  .attr("y1", y)
-	  .attr("y2", y)
-	  .attr("x1", 0)
-	  .attr("x2", ww );
-      
-      function xlabel_rotate (xx) {
-	  return "rotate("+[90,x(xx),(hh+3)].join(",")+")"
+      cumflow.container = function(x) {
+	  if (!arguments.length) return container;
+	  container = x;
+	  container.setAttribute("class", "tsd");
+	  //container.appendChild(rect);
+	  return cumflow.resize(); // infer size
       }
-      
-      rules2.append("svg:text")
-	  .attr("y", y)
-	  .attr("x", -3)
-	  .attr("dy", ".35em")
-	  .attr("text-anchor", "end")
-	  .text(y.tickFormat(10))
-	  .attr("class","ylabels");
 
-      rules.append("svg:text")
-	  .attr("x", x )
-	  .attr("y", hh + 5 - szt )
-	  .attr("dy", ".25em")
-	  .attr("text-anchor", "start")
-	  .attr("transform",function(d) { return xlabel_rotate(d); } )
-	  .text(/*x.tickFormat(10)*/ function (x) { 
-	      return new Date( x*1000 ).toLocaleTimeString()
-	  } )
-	  .attr("class","xlabels");
-      
-      
+      cumflow.resize = function() {
+	  if (!size) {
+	      rect.setAttribute("width", "100%");
+	      rect.setAttribute("height", "100%");
+	      b = rect.getBBox();
+	      sizeActual = {x: b.width, y: b.height};
+	      //resizer.add(map);
+	  } else {
+	      sizeActual = size;
+	      //resizer.remove(map);
+	  }
+	  rect.setAttribute("width", sizeActual.x);
+	  rect.setAttribute("height", sizeActual.y);
+	  return cumflow;
+      };
 
-      // averages
-      vis.append("svg:g")
-	  .attr("class", "area2")
-	  .append("svg:path")
-	  .attr("d", d3.svg.area()
-		.x(function(d) { 
-		    return x(d.x); })
-		.y0(hh - 1)
-		.y1(function(d) { 
-		    return y(d.y2); }))
-	  .on("mouseover", function( d,i ) { 
-	      avgmouseover( ); 
-	      /*
-	      vis.selectAll( "g.area2 path" )
-		  .transition()
-		  .attr("fill-opacity", 1 );
-		  */
-	  } )
-	  .on("mouseout", function (d,i) { 
-	      updateText( "&nbsp;" );
-	      /*
-	      vis.selectAll( "g.area2 path" )
-		  .filter( function (d,j) { 
-		      return j == i;
-		  } )
-		  .transition()
-		  .attr("fill-opacity", 0.5 );
-	      */
-	  } );
-      
-      vis.append("svg:path")
-	  .attr("class", "line2")
-	  .attr("d", d3.svg.line()
-		.x(function(d) { return x(d.x); })
-		.y(function(d) { return y(d.y2); }));
+      cumflow.data = function(x) {
+	  if ( !arguments.length ) return json;
+	  json = x;
+	  return cumflow;
+      }
 
-      // compute delay from implied queuing
-      var delay2 = 0;
-      $.each( data, function(i, d) {
-	  delay2 += (d.y3-d.y)*1000*5/60;
-      });
+      cumflow.section = function(x) {
+	  if ( !arguments.length ) return section != null ? section : getSectionIndex( json.sec )-1;
+	  section = x;
 
-      d3.select("#chartDelay2").html( delay2.toFixed(0) );
+	  cumflow.redraw();
 
-      // divavg
-      if ( loc == getSection( json, json.sec )-1 ) {
+	  return cumflow;
+      }
+
+
+      cumflow.redraw = function() {
+	  // clear any existing
+	  $(container).children().remove();
+
+	  var t0 = new Date( json.t0 ).getTime()/1000;
+	  var t1 = new Date( json.t1 ).getTime()/1000;
+	  var t2 = new Date( json.t2 ).getTime()/1000;
+	  var t3 = new Date( json.t3 ).getTime()/1000;
+	  var volscale = 1/1000;
+	  var volscale = 1;
+
+	  var incidentSectionIndex = getSectionIndex(json.sec)-1;
+
+	  var startCell = json.timesteps.filter( function (e) {
+	      return !t1 || (e.getTime()/1000 < t1);
+	  }).length-1;
+
+	  var finishCell = json.timesteps.filter( function (e) {
+	      return !t3 || (e.getTime()/1000 < t3);
+	  }).length;
+
+	  // fixme: crindt: we really want to use the incident section by default, not the downstream section.
+	  var diversion = sfunc(incidentSectionIndex,finishCell,function(v){
+	      return v == null || v.vol_avg == null ? 0 : v.vol_avg/volscale;
+	  }) - sfunc(incidentSectionIndex,finishCell,function(v){
+	      return v == null || v.vol == null ? 0 : v.vol/volscale;
+	  });
+
+	  var data = d3.range( json.timesteps.length ).map(function(j) {
+	      return {x:json.timesteps[j].getTime()/1000+300,
+		      y: sfunc(section,j,function(v){return v.vol/volscale}), 
+		      y2: sfunc(section,j,function(v){return v.vol_avg/volscale}),
+		      y3: ( j < startCell
+			    ?  sfunc(section,j,function(v){return v.vol_avg/volscale})
+			    : ( j > finishCell
+				? sfunc(section,j,function(v){return v.vol_avg/volscale}) - diversion
+				: sfunc(section,j,function(v){return v.vol_avg/volscale}) - diversion*(j-startCell)/(finishCell-startCell) ) )
+		     }
+	  });
+
+	  // add zeroed elements at the beginning
+	  data.unshift( { x:json.timesteps[0].getTime()/1000,y:0,y2:0,y3:0} );
+	  
+	  // Compute the maximum cumulative flow across all sections (to set the max scale)
+	  var maxflow = Array.max( json.data.map( function( r ) { 
+	      return Array.max( [ sfunc( r[0].i,r.length-1, function(v){return v.vol/volscale}), 
+				  sfunc( r[0].i,r.length-1, function(v){return v.vol_avg/volscale}) ] );
+	  } ) );
+
+
+	  var w = $(container).width()-2,
+	  h = $(container).height()-2,
+	  ww = w - 7*p,       // width available for plot
+	  hh = h - 4*p,   // height available for plot
+	  x = d3.scale.linear().domain([json.timesteps[0].getTime()/1000,json.timesteps[json.timesteps.length-1].getTime()/1000+300]).range([0, ww]),
+	  y = d3.scale.linear().domain(/*[0,20]*/[0, maxflow]).range([hh, 0]),
+	  now = new Date();
+	  
+	  var vis = d3.select("#chartbox")
+	      .append("svg:svg")
+	      .attr("class", "flowchart" )
+	      .data([data])
+	      .attr("width", w) // margin of 100
+	      .attr("height", h)
+	      .append("svg:g")
+	      .attr("transform", "translate(" 
+		    + 6*p      // shift left 5p (1p margin on right)
+		    + "," + p  // shift down 1p (1p margin on top)
+		    + ")");
+	  
+	  // create some data for the section rules
+	  var rr = d3.range( json.timesteps[0].getTime()/1000,
+			     json.timesteps[json.timesteps.length-1].getTime()/1000+300,
+			     300 );
+
+	  // create some data for the time rules
+	  var rr2 = x.ticks(json.timesteps.length);
+
+	  
+	  // Now, for each section, create a group
+	  var rules = vis.selectAll("g.rule")
+	      .data( rr )
+	      .enter().append("svg:g")
+	      .attr("class", "rule");
+	  
+	  // within each section group, create a line (it's vertical here, 
+	  // but will be horizontal on the rotated plot
+	  rules.append("svg:line")
+	      .attr("x1", x)
+	      .attr("x2", x)
+	      .attr("y1", 0)
+	      .attr("y2", hh - 1);
+
+	  // For each time, create a group
+	  var rules2 = vis.selectAll("g.rule2")
+	      .data(y.ticks(10))
+	      .enter().append("svg:g")
+	      .attr("class","rule2");
+	  
+	  // within each time group, create a line (it's horizontal here,
+	  // but will be vertical on the rotated plot
+	  rules2.append("svg:line")
+	      .attr("class", function(d) { return d ? null : "axis"; })
+	      .attr("y1", y)
+	      .attr("y2", y)
+	      .attr("x1", 0)
+	      .attr("x2", ww );
+	  
+	  // a function to rotate the time axis labels
+	  function xlabel_rotate (xx) {
+	      return "rotate("+[90,x(xx),(hh+3)].join(",")+")"
+	  }
+	  
+	  // now, add labels for each section
+	  rules2.append("svg:text")
+	      .attr("y", y)
+	      .attr("x", -3)
+	      .attr("dy", ".35em")
+	      .attr("text-anchor", "end")
+	      .text(y.tickFormat(10))
+	      .attr("class","ylabels");
+
+	  // finally, add labels for each time step
+	  rules.append("svg:text")
+	      .attr("x", x )
+	      .attr("y", hh + 5 )
+	      .attr("dy", ".25em")
+	      .attr("text-anchor", "start")
+	      .attr("transform",function(d) { return xlabel_rotate(d); } )
+	      .text(/*x.tickFormat(10)*/ function (x) { 
+		  return new Date( x*1000 ).toLocaleTimeString()
+	      } )
+	      .attr("class","xlabels");
+	  
+	  
+
+	  // averages
 	  vis.append("svg:g")
-	      .attr("class", "area3")
+	      .attr("class", "area2")
 	      .append("svg:path")
 	      .attr("d", d3.svg.area()
-		    .x(function(d) { return x(d.x); })
+		    .x(function(d) { 
+			return x(d.x); })
 		    .y0(hh - 1)
-		    .y1(function(d) { return y(d.y3); }))
+		    .y1(function(d) { 
+			return y(d.y2); }))
 	      .on("mouseover", function( d,i ) { 
-		  updateText( "Delayed non-diverted traffic" );
-/*
-		  vis.selectAll( "g.area3 path" )
-		      .transition()
-		      .attr("fill-opacity", 1 );
-*/
+		  avgmouseover( ); 
+		  /*
+		    vis.selectAll( "g.area2 path" )
+		    .transition()
+		    .attr("fill-opacity", 1 );
+		  */
 	      } )
 	      .on("mouseout", function (d,i) { 
 		  updateText( "&nbsp;" );
-/*
-		  vis.selectAll( "g.area3 path" )
-		      .filter( function (d,j) { 
-			  return j == i;
-		      } )
-		      .transition()
-		      .attr("fill-opacity", 0.5 );
-*/
+		  /*
+		    vis.selectAll( "g.area2 path" )
+		    .filter( function (d,j) { 
+		    return j == i;
+		    } )
+		    .transition()
+		    .attr("fill-opacity", 0.5 );
+		  */
 	      } );
 	  
 	  vis.append("svg:path")
-	      .attr("class", "line3")
+	      .attr("class", "line2")
 	      .attr("d", d3.svg.line()
 		    .x(function(d) { return x(d.x); })
-		    .y(function(d) { return y(d.y3); }));
+		    .y(function(d) { return y(d.y2); }));
+
+	  // compute delay from implied queuing
+	  var delay2 = 0;
+	  $.each( data, function(i, d) {
+	      delay2 += (d.y3-d.y)*1000*5/60;
+	  });
+
+	  d3.select("#chartDelay2").html( delay2.toFixed(0) );
+
+	  // divavg
+	  if ( section == incidentSectionIndex ) {
+	      vis.append("svg:g")
+		  .attr("class", "area3")
+		  .append("svg:path")
+		  .attr("d", d3.svg.area()
+			.x(function(d) { return x(d.x); })
+			.y0(hh - 1)
+			.y1(function(d) { return y(d.y3); }))
+		  .on("mouseover", function( d,i ) { 
+		      updateText( "Delayed non-diverted traffic" );
+		      /*
+			vis.selectAll( "g.area3 path" )
+			.transition()
+			.attr("fill-opacity", 1 );
+		      */
+		  } )
+		  .on("mouseout", function (d,i) { 
+		      updateText( "&nbsp;" );
+		      /*
+			vis.selectAll( "g.area3 path" )
+			.filter( function (d,j) { 
+			return j == i;
+			} )
+			.transition()
+			.attr("fill-opacity", 0.5 );
+		      */
+		  } );
+	      
+	      vis.append("svg:path")
+		  .attr("class", "line3")
+		  .attr("d", d3.svg.line()
+			.x(function(d) { return x(d.x); })
+			.y(function(d) { return y(d.y3); }));
+	  }
+
+
+
+	  // observed
+	  vis.append("svg:path")
+	      .attr("class", "area")
+	      .attr("d", d3.svg.area()
+		    .x(function(d) { return x(d.x); })
+		    .y0(hh - 1)
+		    .y1(function(d) { return y(d.y); }))
+	      .on("mouseover", obsmouseover )
+	      .on("mouseout", function () { updateText( "&nbsp;" ) } );
+
+	  
+	  vis.append("svg:path")
+	      .attr("class", "line")
+	      .attr("d", d3.svg.line()
+		    .x(function(d) { return x(d.x); })
+		    .y(function(d) { return y(d.y); }));
+
+
+	  // draw start of incident
+
+	  var tr = [ t0, t1, t2, t3 ].filter( function( x ) { return x != null; } );
+	  var times = vis.selectAll("g.timebar")
+	      .data( tr )
+	      .enter().append("svg:g")
+	      .attr("class", "timebar");
+
+	  times.append("svg:line")
+	      .attr("x1", x )
+	      .attr("x2", x )
+	      .attr("y1", 0 )
+	      .attr("y2", hh - 1 );
+
+
+	  function avgmouseover(d,i) {
+	      updateText( "Delay due to incident" );
+	  }
+
+	  function obsmouseover(d,i) {
+	      updateText( "Observed delay" );
+	  }
+
+	  function updateText(msg) {
+	      d3.select("#msgtxt").html(msg);
+	  }
+
+
       }
-
-
-
-      // observed
-      vis.append("svg:path")
-	  .attr("class", "area")
-	  .attr("d", d3.svg.area()
-		.x(function(d) { return x(d.x); })
-		.y0(hh - 1)
-		.y1(function(d) { return y(d.y); }))
-	  .on("mouseover", obsmouseover )
-	  .on("mouseout", function () { updateText( "&nbsp;" ) } );
-
-      
-      vis.append("svg:path")
-	  .attr("class", "line")
-	  .attr("d", d3.svg.line()
-		.x(function(d) { return x(d.x); })
-		.y(function(d) { return y(d.y); }));
-
-
-      // draw start of incident
-
-      var tr = [ t0, t1, t2, t3 ].filter( function( x ) { return x != null; } );
-      var times = vis.selectAll("g.timebar")
-	  .data( tr )
-	  .enter().append("svg:g")
-	  .attr("class", "timebar");
-
-      times.append("svg:line")
-	  .attr("x1", x )
-	  .attr("x2", x )
-	  .attr("y1", 0 )
-	  .attr("y2", hh - 1 );
-
-
-      function avgmouseover(d,i) {
-	  updateText( "Delay due to incident" );
-      }
-
-      function obsmouseover(d,i) {
-	  updateText( "Observed delay" );
-      }
-
-      function updateText(msg) {
-	  d3.select("#msgtxt").html(msg);
-      }
-
-
+      return cumflow;
   };
 
+  tmcpe.segmap = function() {
+      var segmap = {},
+      container,
+      theight,// = $(container).height()-2,
+      twidth,// = $(container).height()-2,
+      data,
+      map,
+
+      po = org.polymaps;
+
+      tmcpe.svg = function(type) {
+	  return document.createElementNS(tmcpe.ns.svg, type);
+      };
+
+      segmap.container = function(x) {
+	  if (!arguments.length) return container;
+	  container = x;
+	  container.setAttribute("class", "map");
+	  //container.appendChild(rect);
+	  return cumflow.resize(); // infer size
+      }
+
+      var rect = tmcpe.svg("rect");
+      rect.setAttribute("visibility", "hidden");
+      rect.setAttribute("pointer-events", "all");
+
+      segmap.resize = function() {
+	  if (!size) {
+	      rect.setAttribute("width", "100%");
+	      rect.setAttribute("height", "100%");
+	      b = rect.getBBox();
+	      sizeActual = {x: b.width, y: b.height};
+	      //resizer.add(map);
+	  } else {
+	      sizeActual = size;
+	      //resizer.remove(map);
+	  }
+	  rect.setAttribute("width", sizeActual.x);
+	  rect.setAttribute("height", sizeActual.y);
+	  return segmap;
+      };
+
+      segmap.data = function(x) {
+	  if ( !arguments.length ) return json;
+	  json = x;
+	  segmap.redraw();
+	  return segmap;
+      }
+
+      segmap.hh = function() { return $(container).height()-2; };
+      segmap.ww = function() { return $(container).width()-2; };
+
+
+      segmap.container = function(x) {
+	  if ( !arguments.length ) return container;
+	  container = x;
+	  return segmap;
+      }
+
+      segmap.redraw = function() {
+	  if ( container ) $(container).children().remove();
+	  create();
+	  addImageLayer();
+	  addSegmentLayer();
+	  return segmap;
+      }
+
+      function create() {
+
+	  // create the map
+	  var svg = d3.select(container)
+	      .append("svg:svg")
+	      .attr("id","segmapsvg")
+	      .attr("height",segmap.hh())
+	      .attr("width",segmap.ww())[0][0];
+
+	  map = po.map()
+	      .container(svg)
+	      .zoom(13)
+	      .zoomRange([1,/*6*/, 18])
+	      .add(po.interact())
+	      .add(po.compass()
+		   .pan("none"));
+
+	  return segmap;
+      }
+      
+      function addImageLayer() {
+
+	  map.add(po.image()
+		  .url(po.url("http://{S}tile.openstreetmap.org"
+			      + "/{Z}/{X}/{Y}.png")
+		       .hosts(["a.", "b.", "c.", ""])));
+	  return segmap;
+      }
+
+      function addSegmentLayer() {
+	  var secjson;
+	  d3.json
+	  ("/tmcpe/vds/list.geojson?idIn="+json.sections.map( function( sec ) {return sec.vdsid;}).join(","), 
+	   function(e){
+	       var x = Array();
+	       var y = Array();
+	       for (var i = 0; i < e.features.length; i++) {
+		   var feature = e.features[i];
+		   var coords = feature.geometry.coordinates;
+		   var polygons = $.map(coords, function(a){
+		       return [a];});
+		   var points = $.map(polygons, function(a){
+		       return [a];});
+		   $.map(points, function(a){
+		       if(!isNaN(a[0])){
+			   x.push(a[0])
+		       }; 
+		       if(!isNaN(a[1])){
+			   y.push(a[1])
+		       };
+		   });
+	       }
+	       xMax = Array.max(x);
+	       xMin = Array.min(x);
+	       yMax = Array.max(y);
+	       yMin = Array.min(y);
+	       secjson = e;
+
+	       var start = secjson.features[0].geometry.coordinates;
+	       start = start[0];
+	       var end = secjson.features[secjson.features.length-1].geometry.coordinates;
+	       end = end[end.length-1];
+
+
+	       var angle = Math.atan2( end[1]-start[1], end[0]-start[0] );
+
+
+	       map.angle( Math.PI-angle );
+
+	       map.extent([{lon:xMin,lat:yMin},{lon:xMax,lat:yMax}]);
+
+	       var size = map.size();
+	       var pmin = map.coordinatePoint(map.locationCoordinate(map.center()),map.locationCoordinate({lon:xMin,lat:yMin}));
+	       pmin.y += 300;
+	       var pmax = map.coordinatePoint(map.locationCoordinate(map.center()),map.locationCoordinate({lon:xMax,lat:yMax}));
+	       pmax.y -= 300;
+
+	       var lmin = map.coordinateLocation(map.pointCoordinate(map.locationCoordinate(map.center()),pmin));
+	       var lmax = map.coordinateLocation(map.pointCoordinate(map.locationCoordinate(map.center()),pmax));
+
+
+	       map.extent([lmin,lmax]);
+
+	       var secs = po.geoJson().features(secjson.features)
+		   .id("segments")
+		   .zoom( function(z) { return Math.max(4, Math.min(18, z)); } )
+		   .tile(false)
+		   .on("load", po.stylist()
+		       .attr("id", function( d ) { return d.id; } )
+		       .attr("i", function( d ) { return d.i; } )
+		       .attr("stroke", function( d ) { 
+			   var el = $('g[vdsid^="'+d.id+'"] rect[j^=11]')[0];
+			   return el == null ? "black" : el.style.fill; 
+		       } )
+		       .attr("stroke-width", 4 )
+		       /*
+			 function(d) { 
+			 var zz = map.zoom()
+			 var lev = 4+Math.floor(((zz-1))/17*(10-4));
+			 return Math.min( Math.max( 4, lev ), 10 ) } )
+		       */
+		       .title(function(d) { return [d.id,d.name].join(":"); })
+		      );
+
+	       var ends = po.geoJson().features(secjson.features.map( function (f) { 
+		   return {data: f.properties, 
+			   geometry: { type:"Point", 
+				       coordinates: f.geometry.coordinates[ f.geometry.coordinates.length-1 ] 
+				     }}; 
+	       } ) )
+		   .id("ends")
+		   .zoom( function(z) { return Math.max(4, Math.min(18, z)); } )
+		   .tile(false)
+		   .on("load", po.stylist()
+		       .attr("id", function(d) { 
+			   return "node:"+d.data.id } )
+		       .attr("r", 2 )
+		       /*
+			 function(d) { 
+			 var zz = map.zoom()
+			 var lev = 2+Math.floor(((zz-1))/17*(8-2));
+			 return Math.min( Math.max( 2, lev ), 8 ) } )
+		       */
+		       .attr("stroke", "yellow" )
+		       .attr("fill", "none" )
+		       .title(function(d) { return [d.data.id,d.data.name].join(":"); }));
+	       map.add(secs);
+	       map.add(ends);
+	   });
+      }
+
+
+      return segmap;
+  };
 
  })()
