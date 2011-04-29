@@ -2,6 +2,8 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>Incident List</title>
+    <base id="htmldom"  href="${resource(dir:'/',absolute:true)}" />
+
 
 <!--
     <p:css name="po" />
