@@ -44,6 +44,11 @@
      var scale  = $("#scaleslider").slider("option","value");
      var maxSpd = $("#maxspdslider").slider("option","value");
 
+     // return grey if evidence is uncertain (imputed data)
+     if ( d.p_j_m > 0 && d.p_j_m < 1 ) {
+        return "fill:#999;stroke:#eee;"
+     } 
+
      if ( theme == "stdspd" ) {
         var color = pv.Scale.linear(-scale,
                   -(scale/2),0 ).range("#ff0000","#ffff00","#00ff00");
@@ -116,7 +121,7 @@
 
       // create the map
       //doMap( json );
-      map = tmcpe.segmap().container( $("#mapbox")[0] ).data( json );
+      map = tmcpe.segmap().container( $("#mapbox")[0] ).data( json ).redraw();
 
       $(window).resize(function() { 
          tsd.resize(); 
@@ -125,8 +130,13 @@
 	 cumflow.redraw( );
 	 updateStats( json );
 //	 doMap( json );
-         map.redraw();
+         map.data(json).redraw();
+	 
       });
+  }
+
+  function rotateMap( v ) {
+     map.rotate( v.value );
   }
 
   function handleFailure( e ) {
@@ -205,7 +215,7 @@
       <div id="" class="grid_1 ">
       </div>
 
-      <div id="" class="grid_14 ">
+      <div id="" class="grid_8 ">
 
 	<select id="ifia" onchange="updateAnalysis(this.options[this.selectedIndex].value);">
 	  <g:each in="${incidentInstance.analyses}">
@@ -221,25 +231,34 @@
 	</select>
 	<div id="scaleslider"></div><span id="alpha">1.0</span>
 	<div id="maxspdslider"></div><span id="maxspd">60</span>
-	<p id="msgtxt"></p>
 
       </div>
 
+      <div id="" class="grid_6 ">
+	<form>
+	  <input type="radio" name="align" value="cardinal" onclick="rotateMap(this);">Align to cardinal</option>
+	  <input type="radio" name="align" checked="true" value="incident" onclick="rotateMap(this)">Align to incident</option>
+	</form>
+      </div>
     </div>
-
+    <div id="msg" class="container_16">
+      <div id="" class="grid_16 alpha omega ">
+	<p id="msgtxt">&nbsp;</p>
+      </div>
+    </div>
 
     <div id="content" class="container_16">
 
-      <div id="" style="height:400px" class="grid_16 ">
+      <div id="" style="height:400px" class="grid_16 alpha omega">
 	<div id="tsdcontainer" class="grid_8 alpha">
-	  <div id="tsdbox" style="height:100%;width:100%;" >
+	  <div id="tsdbox">
 	  </div>
 	</div>
-	<div id="mapbox" style="height:100%" class="grid_8 omega">
+	<div id="mapbox" class="grid_8 omega">
 	  <div id="map" tabindex="1"></div>
 	</div>
       </div>
-      <div id="" class="grid_16 ">
+      <div id="" class="grid_16 alpha omega">
 	<div id="chartcontainer" class="grid_8 alpha">
 	  <div id="chartbox" style="height:300px;"></div>
 	</div>

@@ -321,11 +321,19 @@ if ( !tmcpe ) var tmcpe = {};
 			  s.style.setProperty("stroke",e.style.getPropertyValue("fill"),"important") } );
 
 		      // update node colors
-		      var nod = $('circle[id^="node:'+sections[e.__data__.i].vdsid+'"]');
+		      var nod = $('#ends circle[id^="node:'+sections[e.__data__.i].vdsid+'"]');
 		      nod.map( function (jj, s) { 
 			  s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
 			  s.setAttribute("r", e.__data__.inc ? 4 : 2 );
 		      } );
+
+		      // update arrow colors
+		      var nod = $('#ends path[id^="node:'+sections[e.__data__.i].vdsid+'"]');
+		      nod.map( function (jj, s) { 
+			  s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
+			  s.setAttribute("r", e.__data__.inc ? 4 : 2 );
+		      } );
+
 		  }
 	      });
 
@@ -376,10 +384,13 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // create ylabels
 	  gg.append("svg:text")
+	      .attr("x", -4 )  // shift 4 px left of axis
+	      .attr("class", "ylabels" )
 	      .attr("dy",function (d,i) { 
 		  return theight*sections[d[0].i].seglen/seclensum/2+5; } ) // put midway down
 	      .attr("text-anchor","end")
 	      .text(function(d,i){ 
+		  // only show avery other segment name
 		  return i%2 ? "" : sections[i].name; 
 	      })
 	      .attr("class","ylabels");
@@ -616,7 +627,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  // now, add labels for each section
 	  rules2.append("svg:text")
 	      .attr("y", y)
-	      .attr("x", -3)
+	      .attr("x", -4)  // shift 4px to left of axis
 	      .attr("dy", ".35em")
 	      .attr("text-anchor", "end")
 	      .text(y.tickFormat(10))
@@ -775,6 +786,11 @@ if ( !tmcpe ) var tmcpe = {};
       twidth,// = $(container).height()-2,
       data,
       map,
+      usearrow = true,
+      rotate = "incident",  // default = incident
+      secjson,
+      segments,
+      ends,
 
       po = org.polymaps;
 
@@ -814,8 +830,34 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( !arguments.length ) return json;
 	  json = x;
 	  segmap.redraw();
+	  readSegments();
 	  return segmap;
       }
+
+      segmap.secjson = function(x) {
+	  if ( !arguments.length ) return secjson;
+
+	  secjson = x;
+
+	  // sort the feature list
+	  secjson.features = secjson.features.sort( function(a,b) {
+	      var diff =  a.properties.absPostmile - b.properties.absPostmile;
+	      if ( a.properties.freewayDir == 'S' || a.properties.freewayDir == 'W' )
+		  return -diff;
+	      else
+		  return diff;
+	  });
+
+	  // 
+	  addSegmentLayer();
+	  // order is important here if we're drawing arrows
+	  zoomExtents();
+	  rotateLayer();
+	  addEndsLayer();
+	  
+	  return segmap;
+      }
+
 
       segmap.hh = function() { return $(container).height()-2; };
       segmap.ww = function() { return $(container).width()-2; };
@@ -831,7 +873,13 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( container ) $(container).children().remove();
 	  create();
 	  addImageLayer();
-	  addSegmentLayer();
+	  return segmap;
+      }
+
+      segmap.rotate = function(x) {
+	  if ( !arguments.length ) return rotate;
+	  rotate = x;
+	  rotateLayer()
 	  return segmap;
       }
 
@@ -848,9 +896,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .container(svg)
 	      .zoom(13)
 	      .zoomRange([1,/*6*/, 18])
-	      .add(po.interact())
-	      .add(po.compass()
-		   .pan("none"));
+	      .add(po.interact());
 
 	  return segmap;
       }
@@ -864,106 +910,251 @@ if ( !tmcpe ) var tmcpe = {};
 	  return segmap;
       }
 
-      function addSegmentLayer() {
-	  var secjson;
+      function rotateLayer() {
+	  if ( rotate == "incident" ) {
+
+	      var ff = secjson.features;
+
+	      var startll = ff[0].geometry.coordinates;
+	      start = map.coordinatePoint(map.locationCoordinate(map.center()),
+					  map.locationCoordinate( {lon:startll[0][0],lat:startll[0][1] } ) );
+	      var endll = ff[ff.length-1].geometry.coordinates;
+	      end = map.coordinatePoint(map.locationCoordinate(map.center()),
+					map.locationCoordinate( {lon:endll[endll.length-1][0],lat:endll[endll.length-1][1] } ) );
+
+	      for ( var i = 0; i < ff.length; ++i ) {
+		  console.log( "FF: " + ff[i].properties.vdsid + ", " + ff[i].properties.absPostmile );
+	      }
+
+	      // x,y screen coords are flipped on the x axis (y increases downward)
+	      // we negate the y coords here for the angle calc
+	      var dy = -((end.y)-(start.y));
+	      var dx = (end.x-start.x);
+	      var angle = Math.atan2( dy, dx );
+	      var aa = angle * 180 / Math.PI;
+
+	      rr = angle + Math.PI/2.0;
+
+	      var rra = rr * 180 / Math.PI;
+
+	      console.log( "Angle,rra:"+aa+","+rra );
+
+	      map.angle( rr )
+//	      map.angle( 90*Math.PI/180.0 );
+
+	  } else {
+	      // default is cardinal
+	      map.angle( 0 );
+	  }
+      }
+
+      function screenAngleBetweenGeoJsonPoints(a,b) {
+	  var p1 = map.coordinatePoint(map.locationCoordinate(map.center()),map.locationCoordinate({lon:a[0],lat:a[1]}));
+	  var p2 = map.coordinatePoint(map.locationCoordinate(map.center()),map.locationCoordinate({lon:b[0],lat:b[1]}));
+	  return {a:Math.atan2( p2.y - p1.y, p2.x - p1.x ),p1:p1,p2:p2};
+      }
+
+      function addEndsLayer() {
+	  // remove existing
+	  $("#ends").remove();
+
+	  var ends = po.geoJson().features(secjson.features.map( function (f) {
+
+	      var p3 = f.geometry.coordinates[ f.geometry.coordinates.length-1 ]; // end of segment/arrow
+
+	      if ( !usearrow ) {
+		  // draw a circle
+		  return {data: f.properties, 
+			  geometry: { type:"Point", 
+				      coordinates: p3
+				    }};
+
+	      } else {
+		  // draw an arrow
+		  var p1 = f.geometry.coordinates[ f.geometry.coordinates.length-2 ]; // base of shaft
+		  
+		  var aa = screenAngleBetweenGeoJsonPoints( p1, p3 );
+
+		  var angle1 = aa.a;
+		  var angle2 = angle1 +Math.PI/2;
+
+		  var shaftlen = Math.pow(2, map.zoom() - 9);;
+		  var shaftlen2 = Math.pow(2, map.zoom() - 9.5);;
+		  var arrowwid = Math.pow(2, map.zoom() - 10);
+
+		  var c1b = {x:aa.p2.x - Math.cos(angle1)*shaftlen,y:aa.p2.y - Math.sin(angle1)*shaftlen};  // convert pixels
+		  var c1c = {x:aa.p2.x - Math.cos(angle1)*shaftlen2,y:aa.p2.y - Math.sin(angle1)*shaftlen2};  // convert pixels
+		  var c2 = {x:c1b.x + Math.cos(angle2)*arrowwid,y:c1b.y + Math.sin(angle2)*arrowwid};  // convert pixels
+		  var c4 = {x:c1b.x - Math.cos(angle2)*arrowwid,y:c1b.y - Math.sin(angle2)*arrowwid};  // convert pixels
+
+		  p1 = map.coordinateLocation(map.pointCoordinate(map.locationCoordinate(map.center()),c1c));
+		  p2 = map.coordinateLocation(map.pointCoordinate(map.locationCoordinate(map.center()),c2));
+		  p3 = map.coordinateLocation(map.pointCoordinate(map.locationCoordinate(map.center()),aa.p2));
+		  p4 = map.coordinateLocation(map.pointCoordinate(map.locationCoordinate(map.center()),c4));
+
+
+		  return {data: f.properties, 
+			  geometry: { type:"Polygon",
+				      coordinates: [[[p1.lon,p1.lat],
+						     [p2.lon,p2.lat],
+						     [p3.lon,p3.lat],
+						     [p4.lon,p4.lat],
+						     [p1.lon,p1.lat]]] }
+			 }; 
+	      }
+	  } ) );
+
+	  ends.id("ends")
+	      .zoom( function(z) { return Math.max(4, Math.min(18, z)); } )
+	      .tile(false)
+	      .on("load", po.stylist()
+		  .attr("id", function(d) { 
+		      return "node:"+d.data.id } )
+		  .attr("r", 2 )
+		  /*
+		    function(d) { 
+		    var zz = map.zoom()
+		    var lev = 2+Math.floor(((zz-1))/17*(8-2));
+		    return Math.min( Math.max( 2, lev ), 8 ) } )
+		  */
+		  .attr("stroke", "yellow" )
+		  .attr("fill", "blue" )
+		  .title(function(d) { 
+		      return [d.data.id,d.data.name].join(":"); }));
+	  map.add(ends);
+      }
+
+      function zoomExtents() {
+
+
+	  var x = Array();
+	  var y = Array();
+	  for (var i = 0; i < secjson.features.length; i++) {
+	      var feature = secjson.features[i];
+	      var coords = feature.geometry.coordinates;
+	      var polygons = $.map(coords, function(a){
+		  return [a];});
+	      var points = $.map(polygons, function(a){
+		  return [a];
+		  // convert to screen coordinates to compute extent
+		  //		       var p = map.coordinatePoint( map.locationCoordinate(map.center()),map.locationCoordinate({lon:a[0],lat:a[1]}) )
+		  //		       return p;
+	      });
+	      $.map(points, function(a){
+		  if(!isNaN(a[0])){
+		      x.push(a[0])
+		  }; 
+		  if(!isNaN(a[1])){
+		      y.push(a[1])
+		  };
+	      });
+	  }
+	  xMax = Array.max(x);
+	  xMin = Array.min(x);
+	  yMax = Array.max(y);
+	  yMin = Array.min(y);
+
+	  map.extent([{lon:xMin,lat:yMin},{lon:xMax,lat:yMax}])
+//	      .zoomBy(segmap.ww()/segmap.hh())
+	      .zoomBy((yMax-yMin)/(xMax-xMin)*(Math.abs(Math.sin(map.angle()))))
+	      .zoomBy(-0.75)
+	  ;
+
+	  map.add(po.compass().pan("none"));
+
+      }
+
+      function readSegments() {
 	  d3.json
-	  ("/tmcpe/vds/list.geojson?idIn="+json.sections.map( function( sec ) {return sec.vdsid;}).join(","), 
+	  ("/tmcpe/vds/list.geojson?freewayDir="+json.sections[0].dir+"&idIn="+json.sections.map( function( sec ) {return sec.vdsid;}).join(","), 
 	   function(e){
-	       var x = Array();
-	       var y = Array();
-	       for (var i = 0; i < e.features.length; i++) {
-		   var feature = e.features[i];
-		   var coords = feature.geometry.coordinates;
-		   var polygons = $.map(coords, function(a){
-		       return [a];});
-		   var points = $.map(polygons, function(a){
-		       return [a];});
-		   $.map(points, function(a){
-		       if(!isNaN(a[0])){
-			   x.push(a[0])
-		       }; 
-		       if(!isNaN(a[1])){
-			   y.push(a[1])
-		       };
-		   });
-	       }
-	       xMax = Array.max(x);
-	       xMin = Array.min(x);
-	       yMax = Array.max(y);
-	       yMin = Array.min(y);
-	       secjson = e;
-
-	       var start = secjson.features[0].geometry.coordinates;
-	       start = start[0];
-	       var end = secjson.features[secjson.features.length-1].geometry.coordinates;
-	       end = end[end.length-1];
-
-
-	       var angle = Math.atan2( end[1]-start[1], end[0]-start[0] );
-
-
-	       map.angle( Math.PI-angle );
-
-	       map.extent([{lon:xMin,lat:yMin},{lon:xMax,lat:yMax}]);
-
-	       var size = map.size();
-	       var pmin = map.coordinatePoint(map.locationCoordinate(map.center()),map.locationCoordinate({lon:xMin,lat:yMin}));
-	       pmin.y += 300;
-	       var pmax = map.coordinatePoint(map.locationCoordinate(map.center()),map.locationCoordinate({lon:xMax,lat:yMax}));
-	       pmax.y -= 300;
-
-	       var lmin = map.coordinateLocation(map.pointCoordinate(map.locationCoordinate(map.center()),pmin));
-	       var lmax = map.coordinateLocation(map.pointCoordinate(map.locationCoordinate(map.center()),pmax));
-
-
-	       map.extent([lmin,lmax]);
-
-	       var secs = po.geoJson().features(secjson.features)
-		   .id("segments")
-		   .zoom( function(z) { return Math.max(4, Math.min(18, z)); } )
-		   .tile(false)
-		   .on("load", po.stylist()
-		       .attr("id", function( d ) { return d.id; } )
-		       .attr("i", function( d ) { return d.i; } )
-		       .attr("stroke", function( d ) { 
-			   var el = $('g[vdsid^="'+d.id+'"] rect[j^=11]')[0];
-			   return el == null ? "black" : el.style.fill; 
-		       } )
-		       .attr("stroke-width", 4 )
-		       /*
-			 function(d) { 
-			 var zz = map.zoom()
-			 var lev = 4+Math.floor(((zz-1))/17*(10-4));
-			 return Math.min( Math.max( 4, lev ), 10 ) } )
-		       */
-		       .title(function(d) { return [d.id,d.name].join(":"); })
-		      );
-
-	       var ends = po.geoJson().features(secjson.features.map( function (f) { 
-		   return {data: f.properties, 
-			   geometry: { type:"Point", 
-				       coordinates: f.geometry.coordinates[ f.geometry.coordinates.length-1 ] 
-				     }}; 
-	       } ) )
-		   .id("ends")
-		   .zoom( function(z) { return Math.max(4, Math.min(18, z)); } )
-		   .tile(false)
-		   .on("load", po.stylist()
-		       .attr("id", function(d) { 
-			   return "node:"+d.data.id } )
-		       .attr("r", 2 )
-		       /*
-			 function(d) { 
-			 var zz = map.zoom()
-			 var lev = 2+Math.floor(((zz-1))/17*(8-2));
-			 return Math.min( Math.max( 2, lev ), 8 ) } )
-		       */
-		       .attr("stroke", "yellow" )
-		       .attr("fill", "none" )
-		       .title(function(d) { return [d.data.id,d.data.name].join(":"); }));
-	       map.add(secs);
-	       map.add(ends);
+	       // update the section layer json
+	       segmap.secjson( e );
 	   });
+      }
+
+      function addSegmentLayer() {
+	  // remove existing
+	  $("#segments").remove();
+
+	  var secs = po.geoJson().features(secjson.features)
+	      .id("segments")
+	      .zoom( function(z) { return Math.max(4, Math.min(18, z)); } )
+	      .tile(false)
+	      .on("load", 
+		  function (e) {
+		      for (var i = 0; i < e.features.length; i++) {
+			  var f = e.features[i];
+			  var c = $(f.element);
+			  var g = c.parent().add("svg:g", c);
+			  g.add(c);
+
+			  var crdst  = f.data.geometry.coordinates[0];
+			  var crdend = f.data.geometry.coordinates[f.data.geometry.coordinates.length-1];
+			  var aa = screenAngleBetweenGeoJsonPoints( crdst, crdend );
+			  var text = g[0].appendChild(po.svg("text"));
+			  text.setAttribute("x",crdend.x);
+			  text.setAttribute("y",crdst.y);
+			  text.setAttribute("dy",".71em");
+			  var rr = -aa.a;
+			  var rra = rr * 180/Math.PI;
+			  //text.setAttribute("transform","rotate("+(rr)+")");
+			  text.appendChild(document.createTextNode("test"));
+		      }
+		      
+		      // Find the incident section
+		      var i;
+		      var incsec;
+		      for ( i = 0; i < e.features.length && e.features[i].data.properties.id != json.sec; ++i );
+
+		      if ( i < e.features.length ) incsec = e.features[i];
+
+		      if ( incsec ) {
+			  var c = $(incsec.element);
+			  var g = c.parent().add("svg:g", c );
+			  g.add(c);
+			  
+			  var point = g[0].appendChild(po.svg("circle"));
+			  point.setAttribute("id", "location");
+			  // mark at end of incsec
+			  var crd = incsec.data.geometry.coordinates[incsec.data.geometry.coordinates.length-1];
+//			  var lc = map.locationCoordinate({lon:crd[0],lat:crd[1]});
+//			  var cc = map.coordinatePoint(map.locationCoordinate(map.center()),lc)
+			  point.setAttribute("class", "incidentLocation" )
+			  point.setAttribute("cx", crd.x);
+			  point.setAttribute("cy", crd.y);
+			  //point.setAttribute("r", Math.pow(2, tile.zoom - 11) * Math.sqrt(cluster.cluster.length));
+			  point.setAttribute("r", Math.pow(2, map.zoom() - 7) );
+		      }
+
+
+		      po.stylist()
+			  .attr("id", function( d ) { return d.id; } )
+			  .attr("i", function( d ) { return d.i; } )
+			  .attr("stroke", function( d ) {
+			      var el = $('g[vdsid^="'+d.id+'"] rect[j^=11]')[0]; // fixme: j == 11?  this is a hanging hardcode
+			      return el == null ? "black" : el.style.fill; 
+			  } )
+			  .attr("stroke-width", 4 )
+			  .title(function(d) { return [d.id,d.name].join(":"); })(e);
+		  });
+
+	  map.add(secs);
+
+
+	  /*
+	  $.map(secs.features(), function(f) {
+	      var c = f.geometry.coordinates;
+	      var tt = $(
+	      var text = tt.appendChild(po.svg("text"));
+	      text.setAttribute("x",c[c.length-1][0]);
+	      text.setAttribute("y",c[c.length-1][1]);
+	      text.setAttribute("dy",".71em");
+	      text.appendChild(document.createTextNode("test"));
+	  });
+	  */
+	  
+
       }
 
 
