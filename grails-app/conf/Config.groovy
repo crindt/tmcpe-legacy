@@ -204,6 +204,10 @@ uiperformance.exclusions = [
     "**/jquery*/**",
     "**/d3/**",
     "**/polymaps/**",
+    "**/protovis/**",
+    "**/tablesorter/**",
+    "**/tablescroll/**",
+    "**/numberformat/**",
 ]
 
 uiperformance.bundles = [
