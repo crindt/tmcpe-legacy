@@ -294,9 +294,9 @@ if ( !tmcpe ) var tmcpe = {};
       function updateIncidentInfo( d, e ) {
 	  // Update the title
 	  if ( d.cad ) {
-	      $('#incidentTitle').html( 'Incident <a href="/tmcpe/incident/d3_tsd?id=' + d.id + '">' + d.cad + '</a>' );
+	      $('#incidentTitle').html( 'Incident <a href="/incident/d3_tsd?id=' + d.id + '">' + d.cad + '</a>' );
 	  } else {
-	      $('#incidentTitle').html( 'Incident <a href="/tmcpe/incident/d3_tsd?id=' + d.id + '">' + d.id + '</a>' );
+	      $('#incidentTitle').html( 'Incident <a href="/incident/d3_tsd?id=' + d.id + '">' + d.id + '</a>' );
 	  }
 
 	  // Remove the existing table (if any)
@@ -756,7 +756,7 @@ var doQueryMap = function( data, parent ) {
 	}
     }
 
-    d3.json("/tmcpe/incident/list.geojson"
+    d3.json("/incident/list.geojson"
 	    //	    +"?startDate=2009-01-01"
 	    //	    +"?startDate=2010-01-01"
 	    +"?startDate=2010-09-01"
@@ -1284,9 +1284,9 @@ var doQueryMap = function( data, parent ) {
     function updateIncidentInfo( d, e ) {
 	// Update the title
 	if ( d.cad ) {
-	    $('#incidentTitle').html( 'Incident <a href="/tmcpe/incident/d3_tsd?id=' + d.id + '">' + d.cad + '</a>' );
+	    $('#incidentTitle').html( 'Incident <a href="/incident/d3_tsd?id=' + d.id + '">' + d.cad + '</a>' );
 	} else {
-	    $('#incidentTitle').html( 'Incident <a href="/tmcpe/incident/d3_tsd?id=' + d.id + '">' + d.id + '</a>' );
+	    $('#incidentTitle').html( 'Incident <a href="/incident/d3_tsd?id=' + d.id + '">' + d.id + '</a>' );
 	}
 
 	// Remove the existing table (if any)
