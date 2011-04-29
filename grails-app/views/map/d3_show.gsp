@@ -42,7 +42,7 @@
       //doQueryMap();
 
       d3.json
-      ("/tmcpe/incident/list.geojson"
+      ("/incident/list.geojson"
       //	    +"?startDate=2009-01-01"
       //	    +"?startDate=2010-01-01"
       +"?startDate=2010-09-01"
