@@ -203,6 +203,7 @@ uiperformance.exclusions = [
     "**/openlayers*/**",
     "**/jquery*/**",
     "**/d3/**",
+    "**/polymaps/**",
 ]
 
 uiperformance.bundles = [
