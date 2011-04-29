@@ -1066,7 +1066,7 @@ if ( !tmcpe ) var tmcpe = {};
 
       function readSegments() {
 	  d3.json
-	  ("/tmcpe/vds/list.geojson?freewayDir="+json.sections[0].dir+"&idIn="+json.sections.map( function( sec ) {return sec.vdsid;}).join(","), 
+	  ("vds/list.geojson?freewayDir="+json.sections[0].dir+"&idIn="+json.sections.map( function( sec ) {return sec.vdsid;}).join(","), 
 	   function(e){
 	       // update the section layer json
 	       segmap.secjson( e );
