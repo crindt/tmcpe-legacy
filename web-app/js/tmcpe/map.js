@@ -124,7 +124,8 @@ if ( !tmcpe ) var tmcpe = {};
 	      .zoom(13)
 	      .zoomRange([1,/*6*/, 18])
 	      .add(po.interact())
-	      .add(po.hash());
+//	      .add(po.hash())
+	  ;
 
 	  qmap.map = map;
 
@@ -697,7 +698,7 @@ var doQueryMap = function( data, parent ) {
     var map = po.map()
 	.container(svg)
 	.add(po.interact())
-	.add(po.hash())
+//	.add(po.hash())
 	.center({lat: 33.739, lon: -117.830})
 	.zoom(13)
 	.zoomRange([1,/*6*/, 18])
