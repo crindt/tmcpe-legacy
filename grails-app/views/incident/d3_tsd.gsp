@@ -3,6 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>Incident Detail</title>
+    <base id="htmldom"  href="${resource(dir:'/',absolute:true)}" />
 
 <!--
     <p:css name="po" />
@@ -158,7 +159,7 @@
 
   function updateAnalysis( id ) {
       //	     new Ajax.Request('/tmcpe/incidentFacilityImpactAnalysis/tsdData/'+id,{asynchronous:false,evalScripts:true,onSuccess:function(e){updateData(e)},onFailure:function(e){handleFailure(e)},method:'get'});
-      d3.json('/tmcpe/incidentFacilityImpactAnalysis/tsdData/'+id,function(e){updateData(e)});
+      d3.json('incidentFacilityImpactAnalysis/tsdData/'+id,function(e){updateData(e)});
   }
 
 
