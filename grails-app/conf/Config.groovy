@@ -208,6 +208,7 @@ uiperformance.exclusions = [
     "**/tablesorter/**",
     "**/tablescroll/**",
     "**/numberformat/**",
+    "**/DataTables/**",
 ]
 
 uiperformance.bundles = [
