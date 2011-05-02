@@ -59,7 +59,8 @@ class TestbedController {
         def json = [];
         theList.each() { 
             if ( it.section ) {
-		def url = createLink(absolute:true,controller:'incident',action:'showCustom',id:it.id)
+		//		def url = createLink(absolute:true,controller:'incident',action:'showCustom',id:it.id)
+		def url = createLink(absolute:true,controller:'incident',action:'d3_tsd',id:it.id)
                 json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, 
                         //properties: it
                         properties: [ locString: "Incident " + it.cad + ": " + it.section.toString(), 
