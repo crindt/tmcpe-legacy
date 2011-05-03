@@ -93,7 +93,7 @@ class IncidentController extends BaseController {
 			def to = ( params.endDate 
 				   ? Date.parse( "yyyy-MM-dd", params.endDate ) 
 				   : new Date() )
-			log.debug("============DATES: " + from + " <<>> "  + to )
+			log.info("============DATES: " + from + " <<>> "  + to )
 
 			between( 'startTime', from, to )
 		    }

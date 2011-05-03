@@ -260,6 +260,7 @@ class IncidentFacilityImpactAnalysisController {
                     System.err.println( "A total of " + ifia.analyzedSections.size() + " analyzed sections!\n" )
 		    def i = 0;
 		    def json = [ 
+			log: ifia.incidentImpactAnalysis.incident.getTmcLogEntries(),
 			sections: ifia.analyzedSections.collect {
 			    [ vdsid: it.section.id,
 			      fwy: it.section.freewayId,

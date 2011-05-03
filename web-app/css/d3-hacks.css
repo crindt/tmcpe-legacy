@@ -2,10 +2,10 @@
    border: 1px;
    background-color: yellow;
 }
-  #databox table {
+#databox table {
   margin-top:1em;
 }
- svg {
+svg {
   border: solid 1px #aaa;
 }
 path.incidentBoundary {
@@ -266,15 +266,19 @@ table td,table th {
    margin-top: 1em;
 }
 
+#incidentTitle {
+    color: yellow;
+}
+
+
+#incidentDetailTableBox td, #incidentDetailTableBox th {
+    color: #000;
+}
+
 #incidents .selected {
    stroke-width: 10px;
    stroke: cyan;
    fill-opacity: 0.85;
-}
-
-body {
-    background-color: #003;
-    color: #000;
 }
 
 #inctableContainer td, #inctableContainer th {
@@ -307,12 +311,9 @@ body {
 #infobox {
     border: 4px solid #ccc;
     height: 500px;
-    width: 48%;
-
 }
 
 #info {
     padding: 1em;
     width: 100%;
 }
-

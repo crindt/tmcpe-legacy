@@ -750,6 +750,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  // draw start of incident
 
 	  var tr = [ t0, t1, t2, t3 ].filter( function( x ) { return x != null; } );
+
 	  var times = vis.selectAll("g.timebar")
 	      .data( tr )
 	      .enter().append("svg:g")
@@ -760,6 +761,30 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("x2", x )
 	      .attr("y1", 0 )
 	      .attr("y2", hh - 1 );
+
+	  var times2 = vis.selectAll("g.timebar")
+	      .data( json.log )
+	      .enter().append("svg:g")
+	      .attr("class", "timebar activitylog")
+	  ;
+
+	  times2.append("svg:line")
+	      .attr("x1", function( d ) { 
+		  var dd = new Date( d.stampDateTime ).getTime()/1000; 
+		  return x( dd ); } )
+	      .attr("x2", function( d ) { 
+		  var dd = new Date( d.stampDateTime ).getTime()/1000; 
+		  return x( dd ); } )
+	      .attr("y1", 0 )
+	      .attr("y2", hh - 1 )
+	      .on("mouseover", function(d,i) { 
+		  this.style.stroke="red";
+		  updateText( "Log: " + new Date(d.stampDateTime).toLocaleTimeString() + ": " + d.memo ); 
+	      })
+	      .on("mouseout", function(d,i) {
+		  this.style.stroke="";
+	      })
+	  ;
 
 
 	  function avgmouseover(d,i) {
@@ -1089,6 +1114,7 @@ if ( !tmcpe ) var tmcpe = {};
 			  var g = c.parent().add("svg:g", c);
 			  g.add(c);
 
+/* Add text
 			  var crdst  = f.data.geometry.coordinates[0];
 			  var crdend = f.data.geometry.coordinates[f.data.geometry.coordinates.length-1];
 			  var aa = screenAngleBetweenGeoJsonPoints( crdst, crdend );
@@ -1100,6 +1126,7 @@ if ( !tmcpe ) var tmcpe = {};
 			  var rra = rr * 180/Math.PI;
 			  //text.setAttribute("transform","rotate("+(rr)+")");
 			  text.appendChild(document.createTextNode("test"));
+			  */
 		      }
 		      
 		      // Find the incident section

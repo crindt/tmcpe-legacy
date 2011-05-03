@@ -2,21 +2,11 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="thin" />
     <title>Incident Detail</title>
-    <base id="htmldom"  href="${resource(dir:'/',absolute:true)}" />
 
-<!--
-    <p:css name="po" />
--->
-
-
-    <p:css name="960-fluid" /> <!-- Load the 960 css -->
-    <p:css name="jquery/themes/base/jquery-ui" /> <!-- Load the openlayers css -->
+    <p:css name="tmcpe-common" />
     <p:css name="d3-tsd" /> <!-- Load the openlayers css -->
-
-<style type='text/css'> 
-
-</style> 
 
     <p:javascript src='d3/d3' />
     <p:javascript src='d3/d3.geom' />
@@ -165,6 +155,9 @@
 
 
       $(document).ready(function(){
+
+      var settings = $("#settings").detach();
+      settings.appendTo('#header');
 	  
       // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
 
@@ -211,37 +204,66 @@
   </head>
   <body>
 
-    <div id="header" class="container_16">
+    <div class="container_16">
 
-      <div id="" class="grid_1 ">
-      </div>
-
-      <div id="" class="grid_8 ">
-
-	<select id="ifia" onchange="updateAnalysis(this.options[this.selectedIndex].value);">
-	  <g:each in="${incidentInstance.analyses}">
-	    <g:each var="ifia" in="${it.incidentFacilityImpactAnalyses}">
-	      <option selected="true" value="${ifia.id}">${ifia.location.freewayId}-${ifia.location.freewayDir}</option>
-	      <option value="${ifia.id}">Bogus</option>
-	    </g:each>
-	  </g:each>
-	</select>
-	<select id="theme" onChange="updateTsd()">
-	  <option selected="true" value="stdspd">Standard Deviation of Speed from Mean</option>
-	  <option value="spd">Speed Scaled between max speed and jam speed</option>
-	</select>
-	<div id="scaleslider"></div><span id="alpha">1.0</span>
-	<div id="maxspdslider"></div><span id="maxspd">60</span>
-
-      </div>
-
-      <div id="" class="grid_6 ">
-	<form>
-	  <input type="radio" name="align" value="cardinal" onclick="rotateMap(this);">Align to cardinal</option>
-	  <input type="radio" name="align" checked="true" value="incident" onclick="rotateMap(this)">Align to incident</option>
-	</form>
+      <div id="settings" style="display:inline;float:left;margin-left:10px;">
+	<table style="float:left;">
+	  <tr>
+	    <th>Facility:</th>
+	    <td>
+	      <select id="ifia" onchange="updateAnalysis(this.options[this.selectedIndex].value);">
+		<g:each in="${incidentInstance.analyses}">
+		  <g:each var="ifia" in="${it.incidentFacilityImpactAnalyses}">
+		    <option selected="true" value="${ifia.id}">${ifia.location.freewayId}-${ifia.location.freewayDir}</option>
+		  </g:each>
+		</g:each>	      
+	      </select>
+	    </td>
+	  </tr>
+	  <tr>
+	    <th>Cell theme:</th>
+	    <td>
+	      <select id="theme" onChange="updateTsd()">
+		<option selected="true" value="stdspd">Standard Deviation of Speed from Mean</option>
+		<option value="spd">Speed Scaled between max speed and jam speed</option>
+	      </select>
+	    </th>
+	  </tr>
+	</table>
+	<table style="float:left">
+	  <tr>
+	    <th id="speed_parameter">Scale:</th>
+	    <td>
+	      <div id="scaleslider"></div>
+	    </td>
+	    <td>
+	      <span id="alpha">1.0</span>
+	    </td>
+	  </tr>
+	  <tr>
+	    <th>Max Speed:</th>
+	    <td>
+	      <div id="maxspdslider"></div>
+	    </td>
+	    <td>
+	      <span id="maxspd">60</span>
+	    </td>
+	  </tr>
+	</table>
+	<table style="float:left">
+	  <tr>
+	    <th>Align map to:</th>
+	    <td>
+	      <form>
+		<input type="radio" name="align" value="cardinal" onclick="rotateMap(this);">Cardinal directions</option>
+		<input type="radio" name="align" checked="true" value="incident" onclick="rotateMap(this)">Incident</option>
+	      </form>
+	    </td>
+	  </tr>
+	</table>
       </div>
     </div>
+
     <div id="msg" class="container_16">
       <div id="" class="grid_16 alpha omega ">
 	<p id="msgtxt">&nbsp;</p>
@@ -250,7 +272,7 @@
 
     <div id="content" class="container_16">
 
-      <div id="" style="height:400px" class="grid_16 alpha omega">
+      <div style="height:40%;">
 	<div id="tsdcontainer" class="grid_8 alpha">
 	  <div id="tsdbox">
 	  </div>
@@ -259,9 +281,10 @@
 	  <div id="map" tabindex="1"></div>
 	</div>
       </div>
-      <div id="" class="grid_16 alpha omega">
+      
+      <div style="height:40%">
 	<div id="chartcontainer" class="grid_8 alpha">
-	  <div id="chartbox" style="height:300px;"></div>
+	  <div id="chartbox" style="height:100%;"></div>
 	</div>
 	<div id="databox" class="grid_8 omega">
 	  <table>
@@ -276,10 +299,6 @@
 	  </table>
 	</div>
       </div>
-	</div>
-
-      </div>
-
     </div>
 
     <div id="footer" class="container_16">

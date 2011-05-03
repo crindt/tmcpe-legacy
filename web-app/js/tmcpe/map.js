@@ -124,6 +124,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .zoom(13)
 	      .zoomRange([1,/*6*/, 18])
 	      .add(po.interact())
+	      .center({lat: 33.739, lon: -117.830})
 //	      .add(po.hash())
 	  ;
 
