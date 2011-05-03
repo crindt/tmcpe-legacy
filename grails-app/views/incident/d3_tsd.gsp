@@ -7,6 +7,7 @@
 
     <p:css name="tmcpe-common" />
     <p:css name="d3-tsd" /> <!-- Load the openlayers css -->
+    <p:css name="jquery-tooltip/jquery.tooltip" /> <!-- Load the openlayers css -->
 
     <p:javascript src='d3/d3' />
     <p:javascript src='d3/d3.geom' />
@@ -15,6 +16,7 @@
     <p:javascript src='jquery-ui/1.8/ui/minified/jquery-ui.min' />
     <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
     <p:javascript src='jquery-dateFormat/jquery.dateFormat-1.0' />
+    <p:javascript src='jquery-tooltip/jquery.tooltip' />
     <p:javascript src='polymaps/polymaps' />
     <p:javascript src='protovis/protovis' />
 <!--    <p:javascript src='tmcpe/po' /> -->
@@ -110,6 +112,8 @@
       syncchart(tsd,cumflow)({i:cumflow.section()})
 
       d3.select(tsd.container()).selectAll("rect").on("click", syncchart( tsd, cumflow ));
+
+      updateStats( json );
 
       // create the map
       //doMap( json );
@@ -285,17 +289,23 @@
       
       <div style="height:40%">
 	<div id="chartcontainer" class="grid_8 alpha">
-	  <div id="chartbox" style="height:100%;"></div>
+	  <div id="chartbox" style="height:90%;"></div>
+	  <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
 	</div>
-	<div id="databox" class="grid_8 omega">
+	<div id="databox" style="height:100%" class="grid_8 omega">
 	  <table>
 	    <tr><td class="label">tmcpe delay:</td><td class="value" id="netDelay"></td><td class="unit" id="netDelayUnit">veh-hr</td></tr>
+<!--
 	    <tr><td class="label">tmcpe delay2:</td><td class="value" id="computedDelay2"></td><td class="unit" id="computedDelayUnit">veh-hr</td></tr>
 	    <tr><td class="label">chart delay2:</td><td class="value" id="chartDelay2"></td><td class="unit" id="chartDelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">chart delay3:</td><td class="value" id="chartDelay3"></td><td class="unit" id="chartDelayUnit">veh-hr</td></tr>
+-->
 	    <tr><td class="label">d12 delay:</td><td class="value" id="d12Delay"></td><td class="unit" id="d12DelayUnit">veh-hr</td></tr>
 	    <tr><td class="label">diversion:</td><td class="value" id="computedDiversion"></td><td class="unit" id="computedDiversionUnit">veh</td></tr>
 	    <tr><td class="label">maxq:</td><td class="value" id="computedMaxq"></td><td class="unit" id="computedMaxqUnit">veh</td></tr>
-	    <tr><td class="label">maxq time:</td><td class="value" id="ComputedMaxqTime"></td><td class="unit" id="ComputedMaxqTimeUnit">hr</td></tr>
+<!--
+	    <tr><td class="label">maxq time:</td><td class="value" id="computedMaxqTime"></td><td class="unit" id="computedMaxqTimeUnit">hr</td></tr>
+-->
 	    <tr><td class="label">TMC savings:</td><td class="value" id="tmcSavings"></td><td class="unit" id="tmcSavingsUnit">veh-hr</td></tr>
 	  </table>
 	</div>

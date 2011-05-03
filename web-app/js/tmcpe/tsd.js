@@ -380,7 +380,18 @@ if ( !tmcpe ) var tmcpe = {};
               .attr("transform", translateX )
               .attr("height", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum); })
 	      .attr("style", cellStyle)
-              .on("mouseover", mouseover);
+	      .text("test")
+/*
+	      .attr("tt", function(d){ 
+		  this.tooltip({ bodyHandler: function() {
+                      return $($(this).attr("href")).html();
+		  }});
+	      })
+*/
+              .on("mouseover", mouseover)
+	  ;
+
+
 
 	  // create ylabels
 	  gg.append("svg:text")
@@ -524,6 +535,9 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  var incidentSectionIndex = getSectionIndex(json.sec)-1;
 
+	  d3.select("#chart_location").html(json.sections[section].name);
+
+
 	  var startCell = json.timesteps.filter( function (e) {
 	      return !t1 || (e.getTime()/1000 < t1);
 	  }).length-1;
@@ -664,7 +678,7 @@ if ( !tmcpe ) var tmcpe = {};
 		    vis.selectAll( "g.area2 path" )
 		    .transition()
 		    .attr("fill-opacity", 1 );
-		  */
+		    */
 	      } )
 	      .on("mouseout", function (d,i) { 
 		  updateText( "&nbsp;" );
@@ -686,11 +700,14 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // compute delay from implied queuing
 	  var delay2 = 0;
+	  var delay3 = 0;
 	  $.each( data, function(i, d) {
-	      delay2 += (d.y3-d.y)*1000*5/60;
+	      delay2 += (d.y3-d.y)*5/60;
+	      delay3 += (d.y2-d.y)*5/60;
 	  });
 
 	  d3.select("#chartDelay2").html( delay2.toFixed(0) );
+	  d3.select("#chartDelay3").html( delay3.toFixed(0) );
 
 	  // divavg
 	  if ( section == incidentSectionIndex ) {
@@ -702,12 +719,12 @@ if ( !tmcpe ) var tmcpe = {};
 			.y0(hh - 1)
 			.y1(function(d) { return y(d.y3); }))
 		  .on("mouseover", function( d,i ) { 
-		      updateText( "Delayed non-diverted traffic" );
+		      updateText( "Expected non-diverted Cumulative Flow (Observed delay)" );
 		      /*
 			vis.selectAll( "g.area3 path" )
 			.transition()
-			.attr("fill-opacity", 1 );
-		      */
+			.attr("fill-opacity", 0.5 );
+			*/
 		  } )
 		  .on("mouseout", function (d,i) { 
 		      updateText( "&nbsp;" );
@@ -717,8 +734,8 @@ if ( !tmcpe ) var tmcpe = {};
 			return j == i;
 			} )
 			.transition()
-			.attr("fill-opacity", 0.5 );
-		      */
+			.attr("fill-opacity", 1 );
+			*/
 		  } );
 	      
 	      vis.append("svg:path")
@@ -726,6 +743,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  .attr("d", d3.svg.line()
 			.x(function(d) { return x(d.x); })
 			.y(function(d) { return y(d.y3); }));
+
 	  }
 
 
@@ -816,11 +834,11 @@ if ( !tmcpe ) var tmcpe = {};
 
 
 	  function avgmouseover(d,i) {
-	      updateText( "Delay due to incident" );
+	      updateText( "Expected Cumulative Flow" );
 	  }
 
 	  function obsmouseover(d,i) {
-	      updateText( "Observed delay" );
+	      updateText( "Observed Cumulative Flow" );
 	  }
 
 	  function updateText(msg) {

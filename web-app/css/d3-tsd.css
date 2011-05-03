@@ -192,11 +192,18 @@ td.unit {
     width: 100%;
     height: 100%;
 }
+#chartcontainer{
+    border: 2px solid #eee;
+    background-color: #006;
+}
+#chartcontainer h3 {
+    text-align:center;
+}
 #chartbox {
     margin-top:1em;
     background-color: #006;
     text-align: right;
-    border: 2px solid #eee;
+    border: 0px;
     padding: 0px;
     width: 100%;
     height: 100%;
