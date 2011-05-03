@@ -43,3 +43,6 @@
 [submodule "web-app/js/tablescroll"]
 	path = web-app/js/tablescroll
 	url = https://github.com/farinspace/jquery.tableScroll
+[submodule "web-app/js/jquery-dateFormat"]
+	path = web-app/js/jquery-dateFormat
+	url = https://github.com/phstc/jquery-dateFormat

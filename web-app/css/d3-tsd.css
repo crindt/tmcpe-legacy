@@ -94,6 +94,11 @@ svg text {
     stroke: purple;
     stroke-width: 4px;
 }
+
+.timebar .critical-time {
+    stroke: white;
+    stroke-width: 1px;
+}
  
 .line2, circle.area2 {
   fill: none;

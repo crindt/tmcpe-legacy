@@ -120,7 +120,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if (!arguments.length) return container;
 	  container = x;
 	  container.setAttribute("class", "tsd");
-	  //container.appendChild(rect);
+	  container.appendChild(rect);
 	  return tsd.resize(); // infer size
       }
 
@@ -641,7 +641,8 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("text-anchor", "start")
 	      .attr("transform",function(d) { return xlabel_rotate(d); } )
 	      .text(/*x.tickFormat(10)*/ function (x) { 
-		  return new Date( x*1000 ).toLocaleTimeString()
+		  return $.format.date(new Date( x*1000 ), "HH:mm");
+//		  return new Date( x*1000 ).toLocaleTimeString();
 	      } )
 	      .attr("class","xlabels");
 	  
@@ -749,7 +750,11 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // draw start of incident
 
-	  var tr = [ t0, t1, t2, t3 ].filter( function( x ) { return x != null; } );
+	  var tr = [ 
+	      { t:t0, n: "t0", l:"Onset of incident" }, //"t<tspan baseline-shift='sub'>0</tspan>" },
+	      { t:t1, n: "t1", l:"Verification" }, 
+	      { t:t2, n: "t2", l:"Roadway clear" }, 
+	      { t:t3, n: "t3", l:"Queue dissipated" }, ].filter( function( d ) { return d.t != null; } );
 
 	  var times = vis.selectAll("g.timebar")
 	      .data( tr )
@@ -757,11 +762,33 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("class", "timebar");
 
 	  times.append("svg:line")
-	      .attr("x1", x )
-	      .attr("x2", x )
+	      .attr("x1", function (d) { 
+		  return x(d.t) } )
+	      .attr("x2", function (d) { 
+		  return x(d.t) } )
 	      .attr("y1", 0 )
-	      .attr("y2", hh - 1 );
+	      .attr("y2", hh - 1 )
+	      .on("mouseover", function(d,i) {
+		  this.style.stroke="red";
+		  updateText( $.format.date( new Date(d.t*1000), "HH:mm" ) + ":: " + d.l );
+	      })
+	      .on("mouseout", function(d,i) {
+		  this.style.stroke="";
+	      })
+	  ;
 
+	  d3.selectAll("g.timebar")
+	      .append("svg:text")
+	      .attr("class","critical-time")
+	      .attr("x", function (d) { 
+		  return x(d.t) } )
+	      .attr("y", 0 )
+	      .attr("text-anchor", "start")
+	      .text( function(d) { 
+		  return d.n; } )
+	  ;
+
+/*
 	  var times2 = vis.selectAll("g.timebar")
 	      .data( json.log )
 	      .enter().append("svg:g")
@@ -785,6 +812,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  this.style.stroke="";
 	      })
 	  ;
+*/
 
 
 	  function avgmouseover(d,i) {
@@ -946,10 +974,6 @@ if ( !tmcpe ) var tmcpe = {};
 	      var endll = ff[ff.length-1].geometry.coordinates;
 	      end = map.coordinatePoint(map.locationCoordinate(map.center()),
 					map.locationCoordinate( {lon:endll[endll.length-1][0],lat:endll[endll.length-1][1] } ) );
-
-	      for ( var i = 0; i < ff.length; ++i ) {
-		  console.log( "FF: " + ff[i].properties.vdsid + ", " + ff[i].properties.absPostmile );
-	      }
 
 	      // x,y screen coords are flipped on the x axis (y increases downward)
 	      // we negate the y coords here for the angle calc

@@ -14,6 +14,7 @@
     <p:javascript src='jquery/dist/jquery.min' />
     <p:javascript src='jquery-ui/1.8/ui/minified/jquery-ui.min' />
     <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
+    <p:javascript src='jquery-dateFormat/jquery.dateFormat-1.0' />
     <p:javascript src='polymaps/polymaps' />
     <p:javascript src='protovis/protovis' />
 <!--    <p:javascript src='tmcpe/po' /> -->
@@ -220,6 +221,8 @@
 	      </select>
 	    </td>
 	  </tr>
+	</table>
+	<table style="float:left">
 	  <tr>
 	    <th>Cell theme:</th>
 	    <td>
@@ -229,8 +232,6 @@
 	      </select>
 	    </th>
 	  </tr>
-	</table>
-	<table style="float:left">
 	  <tr>
 	    <th id="speed_parameter">Scale:</th>
 	    <td>
@@ -250,11 +251,11 @@
 	    </td>
 	  </tr>
 	</table>
-	<table style="float:left">
-	  <tr>
+	<table style="float:left;border:solid 1px white">
+	  <tr >
 	    <th>Align map to:</th>
 	    <td>
-	      <form>
+	      <form style="display:inline;">
 		<input type="radio" name="align" value="cardinal" onclick="rotateMap(this);">Cardinal directions</option>
 		<input type="radio" name="align" checked="true" value="incident" onclick="rotateMap(this)">Incident</option>
 	      </form>
