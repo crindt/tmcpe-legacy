@@ -90,6 +90,10 @@ svg text {
 //  fill-opacity: 0.5;
 }
 
+.whatif {
+    fill: gray;
+}
+
 .timebar {
     stroke: purple;
     stroke-width: 4px;
