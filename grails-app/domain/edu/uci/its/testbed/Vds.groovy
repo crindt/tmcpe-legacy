@@ -135,7 +135,8 @@ class Vds {
 	return (res = this.freeway.compareTo(other.freeway) 
 		? res 
 		: ( res2 = this.freewayDir.compareTo(other.freewayDir)
-		    ? return other.getSortablePostmile() - this.getSortablePostmile()
+		    ? other.getSortablePostmile() - this.getSortablePostmile()
+		    : 0
 		  ) );
     }
 
