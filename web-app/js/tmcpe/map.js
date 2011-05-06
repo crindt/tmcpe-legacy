@@ -43,6 +43,7 @@ if ( !tmcpe ) var tmcpe = {};
       allTheData,
       map,
       table,
+      size,
 
       po = org.polymaps;
 
@@ -54,8 +55,9 @@ if ( !tmcpe ) var tmcpe = {};
 	  if (!arguments.length) return container;
 	  container = x;
 	  container.setAttribute("class", "map");
-	  //container.appendChild(rect);
-	  return cumflow.resize(); // infer size
+//	  container.appendChild(rect);
+	  return qmap.resize(); // infer size
+	  //return qmap;
       }
 
       var rect = tmcpe.svg("rect");
@@ -89,11 +91,13 @@ if ( !tmcpe ) var tmcpe = {};
       qmap.ww = function() { return $(container).width()-2; };
 
 
+/*
       qmap.container = function(x) {
 	  if ( !arguments.length ) return container;
 	  container = x;
 	  return qmap;
       }
+*/
 
       qmap.table = function(x) {
 	  if ( !arguments.length ) return table;

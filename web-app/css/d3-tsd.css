@@ -141,7 +141,7 @@ td.label {
     text-align: right;
 }
 
-td.value {
+td.value, td.delayValue {
     text-align: right;
     width: 4em;
 }

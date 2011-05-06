@@ -120,8 +120,9 @@ if ( !tmcpe ) var tmcpe = {};
 	  if (!arguments.length) return container;
 	  container = x;
 	  container.setAttribute("class", "tsd");
-	  container.appendChild(rect);
-	  return tsd.resize(); // infer size
+//	  container.appendChild(rect);
+//	  return tsd.resize(); // infer size
+	  return tsd;
       }
 
       tsd.resize = function() {
@@ -345,6 +346,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  svg = d3.select(container)
               .append("svg:svg")
+	      .attr("id", "tsdsvg" )
               .attr("width", twidth + 7*p/*theight/*twidth*/ )
               .attr("height", theight + 2*p/*twidth/*theight*/ )
 	      .append("svg:g")
@@ -454,7 +456,8 @@ if ( !tmcpe ) var tmcpe = {};
       theight,
       svg,
       section,
-      p = 20
+      p = 20,
+      tmcDivPct = 20
       ;
 
 
@@ -482,12 +485,19 @@ if ( !tmcpe ) var tmcpe = {};
       rect.setAttribute("visibility", "hidden");
       rect.setAttribute("pointer-events", "all");
 
+      cumflow.tmcDivPct = function(x) {
+	  if (!arguments.length) return container;
+	  tmcDivPct = x;
+	  return cumflow.updateStats();
+      }
+
       cumflow.container = function(x) {
 	  if (!arguments.length) return container;
 	  container = x;
 	  container.setAttribute("class", "tsd");
 	  //container.appendChild(rect);
 	  return cumflow.resize(); // infer size
+	  //return cumflow;
       }
 
       cumflow.resize = function() {
@@ -521,8 +531,37 @@ if ( !tmcpe ) var tmcpe = {};
 	  return cumflow;
       }
 
-      function getCumflowForTime( tt ) {
-	  
+      var data;
+
+
+
+      cumflow.updateStats = function() {
+	  // compute delay from implied queuing
+	  var delay2 = 0;
+	  var delay3 = 0;
+	  var delay4 = 0;
+	  var tmcSavings = 0;
+	  $.each( data, function(i, d) {
+	      delay2 += (d.y3-d.y)*5/60;       // div adj avg - obs
+	      delay3 += (d.y2-d.y)*5/60;       // avg - obs
+	      delay4 += (d.y2-d.incflow)*5/60; // avg - inc projected
+	  });
+
+	  // scale to convert div adj avg to netdelay
+	  var factor = json.analysis.netDelay/(delay2+(delay3-delay2)*(1-tmcDivPct/100.0));
+
+	  delay4 *= factor;
+	  tmcSavings = delay4-json.analysis.netDelay;
+	  tmcSavings = ( tmcSavings < 0 ? 0 : tmcSavings );
+
+	  d3.select("#netDelay").html( json.analysis.netDelay.toFixed(0) );
+	  d3.select("#d12Delay").html( json.analysis.d12Delay.toFixed(0) );
+	  d3.select("#computedDiversion").html( json.analysis.computedDiversion.toFixed(0) );
+	  d3.select("#computedMaxq").html( json.analysis.computedMaxq.toFixed(0) );
+	  d3.select("#chartDelay2").html( delay2.toFixed(0) );
+	  d3.select("#chartDelay3").html( delay3.toFixed(0) );
+	  d3.select("#whatIfDelay").html( delay4.toFixed(0) );
+	  d3.select("#tmcSavings").html( tmcSavings.toFixed(0) );
       }
 
 
@@ -573,7 +612,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      return v == null || v.vol == null ? 0 : v.vol/volscale;
 	  });
 
-	  var data = d3.range( json.timesteps.length ).map(function(j) {
+	  data = d3.range( json.timesteps.length ).map(function(j) {
 	      return {x:json.timesteps[j].getTime()/1000+300,
 		      y: sfunc(section,j,function(v){return v.vol/volscale}), 
 		      y2: sfunc(section,j,function(v){return v.vol_avg/volscale}),
@@ -588,15 +627,18 @@ if ( !tmcpe ) var tmcpe = {};
 	  var incflowrate = (data[t2Cell].y - data[t0Cell].y)/(5*60*(t2Cell-t0Cell)) ;
 	  var clearflowrate = (data[finishCell].y - data[t2Cell].y)/(5*60*(finishCell-t2Cell)) ;
 
+	  // compute what-if flow rate
 	  $.each(data,function(j,d){
 	      if ( j < t2Cell ) {
+		  // before t2 (clearance), what-if flow is equivalent to measured
 		  d.incflow = sfunc(section,j,function(v){return v.vol/volscale})
 	      } else if ( j < t2pCell ) {
-		  var base = sfunc(section,t0Cell,function(v){return v.vol/volscale});
-		  d.incflow =  base + incflowrate*(j-t0Cell)*60*5;
+		  // between t2 and t2p, what-if flow is the base vvalue 
+		  var base = sfunc(section,t2Cell,function(v){return v.vol/volscale});
+		  d.incflow =  base + incflowrate*(j-t2Cell)*60*5;
 	      } else {
-		  var base = sfunc(section,t0Cell,function(v){return v.vol_avg/volscale});
-		  d.incflow = base + incflowrate*(t2pCell-t0Cell)*60*5 + clearflowrate*(j-t2pCell)*60*5;
+		  var base = sfunc(section,t2Cell,function(v){return v.vol/volscale});
+		  d.incflow = base + incflowrate*(t2pCell-t2Cell)*60*5 + clearflowrate*(j-t2pCell)*60*5;
 	      }
 	  });
 
@@ -869,23 +911,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  ;
 */
 
-
-	  // compute delay from implied queuing
-	  var delay2 = 0;
-	  var delay3 = 0;
-	  var delay4 = 0;
-	  $.each( data, function(i, d) {
-	      delay2 += (d.y3-d.y)*5/60;
-	      delay3 += (d.y2-d.y)*5/60;
-	      delay4 += (d.y2-d.incflow)*5/60;
-	  });
-	  delay4 *= json.netDelay/delay3;
-
-	  d3.select("#chartDelay2").html( delay2.toFixed(0) );
-	  d3.select("#chartDelay3").html( delay3.toFixed(0) );
-	  d3.select("#tmcSavings").html( delay3.toFixed(0) );
-
-
+	  cumflow.updateStats();
 
 	  function avgmouseover(d,i) {
 	      updateText( "Expected Cumulative Flow" );

@@ -151,6 +151,35 @@
      tsd.updateCellAugmentation( ); // update style
   }
 
+  function updateCumFlowStats() {
+     cumflow.tmcDivPct( $("#tmcpct").text() );
+
+     var unit = $('input[name=delayUnit]:checked').val();
+     var vot = $("#valueOfTime")[0];
+
+     if ( unit == 'usd' ) {
+        $('#valueOfTime').attr("disabled","");
+
+        if ( vot != "" ) {
+	$(".delayValue").each(function() { 
+	   var val = this.innerText*vot.value;
+	   this.innerHTML = val.toFixed();
+	});
+        $(".delayUnit").each(function() { 
+	   this.innerHTML = "USD";
+	});
+        }
+     } else {
+        $('#valueOfTime').attr("disabled","disabled");
+        $(".delayUnit").each(function() { 
+	   this.innerHTML = "veh-hr";
+	});
+     }
+  }
+
+  function changeUnit(v) {
+     updateCumFlowStats();
+  }
 
   function updateAnalysis( id ) {
       //	     new Ajax.Request('/tmcpe/incidentFacilityImpactAnalysis/tsdData/'+id,{asynchronous:false,evalScripts:true,onSuccess:function(e){updateData(e)},onFailure:function(e){handleFailure(e)},method:'get'});
@@ -200,10 +229,26 @@
 		updateTsd() ;
 		}
 		});
-		$("#maxspd").text("60");
-		}
-		);
+	  $("#maxspd").text("60");
 		
+	  $("#tmcpctslider").slider({
+	     value:50,
+	     min: 0,
+	     max: 100,
+	     step: 1,
+	     slide: function(event,ui) {
+  	           $("#tmcpct").text( $("#tmcpctslider").slider("option","value") );
+		   updateCumFlowStats();
+		},
+		change: function( event, ui ) { 
+		   $("#tmcpct").text( $("#tmcpctslider").slider("option","value") );
+		   updateCumFlowStats();
+		}
+		});
+	  $("#tmcpct").text("50");
+	}
+	);
+
     </g:javascript>     
 
   </head>
@@ -265,6 +310,30 @@
 	      </form>
 	    </td>
 	  </tr>
+	  <tr>
+	    <th>TMC Diversion %:</th>
+	    <td>
+	      <div id="tmcpctslider"></div>
+	    </td>
+	    <td>
+	      <span id="tmcpct">50</span>
+	    </td>
+	  </tr>
+	  <tr>
+	    <th>Display delay as:</th>
+	    <td>
+	      <form style="display:inline;">
+		<input type="radio" name="delayUnit" checked="true" value="vehhr" onclick="changeUnit(this)">veh-hr</option>
+		<input type="radio" name="delayUnit" value="usd" onclick="changeUnit(this)">USD</option>
+	      </form>
+	    </td>
+	  </tr>
+	  <tr>
+	    <th>Value of Time</th>
+	    <td>
+	      <input disabled="disabled" type="text" value="13.11" onChange="updateCumFlowStats()" id="valueOfTime"/>
+	    </td>
+	  </tr>
 	</table>
       </div>
     </div>
@@ -294,19 +363,20 @@
 	</div>
 	<div id="databox" style="height:100%" class="grid_8 omega">
 	  <table>
-	    <tr><td class="label">tmcpe delay:</td><td class="value" id="netDelay"></td><td class="unit" id="netDelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">tmcpe delay:</td><td class="delayValue" id="netDelay"></td><td class="unit delayUnit" id="netDelayUnit">veh-hr</td></tr>
 <!--
-	    <tr><td class="label">tmcpe delay2:</td><td class="value" id="computedDelay2"></td><td class="unit" id="computedDelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">tmcpe delay2:</td><td class="value" id="computedDelay2"></td><td class="unit delayUnit" id="computedDelayUnit">veh-hr</td></tr>
 	    <tr><td class="label">chart delay2:</td><td class="value" id="chartDelay2"></td><td class="unit" id="chartDelayUnit">veh-hr</td></tr>
 	    <tr><td class="label">chart delay3:</td><td class="value" id="chartDelay3"></td><td class="unit" id="chartDelayUnit">veh-hr</td></tr>
 -->
-	    <tr><td class="label">d12 delay:</td><td class="value" id="d12Delay"></td><td class="unit" id="d12DelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">d12 delay:</td><td class="delayValue" id="d12Delay"></td><td class="unit delayUnit" id="d12DelayUnit">veh-hr</td></tr>
 	    <tr><td class="label">diversion:</td><td class="value" id="computedDiversion"></td><td class="unit" id="computedDiversionUnit">veh</td></tr>
 	    <tr><td class="label">maxq:</td><td class="value" id="computedMaxq"></td><td class="unit" id="computedMaxqUnit">veh</td></tr>
 <!--
 	    <tr><td class="label">maxq time:</td><td class="value" id="computedMaxqTime"></td><td class="unit" id="computedMaxqTimeUnit">hr</td></tr>
 -->
-	    <tr><td class="label">TMC savings:</td><td class="value" id="tmcSavings"></td><td class="unit" id="tmcSavingsUnit">veh-hr</td></tr>
+	    <tr><td class="label">"What-if" delay:</td><td class="delayValue" id="whatIfDelay"></td><td class="unit delayUnit" id="whatIfDelayUnit">veh-hr</td></tr>
+	    <tr><td class="label">TMC savings:</td><td class="delayValue" id="tmcSavings"></td><td class="unit delayUnit" id="tmcSavingsUnit">veh-hr</td></tr>
 	  </table>
 	</div>
       </div>
