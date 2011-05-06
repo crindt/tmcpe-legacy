@@ -232,7 +232,7 @@
 	  $("#maxspd").text("60");
 		
 	  $("#tmcpctslider").slider({
-	     value:50,
+	     value:75,
 	     min: 0,
 	     max: 100,
 	     step: 1,
@@ -245,7 +245,7 @@
 		   updateCumFlowStats();
 		}
 		});
-	  $("#tmcpct").text("50");
+	  $("#tmcpct").text("75");
 	}
 	);
 
@@ -316,7 +316,7 @@
 	      <div id="tmcpctslider"></div>
 	    </td>
 	    <td>
-	      <span id="tmcpct">50</span>
+	      <span id="tmcpct">75</span>
 	    </td>
 	  </tr>
 	  <tr>
