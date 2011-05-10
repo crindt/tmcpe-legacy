@@ -498,3 +498,4 @@
   616  perl import-al.pl --skip-al --skip-incidents --skip-icad --date-from='2007-01-01' --date-to='2007-01-07' --verbose
   617  history
   618  history > recent-commands.txt
+perl import-al.pl --dc-vds-downstream-fudge=1.5 --dc-vds-upstream-fallback=6 --dc-prewindow=20 --dc-postwindow=90  --date-from=2010-07-15 --dc-use-eq4567 --dc-use-eq3 --dc-min-obs-pct=20 --dc-limit-loading-shockwave=20 --dc-limit-clearing-shockwave=20 --dc-use-eq8 --dc-use-eq8b  --dc-unknown-evidence-value=0.50 --dc-dont-compute-vds-upstream-fallback --dc-band=1 not-40-1210 --verbose --use-osm-geom --only-sigalerts --dc-cplex-optcr=0 --dc-gams-reslim=300 --dc-weight-for-distance=3 --dc-bound-incident-time  not-505-031509  --verbose --skip-al-import --skip-rl-import --skip-icad-import --replace-existing --dc-reprocess-existing 571-09172010

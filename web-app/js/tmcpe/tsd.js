@@ -108,6 +108,8 @@ if ( !tmcpe ) var tmcpe = {};
       cellAugmentStyle,
       selectedTime,
       seclensum,
+      startTime = 0,
+      endTime,// = 20,
       
       p = 20  // padding, in px
       ;
@@ -144,6 +146,17 @@ if ( !tmcpe ) var tmcpe = {};
       tsd.data = function(x) {
 	  if ( !arguments.length ) return json;
 	  json = x;
+
+/*
+	  json.sections = json.sections.sort( function(a,b) {
+	      var diff =  a.pm - b.pm;
+	      if ( a.dir == 'S' || a.dir == 'W' )
+		  return -diff;
+	      else
+		  return diff;
+	  });
+*/
+
 	  tsd.redraw();
 	  return tsd;
       }
@@ -199,6 +212,8 @@ if ( !tmcpe ) var tmcpe = {};
 	  var data = json.data,
 	  sections = json.sections
 
+	  if ( sections == null || sections.length == 0 ) return;
+
 	  // update cross line by translating it to the proper section
 	  var cross = tsd.svg.selectAll("#tsdsec")
 	      .data([1])
@@ -248,13 +263,22 @@ if ( !tmcpe ) var tmcpe = {};
 	  // remove any existing children
 	  $(container).children().remove();
 
+	  if ( json.data == null || json.data.length == 0 ) {
+	      // NO DATA AVAILABLE
+	      $(container).append('<p>NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
+							      ? ' BECAUSE: '+json.analysis.badSolution 
+							      : '' )+'</p>');
+	      // nothing to see here.
+	      return tsd;
+	  }
+
 	  var data = json.data,
 	  sections = json.sections
 	  fn       = [grid0, grid1],      // contouring functions
 	  grid = grid1;
 
 	  dh = data.length,        // how many time steps
-	  dw = data[0].length,     // how many sections
+	  dw = timeSlice(data[0]).length,     // how many sections
 
 	  szs = (tsd.hh()-2*p)/dh;
 	  szt = (tsd.ww()-7*p)/dw;
@@ -285,6 +309,9 @@ if ( !tmcpe ) var tmcpe = {};
 		  .attr("class","incidentBoundary");
 	  }
 
+	  function timeSlice( d ) {
+	      return d.slice( startTime?startTime:0,endTime!=null?endTime:d.length );
+	  }
 
 
 	  function mouseover(d,i) {
@@ -374,7 +401,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // next, in each row, create the time-space cells
 	  gg.selectAll("rect")
-              .data(function(d) { return d; })
+              .data(function(d) { return timeSlice(d); })
               .enter().append("svg:rect")
 	      .attr("i", function(d){return d.i;} )
 	      .attr("j", function(d){return d.j;} )
@@ -424,7 +451,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // next, in each row, create the evidence
 	  g.selectAll("circle")
-              .data(function(d) { return d; })
+              .data(function(d) { return timeSlice(d); })
               .enter().append("svg:circle")
 	  //.attr("class", function(d) { return "d"+d.inc; })
 	      .attr("style", cellAugmentStyle )
@@ -432,7 +459,23 @@ if ( !tmcpe ) var tmcpe = {};
               .attr("cy", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum)/2; })
 	      .attr("r", 2 );
 
-	  contour( svg, grid );
+
+	  // make sure there's at least one cell with the incident
+	  // flag set to 1, d3.contour infinite loops if that's not
+	  // the case.  Issue #680
+	  var incsum = 0;
+	  for ( y in json.data ) {
+	      for ( x in json.data[y] ) {
+		  incsum += (json.data[y][x].inc==1?1:0);
+	      }
+	  }
+
+	  // Only contour if there's a solution
+	  if ( incsum > 0 && json.analysis.badSolution == null ) { 
+	      contour( svg, grid );
+	  } else {
+	      updateText( "NO DELAY SOLUTION AVAILBLE BECAUSE: " + json.analysis.badSolution );
+	  }
 
 	  return tsd;
 
@@ -456,13 +499,19 @@ if ( !tmcpe ) var tmcpe = {};
       theight,
       svg,
       section,
-      p = 20,
-      tmcDivPct = 20
+      tmcDivPct = 20,
+      startTime = 0,
+      endTime,// = 20,
+      
+      p = 20
       ;
 
 
       // get section index from vdsid
       getSectionIndex = function( id ) {
+	  if ( json.sections == null || json.sections.length == 0 ) {
+	      return null;
+	  }
 	  var sec = json.sections.length-1; // default to the last
 	  var ii;
 	  for( ii = 0; ii < json.sections.length; ++ii ) {
@@ -519,6 +568,18 @@ if ( !tmcpe ) var tmcpe = {};
       cumflow.data = function(x) {
 	  if ( !arguments.length ) return json;
 	  json = x;
+
+/*
+	  json.sections = json.sections.sort( function(a,b) {
+	      var diff =  a.pm - b.pm;
+	      if ( a.dir == 'S' || a.dir == 'W' )
+		  return -diff;
+	      else
+		  return diff;
+	  });
+*/
+
+
 	  return cumflow;
       }
 
@@ -534,6 +595,10 @@ if ( !tmcpe ) var tmcpe = {};
       var data;
 
 
+      function zeroOrBetter( x ) {
+	  return x < 0 ? 0 : x;
+      }
+
 
       cumflow.updateStats = function() {
 	  // compute delay from implied queuing
@@ -541,6 +606,15 @@ if ( !tmcpe ) var tmcpe = {};
 	  var delay3 = 0;
 	  var delay4 = 0;
 	  var tmcSavings = 0;
+
+	  if ( json.analysis.badSolution != null ) {
+	      $.each(["netDelay","d12Delay","computedDiversion","computedMaxq","whatIfDelay","tmcSavings"], function (i,v) {
+		  d3.select("#"+v).html( "n/a" );
+	      });
+	      return cumflow;
+	  }
+
+
 	  $.each( data, function(i, d) {
 	      delay2 += (d.y3-d.y)*5/60;       // div adj avg - obs
 	      delay3 += (d.y2-d.y)*5/60;       // avg - obs
@@ -551,23 +625,39 @@ if ( !tmcpe ) var tmcpe = {};
 	  var factor = json.analysis.netDelay/(delay2+(delay3-delay2)*(1-tmcDivPct/100.0));
 
 	  delay4 *= factor;
-	  tmcSavings = delay4-json.analysis.netDelay;
+	  delay4 = zeroOrBetter( delay4 );
+	  tmcSavings = delay4-zeroOrBetter(json.analysis.netDelay);
 	  tmcSavings = ( tmcSavings < 0 ? 0 : tmcSavings );
 
-	  d3.select("#netDelay").html( json.analysis.netDelay.toFixed(0) );
-	  d3.select("#d12Delay").html( json.analysis.d12Delay.toFixed(0) );
-	  d3.select("#computedDiversion").html( json.analysis.computedDiversion.toFixed(0) );
-	  d3.select("#computedMaxq").html( json.analysis.computedMaxq.toFixed(0) );
+	  $.each(["netDelay","d12Delay","computedDiversion","computedMaxq","whatIfDelay","tmcSavings"], function (i,v) {
+	      if ( json.analysis[v] != null  && v != 'computedMaxqTime' ) {
+		  d3.select("#"+v).html( zeroOrBetter(json.analysis[v].toFixed(0) ) );
+	      }
+	  });
 	  d3.select("#chartDelay2").html( delay2.toFixed(0) );
 	  d3.select("#chartDelay3").html( delay3.toFixed(0) );
 	  d3.select("#whatIfDelay").html( delay4.toFixed(0) );
 	  d3.select("#tmcSavings").html( tmcSavings.toFixed(0) );
       }
 
+      function timeSlice( d ) {
+	  return d.slice( startTime?startTime:0,endTime!=null?endTime:d.length );
+      }
+
 
       cumflow.redraw = function() {
 	  // clear any existing
 	  $(container).children().remove();
+
+	  if ( json.data == null || json.data.length == 0 ) {
+	      // NO DATA AVAILABLE
+	      $(container).append('<p>NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
+							      ? ' BECAUSE: '+json.analysis.badSolution 
+							      : '' )+'</p>');
+	      // nothing to see here.
+	      return tsd;
+	  }
+
 
 	  var t0 = new Date( json.t0 ).getTime()/1000;
 	  var t1 = new Date( json.t1 ).getTime()/1000;
@@ -605,6 +695,19 @@ if ( !tmcpe ) var tmcpe = {};
 	      return !t3 || (e.getTime()/1000 < t3);
 	  }).length;
 
+	  if ( finishCell >= json.timesteps.length ) {
+	      finishCell = json.timesteps.length-1;
+	  }
+
+
+	  if ( t0Cell < 0 ) {
+	      // BAD DATA
+	      $(container).append('<p>PROBLEM WITH THIS DATA, REPORT AN ISSUE</p>');
+	      // nothing to see here.
+	      return tsd;
+	  }
+
+
 	  // fixme: crindt: we really want to use the incident section by default, not the downstream section.
 	  var diversion = sfunc(incidentSectionIndex,finishCell,function(v){
 	      return v == null || v.vol_avg == null ? 0 : v.vol_avg/volscale;
@@ -640,6 +743,10 @@ if ( !tmcpe ) var tmcpe = {};
 		  var base = sfunc(section,t2Cell,function(v){return v.vol/volscale});
 		  d.incflow = base + incflowrate*(t2pCell-t2Cell)*60*5 + clearflowrate*(j-t2pCell)*60*5;
 	      }
+
+	      // don't allow projection to be greater than avg.
+//	      if ( d.incflow > d.y2 ) d.incflow = d.y2;
+
 	  });
 
 
@@ -657,14 +764,17 @@ if ( !tmcpe ) var tmcpe = {};
 	  h = $(container).height()-2,
 	  ww = w - 7*p,       // width available for plot
 	  hh = h - 4*p,   // height available for plot
-	  x = d3.scale.linear().domain([json.timesteps[0].getTime()/1000,json.timesteps[json.timesteps.length-1].getTime()/1000+300]).range([0, ww]),
+	  x = d3.scale.linear()
+	      .domain([json.timesteps[startTime ? startTime : 0 /*0*/].getTime()/1000,
+		       json.timesteps[endTime ? endTime-1: json.timesteps.length-1].getTime()/1000+300])
+	      .range([0, ww]),
 	  y = d3.scale.linear().domain(/*[0,20]*/[0, maxflow]).range([hh, 0]),
 	  now = new Date();
 	  
 	  var vis = d3.select("#chartbox")
 	      .append("svg:svg")
 	      .attr("class", "flowchart" )
-	      .data([data])
+	      .data([timeSlice(data)])
 	      .attr("width", w) // margin of 100
 	      .attr("height", h)
 	      .append("svg:g")
@@ -677,9 +787,11 @@ if ( !tmcpe ) var tmcpe = {};
 	  var rr = d3.range( json.timesteps[0].getTime()/1000,
 			     json.timesteps[json.timesteps.length-1].getTime()/1000+300,
 			     300 );
+	  rr = timeSlice( rr );
 
 	  // create some data for the time rules
 	  var rr2 = x.ticks(json.timesteps.length);
+	  rr2 = timeSlice( rr2 );
 
 	  
 	  // Now, for each section, create a group
@@ -885,11 +997,12 @@ if ( !tmcpe ) var tmcpe = {};
 		  return d.n; } )
 	  ;
 
-/*
+	  // Add activity log entries
 	  var times2 = vis.selectAll("g.timebar")
 	      .data( json.log )
 	      .enter().append("svg:g")
-	      .attr("class", "timebar activitylog")
+	      .attr("class", "logtimebar activitylog hidden")
+	      .attr("logid", function(d,i) { return d.id; } )
 	  ;
 
 	  times2.append("svg:line")
@@ -903,13 +1016,13 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("y2", hh - 1 )
 	      .on("mouseover", function(d,i) { 
 		  this.style.stroke="red";
-		  updateText( "Log: " + new Date(d.stampDateTime).toLocaleTimeString() + ": " + d.memo ); 
+		  updateText( "Log: " + new Date(d.stampDateTime).toLocaleTimeString() + ": " + d.memoOnly ); 
 	      })
 	      .on("mouseout", function(d,i) {
 		  this.style.stroke="";
 	      })
 	  ;
-*/
+
 
 	  cumflow.updateStats();
 
@@ -938,7 +1051,7 @@ if ( !tmcpe ) var tmcpe = {};
       data,
       map,
       usearrow = true,
-      rotate = "incident",  // default = incident
+      rotate = "cardinal",  // default = incident
       secjson,
       segments,
       ends,
@@ -989,15 +1102,6 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( !arguments.length ) return secjson;
 
 	  secjson = x;
-
-	  // sort the feature list
-	  secjson.features = secjson.features.sort( function(a,b) {
-	      var diff =  a.properties.absPostmile - b.properties.absPostmile;
-	      if ( a.properties.freewayDir == 'S' || a.properties.freewayDir == 'W' )
-		  return -diff;
-	      else
-		  return diff;
-	  });
 
 	  // 
 	  addSegmentLayer();
@@ -1064,7 +1168,13 @@ if ( !tmcpe ) var tmcpe = {};
       function rotateLayer() {
 	  if ( rotate == "incident" ) {
 
-	      var ff = secjson.features;
+	      var ff = secjson.features.slice(0,secjson.features.length).sort(function(a,b){
+		  var diff =  a.pm - b.pm;
+		  if ( a.dir == 'S' || a.dir == 'W' )
+		      return -diff;
+		  else
+		      return diff;
+	      });
 
 	      var startll = ff[0].geometry.coordinates;
 	      start = map.coordinatePoint(map.locationCoordinate(map.center()),
@@ -1220,6 +1330,15 @@ if ( !tmcpe ) var tmcpe = {};
 	   });
       }
 
+      segmap.getSectionIndex = function( sec, e  ) {
+	  for (var i = 0; i < e.features.length; i++) {
+	      if ( e.features[i].data.id == sec ) {
+		  return i;
+	      }
+	  }
+	  return null;
+      }
+
       function addSegmentLayer() {
 	  // remove existing
 	  $("#segments").remove();
@@ -1252,11 +1371,10 @@ if ( !tmcpe ) var tmcpe = {};
 		      }
 		      
 		      // Find the incident section
-		      var i;
-		      var incsec;
-		      for ( i = 0; i < e.features.length && e.features[i].data.properties.id != json.sec; ++i );
 
-		      if ( i < e.features.length ) incsec = e.features[i];
+		      var i;
+		      var incsecIndex=segmap.getSectionIndex(json.sec, e);
+		      var incsec=e.features[incsecIndex];
 
 		      if ( incsec ) {
 			  var c = $(incsec.element);
@@ -1285,7 +1403,8 @@ if ( !tmcpe ) var tmcpe = {};
 			      return el == null ? "black" : el.style.fill; 
 			  } )
 			  .attr("stroke-width", 4 )
-			  .title(function(d) { return [d.id,d.name].join(":"); })(e);
+			  .title(function(d) { 
+			      return [d.id,d.name].join(":"); })(e);
 		  });
 
 	  map.add(secs);

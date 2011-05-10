@@ -40,8 +40,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("district_id", "crossing_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-11 14:07:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fU4a5UsnKzth4wgy6NeA3w
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:35:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:U8S6L93rhaYf3rrVmJbCTw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

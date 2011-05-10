@@ -54,8 +54,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("vds_id", "obs_day");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-11 14:07:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5iifmMohtRkFGHhizqtVKg
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:35:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qJU7MzDah20SqFw0AzmOVA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

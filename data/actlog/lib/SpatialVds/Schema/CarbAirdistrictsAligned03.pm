@@ -75,6 +75,11 @@ __PACKAGE__->table("carb_airdistricts_aligned_03");
   data_type: 'geometry'
   is_nullable: 1
 
+=head2 geom4326
+
+  data_type: 'geometry'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -103,12 +108,14 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 35 },
   "the_geom",
   { data_type => "geometry", is_nullable => 1 },
+  "geom4326",
+  { data_type => "geometry", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("gid");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-11 14:07:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XFcKAkIIrGXghh0GbY7i6A
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:35:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hlYprbX591LRCfnB/2jrxw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -41,7 +41,7 @@ use TMCPE::Schema;
 use TBMAP::Schema;
 use Date::Format;
 use POSIX;
-#use Devel::Comments '###', '###';
+use Devel::Comments '###', '###';
 
 our $VERSION = '0.3.4';
 
@@ -1396,10 +1396,12 @@ sub parse_results {
     $self->rawdata( [] );
 
     my $resf = io( $self->get_lst_file );
+    $self->bad_solution( "RESULTS FILE ".$self->get_lst_file." DOESN'T EXIST" ) if !$resf->exists();
+    
     my $found = 0;
     my $error = 0;
 
-    my $cell;
+    my $cell = [];
     my $z;
     my $tot_delay;
     my $avg_delay;
@@ -1407,8 +1409,9 @@ sub parse_results {
     my $solution_time_bounded;
     my $solution_space_bounded;
 
+    my $line;
   LINE: 
-    while( my $line = $resf->getline() ) { ### PROCESSING RESULTS |===[%]              |
+    while( $resf->exists() && ( $line = $resf->getline() ) ) { ### PROCESSING RESULTS |===[%]              |
 	$_ = $line;
 	/^Error Messages/ && do
 	{
@@ -1423,19 +1426,27 @@ sub parse_results {
 	}
 	/^\*\*\*\* \d+ ERROR/ && do
 	{
-	    croak "CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    warn "GENERAL ERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    $self->bad_solution( $_ );
 	};
 	/EXECERROR/ && do 
 	{
-	    croak "EXECERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    warn "EXECERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    $self->bad_solution( $_ );
 	};
 	/Error solving MIP subprogram/ && do 
 	{
-	    croak "Error solving MIP: CONSULT ".$self->get_lst_file." FOR DETAILS (and possibly the CPLEX subdir)";
+	    warn "Error solving MIP: CONSULT ".$self->get_lst_file." FOR DETAILS (and possibly the CPLEX subdir)";
+	    $self->bad_solution( $_ );
+	};
+	/RESOURCE INTERRUPT/ && do
+	{
+	    $self->bad_solution( $_ );
 	};
 	/No solution returned/ && do 
 	{
-	    croak "No solution?: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    warn "No solution?: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    $self->bad_solution( $_ );
 	};
 	
 	/^----\s+VAR Z\s+[^\s]+\s+(-?[\d.]+)\s+.*/ && do
@@ -1497,10 +1508,6 @@ sub parse_results {
 		$self->bad_solution( "Failed to find a solution: $1 $2 rows" );
 	    }
 	};
-	/RESOURCE INTERRUPT/ && do
-	{
-	    $self->bad_solution( $_ );
-	};
 	next LINE if not $found;
 	
 	/^S\s*(\d+)\s*\.\s*(\d+)\s+(.*)/ && do 
@@ -1523,6 +1530,7 @@ sub parse_results {
     $self->solution_space_bounded( $solution_space_bounded );
 
     $self->cell( $cell );
+    1;
 }
 
 # Write the solution to the database
@@ -1535,9 +1543,6 @@ sub write_to_db {
     my $cell = $self->cell;
 
     my $facilkey = join( ":", $fwy, $dir );
-
-    # Don't write if the solution is bad
-    croak {msg => join(":", "BAD SOLUTION: ", $self->bad_solution ) } if $self->bad_solution;
 
     # This gives us the FacilitySection associated with the incident
     # location on this facility
@@ -1586,7 +1591,9 @@ sub write_to_db {
 		incident_id => $self->incid
 	    });
 
-	
+
+	# Write details 
+	warn {msg => join(":", "BAD SOLUTION: ", $self->bad_solution ) } if $self->bad_solution;
 	$ifa = $ia->create_related( 'incident_facility_impact_analyses',
 				    {
 					command_line => $self->cmdline,
@@ -1607,6 +1614,7 @@ sub write_to_db {
 					bound_incident_time => $self->bound_incident_time,
 					d12delay_speed => $self->d12_delay_speed,
 					max_incident_speed => $self->max_incident_speed,
+					bad_solution => $self->bad_solution,
 					solution_time_bounded => ($self->solution_time_bounded?1:0),
 					solution_space_bounded => ($self->solution_space_bounded?1:0),
 
@@ -1619,6 +1627,7 @@ sub write_to_db {
 					total_delay => $self->tot_delay,
 					net_delay => $self->net_delay,
 					avg_delay => $self->avg_delay,
+
 				    } );
 	$ifa->update;
     };
@@ -1685,7 +1694,7 @@ sub write_to_db {
     }
     $ifa->d12delay( $d12delaysum );
     $ifa->update();
-
+    
     $self->ifa( $ifa );
 }
 
@@ -1756,7 +1765,12 @@ sub index_from_timestring() {
 
 sub section_from_index() {
     my ( $self, $index ) = ( @_ );
-    return $self->stationdata->[$index]->{vds};
+    my $num = scalar(@{$self->stationdata})-1;
+    if ( $self->dir =~ /[NE]/ ) {
+	return $self->stationdata->[$num-$index]->{vds};
+    } else {
+	return $self->stationdata->[$index]->{vds};
+    }
 }
 
 sub compute_incident_start() {
@@ -1771,7 +1785,11 @@ sub compute_incident_start() {
     my ( $mm, $jj ) = (0,0);
     my $j = 0;
   TIMELOOPSTART:
-    foreach my $j ( reverse 0..($J-1) ) {
+    foreach my $j ( 
+	# need to reorder depending on direction
+	#$self->dir =~ /[NE]/ ?  ( 0..($J-1) ) :  
+	reverse ( 0..($J-1) )
+	) {
 	foreach my $m ( 0..($M-1) ) {
 	    my $dat = $self->rawdata->[$j][$m];
 	    if ( $dat->{incident_flag} ) {
@@ -1839,6 +1857,7 @@ sub compute_incident_clear() {
 	my $dat = $self->rawdata->[$j][ $m ];
 	my $spd = $dat->{spd}; #mph
 
+	if ( $spd == 0 ) {$spd = 60;};  # default, assume free flow
 	my $time_used = $spaceres/$spd*60.0/5.0;  # frac of 5 minutes used
 
 	if ( $time_used > $timeres ) {
@@ -1919,31 +1938,34 @@ sub compute_delay2() {
 
     my $incdur = ( $self->computed_incident_clear_time - $ver_index + 1 );
 
-    my $div_per_period = $self->computed_diversion / $incdur;
-
     my ($qdel,$qlen) = (0,0);
     my ($maxq,$maxq_time) = (0,0);
-    my @qq;
-    foreach my $m ( ($self->computed_start_time)..($self->computed_incident_clear_time) ) {
-	my $dat = $self->rawdata->[ $self->computed_start_location ][ $m ];
 
-	# determine the queue length during period m
-	my $delvol = $dat->{vol_avg} - $dat->{vol};
-	$delvol -=  $div_per_period if $m >= $ver_index;
-	$qlen += $delvol;
+    if ( $incdur > 0 ) {
 
-	if ( $qlen > $maxq ) { 
-	    $maxq = $qlen; 
-	    $maxq_time = $m;
-	}
+	my $div_per_period = $self->computed_diversion / $incdur;
+	my @qq;
+	foreach my $m ( ($self->computed_start_time)..($self->computed_incident_clear_time) ) {
+	    my $dat = $self->rawdata->[ $self->computed_start_location ][ $m ];
+
+	    # determine the queue length during period m
+	    my $delvol = $dat->{vol_avg} - $dat->{vol};
+	    $delvol -=  $div_per_period if $m >= $ver_index;
+	    $qlen += $delvol;
+
+	    if ( $qlen > $maxq ) { 
+		$maxq = $qlen; 
+		$maxq_time = $m;
+	    }
 #	if ( $qlen < 0 ) {
 #	    $delvol = $qlen-$delvol;
 #	    $qlen = 0;
 #	}
 
-	push @qq, [ $qlen, $delvol ];
-	
-	$qdel += $qlen * 5.0/60.0;  # delay for period m in veh-hr
+	    push @qq, [ $qlen, $delvol ];
+	    
+	    $qdel += $qlen * 5.0/60.0;  # delay for period m in veh-hr
+	}
     }
 
     $self->computed_delay2( $qdel );

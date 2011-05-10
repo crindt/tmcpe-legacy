@@ -3,7 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="thin" />
-    <title>Incident Detail</title>
+    <title>Incident ${incidentInstance.cad} Detail</title>
 
     <p:css name="tmcpe-common" />
     <p:css name="d3-tsd" /> <!-- Load the openlayers css -->
@@ -15,10 +15,12 @@
     <p:javascript src='jquery/dist/jquery.min' />
     <p:javascript src='jquery-ui/1.8/ui/minified/jquery-ui.min' />
     <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
-    <p:javascript src='jquery-dateFormat/jquery.dateFormat-1.0' />
+<!--    <p:javascript src='jquery-dateFormat/jquery.dateFormat-1.0' /> -->
     <p:javascript src='jquery-tooltip/jquery.tooltip' />
     <p:javascript src='polymaps/polymaps' />
     <p:javascript src='protovis/protovis' />
+    <p:javascript src='datatables/jquery.dataTables' />
+
 <!--    <p:javascript src='tmcpe/po' /> -->
     
     <g:javascript>
@@ -115,6 +117,12 @@
 
       updateStats( json );
 
+      updateLog( json );
+
+      // update the $$ calc
+      cumflow.tmcDivPct( $("#tmcpct").text() );
+
+
       // create the map
       //doMap( json );
       map = tmcpe.segmap().container( $("#mapbox")[0] ).data( json ).redraw();
@@ -125,6 +133,7 @@
 	 cumflow.resize( );
 	 cumflow.redraw( );
 	 updateStats( json );
+	 updateLog( json );
 //	 doMap( json );
          map.data(json).redraw();
 	 
@@ -140,10 +149,103 @@
   }
 
   function updateStats( json ) {
-      for ( var key in json.analysis ) {
-	  var val = json.analysis[key];
-	  $( '#'+key ).text( val == null ? "n/a" : ( isNaN(val) ? val : val.toFixed(0) ) );
+      if ( json.analysis.badSolution != null ) {
+          //$( '#generalStats td' ).text( "" );   // clear everything
+	  $( '#generalStats_wrapper').remove();
+	  $( '#generalStatsContainer').append("<p>ANALYSIS FOR THIS FACILITY FAILED: "+json.analysis.badSolution+"</p>");
+      } else {
+	  // FIXME: This dups a similar function in tsd.js
+	  $.each(["netDelay","d12Delay","computedDiversion","computedMaxq","whatIfDelay","tmcSavings"], function (i,v) {
+              if ( json.analysis[v] != null  && v != 'computedMaxqTime' ) {
+		  var val = json.analysis[v].toFixed(0);
+		  d3.select("#"+v).html( val < 0 ? 0 : val  );
+              }
+	  });
       }
+  }
+
+  function updateLog( json ) {
+      // clear existing
+      var container = d3.select( '#logtableContainer' );
+
+      $('#logtableContainer').children().remove();
+
+      // select table element (for d3)
+      var tab = container
+	  .append("table")
+	  .attr("id","activityLog");
+
+      function renderLogTimestamp(obj) {
+	  dd = new Date( obj );
+	  return $.format.date(dd,'yyyy-MM-dd kk:mm');
+      };
+
+      var fields = [ {key:"stampDateTime",title:"Time",render:renderLogTimestamp}, 
+		     {key:"activitySubject",title:"Activity"}, 
+		     {key:"memoOnly",title:"Description"}, 
+		   ];
+
+      var head = tab.append("thead");
+
+
+      head.append("tr").selectAll("th").data(fields).enter()
+	  .append("th")
+	  .attr("class",function(d){return d.key ? d.key : d;})
+	  .html(function(d){return d.title ? d.title : d});
+
+
+      var body = tab.append("tbody");
+
+      function raiseLogEntry( d ) {
+	  // In SVG, the z-index is the element's index in the dom.  To raise an
+	  // element, just detach it from the dom and append it back to its parent
+	  var targets = $("g[logid="+d.id+"]");
+	  var target = targets[0];
+	  var parent = target.parentNode;
+	  targets.detach().appendTo( parent );
+	  return 
+      }
+
+      // create log rows
+      var rows = body.selectAll("tr")
+	  .data(json.log,function(d) {return d.id})
+	  .enter().append("tr")
+	  .attr("id", function( d ) { return ["log",d.id].join("-"); })
+	  .attr("logid", function( d ) { return d.id; })
+	  .attr("class", function( d, i ) { return ( i % 2 ? "even" : "odd" ) + " " + d.type } )
+	  .on("mouseover",function(d,e) {
+	      // placehold, should highlight on TSD
+	      d3.selectAll('g.activitylog').attr("class","logtimebar activitylog hidden");
+	      d3.selectAll('g.activitylog[logid="'+d.id+'"]')
+		  .attr("class",function(dd,e){
+		      raiseLogEntry(dd);
+		      return "logtimebar activitylog";
+		  });
+	  } );
+      
+      // now populate rows
+      rows.selectAll("td")
+	  .data(function(d) {
+	      var props = [];
+	      $.each( fields, function( i, dd ) {
+		  var item = d[dd.key];
+		  props.push( dd.render ? dd.render( item ) : item );
+	      });
+	      return props;
+	  })
+	  .enter().append("td")
+	  .attr("class", function(d,i) { return fields[i].key } )
+	  .text( function(dd) { return dd; } );
+
+      $("#activityLog").dataTable({ 
+	  bPaginate: false, sScrollY:"300px","bAutoWidth":false,
+	  "aoColumns": [
+	      {"sWidth": "20%", "sType":"date" },
+	      {"sWidth": "20%", "sType":"string" },
+	      {"sWidth": "60%", "sType":"string" }
+	  ]});
+      
+      
   }
 
   function updateTsd() {
@@ -183,20 +285,26 @@
 
   function updateAnalysis( id ) {
       //	     new Ajax.Request('/tmcpe/incidentFacilityImpactAnalysis/tsdData/'+id,{asynchronous:false,evalScripts:true,onSuccess:function(e){updateData(e)},onFailure:function(e){handleFailure(e)},method:'get'});
-      d3.json('incidentFacilityImpactAnalysis/tsdData/'+id,function(e){updateData(e)});
+      d3.json('incidentFacilityImpactAnalysis/tsdData/'+id.value,function(e){updateData(e)});
+      $('#generalStats #facility').html(id.children[0].innerHTML);
+      
   }
 
 
 
       $(document).ready(function(){
 
-      var settings = $("#settings").detach();
-      settings.appendTo('#header');
+         var settings = $("#settings").detach();
+         settings.appendTo('#header');
 	  
-      // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
+         // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
 
 	  $("#ifia").each(function() {
-  	     updateAnalysis( this.value ); 
+	     if ( this.value != "" ) {
+  	        updateAnalysis( this ); 
+ 	     } else {
+		 $("#msgtxt").text("NO ANALYSES AVAILABLE");
+	     }
 	  });
 
 	  $("#scaleslider").slider({
@@ -232,7 +340,7 @@
 	  $("#maxspd").text("60");
 		
 	  $("#tmcpctslider").slider({
-	     value:75,
+	     value:50,
 	     min: 0,
 	     max: 100,
 	     step: 1,
@@ -245,9 +353,25 @@
 		   updateCumFlowStats();
 		}
 		});
-	  $("#tmcpct").text("75");
-	}
-	);
+	  $("#tmcpct").text("50");
+	  $("#tabs").tabs( {
+	      // hack to resize columns in a tab: http://datatables.net/examples/api/tabs_and_scrolling.html
+		"show": function(event, ui) {
+			var oTable = $('div.dataTables_scrollBody>table', ui.panel).dataTable();
+			if ( oTable.length > 0 ) {
+				oTable.fnAdjustColumnSizing();
+			}
+		}
+	  } );
+	  $("#generalStats").dataTable({
+	      "bPaginate": false,
+	      "sScrollY": "300px",
+	      "bLengthChange": false,
+	      "bFilter": false,
+	      "bSort": false,
+	      "bInfo": false,
+	      "bAutoWidth": true } );
+      });
 
     </g:javascript>     
 
@@ -261,7 +385,7 @@
 	  <tr>
 	    <th>Facility:</th>
 	    <td>
-	      <select id="ifia" onchange="updateAnalysis(this.options[this.selectedIndex].value);">
+	      <select id="ifia" onchange="updateAnalysis(this.options[this.selectedIndex]);">
 		<g:each in="${incidentInstance.analyses}">
 		  <g:each var="ifia" in="${it.incidentFacilityImpactAnalyses}">
 		    <option selected="true" value="${ifia.id}">${ifia.location.freewayId}-${ifia.location.freewayDir}</option>
@@ -276,8 +400,8 @@
 	    <th>Cell theme:</th>
 	    <td>
 	      <select id="theme" onChange="updateTsd()">
-		<option selected="true" value="stdspd">Standard Deviation of Speed from Mean</option>
-		<option value="spd">Speed Scaled between max speed and jam speed</option>
+		<option value="stdspd">Standard Deviation of Speed from Mean</option>
+		<option selected="true" value="spd">Speed Scaled between max speed and jam speed</option>
 	      </select>
 	    </th>
 	  </tr>
@@ -305,8 +429,8 @@
 	    <th>Align map to:</th>
 	    <td>
 	      <form style="display:inline;">
-		<input type="radio" name="align" value="cardinal" onclick="rotateMap(this);">Cardinal directions</option>
-		<input type="radio" name="align" checked="true" value="incident" onclick="rotateMap(this)">Incident</option>
+		<input type="radio" name="align" checked="true" value="cardinal" onclick="rotateMap(this);">Cardinal directions</option>
+		<input type="radio" name="align" value="incident" onclick="rotateMap(this)">Incident</option>
 	      </form>
 	    </td>
 	  </tr>
@@ -316,7 +440,7 @@
 	      <div id="tmcpctslider"></div>
 	    </td>
 	    <td>
-	      <span id="tmcpct">75</span>
+	      <span id="tmcpct">50</span>
 	    </td>
 	  </tr>
 	  <tr>
@@ -340,7 +464,7 @@
 
     <div id="msg" class="container_16">
       <div id="" class="grid_16 alpha omega ">
-	<p id="msgtxt">&nbsp;</p>
+        <p><h3 style="display:inline;color:yellow;">Incident ${incidentInstance.cad}:&nbsp;</h3><span id="msgtxt">&nbsp;</span></p>
       </div>
     </div>
 
@@ -362,22 +486,52 @@
 	  <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
 	</div>
 	<div id="databox" style="height:100%" class="grid_8 omega">
-	  <table>
-	    <tr><td class="label">tmcpe delay:</td><td class="delayValue" id="netDelay"></td><td class="unit delayUnit" id="netDelayUnit">veh-hr</td></tr>
-<!--
-	    <tr><td class="label">tmcpe delay2:</td><td class="value" id="computedDelay2"></td><td class="unit delayUnit" id="computedDelayUnit">veh-hr</td></tr>
-	    <tr><td class="label">chart delay2:</td><td class="value" id="chartDelay2"></td><td class="unit" id="chartDelayUnit">veh-hr</td></tr>
-	    <tr><td class="label">chart delay3:</td><td class="value" id="chartDelay3"></td><td class="unit" id="chartDelayUnit">veh-hr</td></tr>
--->
-	    <tr><td class="label">d12 delay:</td><td class="delayValue" id="d12Delay"></td><td class="unit delayUnit" id="d12DelayUnit">veh-hr</td></tr>
-	    <tr><td class="label">diversion:</td><td class="value" id="computedDiversion"></td><td class="unit" id="computedDiversionUnit">veh</td></tr>
-	    <tr><td class="label">maxq:</td><td class="value" id="computedMaxq"></td><td class="unit" id="computedMaxqUnit">veh</td></tr>
-<!--
-	    <tr><td class="label">maxq time:</td><td class="value" id="computedMaxqTime"></td><td class="unit" id="computedMaxqTimeUnit">hr</td></tr>
--->
-	    <tr><td class="label">"What-if" delay:</td><td class="delayValue" id="whatIfDelay"></td><td class="unit delayUnit" id="whatIfDelayUnit">veh-hr</td></tr>
-	    <tr><td class="label">TMC savings:</td><td class="delayValue" id="tmcSavings"></td><td class="unit delayUnit" id="tmcSavingsUnit">veh-hr</td></tr>
-	  </table>
+	  <div id="tabs">
+	    <ul>
+	      <li><a href="#generalStatsContainer">General Statistics</a></li>
+	      <li><a href="#logtableContainer">Activity Log</a></li>
+	    </ul>
+	    <div id="generalStatsContainer">
+	      <table id="generalStats">
+    <thead>
+		<tr>
+		  <th class="label">Facility</th>
+		  <th class="label">&Delta;<sub>d12</sub></th>
+		  <th class="label">&Delta;<sub>tmcpe</sub></th>
+		  <th class="label">&Delta;q</th>
+		  <th class="label">max(q)</th>
+		  <th class="label">&Delta;<sub>"what-if"</sub></th>
+		  <th class="label">&Delta;<sub>TMC</sub></th>
+		</tr>
+    </thead>
+    <tbody>
+		<tr>
+		  <td class="facilityName" id="facility"></td>
+		  <td class="delayValue" id="d12Delay"></td>
+<!--		  <td class="unit delayUnit" id="d12DelayUnit">veh-hr</td> -->
+
+		  <td class="delayValue" id="netDelay"></td>
+<!--		  <td class="unit delayUnit" id="netDelayUnit">veh-hr</td> -->
+
+		  <td class="value" id="computedDiversion"></td>
+<!--		  <td class="unit" id="computedDiversionUnit">veh</td> -->
+
+		  <td class="value" id="computedMaxq"></td>
+<!--		  <td class="unit" id="computedMaxqUnit">veh</td> -->
+
+		  <td class="delayValue" id="whatIfDelay"></td>
+<!--		  <td class="unit delayUnit" id="whatIfDelayUnit">veh-hr</td> -->
+
+		  <td class="delayValue" id="tmcSavings"></td>
+<!--		  <td class="unit delayUnit" id="tmcSavingsUnit">veh-hr</td> -->
+		</tr>
+    </tbody>
+	      </table>
+	    </div>
+	    <div id="logtableContainer">
+	      <table id="activityLog">
+	      </table>
+	    </div>
 	</div>
       </div>
     </div>

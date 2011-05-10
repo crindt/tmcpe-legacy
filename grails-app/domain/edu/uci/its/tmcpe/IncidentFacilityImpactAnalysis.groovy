@@ -49,6 +49,7 @@ class IncidentFacilityImpactAnalysis implements Comparable {
 
 
     ///////// OUTPUTS ////////
+    String badSolution
     Boolean solutionTimeBounded
     Boolean solutionSpaceBounded
     Double d12Delay

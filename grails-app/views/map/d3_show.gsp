@@ -7,7 +7,6 @@
     <p:css name="960-fluid" /> <!-- Load the 960 css -->
     <p:css name="jquery/themes/base/jquery-ui" />
     <p:css name="d3-hacks" />
-    <p:css name="tablescroll/jquery.tablescroll" />
 
     <p:javascript src='d3/d3.min' />
     <p:javascript src='d3/d3.geom.min' />
@@ -19,9 +18,8 @@
     <p:javascript src='protovis/protovis.min' />
     <p:javascript src='tmcpe/map' />
     <p:javascript src='datatables/jquery.dataTables' />
+
     <p:javascript src='numberformat/NumberFormat154' />
-    <p:javascript src='tablesorter/jquery.tablesorter.min' />
-    <p:javascript src='tablescroll/jquery.tablescroll' />
     <g:javascript>
       var i = 0;
 
@@ -38,7 +36,7 @@
 
       d3.json
       ("incident/list.geojson"
-      	    +"?startDate="+(year)+"-01-01"
+      	    +"?startDate="+(year)+"-09-01"
       	    +"&endDate="+(parseInt(year)+1)+"-01-01"
 //      +"?startDate=2010-09-01"
       +"&Analyzed=onlyAnalyzed"

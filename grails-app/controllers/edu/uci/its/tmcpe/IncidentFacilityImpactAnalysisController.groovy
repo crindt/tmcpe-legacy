@@ -55,11 +55,12 @@ class IncidentFacilityImpactAnalysisController {
                            timesteps = it.analyzedTimestep
                         }
                     }
-                    def cnt = timesteps.size();
+                    def cnt = timesteps ? timesteps.size() : 0;
                     System.err.println( "A total of " + incidentFacilityImpactAnalysisInstance.analyzedSections.size() + " analyzed sections!\n" )
                     def json = [
                         id: incidentFacilityImpactAnalysisInstance.id,
                         incidentImpactAnalysis: incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis.id,
+			badSolution: incidentFacilityImpactAnalysisInstance.badSolution,
                         location: incidentFacilityImpactAnalysisInstance.location,
                         startTime: incidentFacilityImpactAnalysisInstance.startTime,
                         endTime: incidentFacilityImpactAnalysisInstance.endTime,
@@ -256,27 +257,34 @@ class IncidentFacilityImpactAnalysisController {
                            timesteps = it.analyzedTimestep
                         }
                     }
-                    def cnt = timesteps.size();
+                    def cnt = timesteps ? timesteps.size() : 0;
                     System.err.println( "A total of " + ifia.analyzedSections.size() + " analyzed sections!\n" )
 		    def i = 0;
 		    def json = [ 
+			id : ifia.id,
+			cad : ifia.incidentImpactAnalysis.incident.cad,
 			log: ifia.incidentImpactAnalysis.incident.getTmcLogEntries(),
-			sections: ifia.analyzedSections.collect {
-			    [ vdsid: it.section.id,
-			      fwy: it.section.freewayId,
-			      dir: it.section.freewayDir,
-			      pm:  it.section.absPostmile,
-			      name: it.section.name,
-			      seglen: it.section.segmentLength,
-			      lanes: it.section.lanes
-			    ]
-			},
+			sections: ( ifia.analyzedSections 
+				    ? ifia.analyzedSections.collect {
+					[ vdsid: it.section.id,
+					  fwy: it.section.freewayId,
+					  dir: it.section.freewayDir,
+					  pm:  it.section.absPostmile,
+					  name: it.section.name,
+					  seglen: it.section.segmentLength,
+					  lanes: it.section.lanes
+					]
+				    }
+				    : null ),
 			sec: ifia.computedStartLocation?.id,
 			t0: ifia.computedStartTime,
 			t1: ifia.verification,
 			t2: ifia.lanesClear,
 			t3: ifia.computedIncidentClearTime,
 			analysis: [
+			    badSolution: ifia.badSolution,
+			    solutionTimeBounded: ifia.solutionTimeBounded,
+			    solutionSpaceBounded: ifia.solutionSpaceBounded,
 			    d12Delay: ifia.d12Delay,
 			    totalDelay: ifia.totalDelay,
 			    netDelay: ifia.netDelay,

@@ -127,8 +127,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("weekday", "timeofday", "site_no", "fwydir", "datayear");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-11 14:07:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ZXp65458klR0PRplUgNxiw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:35:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:f3gI4/ghC3kY0ya4Vufpeg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -370,8 +370,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("vdsid", "stamp");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-11 14:07:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wQPhzUB8KzyoyDDR+Y5JlQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:35:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FlIiK02R1xz7PDCjw0gjtQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

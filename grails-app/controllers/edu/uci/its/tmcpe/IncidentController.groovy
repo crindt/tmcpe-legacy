@@ -366,6 +366,20 @@ class IncidentController extends BaseController {
 
     def d3_tsd = {
 	def ii = Incident.get(params.id)
+        if ( params.id ) {
+            ii = Incident.get(params.id)
+        } else if ( params.cad ) {
+            // specified as a cad search for it.
+            def c = Incident.createCriteria()
+            def theList = c.list {
+                eq( "cad", params.cad )
+            }
+            if ( theList.size() == 1 ) {
+                // Got it!
+                ii = theList[0]
+            }
+        }
+
         if (!ii) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
             redirect(action: "list")

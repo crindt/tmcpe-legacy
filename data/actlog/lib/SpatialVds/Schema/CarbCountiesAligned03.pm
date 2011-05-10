@@ -95,7 +95,7 @@ __PACKAGE__->table("carb_counties_aligned_03");
   data_type: 'geometry'
   is_nullable: 1
 
-=head2 geom_4326
+=head2 geom4326
 
   data_type: 'geometry'
   is_nullable: 1
@@ -136,14 +136,14 @@ __PACKAGE__->add_columns(
   { data_type => "smallint", is_nullable => 1 },
   "the_geom",
   { data_type => "geometry", is_nullable => 1 },
-  "geom_4326",
+  "geom4326",
   { data_type => "geometry", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("gid");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-11 14:07:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:j6cC8FTsuAbeQZ2hEemPaA
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:35:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3fj9ZdWSFpntju9qH4vBxg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
