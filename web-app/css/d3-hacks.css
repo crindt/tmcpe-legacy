@@ -270,6 +270,13 @@ table td,table th {
     color: black;
 }
 
+.left {
+    text-align: left;
+}
+.right {
+    text-align: right;
+}
+
 
 #incidentDetailTableBox td, #incidentDetailTableBox th {
     color: #000;

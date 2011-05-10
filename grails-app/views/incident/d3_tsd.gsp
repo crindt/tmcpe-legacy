@@ -374,7 +374,15 @@
 	      "bFilter": false,
 	      "bSort": false,
 	      "bInfo": false,
-	      "bAutoWidth": true } );
+	      "aoColumns": [
+	      {"sWidth": "60%", "sType":"string", "sClass":"right" },
+	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "10%", "sType":"number", "sClass":"left" }
+	  ]
+	       } );
+
       });
 
     </g:javascript>     
@@ -429,6 +437,7 @@
 	  </tr>
 	</table>
 	<table style="float:left;border:solid 1px white">
+<!--
 	  <tr >
 	    <th>Align map to:</th>
 	    <td>
@@ -437,6 +446,7 @@
 		<input type="radio" name="align" value="incident" onclick="rotateMap(this)">Incident</option>
 	      </form>
 	    </td>
+-->
 	  </tr>
 	  <tr>
 	    <th>TMC Diversion %:</th>
@@ -509,8 +519,10 @@
 		  <th class="label">Facility</th>
 		  <th class="label">&Delta;<sub>d12</sub></th>
 		  <th class="label">&Delta;<sub>tmcpe</sub></th>
+<!--
 		  <th class="label">&Delta;q</th>
 		  <th class="label">max(q)</th>
+-->
 		  <th class="label">&Delta;<sub>"what-if"</sub></th>
 		  <th class="label">&Delta;<sub>TMC</sub></th>
 		</tr>
@@ -524,10 +536,10 @@
 		  <td class="delayValue" id="netDelay"></td>
 <!--		  <td class="unit delayUnit" id="netDelayUnit">veh-hr</td> -->
 
-		  <td class="value" id="computedDiversion"></td>
+<!--		  <td class="value" id="computedDiversion"></td> -->
 <!--		  <td class="unit" id="computedDiversionUnit">veh</td> -->
 
-		  <td class="value" id="computedMaxq"></td>
+<!--		  <td class="value" id="computedMaxq"></td> -->
 <!--		  <td class="unit" id="computedMaxqUnit">veh</td> -->
 
 		  <td class="delayValue" id="whatIfDelay"></td>

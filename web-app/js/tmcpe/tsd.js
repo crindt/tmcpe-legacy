@@ -1170,9 +1170,9 @@ if ( !tmcpe ) var tmcpe = {};
       function rotateLayer() {
 	  if ( rotate == "incident" ) {
 
-	      var ff = secjson.features.slice(0,secjson.features.length).sort(function(a,b){
+	      var ff = secjson.features.slice(0,secjson.features.length-1).sort(function(a,b){
 		  var diff =  a.pm - b.pm;
-		  if ( a.dir == 'S' || a.dir == 'W' )
+		  if ( a.dir == 'N' || a.dir == 'E' )
 		      return -diff;
 		  else
 		      return diff;

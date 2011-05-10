@@ -891,7 +891,7 @@ eval {
 		$_ = $memo;
 		if ( /SIGALERT END/ || /LANES CLEAR/ || /LANES CLR/ || /ROADWAY CLEAR/ || /RDWY CLR/ 
 		     || /RDWY CLEAR/ || /ROADWAY IS CLEAR/ || /RDWY IS CLEAR/ || /LANES OPEN/ || /LNS ARE OPEN/
-		     || /LNS OPEN/) {
+		     || /LNS OPEN/ || /ALL LANES ARE CLEAR/) {
 		    $inc->lanes_clear( $log );
 		}
 	    }
