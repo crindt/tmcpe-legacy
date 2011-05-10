@@ -122,6 +122,10 @@
       // update the $$ calc
       cumflow.tmcDivPct( $("#tmcpct").text() );
 
+      // update the band and max speed sliders
+      $('#maxspdslider').slider('value',json.parameters.maxIncidentSpeed);
+      $('#maxspd').text(json.parameters.maxIncidentSpeed);
+
 
       // create the map
       //doMap( json );
@@ -459,6 +463,13 @@
 	    </td>
 	  </tr>
 	</table>
+<!--
+      <div id="menu" style="float:right;">
+        <ul>
+          <li><a href="#">test</a></li>
+        </ul>
+      </div>
+-->
       </div>
     </div>
 

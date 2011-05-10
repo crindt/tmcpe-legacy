@@ -36,7 +36,7 @@
 
       d3.json
       ("incident/list.geojson"
-      	    +"?startDate="+(year)+"-09-01"
+      	    +"?startDate="+(year)+"-01-01"
       	    +"&endDate="+(parseInt(year)+1)+"-01-01"
 //      +"?startDate=2010-09-01"
       +"&Analyzed=onlyAnalyzed"
@@ -85,7 +85,7 @@
 	    <th>Year</th>
 	    <td>
 	      <select id="year" onchange="setToYear(this.options[this.selectedIndex].value);">
-		<option value="2011">2011</option>
+<!--		<option value="2011">2011</option>-->
 		<option selected="true" value="2010">2010</option>
 		<option value="2009">2009</option>
 	      </select>

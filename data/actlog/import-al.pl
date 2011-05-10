@@ -706,6 +706,9 @@ eval {
 		{ cad => $al->cad } );
 	} else {
 	    warn join( "", "UPDATING CAD ", $al->cad, " IN CAD TABLE\n" );
+	    # clear critical events for reprocessing
+	    $inc->verification(undef);
+	    $inc->lanes_clear(undef);
 	}
 
 	# Set the start time
@@ -876,16 +879,19 @@ eval {
 	    # fallback to finding verification
 	    if ( !$inc->verification ) {
 		$_ = $memo;
-		if ( /TMC HAS VISUAL/ ) {
+		if ( /TMC HAS VISUAL/ || /VISUAL PER CCTV/) {
 		    $inc->verification( $log );
+		} elsif ( $inc->sigalert_begin ) {
+		    $inc->verification( $inc->sigalert_begin );
 		}
 	    }
 
 	    # fallback to finding clearance
 	    if ( !$inc->lanes_clear( ) ) {
 		$_ = $memo;
-		if ( /SIGALERT END/ || /LANES CLEAR/ || /LANES CLR/ || /ROADWAY CLEAR/ 
-		     || /RDWY CLEAR/ || /ROADWAY IS CLEAR/ || /RDWY IS CLEAR/ ) {
+		if ( /SIGALERT END/ || /LANES CLEAR/ || /LANES CLR/ || /ROADWAY CLEAR/ || /RDWY CLR/ 
+		     || /RDWY CLEAR/ || /ROADWAY IS CLEAR/ || /RDWY IS CLEAR/ || /LANES OPEN/ || /LNS ARE OPEN/
+		     || /LNS OPEN/) {
 		    $inc->lanes_clear( $log );
 		}
 	    }
@@ -1037,7 +1043,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 	# catch incident logs that were left open too long
 	if ( $inc->sigalert_end() ) { $end = $inc->sigalert_end(); }
 
-	my $last = $inc->first_call;
+	my $last = $inc->first_call || shift @incloc;
       LOGSEARCH:
 	foreach my $ll ( @incloc ) {
 	    my $lastlogdiff = str2time($ll->stamp) - str2time($last->stamp);

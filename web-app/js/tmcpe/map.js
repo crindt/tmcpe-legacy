@@ -301,9 +301,9 @@ if ( !tmcpe ) var tmcpe = {};
       function updateIncidentInfo( d, e ) {
 	  // Update the title
 	  if ( d.cad ) {
-	      $('#incidentTitle').html( 'Incident <a href="incident/d3_tsd?id=' + d.id + '">' + d.cad + '</a>' );
+	      $('#incidentTitle').html( 'Incident <a target="_blank" href="incident/d3_tsd?id=' + d.id + '">' + d.cad + '</a>' );
 	  } else {
-	      $('#incidentTitle').html( 'Incident <a href="incident/d3_tsd?id=' + d.id + '">' + d.id + '</a>' );
+	      $('#incidentTitle').html( 'Incident <a target="_blank" href="incident/d3_tsd?id=' + d.id + '">' + d.id + '</a>' );
 	  }
 
 	  // Remove the existing table (if any)

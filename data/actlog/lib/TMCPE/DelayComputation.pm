@@ -1806,7 +1806,8 @@ sub compute_incident_start() {
     $self->computed_start_location( $jj );
 
     $self->ifa->computed_start_time( $self->time_string_from_index( $mm ) );
-    $self->ifa->computed_start_location_id( $self->section_from_index( $jj )->id );
+    my $startsec = $self->section_from_index( $jj );
+    $self->ifa->computed_start_location_id( $startsec->id ) if $startsec;
 
     $self->ifa->update;
 }

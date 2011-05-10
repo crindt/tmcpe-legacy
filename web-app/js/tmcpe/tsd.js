@@ -212,7 +212,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  var data = json.data,
 	  sections = json.sections
 
-	  if ( sections == null || sections.length == 0 ) return;
+	  if ( sections == null || sections.length == 0 || selectedTime < 0 ) return;
 
 	  // update cross line by translating it to the proper section
 	  var cross = tsd.svg.selectAll("#tsdsec")
@@ -263,7 +263,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  // remove any existing children
 	  $(container).children().remove();
 
-	  if ( json.data == null || json.data.length == 0 ) {
+	  if ( json.data == null || json.data.length == 0 || json.data[0].length == 0 ) {
 	      // NO DATA AVAILABLE
 	      $(container).append('<p>NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
 							      ? ' BECAUSE: '+json.analysis.badSolution 
@@ -607,6 +607,8 @@ if ( !tmcpe ) var tmcpe = {};
 	  var delay4 = 0;
 	  var tmcSavings = 0;
 
+	  if ( !data ) return cumflow;
+
 	  if ( json.analysis.badSolution != null ) {
 	      $.each(["netDelay","d12Delay","computedDiversion","computedMaxq","whatIfDelay","tmcSavings"], function (i,v) {
 		  d3.select("#"+v).html( "n/a" );
@@ -649,7 +651,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  // clear any existing
 	  $(container).children().remove();
 
-	  if ( json.data == null || json.data.length == 0 ) {
+	  if ( json.data == null || json.data.length == 0 || json.data[0].length == 0 || section < 0 ) {
 	      // NO DATA AVAILABLE
 	      $(container).append('<p>NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
 							      ? ' BECAUSE: '+json.analysis.badSolution 
@@ -702,7 +704,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  if ( t0Cell < 0 ) {
 	      // BAD DATA
-	      $(container).append('<p>PROBLEM WITH THIS DATA, REPORT AN ISSUE</p>');
+	      $(container).append('<p>NO INCIDENT START FOUND, <a href="http://tracker.ctmlabs.net/projects/tmcpe/issues/new">REPORT AN ISSUE</a></p>');
 	      // nothing to see here.
 	      return tsd;
 	  }

@@ -281,6 +281,10 @@ class IncidentFacilityImpactAnalysisController {
 			t1: ifia.verification,
 			t2: ifia.lanesClear,
 			t3: ifia.computedIncidentClearTime,
+			parameters: [
+			  maxIncidentSpeed: ifia.maxIncidentSpeed,
+			  band: ifia.band
+			],
 			analysis: [
 			    badSolution: ifia.badSolution,
 			    solutionTimeBounded: ifia.solutionTimeBounded,
