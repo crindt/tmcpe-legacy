@@ -15,13 +15,10 @@
     <p:javascript src='jquery/dist/jquery.min' />
     <p:javascript src='jquery-ui/1.8/ui/minified/jquery-ui.min' />
     <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
-<!--    <p:javascript src='jquery-dateFormat/jquery.dateFormat-1.0' /> -->
     <p:javascript src='jquery-tooltip/jquery.tooltip' />
     <p:javascript src='polymaps/polymaps' />
     <p:javascript src='protovis/protovis' />
     <p:javascript src='datatables/jquery.dataTables' />
-
-<!--    <p:javascript src='tmcpe/po' /> -->
     
     <g:javascript>
 
@@ -166,7 +163,7 @@
               }
 	  });
 
-	  // Update the download analysis link
+	  // Update the download analysis link.  Currently tied to the currently displayed analysis...
 	  $('#tmcpe_tsd_download_link').html( 'Download XLS for facility analysis ' + json.id );
 	  $('#tmcpe_tsd_download_link').attr( 'href', "${resource(dir:'/',absolute:true)}"+'incidentFacilityImpactAnalysis/show.xls?id='+json.id );
 
