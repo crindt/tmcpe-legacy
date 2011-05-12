@@ -165,6 +165,18 @@
 		  d3.select("#"+v).html( val < 0 ? 0 : val  );
               }
 	  });
+
+	  // Update the report problem link
+	    $('#tmcpe_report_analysis_problem_link').html( 'Report problem with this analysis' );
+	    url = "http://tracker.ctmlabs.net/projects/tmcpe/issues/new?tracker_id=3&"
+		+ encodeURIComponent( "issue[subject]=Problem with analysis of Incident "+json.cad+"["+json.id+"]" )
+		+ "&" + encodeURIComponent( "issue[description]=Bad analysis for available for ["+json.cad+"["+json.id+"]"+"]("
+					    +window.location.href
+					    +")\n\n"
+					    +"User Agent: " + navigator.userAgent
+					  )
+	    $('#tmcpe_report_analysis_problem_link').attr('href',url);
+	    $('#tmcpe_report_analysis_problem_link').attr('target', "_blank" );
       }
   }
 
@@ -550,6 +562,7 @@
 		</tr>
     </tbody>
 	      </table>
+	      <a id="tmcpe_report_analysis_problem_link" style="margin-top:0.5em;margin-bottom:0.5em;">&nbsp;</a>
 	    </div>
 	    <div id="logtableContainer">
 	      <table id="activityLog">
