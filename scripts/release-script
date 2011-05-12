@@ -15,7 +15,7 @@ echo "if [ $newappver != $curappver ]; then sed 's/app.version=.*/app.version=$n
 echo "git commit -a"
 echo "sed \"s/def version = { out << '[^']*'/def version = { out << '$new'/g\" grails-app/taglib/TmcpeTagLib.groovy > tsed && mv tsed grails-app/taglib/TmcpeTagLib.groovy"
 echo "git commit -m 'Release $new' grails-app/taglib/TmcpeTagLib.groovy"
-echo "git tag v$new"
+echo "git tag -f v$new"
 
 echo "grails war"
 

@@ -194,8 +194,17 @@ dojo.declare("tmcpe.IncidentList", [ dijit._Widget ], {
 	    theParams['eventType'] = vv;
 	}	
 	if ( dijit.byId( 'queryForm' ).get('value').Analyzed ) {
-	    var value = dijit.byId( 'queryForm' ).get('value').Analyzed
+	    var value = dijit.byId( 'queryForm' ).get('value').Analyzed;
 	    theParams['Analyzed'] = value;
+	}
+	if ( dijit.byId( 'onlySigalerts' ).get('value') ) {
+	    var value = dijit.byId( 'onlySigalerts' ).get('value');
+	    theParams['onlySigalerts'] = value;
+	}
+	var cad = dijit.byId( 'cad' ).get('value');
+	if ( cad ) {
+	    var value = cad;
+	    theParams['cad'] = value;
 	}
 	var days = [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ];
 	for ( dow in days ) {

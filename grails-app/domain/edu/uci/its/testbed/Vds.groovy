@@ -58,6 +58,8 @@ class Vds {
     static constraints = {
     }
 
+    static transients = ['sortablePostmile'];
+
     static mapping = {
         table name: 'vds_view', schema: 'tbmap'
 
@@ -117,4 +119,25 @@ class Vds {
         }
         return kml
     }
+
+    // A method to allow sorting of vds by postmile taking into consideration the freeway direction
+    public Float getSortablePostmile() {
+	if ( ['S', 'W'].grep(freewayDir) ) {
+	    return -absPostmile;
+	} else {
+	    return absPostmile;
+	}
+    }
+
+    public int compareTo( other ) {
+	def res;
+	def res2;
+	return (res = this.freeway.compareTo(other.freeway) 
+		? res 
+		: ( res2 = this.freewayDir.compareTo(other.freewayDir)
+		    ? other.getSortablePostmile() - this.getSortablePostmile()
+		    : 0
+		  ) );
+    }
+
 }

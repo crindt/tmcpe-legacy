@@ -16,3 +16,33 @@
 [submodule "doc/reports/hutchins"]
 	path = doc/reports/hutchins
 	url = /home/crindt/hutchins
+[submodule "web-app/js/d3"]
+	path = web-app/js/d3
+	url = https://github.com/mbostock/d3.git
+[submodule "web-app/js/jquery"]
+	path = web-app/js/jquery
+	url = http://github.com/jquery/jquery.git
+[submodule "web-app/js/jquery-ui"]
+	path = web-app/js/jquery-ui
+	url = http://github.com/jquery/jquery-ui.git
+[submodule "web-app/js/polymaps"]
+	path = web-app/js/polymaps
+	url = https://github.com/simplegeo/polymaps.git
+[submodule "web-app/js/DataTables"]
+	path = web-app/js/DataTables
+	url = https://github.com/DataTables/DataTables.git
+[submodule "web-app/js/jquery-format"]
+	path = web-app/js/jquery-format
+	url = https://github.com/asual/jquery-format.git
+[submodule "web-app/js/protovis"]
+	path = web-app/js/protovis
+	url = https://github.com/mbostock/protovis.git
+[submodule "web-app/js/tablesorter"]
+	path = web-app/js/tablesorter
+	url = https://github.com/crowdsavings/tablesorter.git
+[submodule "web-app/js/tablescroll"]
+	path = web-app/js/tablescroll
+	url = https://github.com/farinspace/jquery.tableScroll
+[submodule "web-app/js/jquery-dateFormat"]
+	path = web-app/js/jquery-dateFormat
+	url = https://github.com/phstc/jquery-dateFormat

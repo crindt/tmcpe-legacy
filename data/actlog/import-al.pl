@@ -33,6 +33,7 @@ GetOptions( \%opt,
 	    "skip-incidents",
 	    "skip-critical-events",
 	    "skip-delay-comp",
+	    "skip-location-parse",
 	    "only-sigalerts",
 	    "only-type=s@",
 	    "date-from=s",
@@ -106,6 +107,7 @@ pod2usage(-verbose => 2)  if ($opt{help});
 my $procopt = {
     al_import => 1,
     rl_import => 1,
+    location_parse => 1,
     icad_import => 1,
     incidents => 1,
     critical_events => 1,
@@ -267,6 +269,9 @@ sub process_performance_measures {
 	} elsif ( /MAX Q (MI)/ || /MAX Q (X-STREET)/) {
 	    $pmtype = 'STATUS';
 
+	} elsif ( /INFO/ ) {
+	    $pmtype = 'INFO';
+
 	    ############################# RESPONSE (OPS) ############################
 	} elsif ( /CMS ACTIVATION/ ) {
 	    $pmtype = 'RESPONSE';
@@ -310,7 +315,7 @@ sub process_performance_measures {
 	} elsif ( /OFF\/R LANES CLEAR/ || /0FF\/R LANES CLEAR/ || /FASTRAK LNS CLEAR/ || /CON LANES CLEAR/ ) {
 	    $pmtype = 'STATUS';
 
-	} elsif ( /LANES CLEAR/ ) {
+	} elsif ( /LANES CLEAR/ || /LNS CLEAR/) {
 	    $pmtype = 'STATUS';
 
 	    # This grabs the lane identifiers spit out by the activity log
@@ -320,7 +325,12 @@ sub process_performance_measures {
 		# got a good match.  Create info necessary to put them in the type eval table
 		$lanes = join( ",", map { join( "", "-", $_ ) } @{$which->[0]} );
 		$detail = $which->[1];
+
+	    } else {
+		# no match.  Assume all lanes clear.  FIXME: crindt: think about this
+		
 	    }
+
 	    
 	    ############################# MISC? ############################
 	} elsif ( /CHP/ || /CT MAINT/ || /CT CLOSURE CREW/ || /RESPONDING/ ) {
@@ -696,6 +706,9 @@ eval {
 		{ cad => $al->cad } );
 	} else {
 	    warn join( "", "UPDATING CAD ", $al->cad, " IN CAD TABLE\n" );
+	    # clear critical events for reprocessing
+	    $inc->verification(undef);
+	    $inc->lanes_clear(undef);
 	}
 
 	# Set the start time
@@ -770,6 +783,7 @@ eval {
 		order_by => 'stamp asc'
 	    });
 	my $openinc;
+	my $proxyver;
 	foreach my $log ( @incloc ) {
 
 	    # check activity subject
@@ -780,12 +794,17 @@ eval {
 		$inc->sigalert_end( $log ) if $1 eq 'END';
 	    } elsif ( /OPEN INCIDENT/ ) {
 		$openinc = $log;
+
+	    # this is a hack to determine the proxy verification
+	    } 
+	    if ( ( /INFO/ || /SIGALERT BEGIN/ ) && !$proxyver) { 
+		$proxyver = $log;
 	    }
 
 	    my @details = split( /:DOSEP:/, $log->memo );
 	    my $memo = shift @details;
 	    foreach ( @details ) {
-		if ( /ROUTE\/DIR\/LOCATION:/ ) {
+		if ( /ROUTE\/DIR\/LOCATION:/ && $procopt->{"location_parse"}) {
 		    # always use R/D/L string to identify location
 		    my ( $locstr ) = ( /ROUTE\/DIR\/LOCATION:\s*(.*)/ );
 		    if ( $locstr ) {
@@ -823,6 +842,12 @@ eval {
 
 		    } elsif ( $pm->{pmtype} eq 'VERIFICATION' && 
 				not defined( $inc->verification ) ) {
+			# assume first verification is t1
+			$inc->verification( $log );
+
+		    } elsif ( $pm->{pmtype} eq 'LANES BLOCKED' && 
+				not defined( $inc->verification ) ) {
+			# assume first identification of lanes blocked is verification
 			$inc->verification( $log );
 
 		    } elsif ( $pm->{pmtype} eq 'STATUS' && $pm->{pmtext} eq 'LANES CLEAR' ) {
@@ -833,7 +858,7 @@ eval {
 	    }
 	    
 	    # fallback to finding location
-	    if ( ! $locdata && ( ! ( $memo =~ /^\s*$/ ) ) ) {
+	    if ( ! $locdata && ( ! ( $memo =~ /^\s*$/ ) ) && $procopt->{"location_parse"} ) {
 		$locdata = $lp->get_location( uc($memo), $inc->location_geom );
 		if ( !$locdata ) {
 		    warn "FAILED TO PARSE MEMO: $memo";
@@ -850,6 +875,26 @@ eval {
 					    "]\n" );
 		}
 	    }
+
+	    # fallback to finding verification
+	    if ( !$inc->verification ) {
+		$_ = $memo;
+		if ( /TMC HAS VISUAL/ || /VISUAL PER CCTV/) {
+		    $inc->verification( $log );
+		} elsif ( $inc->sigalert_begin ) {
+		    $inc->verification( $inc->sigalert_begin );
+		}
+	    }
+
+	    # fallback to finding clearance
+	    if ( !$inc->lanes_clear( ) ) {
+		$_ = $memo;
+		if ( /SIGALERT END/ || /LANES CLEAR/ || /LANES CLR/ || /ROADWAY CLEAR/ || /RDWY CLR/ 
+		     || /RDWY CLEAR/ || /ROADWAY IS CLEAR/ || /RDWY IS CLEAR/ || /LANES OPEN/ || /LNS ARE OPEN/
+		     || /LNS OPEN/ || /ALL LANES ARE CLEAR/) {
+		    $inc->lanes_clear( $log );
+		}
+	    }
 	}
 	    
 	# now set the locdata if we found it...
@@ -860,6 +905,11 @@ eval {
 	if ( ! $inc->first_call && $openinc ) {
 	    # first call not defined in performance measures, use open incident line
 	    $inc->first_call( $openinc );
+	}
+
+	if ( ! $inc->verification && $proxyver ) {
+	    # verification not defined, use proxy
+	    $inc->verification( $proxyver );
 	}
 
 	$inc->update();
@@ -975,11 +1025,11 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->first_call( $inc->start_time );
 
 	
-	$dc->verification( $inc->verification->stamp );
-	$dc->lanes_clear( $inc->lanes_clear->stamp );
+	$dc->verification( $inc->verification->stamp ) if $inc->verification;
+	$dc->lanes_clear( $inc->lanes_clear->stamp ) if $inc->lanes_clear;
 
 
-	$dc->bad_solution( 0 );
+	$dc->bad_solution( undef );
 
 	my @incloc = $tmcpeal->resultset( 'D12ActivityLog' )->search( 
 	    {
@@ -990,6 +1040,21 @@ INCDEL: while( my $inc = $incrs->next ) {
 	    });
 	my $end = pop @incloc;
 
+	# catch incident logs that were left open too long
+	if ( $inc->sigalert_end() ) { $end = $inc->sigalert_end(); }
+
+	my $last = $inc->first_call || shift @incloc;
+      LOGSEARCH:
+	foreach my $ll ( @incloc ) {
+	    my $lastlogdiff = str2time($ll->stamp) - str2time($last->stamp);
+	    if ( $lastlogdiff > 90*60 ) {  
+		# assume the incident is effectively over if there hasn't been an entry for 90 minutes
+		$end = $last;
+		last LOGSEARCH;
+	    }
+	    $last = $ll;
+	}
+
 	$dc->logend( $end->stamp );
 	
 	$dc->compute_delay;
@@ -997,12 +1062,16 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->write_to_db;
 
 	$dc->compute_incident_clear();
+
+	$dc->compute_diversion();
+
+	$dc->compute_delay2();
     };
     if ( $@ ) {
 	$_ = ref $@;
 	if    ( /SCALAR/ ) { warn $@; }
 	elsif ( /DBIx::Class::Exception/ )   { croak $@->{msg}; }
-	else               { warn "UNKNOWN PROBLEM COMPUTING DELAY"; }
+	else               { warn "UNKNOWN PROBLEM COMPUTING DELAY: " . ($@->{msg}?$@->{msg}:$@); }
 	next INCDEL;
     }
 

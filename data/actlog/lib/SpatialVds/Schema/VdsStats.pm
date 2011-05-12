@@ -68,8 +68,8 @@ Related object: L<SpatialVds::Schema::Vds>
 __PACKAGE__->belongs_to("vds_id", "SpatialVds::Schema::Vds", { id => "vds_id" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-01-10 15:13:42
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WdbkbGHxtBo3MKLrZfZHog
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:35:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iJD+8dOmKFxxh4CBmEczqA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

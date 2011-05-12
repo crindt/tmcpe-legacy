@@ -55,11 +55,12 @@ class IncidentFacilityImpactAnalysisController {
                            timesteps = it.analyzedTimestep
                         }
                     }
-                    def cnt = timesteps.size();
+                    def cnt = timesteps ? timesteps.size() : 0;
                     System.err.println( "A total of " + incidentFacilityImpactAnalysisInstance.analyzedSections.size() + " analyzed sections!\n" )
                     def json = [
                         id: incidentFacilityImpactAnalysisInstance.id,
                         incidentImpactAnalysis: incidentFacilityImpactAnalysisInstance.incidentImpactAnalysis.id,
+			badSolution: incidentFacilityImpactAnalysisInstance.badSolution,
                         location: incidentFacilityImpactAnalysisInstance.location,
                         startTime: incidentFacilityImpactAnalysisInstance.startTime,
                         endTime: incidentFacilityImpactAnalysisInstance.endTime,
@@ -240,36 +241,124 @@ class IncidentFacilityImpactAnalysisController {
         }
     }
 
-    def edit = {
-        def incidentFacilityImpactAnalysisInstance = IncidentFacilityImpactAnalysis.get(params.id)
-        if (!incidentFacilityImpactAnalysisInstance) {
+    def tsdData = {
+        def ifia = IncidentFacilityImpactAnalysis.get(params.id)
+        if (!ifia) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis'), params.id])}"
             redirect(action: "list")
         }
         else {
-            return [incidentFacilityImpactAnalysisInstance: incidentFacilityImpactAnalysisInstance]
+            withFormat {
+                json {
+                    def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
+                    def timesteps = null
+                    ifia.analyzedSections.collect {
+                        if ( it.analyzedTimestep != null && ( timesteps == null || ( it.analyzedTimestep.size() > timesteps.size() ) ) ) {
+                           timesteps = it.analyzedTimestep
+                        }
+                    }
+                    def cnt = timesteps ? timesteps.size() : 0;
+                    System.err.println( "A total of " + ifia.analyzedSections.size() + " analyzed sections!\n" )
+		    def i = 0;
+		    def json = [ 
+			id : ifia.id,
+			cad : ifia.incidentImpactAnalysis.incident.cad,
+			log: ifia.incidentImpactAnalysis.incident.getTmcLogEntries(),
+			sections: ( ifia.analyzedSections 
+				    ? ifia.analyzedSections.collect {
+					[ vdsid: it.section.id,
+					  fwy: it.section.freewayId,
+					  dir: it.section.freewayDir,
+					  pm:  it.section.absPostmile,
+					  name: it.section.name,
+					  seglen: it.section.segmentLength,
+					  lanes: it.section.lanes
+					]
+				    }
+				    : null ),
+			sec: ifia.computedStartLocation?.id,
+			t0: ifia.computedStartTime,
+			t1: ifia.verification,
+			t2: ifia.lanesClear,
+			t3: ifia.computedIncidentClearTime,
+			parameters: [
+			  maxIncidentSpeed: ifia.maxIncidentSpeed,
+			  band: ifia.band
+			],
+			analysis: [
+			    badSolution: ifia.badSolution,
+			    solutionTimeBounded: ifia.solutionTimeBounded,
+			    solutionSpaceBounded: ifia.solutionSpaceBounded,
+			    d12Delay: ifia.d12Delay,
+			    totalDelay: ifia.totalDelay,
+			    netDelay: ifia.netDelay,
+			    avgDelay: ifia.avgDelay,
+			    computedDiversion: ifia.computedDiversion,
+			    computedDelay2: ifia.computedDelay2,
+			    computedMaxq: ifia.computedMaxq,
+			    computedMaxqTime: ifia.computedMaxqTime
+			],
+                        timesteps: timesteps.collect { it?.fivemin /*df.format( it?.fivemin )*/ },
+			data: ifia.analyzedSections.collect {
+			    def j = 0
+			    def a = it.analyzedTimestep.size() > 0 ? it.analyzedTimestep.collect { 
+				[ i: i,
+				  j: j++,
+				  vol: it.vol, 
+				  spd: it.spd, 
+				  occ: it.occ, 
+				  days_in_avg: it.days_in_avg, 
+				  vol_avg: it.vol_avg, 
+				  spd_avg: it.spd_avg, 
+				  spd_std: it.spd_std, 
+				  pct_obs_avg: it.pct_obs_avg, 
+				  p_j_m: it.p_j_m, 
+				  inc: it.incident_flag, 
+				  tmcpe_delay: (it.tmcpe_delay>=0?it.tmcpe_delay:0), 
+				  d12_delay: it.d12_delay 
+				]
+			    } : []
+			    i++;
+			    a;
+			}
+		    ]
+
+                    render json as JSON
+                }
+	    }
+	}
+    }
+
+    def edit = {
+        def ifia = IncidentFacilityImpactAnalysis.get(params.id)
+        if (!ifia) {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis'), params.id])}"
+            redirect(action: "list")
+        }
+        else {
+            return [ifia: ifia]
         }
     }
 
     def update = {
-        def incidentFacilityImpactAnalysisInstance = IncidentFacilityImpactAnalysis.get(params.id)
-        if (incidentFacilityImpactAnalysisInstance) {
+        def ifia = IncidentFacilityImpactAnalysis.get(params.id)
+        if (ifia) {
             if (params.version) {
                 def version = params.version.toLong()
-                if (incidentFacilityImpactAnalysisInstance.version > version) {
+                if (ifia.version > version) {
                     
-                    incidentFacilityImpactAnalysisInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis')] as Object[], "Another user has updated this IncidentFacilityImpactAnalysis while you were editing")
-                    render(view: "edit", model: [incidentFacilityImpactAnalysisInstance: incidentFacilityImpactAnalysisInstance])
+                    ifia.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis')] as Object[], "Another user has updated this IncidentFacilityImpactAnalysis while you were editing")
+                    render(view: "edit", model: [ifia: ifia])
                     return
                 }
             }
-            incidentFacilityImpactAnalysisInstance.properties = params
-            if (!incidentFacilityImpactAnalysisInstance.hasErrors() && incidentFacilityImpactAnalysisInstance.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis'), incidentFacilityImpactAnalysisInstance.id])}"
-                redirect(action: "show", id: incidentFacilityImpactAnalysisInstance.id)
+            ifia.properties = params
+            if (!ifia.hasErrors() && ifia.save(flush: true)) {
+                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis'), ifia.id])}"
+                redirect(action: "show", id: ifia.id)
             }
             else {
-                render(view: "edit", model: [incidentFacilityImpactAnalysisInstance: incidentFacilityImpactAnalysisInstance])
+                render(view: "edit", model: [ifia: ifia])
             }
         }
         else {
@@ -279,10 +368,10 @@ class IncidentFacilityImpactAnalysisController {
     }
 
     def delete = {
-        def incidentFacilityImpactAnalysisInstance = IncidentFacilityImpactAnalysis.get(params.id)
-        if (incidentFacilityImpactAnalysisInstance) {
+        def ifia = IncidentFacilityImpactAnalysis.get(params.id)
+        if (ifia) {
             try {
-                incidentFacilityImpactAnalysisInstance.delete(flush: true)
+                ifia.delete(flush: true)
                 flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis'), params.id])}"
                 redirect(action: "list")
             }

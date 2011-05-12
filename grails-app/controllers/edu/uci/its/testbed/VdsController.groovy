@@ -43,8 +43,14 @@ class VdsController {
                 maxResults( max )
                 order( "freeway" )
                 order( "freewayDir" )
-                    }
-                }
+                if ( _params.freewayDir && _params.freewayDir != '' && ["S","W"].grep(_params.freewayDir) ) {
+		    order( 'absPostmile','desc' )
+		} else {
+		    order( 'absPostmile','asc' )
+		}
+
+	    }
+	};
         c = Vds.createCriteria()
         def theFullList = c.list {
             and {
@@ -72,6 +78,11 @@ class VdsController {
                 }
                 order( "freeway" )
                 order( "freewayDir" )
+                if ( _params.freewayDir && _params.freewayDir != '' && ["S","W"].grep(_params.freewayDir) ) {
+		    order( 'absPostmile','desc' )
+		} else {
+		    order( 'absPostmile','asc' )
+		}
                     }
                 }
         def fullTot = theFullList.size()
@@ -81,12 +92,12 @@ class VdsController {
             }
             geojson {
                 def json = []
-                theFullList.each() { json.add( [ id: it.id, geometry: it.segGeom, properties: it ] ) }
+                theFullList.sort().each() { json.add( [ id: it.id, geometry: it.segGeom, properties: it ] ) }
                 def fjson = [ type: "FeatureCollection", features: json ]
                 render fjson as JSON;
             }
             html { 
-                [ vdsInstanceList: theList, 
+                [ vdsInstanceList: theList.sort(), 
                   vdsInstanceTotal: fullTot ] 
             }
         }

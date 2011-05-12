@@ -1,0 +1,264 @@
+
+#maptext {
+   border: 1px;
+   background-color: yellow;
+}
+
+#databox {
+}
+
+#databox table {
+  margin-top:1em;
+}
+
+#database #tabs {
+    height:100%;
+}
+
+#activityLog tr.odd td {
+    background-color: #ddd;
+}
+
+
+.dataTables_scrollHead, .dataTables_scrollBody, .dataTables_scrollFoot {
+    background-color: #fff;
+    border-top: 4px solid #000;
+    border-bottom: 4px solid #000;
+}
+
+#logtableContainer {
+    background-color: #fff;
+    border: 4px solid #ccc;
+    padding: 5px;
+    min-height: 400px;
+    height:400px;
+}
+
+#tabs .ui-tabs-panel {
+    height:350px;
+}
+
+#tabs table td,#tabs table th {
+    color: black;
+}
+svg {
+//  border: solid 1px #ccc;
+  fill: #006;
+}
+path.incidentBoundary {
+  stroke: blue;
+  stroke-width: 4px;
+  fill: none;
+}
+rect {
+  fill: lightsteelblue;
+  stroke: #eee;
+  stroke-width: 2px;
+}
+rect.d1 {
+  fill: steelblue;
+}
+rect.d2 {
+  fill: darkblue;
+}
+
+svg text {
+    fill: #eee;
+//    letter-spacing: 0.5pt;
+    font-family: Arial;
+}
+
+#segmapsvg text {
+//    stroke: #00f;
+    fill: #006;
+}
+
+ 
+.rule line {
+  stroke: #ddd;
+//  stroke-width: 1px;
+//  shape-rendering: crispEdges;
+}
+ 
+.rule2 line {
+  stroke: #ddd;
+//  stroke-width: 1px;
+//  shape-rendering: crispEdges;
+}
+ 
+.rule line.axis {
+  stroke: #000;
+}
+ 
+.rule2 line.axis {
+  stroke: #000;
+}
+ 
+.area {
+  fill: steelblue;
+//    fill-opacity: 0.75;
+}
+ 
+.line, circle.area {
+  fill: none;
+  stroke: cyan;
+  stroke-width: 1.5px;
+}
+ 
+.area2 path {
+  fill: green;
+//  fill-opacity: 0.75;
+}
+
+.line3 {
+  fill: none;
+  stroke: orange;
+  stroke-width: 1.5px;
+}
+ 
+.area3 path {
+  fill: red;
+//  fill-opacity: 0.5;
+}
+
+.whatif {
+    fill: gray;
+}
+
+.timebar {
+    stroke: purple;
+    stroke-width: 4px;
+}
+
+.logtimebar {
+    stroke: yellow;
+    stroke-width: 4px;
+}
+
+.timebar .critical-time {
+    stroke: white;
+    stroke-width: 1px;
+}
+ 
+.hidden {
+    visibility:hidden;
+}
+
+.line2, circle.area2 {
+  fill: none;
+  stroke: yellow;
+  stroke-width: 1.5px;
+}
+ 
+circle.area {
+  fill: #fff;
+}
+
+.ylabels {
+   font-size: 12pt;
+   padding-right: 10px;
+}
+
+.xlabels {
+   font-size: 12pt;
+}
+
+#scaleslider {
+  width: 200px;
+//  display: inline;
+}
+#maxspdslider {
+  width: 200px;
+//  display: inline;
+}
+
+#alpha {
+    display:inline;
+    
+}
+
+td.label {
+    text-align: right;
+}
+
+td.value, td.delayValue {
+    text-align: right;
+    width: 4em;
+}
+
+td.unit {
+    text-align: left;
+}
+
+.compass .back {
+  fill: #256574;
+}
+
+.compass .fore, .compass .chevron {
+  stroke: #1AA398;
+}
+
+#segments path {
+  fill: none;
+  stroke-linecap: round;
+//  stroke-width: 4px;
+}
+
+#ends circle {
+  fill: yellow;
+  stroke: black;
+  r: 1px;
+}
+
+#ends path {
+    fill: yellow;
+    stroke: black;
+    stroke-width: 1px;
+}
+
+#copy, #copy a {
+  color: #1AA398;
+}
+
+#mapbox {
+    background-color: #006;
+    text-align: left;
+    border: 2px solid #eee;
+    padding: 0px;
+    height: 100%;
+}
+
+#tsdbox {
+    background-color: #006;
+    text-align: right;
+    border: 2px solid #eee;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+}
+#chartcontainer{
+    border: 2px solid #eee;
+    background-color: #006;
+}
+#chartcontainer h3 {
+    text-align:center;
+}
+#chartbox {
+    margin-top:1em;
+    background-color: #006;
+    text-align: right;
+    border: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+circle.incidentLocation {
+    stroke-width: 2px;
+    stroke: red;
+    fill: rgba(255,0,0,0.25);
+}
+
+#tmcpct {
+    padding-left:2em;
+}

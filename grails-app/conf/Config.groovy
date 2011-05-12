@@ -201,6 +201,14 @@ uiperformance.exclusions = [
     "**/navigation*/**",
     "**/tmcpe/**",
     "**/openlayers*/**",
+    "**/jquery*/**",
+    "**/d3/**",
+    "**/polymaps/**",
+    "**/protovis/**",
+    "**/tablesorter/**",
+    "**/tablescroll/**",
+    "**/numberformat/**",
+    "**/DataTables/**",
 ]
 
 uiperformance.bundles = [

@@ -24,6 +24,10 @@ class MapController extends BaseController {
         return [ ]
     }
 
+    def d3_show = {
+	return [ ]
+    }
+
     def simple = {
         return [ ]
     }
