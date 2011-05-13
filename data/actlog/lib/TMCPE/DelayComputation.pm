@@ -1615,8 +1615,10 @@ sub write_to_db {
 					d12delay_speed => $self->d12_delay_speed,
 					max_incident_speed => $self->max_incident_speed,
 					bad_solution => $self->bad_solution,
-					solution_time_bounded => ($self->solution_time_bounded?1:0),
-					solution_space_bounded => ($self->solution_space_bounded?1:0),
+
+					# only flag as time/space bounded if the number of bording cells is > 1
+					solution_time_bounded => ($self->solution_time_bounded>1?1:0),
+					solution_space_bounded => ($self->solution_space_bounded>1?1:0),
 
 					start_time => time2str( "%Y-%m-%d %T", $self->calcstart ),
 					end_time => time2str( "%Y-%m-%d %T", $self->calcend ),
@@ -1735,6 +1737,11 @@ sub compute_delay {
 	
 	$self->solve_program( );
     }
+
+    # reset conditions
+    $self->bad_solution( undef );
+    $self->solution_time_bounded( undef );
+    $self->solution_space_bounded( undef );
 
     $self->parse_results( );
 }

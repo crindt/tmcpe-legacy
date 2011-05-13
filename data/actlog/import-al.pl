@@ -48,6 +48,9 @@ GetOptions( \%opt,
 	    "tmcpe-db-user=s",
 	    "tmcpe-db-password=s",
 	    "use-osm-geom",
+	    "max-recompute-loops=i",
+	    "extend-time-increment=i",   # in minutes
+	    "extend-space-increment=i",  # miles
 	    "dc-band=f",
 	    "dc-prewindow=i",
 	    "dc-postwindow=i",
@@ -123,7 +126,10 @@ my $procopt = {
     ignore_unprocessed => 0,
     reprocess_existing => 1,
     forced => [],
-    only_type => []
+    only_type => [],
+    max_recompute_loops => 3,
+    extend_time_increment => 60,  # extend by 60 minutes by default
+    extend_space_increment => 2,  # extend by 60 miles by default
 };
 
 foreach my $o ( keys %opt ) {
@@ -1029,8 +1035,6 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->lanes_clear( $inc->lanes_clear->stamp ) if $inc->lanes_clear;
 
 
-	$dc->bad_solution( undef );
-
 	my @incloc = $tmcpeal->resultset( 'D12ActivityLog' )->search( 
 	    {
 		cad => $inc->cad
@@ -1057,15 +1061,36 @@ INCDEL: while( my $inc = $incrs->next ) {
 
 	$dc->logend( $end->stamp );
 	
-	$dc->compute_delay;
+	
+	my $cnt=0;
+	do {
+	    if ( $dc->solution_time_bounded() ) {
+		# increment time post window by 60 minutes
+		warn "INCREMENTING INCIDENT POST TIME WINDOW BY ".$procopt->{extend_time_increment}." MINUTES";
+		$dc->postwindow( $dc->postwindow() + $procopt->{extend_time_increment} );
+	    } 
+	    if ( $dc->solution_space_bounded() ) {
+		# increment upstream space bound by 2 miles
+		# FIXME: need to account for freeway termination.
+		warn "INCREMENTING INCIDENT POST TIME WINDOW BY ".$procopt->{extend_space_increment}." MILES";
+		$dc->vds_upstream_fallback( $dc->vds_upstream_fallback() + $procopt->{extend_space_increment} ) ;
+	    }
+	    
+	    $dc->compute_delay;
+
+	} while ( !$dc->bad_solution()
+		  && ( $dc->solution_time_bounded() || $dc->solution_space_bounded() )
+		  && $cnt++ < $procopt->{max_recompute_loops} );
 
 	$dc->write_to_db;
 
-	$dc->compute_incident_clear();
-
-	$dc->compute_diversion();
-
-	$dc->compute_delay2();
+	if ( not $dc->bad_solution() ) {
+	    $dc->compute_incident_clear();
+	    
+	    $dc->compute_diversion();
+	    
+	    $dc->compute_delay2();
+	}
     };
     if ( $@ ) {
 	$_ = ref $@;
