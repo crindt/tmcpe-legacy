@@ -2,6 +2,9 @@ package edu.uci.its.tmcpe
 
 import grails.converters.*
 
+import grails.plugins.springsecurity.Secured
+
+@Secured(["ROLE_ADMIN","ROLE_TMCPE","ROLE_CALTRANS_D12_TMC"])
 class TmcLogEntryController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
