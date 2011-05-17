@@ -46,7 +46,7 @@ function cluster() {
             //points[key].data.properties.elements.push(elem);
 	    points[key].elements.push( elem );
         }
-	incidentMap[elem.data.properties.cad] = points[key].id;
+	incidentMap[elem.data.properties.cad] = points[key];
     };
     clusterf.reset = function(){
 	cnt = 0;
@@ -63,7 +63,10 @@ function cluster() {
         return points;
     };
     clusterf.pointForCad = function( cad ) {
-	return $("#"+incidentMap[cad])[0];
+	return incidentMap[cad];
+    }
+    clusterf.nodeForCad = function( cad ) {
+	return $("#"+incidentMap[cad].id)[0];
     };
     return clusterf;
 }
@@ -191,11 +194,6 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // update the detail box
 	  detail.cluster( cluster );
-
-	  // grab first incident and globally select it
-	  //var cad = cluster.data.elements[0].data.properties.cad ;
-
-	  //query.selectIncident( cad );
       }
 
       query.selectIncident = function(cad) {
@@ -203,6 +201,12 @@ if ( !tmcpe ) var tmcpe = {};
 	  qmap.highlightIncident( cad );
 
 	  table.highlightIncident( cad );
+	  
+	  var cluster = qmap.clusterForCad( cad );
+	  if ( cluster != detail.cluster() ) { 
+	      detail.cluster( cluster );
+	  }
+	  detail.cad( cad );
       }
       
       d3.json( qstr,
@@ -262,8 +266,19 @@ if ( !tmcpe ) var tmcpe = {};
       var detail = {},
       theQuery,
       cluster,
+      cad,
       container
       ;
+
+      
+      function pageToCad( cad ) {
+	  if ( cluster==null || cluster.elements == null  ) return; // throw exception
+	  // quick search over cluster elements
+	  var idx;
+	  for( idx = 0; idx < cluster.elements.length && cluster.elements[idx].data.properties.cad != cad; idx++ ) {};
+	  if ( idx == cluster.elements.length ) alert( "Invalid data in cluster" );  // throw exception
+	  $('#incidentDetailPager').trigger('setPage',[idx]);
+      }
 
 
       detail.query = function(x) {
@@ -281,6 +296,16 @@ if ( !tmcpe ) var tmcpe = {};
 	  return detail;
       }
 
+      detail.cad = function( x ) {
+	  if ( !arguments.length ) return cad;
+	  var oldCad = cad;
+	  cad = x;
+	  if ( cad != oldCad ) {
+	      pageToCad( x );
+	  }
+	  return detail;
+      }
+
       detail.container = function( x ) {
 	  if ( !arguments.length ) return container;
 
@@ -294,7 +319,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  // recreate
 	  detail.create();
-
+	  
 	  return detail;
       }
 
@@ -302,37 +327,36 @@ if ( !tmcpe ) var tmcpe = {};
 	  // This selects 20 elements from a content array
 	  $('#incidentDetail').empty();
 	  
-	  var max = Array.min( [new_page_index+1,cluster.data.elements.length] );
+	  var max = Array.min( [new_page_index+1,cluster.elements.length] );
 	  for ( var i = new_page_index; i<max; ++i ){
 	      var id = $('#incidentDetail');
-	      id.append('<h3>Incident '+cluster.data.elements[i].data.properties.cad+'</h3>');
-	      id.append('<p><a href="incident/d3_tsd?cad='+cluster.data.elements[i].data.properties.cad+'">Show detailed analysis</a></p>');
+	      id.append('<h3>Incident '+cluster.elements[i].data.properties.cad+'</h3>');
+	      id.append('<p><a href="incident/d3_tsd?cad='+cluster.elements[i].data.properties.cad+'">Show detailed analysis</a></p>');
 	  }
-
+	  
 	  // select the first element
-	  theQuery.selectIncident( cluster.data.elements[new_page_index].data.properties.cad );
-
+	  theQuery.selectIncident( cluster.elements[new_page_index].data.properties.cad );
+	  
 	  // update the background color
-	  d3.select("#infobox").attr("style","background-color:"+color(220)(cluster.data.elements[new_page_index].data.properties.tmcpe_delay)); 
-
-
+	  d3.select("#infobox").attr("style","background-color:"+color(220)(cluster.elements[new_page_index].data.properties.tmcpe_delay)); 
+	  
+	  
 	  return false;
       }
-
 
       detail.create = function() {
 	  // only create if we have a container and a cluster
 	  if ( container == null || cluster == null ) return detail;
 
 	  /*
-	  $.each( cluster.data.elements, function( i, inc ) {
-	      $(container).append('<h3>'+inc.data.properties.cad+'</h3');
-	  });
-*/
+	    $.each( cluster.elements, function( i, inc ) {
+	    $(container).append('<h3>'+inc.data.properties.cad+'</h3');
+	    });
+	  */
 	  $(container).append('<div id="incidentDetail"></div>');
 	  $(container).append('<div id="incidentDetailPager"></div>');
 
-	  $('#incidentDetailPager').pagination( cluster.data.elements.length, { 
+	  $('#incidentDetailPager').pagination( cluster.elements.length, { 
 	      items_per_page: 1,
 	      callback:handlePaginationClick
 	  } );
@@ -363,15 +387,9 @@ if ( !tmcpe ) var tmcpe = {};
       function clusterClicked(e,c) {
 	  var c = e.currentTarget;
 
-	  theQuery.selectCluster( c );
+	  theQuery.selectCluster( c.data );
       }
 
-
-      function Cluster_core() {
-      }
-
-      function Cluster_move() {
-      }
 
       function Cluster_load(e){
 	  if(!e.tile.cluster){
@@ -422,6 +440,11 @@ if ( !tmcpe ) var tmcpe = {};
 	      value.node = point; 
               $(point).click(clusterClicked);
 	  });
+      }
+
+      qmap.clusterForCad = function( cad ) {
+	  if ( !arguments.length || blobs == null ) return null;
+	  return blobs.pointForCad( cad );
       }
 
       qmap.container = function(x) {
@@ -554,7 +577,7 @@ if ( !tmcpe ) var tmcpe = {};
       // raise the cluster circle associated with CAD
       qmap.raiseIncident = function( cad ) {
 	  if ( blobs == null ) return qmap;
-	  var point = blobs.pointForCad( cad );
+	  var point = blobs.nodeForCad( cad );
 	  
 	  // In SVG, the z-index is the element's index in the dom.  To raise an
 	  // element, just detach it from the dom and append it back to its parent
@@ -575,7 +598,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  var sel = $('circle');
 	  sel.removeClass("selected");
 
-	  //var point = blobs.pointForCad( cad );
+	  //var point = blobs.nodeForCad( cad );
 	  sel = $('circle[cads~="'+cad+'"]');
 	  sel.addClass("selected");
 	  //	  $(point.node).attr("className",function (dd,e) { 
