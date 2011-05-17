@@ -1,17 +1,17 @@
 [submodule "osm"]
 	path = osm
 	url = /home/crindt/Desktop/osm
-[submodule "web-app/js/openlayers"]
-	path = web-app/js/openlayers
+[submodule "src/js/openlayers"]
+	path = src/js/openlayers
 	url = /home/crindt/openlayers
-[submodule "web-app/js/dojo-src/dojo"]
-	path = web-app/js/dojo-src/dojo
+[submodule "src/js/dojo-src/dojo"]
+	path = src/js/dojo-src/dojo
 	url = /home/crindt/dojo-src/dojo
-[submodule "web-app/js/dojo-src/dojox"]
-	path = web-app/js/dojo-src/dojox
+[submodule "src/js/dojo-src/dojox"]
+	path = src/js/dojo-src/dojox
 	url = /home/crindt/dojo-src/dojox
-[submodule "web-app/js/dojo-src/dijit"]
-	path = web-app/js/dojo-src/dijit
+[submodule "src/js/dojo-src/dijit"]
+	path = src/js/dojo-src/dijit
 	url = /home/crindt/dojo-src/dijit
 [submodule "doc/reports/hutchins"]
 	path = doc/reports/hutchins
@@ -19,39 +19,33 @@
 [submodule "web-app/js/d3"]
 	path = web-app/js/d3
 	url = https://github.com/mbostock/d3.git
-[submodule "web-app/js/jquery"]
-	path = web-app/js/jquery
+[submodule "src/js/jquery"]
+	path = src/js/jquery
 	url = http://github.com/jquery/jquery.git
-[submodule "web-app/js/jquery-ui"]
-	path = web-app/js/jquery-ui
+[submodule "src/js/jquery-ui"]
+	path = src/js/jquery-ui
 	url = http://github.com/jquery/jquery-ui.git
-[submodule "web-app/js/polymaps"]
-	path = web-app/js/polymaps
+[submodule "src/js/polymaps"]
+	path = src/js/polymaps
 	url = https://github.com/simplegeo/polymaps.git
-[submodule "web-app/js/DataTables"]
-	path = web-app/js/DataTables
+[submodule "src/js/DataTables"]
+	path = src/js/DataTables
 	url = https://github.com/DataTables/DataTables.git
-[submodule "web-app/js/jquery-format"]
-	path = web-app/js/jquery-format
+[submodule "src/js/jquery-format"]
+	path = src/js/jquery-format
 	url = https://github.com/asual/jquery-format.git
-[submodule "web-app/js/protovis"]
-	path = web-app/js/protovis
+[submodule "src/js/protovis"]
+	path = src/js/protovis
 	url = https://github.com/mbostock/protovis.git
-[submodule "web-app/js/tablesorter"]
-	path = web-app/js/tablesorter
-	url = https://github.com/crowdsavings/tablesorter.git
-[submodule "web-app/js/tablescroll"]
-	path = web-app/js/tablescroll
-	url = https://github.com/farinspace/jquery.tableScroll
 [submodule "web-app/js/jquery-dateFormat"]
 	path = web-app/js/jquery-dateFormat
 	url = https://github.com/phstc/jquery-dateFormat
 [submodule "web-app/js/jquery-svg"]
 	path = web-app/js/jquery-svg
 	url = https://github.com/apendleton/jquery-svg.git
-[submodule "web-app/js/jquery_pagination"]
-	path = web-app/js/jquery_pagination
+[submodule "src/js/jquery_pagination"]
+	path = src/js/jquery_pagination
 	url = https://github.com/gbirke/jquery_pagination.git
-[submodule "web-app/js/tipsy-src"]
-	path = web-app/js/tipsy-src
+[submodule "src/js/tipsy"]
+	path = src/js/tipsy
 	url = git://github.com/jaz303/tipsy.git
