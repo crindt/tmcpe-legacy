@@ -136,8 +136,9 @@ td.unit {
 
 #incidents circle {
 //  fill: #ff0000;
-  fill-opacity: 0.5;
+//  fill-opacity: 0.5;
   stroke: #000000;
+  stroke-width:0.2;
 }
 
 .sorting {
@@ -284,7 +285,7 @@ table td,table th {
 
 #incidents .selected {
    stroke-width: 10px;
-   stroke: cyan;
+   stroke: blue;//cyan;
    fill-opacity: 0.85;
 }
 

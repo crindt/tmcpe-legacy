@@ -13,12 +13,13 @@ Array.min = function( array ){
 
 // zoom-based clustering
 // expects a global variable called map that is a polymap object
+// Adapted from jmarca@translab.its.uci.edu
 function cluster() {
-
     //useless just set to zero
     function precision(zoom){
         return Math.ceil(Math.log(zoom-0) / Math.LN2);
     }
+    var cnt=0;
     var points = {};
     var incidentMap = {};
     var clusterf = function(elem) {
@@ -39,14 +40,16 @@ function cluster() {
             newpoint.x = x;
             newpoint.y = y;
 	    newpoint.elements = [ elem ];
+	    newpoint.id = "cluster_"+(cnt++);
             points[key] = newpoint
         }else{
             //points[key].data.properties.elements.push(elem);
 	    points[key].elements.push( elem );
         }
-	incidentMap[elem.data.properties.cad] = points[key];
+	incidentMap[elem.data.properties.cad] = points[key].id;
     };
     clusterf.reset = function(){
+	cnt = 0;
         points = {};
 	incidentMap = {};
     };
@@ -60,7 +63,7 @@ function cluster() {
         return points;
     };
     clusterf.pointForCad = function( cad ) {
-	return incidentMap[cad];
+	return $("#"+incidentMap[cad])[0];
     };
     return clusterf;
 }
@@ -309,6 +312,10 @@ if ( !tmcpe ) var tmcpe = {};
 	  // select the first element
 	  theQuery.selectIncident( cluster.data.elements[new_page_index].data.properties.cad );
 
+	  // update the background color
+	  d3.select("#infobox").attr("style","background-color:"+color(220)(cluster.data.elements[new_page_index].data.properties.tmcpe_delay)); 
+
+
 	  return false;
       }
 
@@ -387,24 +394,29 @@ if ( !tmcpe ) var tmcpe = {};
               var point = g.appendChild(po.svg("circle"));
               point.setAttribute("cx", value.x);
               point.setAttribute("cy", value.y);
+	      point.setAttribute("id", value.id );
+	      point.setAttribute("cads",
+				 $.map(value.elements, function(d,i) { 
+				     return d.data.cad;
+				 }).join(" "));
 
               var more_wider = value.elements.length;
               var more_darker = value.elements.length / 10;
               more_darker = more_darker < 0.25 ? more_darker : 0.25;
 
               point.setAttribute("r", blobs.fixedR + more_wider*3 );
-              point.setAttribute("stroke", "#000000");
+              //point.setAttribute("stroke", "#000000");
 
 
 	      var arr = $.map(value.elements,function(d){
 		  return d.data.properties.tmcpe_delay;
 	      });
-              point.setAttribute('fill', 
-				 color(0)(Array.max(arr)));
-              point.setAttribute("stroke-width",0.2);
+              point.setAttribute('fill', color(0)(Array.max(arr)));
+              //point.setAttribute("stroke-width",0.2);
               point.setAttribute("opacity",0.65+more_darker);
               point.setAttribute("stroke-opacity",0.8);
 	      point.setAttribute("title",value.elements.length+" incident" + (value.elements.length==1 ? "" : "s") );
+	      $(point).tipsy({gravity:"s"});
 	      //$(point).mouseover(tmcpe.tipsy({gravity:"w"}));
 	      point.data = value;
 	      value.node = point; 
@@ -546,7 +558,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  // In SVG, the z-index is the element's index in the dom.  To raise an
 	  // element, just detach it from the dom and append it back to its parent
-	  var node = point.node;
+	  var node = point;
 	  if ( node ) {
 	      var parent = node.parentNode;
 	      $(node).detach().appendTo( parent );
@@ -559,10 +571,13 @@ if ( !tmcpe ) var tmcpe = {};
 	  //var ret = this.className.baseVal.replace(/\s*\bselected\b/i,""); // remove selected
 	  //return ret;
 	  //	  });
-	  $('circle.selected').toggleClass("selected");
+	  // remove all selected
+	  var sel = $('circle');
+	  sel.removeClass("selected");
 
-	  var point = blobs.pointForCad( cad );
-	  $(point.node).toggleClass("selected");
+	  //var point = blobs.pointForCad( cad );
+	  sel = $('circle[cads~="'+cad+'"]');
+	  sel.addClass("selected");
 	  //	  $(point.node).attr("className",function (dd,e) { 
 	  //	      return this.className.baseVal+" selected";
 	  //	  });
@@ -591,11 +606,11 @@ if ( !tmcpe ) var tmcpe = {};
       qtable.highlightIncident = function( cad ) {
 
 	  // restyle row
-	  $("#inctable tr.selected").toggleClass("selected");
 	  d3.selectAll("#inctable tr.selected")
 	      .attr( "style", function(d,i) { 	
 		  return "background-color:"+color(160)(d.properties.tmcpe_delay); 
 	      });
+	  $("#inctable tr.selected").toggleClass("selected");
 
 	  // now restyle the selected row
 	  $("#inctable tr[cad='"+cad+"']")
@@ -747,7 +762,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .data(thedata,function(d) { return d.cad })
 	      .enter().append("tr")
 	      .attr("id", function( d ) { 
-		  return d.id 
+		  return "table_incident_id_"+d.id;
 	      } )
 	      .attr("cad", function( d ) { 
 		  return d.cad
@@ -858,7 +873,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      // enter, adding new tr elements for new data.
 	      rr.enter().append("tr")
 		  .attr("id", function( d ) { 
-		      return d.id 
+		      return "table_incident_id_"+d.id ;
 		  } )
 		  .attr("cad", function( d ) { 
 		      return d.cad
