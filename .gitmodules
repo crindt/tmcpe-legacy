@@ -46,3 +46,12 @@
 [submodule "web-app/js/jquery-dateFormat"]
 	path = web-app/js/jquery-dateFormat
 	url = https://github.com/phstc/jquery-dateFormat
+[submodule "web-app/js/jquery-svg"]
+	path = web-app/js/jquery-svg
+	url = https://github.com/apendleton/jquery-svg.git
+[submodule "web-app/js/jquery_pagination"]
+	path = web-app/js/jquery_pagination
+	url = https://github.com/gbirke/jquery_pagination.git
+[submodule "web-app/js/tipsy-src"]
+	path = web-app/js/tipsy-src
+	url = git://github.com/jaz303/tipsy.git

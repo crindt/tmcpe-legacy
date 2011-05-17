@@ -1,10 +1,229 @@
 
+
+// Function to get the Max value in Array
+Array.max = function( array ){
+    return Math.max.apply( Math, array );
+};
+
+// Function to get the Min value in Array
+Array.min = function( array ){
+    return Math.min.apply( Math, array );
+};
+
+
+// zoom-based clustering
+// expects a global variable called map that is a polymap object
+function cluster() {
+
+    //useless just set to zero
+    function precision(zoom){
+        return Math.ceil(Math.log(zoom-0) / Math.LN2);
+    }
+    var points = {};
+    var incidentMap = {};
+    var clusterf = function(elem) {
+        coord = elem.data.geometry.coordinates
+        var x = coord.x.toFixed(0);
+        var y = coord.y.toFixed(0);
+
+        var x2 = (coord.x/50).toFixed(0);
+        var y2 = (coord.y/50).toFixed(0);
+	
+        var key = x2+','+y2;
+
+        if(!points[key]){
+            // create a new cluster
+	    //            newpoint = elem;
+	    //            newpoint.data.properties.elements = [elem];
+	    newpoint = {};
+            newpoint.x = x;
+            newpoint.y = y;
+	    newpoint.elements = [ elem ];
+            points[key] = newpoint
+        }else{
+            //points[key].data.properties.elements.push(elem);
+	    points[key].elements.push( elem );
+        }
+	incidentMap[elem.data.properties.cad] = points[key];
+    };
+    clusterf.reset = function(){
+        points = {};
+	incidentMap = {};
+    };
+    clusterf.sort = function(f) {
+	$.each( points, function ( key, value ) {
+	    value.elements.sort( f );
+	} );
+    };
+    clusterf.fixedR = 10;
+    clusterf.points = function(){
+        return points;
+    };
+    clusterf.pointForCad = function( cad ) {
+	return incidentMap[cad];
+    };
+    return clusterf;
+}
+
+
+
+
 if ( !tmcpe ) var tmcpe = {};
 
 (function()
  {tmcpe.version = "0.1";
-  tmcpe.query = {};
-  
+
+  tmcpe.svg = function(type) {
+      return document.createElementNS(tmcpe.ns.svg, type);
+  };
+
+
+  tmcpe.tipsy = function(opts) {
+      var tip;
+
+      /**
+       * @private When the mouse leaves the root panel, trigger a mouseleave event
+       * on the tooltip span. This is necessary for dimensionless marks (e.g.,
+       * lines) when the mouse isn't actually over the span.
+       */
+      function trigger() {
+	  if (tip) {
+	      $(tip).tipsy("hide");
+	      tip.parentNode.removeChild(tip);
+	      tip = null;
+	  }
+      }
+
+      return function(d) {
+	  /* Compute the transform to offset the tooltip position. */
+	      /*
+	  var t = pv.Transform.identity, p = this.parent;
+	  do {
+              t = t.translate(p.left(), p.top()).times(p.transform());
+	  } while (p = p.parent);
+*/
+	  var parentContainer = this;
+	  for ( ;parentContainer.ownerSVGElement;parentContainer = parentContainer.ownerSVGElement );
+
+/*
+	  var t = parentContainer.createSVGMatrix(), p = this.parentNode;
+	  do { 
+	      var bb = p.getBBox();
+	      t = t.translate(bb.x,bb.y).times(p.transform());
+	  } while ( p = p.parentNode );
+*/
+
+
+
+	  /* Create and cache the tooltip span to be used by tipsy. */
+	  if (!tip) {
+              var c = this.parentNode;//root.canvas();
+              c.style.position = "relative";
+              $(c).mouseleave(trigger);
+
+              tip = c.appendChild(document.createElement("div"));
+              tip.style.position = "absolute";
+              tip.style.pointerEvents = "none"; // ignore mouse events
+              $(tip).tipsy(opts);
+	  }
+
+	  /* Propagate the tooltip text. */
+	  tip.setAttribute('title', this.getAttribute('title') || $(this).text());
+
+	  /*
+	   * Compute bounding box. TODO support area, lines, wedges, stroke. Also
+	   * note that CSS positioning does not support subpixels, and the current
+	   * rounding implementation can be off by one pixel.
+	   */
+	  var bbox = this.getBBox();
+	  if (bbox.width) {
+              tip.style.width = Math.ceil(bbox.width/* * t.k*/) + 1 + "px";
+              tip.style.height = Math.ceil(bbox.height/* * t.k*/) + 1 + "px";
+	  } /*else if (this.properties.shapeRadius) {
+              var r = this.shapeRadius();
+              t.x -= r;
+              t.y -= r;
+              tip.style.height = tip.style.width = Math.ceil(2 * r * t.k) + "px";
+	  }*/
+	  else { alert ( "TIPSY CONVERSION BROKEN" ); }
+	  var p = parentContainer.createSVGPoint();
+	  p.x = bbox.x;
+	  p.y = bbox.y;
+	  var bbox2 = p.matrixTransform(parentContainer.getScreenCTM().inverse());
+	  tip.style.left = Math.floor(bbox2.x/* * t.k + t.x */) + "px";
+	  tip.style.top = Math.floor(bbox2.y/* * t.k + t.y*/) + "px";
+
+	  /*
+	   * Cleanup the tooltip span on mouseout. Immediately trigger the tooltip;
+	   * this is necessary for dimensionless marks. Note that the tip has
+	   * pointer-events disabled (so as to not interfere with other mouse
+	   * events, such as "click"); thus the mouseleave event handler is
+	   * registered on the event target rather than the tip overlay.
+	   */
+//	  if (tip.style.height) $(pv.event.target).mouseleave(trigger);
+	  $(tip).tipsy("show");
+      };
+  };
+
+
+
+
+
+
+
+
+  tmcpe.query = function( qstra ) {
+      var query = {},
+      qmap,
+      table,
+      detail,
+      mapid = "#map",
+      inctableid = "#inctableContainer",
+      detailid = "#info",
+
+      qstr = qstra;
+
+      
+      query.selectCluster = function( cluster ) {
+
+	  // update the detail box
+	  detail.cluster( cluster );
+
+	  // grab first incident and globally select it
+	  //var cad = cluster.data.elements[0].data.properties.cad ;
+
+	  //query.selectIncident( cad );
+      }
+
+      query.selectIncident = function(cad) {
+	  qmap.raiseIncident( cad );
+	  qmap.highlightIncident( cad );
+
+	  table.highlightIncident( cad );
+      }
+      
+      d3.json( qstr,
+	       function(e) {
+		   qmap = tmcpe.query.qmap()
+		       .query( query )
+		       .container($(mapid)[0])
+		       .data(e.features);
+
+		   table = tmcpe.query.table()
+		       .query( query )
+		       .container($(inctableid)[0])
+		       .map(qmap.map)
+		       .data(qmap.data());
+
+		   detail = tmcpe.query.detail()
+		       .query( query )
+		       .container($(detailid)[0]);
+
+		   $("#loading").css('visibility','hidden');
+	       });
+
+      return query;
+  }
 
   function boundedScale( dom, ran ) {
       var dommin = dom[0];
@@ -35,28 +254,168 @@ if ( !tmcpe ) var tmcpe = {};
       }
   }
 
+
+  tmcpe.query.detail = function() {
+      var detail = {},
+      theQuery,
+      cluster,
+      container
+      ;
+
+
+      detail.query = function(x) {
+	  if ( !arguments.length ) return thequery;
+	  theQuery = x;
+	  return detail;
+      }
+
+      detail.cluster = function( x ) {
+	  if ( !arguments.length ) return cluster;
+	  cluster = x;
+	  
+	  detail.create();
+	  
+	  return detail;
+      }
+
+      detail.container = function( x ) {
+	  if ( !arguments.length ) return container;
+
+	  // same as existing
+	  if ( container != null && container == x ) return container;
+
+	  container = x;
+	  
+	  // clear the container
+	  $(container).empty()
+	  
+	  // recreate
+	  detail.create();
+
+	  return detail;
+      }
+
+      function handlePaginationClick(new_page_index, pagination_container) {
+	  // This selects 20 elements from a content array
+	  $('#incidentDetail').empty();
+	  
+	  var max = Array.min( [new_page_index+1,cluster.data.elements.length] );
+	  for ( var i = new_page_index; i<max; ++i ){
+	      var id = $('#incidentDetail');
+	      id.append('<h3>Incident '+cluster.data.elements[i].data.properties.cad+'</h3>');
+	  }
+
+	  // select the first element
+	  theQuery.selectIncident( cluster.data.elements[new_page_index].data.properties.cad );
+
+	  return false;
+      }
+
+
+      detail.create = function() {
+	  // only create if we have a container and a cluster
+	  if ( container == null || cluster == null ) return detail;
+
+	  /*
+	  $.each( cluster.data.elements, function( i, inc ) {
+	      $(container).append('<h3>'+inc.data.properties.cad+'</h3');
+	  });
+*/
+	  $(container).append('<div id="incidentDetail"></div>');
+	  $(container).append('<div id="incidentDetailPager"></div>');
+
+	  $('#incidentDetailPager').pagination( cluster.data.elements.length, { 
+	      items_per_page: 1,
+	      callback:handlePaginationClick
+	  } );
+
+	  // for each
+	  return detail;
+      }
+
+      return detail;
+  }
+
+
+
   tmcpe.query.qmap = function() {
       var qmap = {},
+      theQuery,
       container,
       theight,// = $(container).height()-2,
       twidth,// = $(container).height()-2,
       theData,
       allTheData,
       map,
-      table,
       size,
+      blobs = {},
 
       po = org.polymaps;
 
-      tmcpe.svg = function(type) {
-	  return document.createElementNS(tmcpe.ns.svg, type);
-      };
+      function clusterClicked(e,c) {
+	  var c = e.currentTarget;
+
+	  theQuery.selectCluster( c );
+      }
+
+
+      function Cluster_core() {
+      }
+
+      function Cluster_move() {
+      }
+
+      function Cluster_load(e){
+	  if(!e.tile.cluster){
+              e.tile.cluster=cluster();
+	  }
+	  blobs=e.tile.cluster;
+	  for (var i = 0; i < e.features.length; i++){
+              blobs(e.features[i]);
+	  }
+
+	  // sort elements by tmcpe_delay descending
+	  blobs.sort( function( a, b ) {
+	      return b.data.properties.tmcpe_delay - a.data.properties.tmcpe_delay;
+	  });
+
+	  var tile = e.tile, g = tile.element;
+	  while (g.lastChild) g.removeChild(g.lastChild);
+
+	  $.each(blobs.points(), function(key, value) {
+              var point = g.appendChild(po.svg("circle"));
+              point.setAttribute("cx", value.x);
+              point.setAttribute("cy", value.y);
+
+              var more_wider = value.elements.length;
+              var more_darker = value.elements.length / 10;
+              more_darker = more_darker < 0.25 ? more_darker : 0.25;
+
+              point.setAttribute("r", blobs.fixedR + more_wider*3 );
+              point.setAttribute("stroke", "#000000");
+
+
+	      var arr = $.map(value.elements,function(d){
+		  return d.data.properties.tmcpe_delay;
+	      });
+              point.setAttribute('fill', 
+				 color(0)(Array.max(arr)));
+              point.setAttribute("stroke-width",0.2);
+              point.setAttribute("opacity",0.65+more_darker);
+              point.setAttribute("stroke-opacity",0.8);
+	      point.setAttribute("title",value.elements.length+" incident" + (value.elements.length==1 ? "" : "s") );
+	      //$(point).mouseover(tmcpe.tipsy({gravity:"w"}));
+	      point.data = value;
+	      value.node = point; 
+              $(point).click(clusterClicked);
+	  });
+      }
 
       qmap.container = function(x) {
 	  if (!arguments.length) return container;
 	  container = x;
 	  container.setAttribute("class", "map");
-//	  container.appendChild(rect);
+	  //	  container.appendChild(rect);
 	  return qmap.resize(); // infer size
 	  //return qmap;
       }
@@ -81,6 +440,12 @@ if ( !tmcpe ) var tmcpe = {};
 	  return qmap;
       };
 
+      qmap.query = function(x) {
+	  if ( !arguments.length ) return thequery;
+	  theQuery = x;
+	  return qmap;
+      }
+
       qmap.data = function(x) {
 	  if ( !arguments.length ) return theData;
 	  theData = x;
@@ -92,19 +457,13 @@ if ( !tmcpe ) var tmcpe = {};
       qmap.ww = function() { return $(container).width()-2; };
 
 
-/*
-      qmap.container = function(x) {
-	  if ( !arguments.length ) return container;
-	  container = x;
-	  return qmap;
-      }
-*/
-
-      qmap.table = function(x) {
-	  if ( !arguments.length ) return table;
-	  table = x;
-	  return qmap;
-      }
+      /*
+	qmap.container = function(x) {
+	if ( !arguments.length ) return container;
+	container = x;
+	return qmap;
+	}
+      */
 
       qmap.redraw = function() {
 	  if ( container ) $(container).children().remove();
@@ -130,7 +489,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .zoomRange([1,/*6*/, 18])
 	      .add(po.interact())
 	      .center({lat: 33.739, lon: -117.830})
-//	      .add(po.hash())
+	  //	      .add(po.hash())
 	  ;
 
 	  qmap.map = map;
@@ -161,50 +520,61 @@ if ( !tmcpe ) var tmcpe = {};
 	      .features(theData)
 	      .id("incidents")
 	      .zoom( 13 )
-	      .on("load",function(a,b,c) {
-		  $("#incidents circle").click( function(d) { 
-		      return table.incidentClicked( d.currentTarget.cad ) } );
-		  //			d3.selectAll("#incidents circle")
-		  //			    .data(e.features)
-		  //			    .on("click", incidentClicked )
-	      })
-	      .on("load", /*loadFeatures*/
-		  po.stylist()
-		  .attr("id", function( d ) { return d.id; } )
-		  .attr("cad", function( d ) { return d.cad; } )
-		  .attr("r", function( d ) { 
-		      //			    var z = map.zoom();
-		      //			    var r =  Math.pow(2, Math.max(18-z,0)) * 0.5;
-		      return 25;
-		  })
-		  .attr("fill",function(d) { 
-		      var cc = color(0)(d.properties.tmcpe_delay);
-		      return cc;
-		  })
-		  .attr("stroke",function(d) { 
-		      var cc = color(0)(d.properties.tmcpe_delay);
-		      return cc;
-		  })
-		 );
+              .on("load",Cluster_load)
+	  ;
 	  map.add(incs);
 
-		map.on("move",function(d){
-		    //			d3.selectAll("#incidents circle")
-		    //			.append("div")
-		    //			.data(e.features)
-		    //			.on("click", incidentClicked )
-		    $("#incidents circle").click( function ( el ) { 
-			var cad = el.currentTarget.getAttribute("cad");
-			table.incidentClicked( cad ); } );
-		});
+	  /*
+	    map.on("move",function(d){
+	    //			d3.selectAll("#incidents circle")
+	    //			.append("div")
+	    //			.data(e.features)
+	    //			.on("click", incidentClicked )
+	    $("#incidents circle").click( function ( el ) { 
+	    var cad = el.currentTarget.getAttribute("cad");
+	    table.incidentClicked( cad ); } );
+	    });
+	  */
 
       }
+
+      // raise the cluster circle associated with CAD
+      qmap.raiseIncident = function( cad ) {
+	  if ( blobs == null ) return qmap;
+	  var point = blobs.pointForCad( cad );
+	  
+	  // In SVG, the z-index is the element's index in the dom.  To raise an
+	  // element, just detach it from the dom and append it back to its parent
+	  var node = point.node;
+	  if ( node ) {
+	      var parent = node.parentNode;
+	      $(node).detach().appendTo( parent );
+	  }
+      }
+
+
+      qmap.highlightIncident = function( cad) {
+	  //	  d3.select(container).selectAll('circle.selected').attr( "class", function (d) { 
+	  //var ret = this.className.baseVal.replace(/\s*\bselected\b/i,""); // remove selected
+	  //return ret;
+	  //	  });
+	  $('circle.selected').toggleClass("selected");
+
+	  var point = blobs.pointForCad( cad );
+	  $(point.node).toggleClass("selected");
+	  //	  $(point.node).attr("className",function (dd,e) { 
+	  //	      return this.className.baseVal+" selected";
+	  //	  });
+      }
+
+
 
       return qmap;
   }
 
   tmcpe.query.table = function() {
       var qtable = {},
+      theQuery,
       container,
       tab,
       thedata,
@@ -217,31 +587,24 @@ if ( !tmcpe ) var tmcpe = {};
 		 {key:"tmcpe_delay",title:"D<sub>tmcpe</sub>",render:renderDecimalNumber}, 
 		 {key:"savings",title:"Savings",render:renderDecimalNumber} ];
 
-      qtable.incidentClicked = function( d, e, f ) {
-	  // restyle row
-	  d3.selectAll("#inctable tr.selected").attr("class",function() { 
-	      var ret =  this.className.replace(/\s*\bselected\b/i,""); // remove selected
-	      return ret;
-	  }).attr( "style", function(d,i) { 
-	      return "background-color:"+color(160)(d.properties.tmcpe_delay); 
-	  })
+      qtable.highlightIncident = function( cad ) {
 
-	  d3.selectAll("#inctable tr[cad='"+d+"']")
-	      .attr("class",function (dd,e) { 
-		  // ugh, highlight the incident in the map too
-		  raiseIncident( dd );
-		  highlightIncident( dd );
-		  // ugh, and update the info
-		  updateIncidentInfo( dd );
-		  scrollIncidentTableToItem( dd,e,this );
-		  
-		  return this.className+" selected";
-	      } )
-	      .attr( "style", function(d,i) { 
-		  return "background-color:"+color(0)(d.properties.tmcpe_delay); 
+	  // restyle row
+	  $("#inctable tr.selected").toggleClass("selected");
+	  d3.selectAll("#inctable tr.selected")
+	      .attr( "style", function(d,i) { 	
+		  return "background-color:"+color(160)(d.properties.tmcpe_delay); 
 	      });
 
-	  //scrollIncidentTableToItem( el );
+	  // now restyle the selected row
+	  $("#inctable tr[cad='"+cad+"']")
+	      .toggleClass("selected");
+	  d3.selectAll("#inctable tr[cad='"+cad+"']")
+	      .attr( "style", function(d,e) { 
+		  scrollIncidentTableToItem( d,e,this );
+
+		  return "background-color:"+color(0)(d.properties.tmcpe_delay); 
+	      });
       }
 
       function removeClass( d ) {
@@ -277,25 +640,6 @@ if ( !tmcpe ) var tmcpe = {};
 
       function centerOnIncident( d ) {
 	  map.center( {lon:d.geometry.coordinates[0],lat:d.geometry.coordinates[1]} );
-      }
-
-      function raiseIncident( d ) {
-	  // In SVG, the z-index is the element's index in the dom.  To raise an
-	  // element, just detach it from the dom and append it back to its parent
-	  var targets = $("circle[id="+d.id+"]");
-	  var target = targets[0];
-	  var parent = target.parentNode;
-	  targets.detach().appendTo( parent );
-      }
-
-      function highlightIncident( d, e ) {
-	  d3.selectAll('#incidents circle.selected').attr( "class", function (d) { 
-	      var ret = this.className.baseVal.replace(/\s*\bselected\b/i,""); // remove selected
-	      return ret;
-	  });
-	  d3.selectAll("#incidents circle[cad='"+d.cad+"']").attr("class",function (dd,e) { 
-	      return this.className.baseVal+" selected";
-	  });
       }
 
       function updateIncidentInfo( d, e ) {
@@ -343,6 +687,12 @@ if ( !tmcpe ) var tmcpe = {};
       qtable.map = function(x) {
 	  if ( !arguments.length ) return map;
 	  map = x;
+	  return qtable;
+      }
+
+      qtable.query = function(x) {
+	  if ( !arguments.length ) return thequery;
+	  theQuery = x;
 	  return qtable;
       }
 
@@ -406,7 +756,8 @@ if ( !tmcpe ) var tmcpe = {};
 		  return "background-color:"+color(160)(d.properties.tmcpe_delay)/*+";opacity:0.5"*/; })
 	      .on("click",function(d,e) { 
 		  if ( !featureVisible(d) ) centerOnIncident( d );
-		  qtable.incidentClicked( d.cad );
+		  //qtable.incidentClicked( d.cad );
+		  theQuery.selectIncident( d.cad );
 	      } );
 
 
@@ -657,16 +1008,16 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
       function renderDecimalNumber(oObj,oCustomInfo) {	
-/*
-	  var num = new NumberFormat();
-	  num.setInputDecimal('.');
-	  num.setNumber(oObj); 
-	  num.setPlaces(0, true);	
-	  num.setCurrency(false);	
-	  num.setNegativeFormat(num.LEFT_DASH);	
-	  num.setSeparators(true, "", ".");
+	  /*
+	    var num = new NumberFormat();
+	    num.setInputDecimal('.');
+	    num.setNumber(oObj); 
+	    num.setPlaces(0, true);	
+	    num.setCurrency(false);	
+	    num.setNegativeFormat(num.LEFT_DASH);	
+	    num.setSeparators(true, "", ".");
 
-	  return num.toFormatted();
+	    return num.toFormatted();
 	  */
 	  return (oObj != null ? oObj.toFixed(0) : oObj );
       }
@@ -680,5 +1031,7 @@ if ( !tmcpe ) var tmcpe = {};
 
       return qtable;
   }
+
+
  })();
- 
+

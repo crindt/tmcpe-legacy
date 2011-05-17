@@ -7,6 +7,10 @@
     <p:css name="960-fluid" /> <!-- Load the 960 css -->
     <p:css name="jquery/themes/base/jquery-ui" />
     <p:css name="d3-hacks" />
+    <p:css name="jquery-svg/jquery.svg" />
+    <p:css name="jquery_pagination/pagination" />
+    <p:css name="tipsy/tipsy" />
+    
 
     <p:javascript src='d3/d3.min' />
     <p:javascript src='d3/d3.geom.min' />
@@ -14,10 +18,15 @@
     <p:javascript src='jquery/dist/jquery.min' />
     <p:javascript src='jquery-ui/1.8/ui/minified/jquery-ui.min' />
     <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
+    <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
+    <p:javascript src='jquery-svg/jquery.svg' />
+    <p:javascript src='jquery-svg/jquery.svgdom' />
     <p:javascript src='polymaps/polymaps' />
     <p:javascript src='protovis/protovis.min' />
     <p:javascript src='tmcpe/map' />
     <p:javascript src='datatables/jquery.dataTables' />
+    <p:javascript src='jquery_pagination/src/jquery.pagination' />
+    <p:javascript src='tipsy/jquery.tipsy' />
 
     <p:javascript src='numberformat/NumberFormat154' />
     <g:javascript>
@@ -34,11 +43,18 @@
       load.appendTo("body");
       $("#loading").css('visibility','visible');
 
+      var query = tmcpe.query("incident/list.geojson"
+//      	    +"?startDate="+(year)+"-01-01"
+      +"?startDate=2010-09-01"
+      	    +"&endDate="+(parseInt(year)+1)+"-01-01"
+      +"&Analyzed=onlyAnalyzed"
+      +"&max=1000");
+/*
       d3.json
       ("incident/list.geojson"
-      	    +"?startDate="+(year)+"-01-01"
+//      	    +"?startDate="+(year)+"-01-01"
+      +"?startDate=2010-09-01"
       	    +"&endDate="+(parseInt(year)+1)+"-01-01"
-//      +"?startDate=2010-09-01"
       +"&Analyzed=onlyAnalyzed"
       +"&max=1000", 
       function(e){
@@ -51,6 +67,7 @@
 	 qmap.table( qtab );
 	 $("#loading").css('visibility','hidden');
       });
+*/
 
 	 $(window).resize(function() { 
 	    qmap.resize();
@@ -101,8 +118,8 @@
       
       <div id="infobox" class="grid_8 omega clearfix">
 	<div id="info">
-	  <h3 id="incidentTitle">No incident selected</h3>
-	  <div id="incidentDetailTableBox"></div>
+	  <div id="incidentDetail"><h3>No incident selected</h3></div>
+	  <div id="incidentDetailPager"></div>
 	</div>
       </div>
 

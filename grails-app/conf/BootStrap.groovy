@@ -3,6 +3,8 @@
 import edu.uci.its.auth.Role
 import edu.uci.its.auth.User
 
+import javax.servlet.http.HttpServletRequest
+
 class BootStrap {
     
     def springSecurityService
@@ -166,6 +168,13 @@ class BootStrap {
 		    inc(secdat.incident_flag)
 		    delay(secdat.tmcpe_delay)
 		}
+	}
+
+
+	// Identify AJAX requests
+	// per http://stackoverflow.com/questions/665067/identifying-ajax-request-or-browser-request-in-grails-controller
+	HttpServletRequest.metaClass.isXhr = {->
+         'XMLHttpRequest' == delegate.getHeader('X-Requested-With')
 	}
     }
 
