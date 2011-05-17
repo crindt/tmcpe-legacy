@@ -457,7 +457,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("style", cellAugmentStyle )
               .attr("cx", function (d, i ) { return ((i+0.5)*szt) } )
               .attr("cy", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum)/2; })
-	      .attr("r", 2 );
+	      .attr("r", 1.5 );
 
 
 	  // make sure there's at least one cell with the incident
@@ -834,7 +834,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  rules2.append("svg:text")
 	      .attr("y", y)
 	      .attr("x", -4)  // shift 4px to left of axis
-	      .attr("dy", ".35em")
+	      .attr("dy", "8pt")
 	      .attr("text-anchor", "end")
 	      .text(y.tickFormat(10))
 	      .attr("class","ylabels");

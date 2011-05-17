@@ -1,5 +1,3 @@
-
-
 // Function to get the Max value in Array
 Array.max = function( array ){
     return Math.max.apply( Math, array );
@@ -1029,7 +1027,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  } );
 
 	  $("#inctable").dataTable({
-	      bPaginate:false, sScrollY:"250px","bAutoWidth":false,
+	      bPaginate:false, sScrollY:"170px","bAutoWidth":false,
 	      "aoColumns": [
 		  { "sWidth": "15%", "sType": "string" }, // CAD
 		  { "sWidth": "10%", "sType": "date" },   // timestamp

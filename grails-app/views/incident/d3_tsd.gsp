@@ -381,9 +381,10 @@
 			}
 		}
 	  } );
-	  $("#generalStats").dataTable({
+	  var gs = $("#generalStats");
+	  gs.dataTable({
 	      "bPaginate": false,
-	      "sScrollY": "300px",
+	      "sScrollY": gs.parent().height()*.5,
 	      "bLengthChange": false,
 	      "bFilter": false,
 	      "bSort": false,

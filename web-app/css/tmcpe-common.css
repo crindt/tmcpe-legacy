@@ -2,13 +2,14 @@
 body {
     background-color: #1A2C45; /*#A2C5DA;*/
     color: #fff;
+    font-size: 8pt;
 }
 
 
 #header h1 {
     margin-left: 10px;
     display: inline;
-    font-size: 60px;
+    font-size: 50px;
     vertical-align: text-bottom;
 }
 
