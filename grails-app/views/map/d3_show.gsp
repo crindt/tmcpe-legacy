@@ -5,28 +5,26 @@
     <title>Incident List</title>
 
     <p:css name="960-fluid" /> <!-- Load the 960 css -->
-    <p:css name="jquery/themes/base/jquery-ui" />
     <p:css name="d3-hacks" />
-    <p:css name="jquery-svg/jquery.svg" />
-    <p:css name="jquery_pagination/pagination" />
-    <p:css name="tipsy/tipsy" />
+    <p:css name="jquery.svg" />
+    <p:css name="pagination" />
+    <p:css name="tipsy" />
     
 
-    <p:javascript src='d3/d3.min' />
-    <p:javascript src='d3/d3.geom.min' />
+    <p:javascript src='d3' />
+    <p:javascript src='d3.geom.min' />
     <p:javascript src='tmcpe/tsd' />
-    <p:javascript src='jquery/dist/jquery.min' />
-    <p:javascript src='jquery-ui/1.8/ui/minified/jquery-ui.min' />
-    <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
-    <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
-    <p:javascript src='jquery-svg/jquery.svg' />
-    <p:javascript src='jquery-svg/jquery.svgdom' />
-    <p:javascript src='polymaps/polymaps' />
-    <p:javascript src='protovis/protovis.min' />
+    <p:javascript src='jquery-1.6.1.min' />
+    <p:javascript src='jquery-ui-1.8.13.custom.min' />
+    <p:javascript src='jquery.format-1.2.min' />
+    <p:javascript src='jquery.svg' />
+    <p:javascript src='jquery.svgdom' />
+    <p:javascript src='polymaps' />
+    <p:javascript src='protovis.min' />
     <p:javascript src='tmcpe/map' />
-    <p:javascript src='datatables/jquery.dataTables' />
-    <p:javascript src='jquery_pagination/src/jquery.pagination' />
-    <p:javascript src='tipsy/jquery.tipsy' />
+    <p:javascript src='jquery.dataTables' />
+    <p:javascript src='jquery.pagination' />
+    <p:javascript src='jquery.tipsy' />
 
     <p:javascript src='numberformat/NumberFormat154' />
     <g:javascript>

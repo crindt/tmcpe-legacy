@@ -6,19 +6,17 @@
     <title>Incident ${incidentInstance.cad} Detail</title>
 
     <p:css name="tmcpe-common" />
-    <p:css name="d3-tsd" /> <!-- Load the openlayers css -->
-    <p:css name="jquery-tooltip/jquery.tooltip" /> <!-- Load the openlayers css -->
+    <p:css name="d3-tsd" />
 
-    <p:javascript src='d3/d3' />
-    <p:javascript src='d3/d3.geom' />
+    <p:javascript src='d3' />
+    <p:javascript src='d3.geom' />
     <p:javascript src='tmcpe/tsd' />
-    <p:javascript src='jquery/dist/jquery.min' />
-    <p:javascript src='jquery-ui/1.8/ui/minified/jquery-ui.min' />
-    <p:javascript src='jquery-format/dist/jquery.format-1.2.min' />
-    <p:javascript src='jquery-tooltip/jquery.tooltip' />
-    <p:javascript src='polymaps/polymaps' />
-    <p:javascript src='protovis/protovis' />
-    <p:javascript src='datatables/jquery.dataTables' />
+    <p:javascript src='jquery-1.6.1.min' />
+    <p:javascript src='jquery-ui-1.8.13.custom.min' />
+    <p:javascript src='jquery.format-1.2.min' />
+    <p:javascript src='polymaps' />
+    <p:javascript src='protovis' />
+    <p:javascript src='jquery.dataTables' />
     
     <g:javascript>
 

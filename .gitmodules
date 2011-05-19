@@ -16,9 +16,6 @@
 [submodule "doc/reports/hutchins"]
 	path = doc/reports/hutchins
 	url = /home/crindt/hutchins
-[submodule "web-app/js/d3"]
-	path = web-app/js/d3
-	url = https://github.com/mbostock/d3.git
 [submodule "src/js/jquery"]
 	path = src/js/jquery
 	url = http://github.com/jquery/jquery.git
@@ -37,15 +34,18 @@
 [submodule "src/js/protovis"]
 	path = src/js/protovis
 	url = https://github.com/mbostock/protovis.git
-[submodule "web-app/js/jquery-dateFormat"]
-	path = web-app/js/jquery-dateFormat
-	url = https://github.com/phstc/jquery-dateFormat
-[submodule "web-app/js/jquery-svg"]
-	path = web-app/js/jquery-svg
-	url = https://github.com/apendleton/jquery-svg.git
 [submodule "src/js/jquery_pagination"]
 	path = src/js/jquery_pagination
 	url = https://github.com/gbirke/jquery_pagination.git
 [submodule "src/js/tipsy"]
 	path = src/js/tipsy
 	url = git://github.com/jaz303/tipsy.git
+[submodule "src/js/d3"]
+	path = src/js/d3
+	url = https://github.com/mbostock/d3.git
+[submodule "src/js/jquery-svg"]
+	path = src/js/jquery-svg
+	url = https://github.com/apendleton/jquery-svg.git
+[submodule "src/js/jquery-dateFormat"]
+	path = src/js/jquery-dateFormat
+	url = https://github.com/phstc/jquery-dateFormat
