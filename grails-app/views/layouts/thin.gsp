@@ -47,7 +47,7 @@
       <div id="header" class="container_16 clearfix">
 
 	<div style="float:left;margin-left:10px;">
-	  <a href="http://www.ctmlabs.net"><img src="images/logo_jem_060.png" alt="CTMLabs" title="" width="140" height="60" /></a>
+	  <a href="http://www.ctmlabs.net"><p:image src='logo_jem_060.png' alt="CTMLabs" title="" width="140" height="60" /></a>
 	  <h1><a href="${resource(dir:'/',absolute:true)}" style="text-decoration:none;color:#fff">TMCPE</a></h1>
 	</div>
       </div>
