@@ -4,7 +4,6 @@
         <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'main.css')}" />
         <link rel="shortcut icon" href="${createLinkTo(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
         <g:layoutHead />
-        <g:javascript library="application" />				
     </head>
     <body onload="${pageProperty(name:'body.onload')}" width="100%">
         <div id="spinner" class="spinner" style="display:none;">
