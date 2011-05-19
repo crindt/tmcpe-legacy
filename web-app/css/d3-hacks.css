@@ -142,15 +142,15 @@ td.unit {
 }
 
 .sorting {
-background: url('../images/datatables/sort_both.png') no-repeat center left;
+background: url('../images/sort_both.png') no-repeat center left;
 }
 
 .headerSortDown {
-background: url('../images/datatables/sort_asc.png') no-repeat center left;
+background: url('../images/sort_asc.png') no-repeat center left;
 }
 
 .headerSortUp {
-background: url('../images/datatables/sort_desc.png') no-repeat center left;
+background: url('../images/sort_desc.png') no-repeat center left;
 }
 
 .mono {
