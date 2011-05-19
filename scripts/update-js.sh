@@ -62,7 +62,7 @@ JQUERYUI_SRCDIR=`pwd`/src/js
 JQUERYUI_STAGEDIR=`pwd`/stage
 JQUERYUI_VERSION=1.8.13
 ( ( mkdir -p $JQUERYUI_STAGEDIR && cd $JQUERYUI_STAGEDIR && \
-    unzip $JQUERYUI_SRCDIR/jquery-ui-$JQUERYUI_VERSION.custom.zip -x development-bundle/* ) ) 
+    unzip $JQUERYUI_SRCDIR/jquery-ui-$JQUERYUI_VERSION.custom.zip -x development-bundle/* -x index.html ) ) 
 if [ $? -gt 0 ]; then
     echo "FAILED @ JQUERYUI"
     exit 1
