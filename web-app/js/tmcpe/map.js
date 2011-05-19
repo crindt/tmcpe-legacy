@@ -329,7 +329,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  for ( var i = new_page_index; i<max; ++i ){
 	      var id = $('#incidentDetail');
 	      id.append('<h3>Incident '+cluster.elements[i].data.properties.cad+'</h3>');
-	      id.append('<p><a href="incident/d3_tsd?cad='+cluster.elements[i].data.properties.cad+'">Show detailed analysis</a></p>');
+	      id.append('<p><a target="_blank" href="incident/d3_tsd?cad='+cluster.elements[i].data.properties.cad+'">Show detailed analysis</a></p>');
 	  }
 	  
 	  // select the first element
