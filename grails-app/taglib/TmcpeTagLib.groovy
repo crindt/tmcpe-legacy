@@ -1,3 +1,5 @@
+import org.codehaus.groovy.grails.commons.ApplicationHolder
+
 class TmcpeTagLib {
   static namespace = 'tmcpe'
 
@@ -107,5 +109,5 @@ class TmcpeTagLib {
 
   def dojo_version = { out << "1.5" }
 
-  def version = { out << "0.4.0 [${grails.util.Environment.getCurrent()}]" }
+  def version = { out << "[${ApplicationHolder.application.metadata['app.version']} [${grails.util.Environment.getCurrent()}]" }
 }

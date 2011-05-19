@@ -8,47 +8,10 @@ import javax.servlet.http.HttpServletRequest
 class BootStrap {
     
     def springSecurityService
-    def navigationService
     
     def init = { servletContext ->
         servletContext.setAttribute( "newDataBinder",  GlobalPropertyEditorConfig.&newDataBinder )
         servletContext.setAttribute( "newBeanWrapper", GlobalPropertyEditorConfig.&newBeanWrapper )
-        
-        // Set up default navigation menu items!!
-        
-        // The login link only appears of the user is not logged in,
-        // logout appears otherwise
-        navigationService.registerItem( 
-	    'dashboard', [ order:      98, 
-			   title:      'Login', 
-			   controller: 'login', 
-			   action:     'casAuth', 
-			   isVisible:  { !springSecurityService.isLoggedIn() } 
-			 ] )
-        navigationService.registerItem( 
-	    'dashboard', [ order:      98, 
-			   title:      'Logout', 
-			   controller: 'logout', 
-			   isVisible:  { springSecurityService.isLoggedIn() } 
-			 ] )
-        
-        // Two different help links depending on whether the user is logged in		
-        navigationService.registerItem( 
-	    'dashboard', [ order:      99, 
-			   title:      'Help', 
-			   controller: 'help', 
-			   action:     'index', 
-			   isVisible:  { !springSecurityService.isLoggedIn() } 
-			 ] )
-        navigationService.registerItem( 
-	    'dashboard', [ order:      99, 
-			   title:      'Help', 
-			   controller: 'help', 
-			   action:     'fullHelp', 
-			   isVisible:  { springSecurityService.isLoggedIn() } 
-			 ] )
-        
-        navigationService.updated()
         
 	// Here, we register a bunch of converters to emit json for various objects
 	def cc = 1  // the object marshallers must have a distinct index, we
