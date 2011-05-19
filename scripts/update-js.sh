@@ -27,7 +27,7 @@ fi
 DATATABLES_SRCDIR=`pwd`/src/js/DataTables
 DATATABLES_STAGEDIR=`pwd`/stage/js
 ( (cd $DATATABLES_SRCDIR/media && rsync -avz js/ $DATATABLES_STAGEDIR) \
-    && (cd $DATATABLES_SRCDIR/media && rsync -avz images/ $STAGEDIR/images ) )
+    && (cd $DATATABLES_SRCDIR/media && rsync -avz --exclude favicon.ico images/ $STAGEDIR/images ) )
 if [ $? -gt 0 ]; then
     echo "FAILED @ DATATABLES"
     exit 1
