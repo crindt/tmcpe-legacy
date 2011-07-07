@@ -47,6 +47,7 @@ GetOptions( \%opt,
 	    "tmcpe-db-name=s",
 	    "tmcpe-db-user=s",
 	    "tmcpe-db-password=s",
+	    "dont-use-osm-geom",
 	    "use-osm-geom",
 	    "max-recompute-loops=i",
 	    "extend-time-increment=i",   # in minutes
@@ -118,6 +119,7 @@ my $procopt = {
     only_sigalerts => 0,
     verbose => 0,
     useexist => 0,
+    use_osm_geom => 0,  # this is expensive!
     tmcpe_db_host => "localhost",
     tmcpe_db_name => "tmcpe_test",
     tmcpe_db_user => "postgres",
@@ -814,6 +816,7 @@ eval {
 		    # always use R/D/L string to identify location
 		    my ( $locstr ) = ( /ROUTE\/DIR\/LOCATION:\s*(.*)/ );
 		    if ( $locstr ) {
+			warn "PARSING LOCSTR: $locstr";
 			$locdata = $lp->get_location( uc($locstr), $inc->location_geom ) ;
 			if ( !$locdata ) {
 			    warn "FAILED TO PARSE R/D/L: $locstr";
@@ -865,6 +868,7 @@ eval {
 	    
 	    # fallback to finding location
 	    if ( ! $locdata && ( ! ( $memo =~ /^\s*$/ ) ) && $procopt->{"location_parse"} ) {
+		warn "PARSING MEMO: $memo";
 		$locdata = $lp->get_location( uc($memo), $inc->location_geom );
 		if ( !$locdata ) {
 		    warn "FAILED TO PARSE MEMO: $memo";
