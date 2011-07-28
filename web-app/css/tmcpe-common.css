@@ -88,7 +88,7 @@ body {
 }
 
 #menu a:hover {
-    color: #yellow;
+    color: yellow;
 }
 
 body {
@@ -96,7 +96,7 @@ body {
 }
 
 
-// the following two records are used to position the nav div at the bottom of the info element
+/* the following two records are used to position the nav div at the bottom of the info element */
 #info {
     position:relative;
 }

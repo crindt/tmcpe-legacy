@@ -449,7 +449,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if (!arguments.length) return container;
 	  container = x;
 	  container.setAttribute("class", "map");
-	  //	  container.appendChild(rect);
+	  container.appendChild(rect);
 	  return qmap.resize(); // infer size
 	  //return qmap;
       }

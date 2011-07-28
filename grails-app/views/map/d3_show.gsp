@@ -36,54 +36,33 @@
 
       function setToYear( year ) {
 
-      var load=$("#loading").detach();
-      load.text("Loading incidents for "+year );
-      load.appendTo("body");
-      $("#loading").css('visibility','visible');
-
-      var query = tmcpe.query("incident/list.geojson"
-//      	    +"?startDate="+(year)+"-01-01"
-      +"?startDate=2010-09-01"
-      	    +"&endDate="+(parseInt(year)+1)+"-01-01"
-      +"&Analyzed=onlyAnalyzed"
-      +"&max=1000");
-/*
-      d3.json
-      ("incident/list.geojson"
-//      	    +"?startDate="+(year)+"-01-01"
-      +"?startDate=2010-09-01"
-      	    +"&endDate="+(parseInt(year)+1)+"-01-01"
-      +"&Analyzed=onlyAnalyzed"
-      +"&max=1000", 
-      function(e){
-         qmap = tmcpe.query.qmap()
-	 .container($("#map")[0]).data(e.features);
-
-	 qtab = tmcpe.query.table()
-	 .container($("#inctableContainer")[0]).map(qmap.map).data(qmap.data());
-
-	 qmap.table( qtab );
-	 $("#loading").css('visibility','hidden');
-      });
-*/
-
-	 $(window).resize(function() { 
-	    qmap.resize();
-	 });
-
-
+	  var load=$("#loading").detach();
+	  load.text("Loading incidents for "+year );
+	  load.appendTo("body");
+	  $("#loading").css('visibility','visible');
+	  
+	  var query = tmcpe.query("incident/list.geojson"
+				  //      	    +"?startDate="+(year)+"-01-01"
+				  +"?startDate=2010-09-01"
+      				  +"&endDate="+(parseInt(year)+1)+"-01-01"
+				  +"&Analyzed=onlyAnalyzed"
+				  +"&max=1000");
+	  
+	  $(window).resize(function() { 
+	      query.qmap.resize();
+	  });
       }
 
       $(document).ready(function(){
 
 
-      var settings = $("#settings").detach();
-      settings.appendTo('#header');
+	  var settings = $("#settings").detach();
+	  settings.appendTo('#header');
 	  
-      // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
-      //doQueryMap();
+	  // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
+	  //doQueryMap();
 
-      setToYear( 2010 );
+	  setToYear( 2010 );
 
       });
 		

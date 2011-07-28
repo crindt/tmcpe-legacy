@@ -46,7 +46,7 @@ rect.d2 {
  
 .area {
   fill: steelblue;
-//    fill-opacity: 0.75;
+/*    fill-opacity: 0.75; */
 }
  
 .line, circle.area {
@@ -57,7 +57,7 @@ rect.d2 {
  
 .area2 path {
   fill: green;
-//  fill-opacity: 0.75;
+/*  fill-opacity: 0.75; */
 }
 
 .line3 {
@@ -68,7 +68,7 @@ rect.d2 {
  
 .area3 path {
   fill: red;
-//  fill-opacity: 0.5;
+/*  fill-opacity: 0.5; */
 }
 
 .timebar {
@@ -121,7 +121,7 @@ td.unit {
 #segments path {
   fill: none;
   stroke-linecap: round;
-//  stroke-width: 4px;
+/*  stroke-width: 4px; */
 }
 
 #ends circle {
@@ -135,8 +135,8 @@ td.unit {
 }
 
 #incidents circle {
-//  fill: #ff0000;
-//  fill-opacity: 0.5;
+/*  fill: #ff0000; */
+/*  fill-opacity: 0.5; */
   stroke: #000000;
   stroke-width:0.2;
 }
@@ -177,63 +177,6 @@ tr.odd td, tr.even td {
    border-bottom: solid blue 4px;
 }
 
-/*
-#inctable tr.selected td:first-child {
-//background-color: cyan;
-//  border-left: solid cyan 6px;
-}
-#inctable tr.selected td:last-child {
-//background-color: cyan;
-//  border-right: solid cyan 6px;
-}
-*/
-
-/*
-.bottom-head {
-   border-bottom: solid 1px black;
-}
-
-.top-foot {
-   border-top: solid 1px black;
-}
-*/
-
-/*
-.datefield {
-   width: 20em;
-}
-
-.timestamp {
-    width: 15em;
-}
-
-.memo {
-    width: 30em;
-}
-
-.locstring {
-   width: 18em;
-}
-
-.cad  {
-    text-align: right;
-    width: 10em;
-}
-
-
-.d12_delay, .tmcpe_delay, .savings {
-    text-align:right;
-    width: 10em;
-}
-*/
-
-/*
-#inctable th, #inctable td {
-   text-align: left;
-   padding-right: 1em;
-}
-*/
-
 #inctableContainer table td, #inctableContainer table th {
     border: 1px dotted;
     font-size: 8pt;
@@ -257,7 +200,7 @@ tr.odd td, tr.even td {
 
 table td,table th {
    padding: 3px 10px;
-//   border: 1px dotted black;
+/*   border: 1px dotted black; */
 }
 
 .hidden {
@@ -286,7 +229,7 @@ table td,table th {
 
 #incidents .selected {
    stroke-width: 10px;
-   stroke: blue;//cyan;
+   stroke: blue;/*cyan;*/
    fill-opacity: 0.85;
 }
 
