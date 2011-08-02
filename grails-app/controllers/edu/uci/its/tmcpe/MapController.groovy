@@ -28,6 +28,10 @@ class MapController extends BaseController {
 	return [ ]
     }
 
+    def backbone_map = {
+	return [ ]
+    }
+
     def simple = {
         return [ ]
     }

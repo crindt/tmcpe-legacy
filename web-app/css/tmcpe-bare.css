@@ -1,0 +1,269 @@
+
+body {
+    background-color: #1A2C45; /*#A2C5DA;*/
+    color: #fff;
+    font-size: 8pt;
+    margin-top: 0px;
+    margin-left: 0px;
+    margin-right: auto;
+    min-width: 960px;
+}
+
+.title {
+    margin-top:21px;
+}
+
+
+.header h1 {
+    color: white;
+    background-image: url(/tmcpe/images/logo_jem_060.png);
+    background-repeat: no-repeat;
+    margin-top: 21px;
+    height: 60px;
+    padding-left: 160px;
+    text-decoration: none;
+    vertical-align: text-bottom;
+    padding-top: 25px;
+    font-size: 30px;
+}
+
+.input-block {
+    clear:both;
+    position:relative;
+    display:block;
+    width:100%;
+}
+
+#leftbox {
+    width:250px;
+    position:absolute;
+    left: 0px;
+    top:101px;
+}
+
+#map {
+    width: 100%;
+    position:relative;
+}
+
+#detail {
+    width: 100%;
+    position:relative;
+}
+
+#content {
+    background-color: white;
+    display:inline;
+    width:fill;
+    float:top;
+    position:absolute;
+    left:250px;
+    top: 101px;
+    margin-left: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#incident-list {
+    position:relative;
+    color: black;
+    cell-padding: 0px;
+    font-size:12px;
+    cell-spacing: 0px;
+    border-collapse: collapse;
+}
+
+#incident-list thead {
+    background: gray;
+/*
+    position:fixed;
+    top: 21px;
+    left: 250px;
+*/
+}
+
+#incident-list thead th {
+    text-align: center;
+    text-weight: bold;
+    padding-left: 10px;
+    height: 36px;
+}
+
+#incident-list tr:hover td {
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+}
+
+#incident-list tr.selected td {
+    background-color: blue;
+    color: white;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    font-weight: bold;
+}
+
+.selected {
+   stroke-width: 10px;
+   stroke: blue;/*cyan;*/
+   fill-opacity: 0.85;
+}
+
+
+#incident-list td {
+    padding-left: 10px;
+    border-bottom: 1px dotted;
+    min-height: 24px;
+    height: 36px;
+}
+
+#incident-list tfoot tr th, {
+    height:24px;
+    text-align:right;
+}
+
+#incident-list tr {
+}
+
+#incident-list .col {
+    white-space:nowrap;
+    overflow-x:hidden;
+    text-overflow:ellipsis;
+}
+
+#incident-list .cad {
+    min-width: 100px;
+    max-width: 100px;
+    width: 100px;
+}
+
+#incident-list td.cad {
+    text-align:right;
+    font-family: 'monospace';
+}
+
+#incident-list .timestamp {
+    min-width: 100px;
+    max-width: 100px;
+    width: 100px;
+}
+
+#incident-list .locString {
+    min-width: 200px;
+    max-width: 250px;
+    width: 250px;
+}
+#incident-list .memo {
+    min-width: 200px;
+    max-width: 200px;
+    width: 200px;
+}
+#incident-list .d12_delay,#incident-list .tmcpe_delay,#incident-list .savings {
+    min-width: 50px;
+    max-width: 50px;
+    width: 50px;
+}
+#incident-list td.d12_delay,#incident-list td.tmcpe_delay,#incident-list td.savings {
+    font-family: 'monospace';
+    text-align:right;
+}
+
+
+#incident-list a:hover {
+    background-color: #ff0000;
+}
+
+#new-incident {
+}
+
+#header ul.menu {
+    float:right;
+    display:inline;
+}
+#header ul.menu li {
+    display:inline;
+    border: solid 1px white;
+    padding: 5px;
+}
+
+#content {
+    background-color: #006;
+}
+
+.loading {
+    background-color: #fff;
+    color: #000;
+    position: absolute;
+    left:40%;
+    top:40%;
+    width:20%;
+    height:20%;
+    visibility: hidden;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top:100px;
+    padding-bottom:100px;
+    text-align:center;
+}
+
+#settings table th {
+    text-align: right;
+}
+#settings table {
+    border: 1px solid white;
+}
+
+#menu {
+    height: 21px;
+    background-color: black;
+    color: grey;
+    position: fixed;
+    width: 100%;
+    padding: 0;
+    margin: 0px;
+    top: 0px;
+    z-index: 100;
+}
+
+#account {
+    float: right;
+}
+
+#menu ul {
+    padding: 0 21px;
+    display: inline;
+}
+
+#menu li {
+    line-height: 21px;
+    margin-right: 4px;
+    float: left;
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    white-space: nowrap;
+}
+
+#menu li a {
+    padding: 4px 5px;
+}
+
+#menu a, #menu a:link, #menu a:visited {
+    margin-right: 8px;
+    text-decoration: none;
+    color: #ddd;
+}
+
+#menu a:hover {
+    color: yellow;
+}
+
+
+/* the following two records are used to position the nav div at the bottom of the info element */
+#info {
+    position:relative;
+}
+
+#incidentDetailPager {
+    position:absolute;
+    bottom:0;
+}
