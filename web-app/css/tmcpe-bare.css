@@ -62,13 +62,14 @@ body {
     margin-left: 10px;
     padding-left: 5px;
     padding-right: 5px;
+    font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
 }
 
 #incident-list {
     position:relative;
     color: black;
     cell-padding: 0px;
-    font-size:12px;
+    font-size:10px;
     cell-spacing: 0px;
     border-collapse: collapse;
 }
@@ -83,16 +84,38 @@ body {
 }
 
 #incident-list thead th {
-    text-align: center;
     text-weight: bold;
-    padding-left: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
     height: 36px;
 }
 
+
+
+
+/* highlight row we're hovering over */
 #incident-list tr:hover td {
-    border-top: 1px solid;
-    border-bottom: 1px solid;
+    border-top: 2px solid blue;
+    border-bottom: 2px solid blue;
 }
+#incident-list tr:hover td:first-child {
+    border-left: 0px solid blue;
+}
+
+#incident-list thead th:first-child {
+    border-left: 0px gray;
+}
+
+#incident-list tr td:first-child {
+}
+#incident-list tr td:last-child, #incident-list thead tr th:last-child {
+    border-right: 1px;
+}
+#incident-list tr:hover td:last-child {
+    border-right: 1px solid blue;
+}
+
+
 
 #incident-list tr.selected td {
     background-color: blue;
@@ -110,7 +133,8 @@ body {
 
 
 #incident-list td {
-    padding-left: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
     border-bottom: 1px dotted;
     min-height: 24px;
     height: 36px;
@@ -134,28 +158,27 @@ body {
     min-width: 100px;
     max-width: 100px;
     width: 100px;
-}
-
-#incident-list td.cad {
     text-align:right;
-    font-family: 'monospace';
 }
 
 #incident-list .timestamp {
-    min-width: 100px;
-    max-width: 100px;
-    width: 100px;
+    min-width: 150px;
+    max-width: 150px;
+    width: 150px;
+    text-align: center;
 }
 
 #incident-list .locString {
-    min-width: 200px;
-    max-width: 250px;
-    width: 250px;
+    min-width: 150px;
+    max-width: 200px;
+    width: 200px;
+    text-align:left;
 }
 #incident-list .memo {
     min-width: 200px;
     max-width: 200px;
     width: 200px;
+    text-align:left;
 }
 #incident-list .d12_delay,#incident-list .tmcpe_delay,#incident-list .savings {
     min-width: 50px;
@@ -163,13 +186,8 @@ body {
     width: 50px;
 }
 #incident-list td.d12_delay,#incident-list td.tmcpe_delay,#incident-list td.savings {
-    font-family: 'monospace';
+//    font-family: 'monospace';
     text-align:right;
-}
-
-
-#incident-list a:hover {
-    background-color: #ff0000;
 }
 
 #new-incident {

@@ -131,6 +131,16 @@ if [ $? -gt 0 ]; then
     exit 1
 fi
 
+# polymaps-cluster
+POLYMAPS_CLUSTER_SRCDIR=`pwd`/src/js/polymaps-cluster
+POLYMAPS_CLUSTER_STAGEDIR=`pwd`/stage
+( mkdir -p $POLYMAPS_CLUSTER_STAGEDIR/js  && \
+    rsync -avz $POLYMAPS_CLUSTER_SRCDIR/*.js $POLYMAPS_CLUSTER_STAGEDIR/js )
+if [ $? -gt 0 ]; then
+    echo "FAILED @ POLYMAPS_CLUSTER"
+    exit 1
+fi
+
     
 rsync -avz `pwd`/stage/ `pwd`/web-app
 

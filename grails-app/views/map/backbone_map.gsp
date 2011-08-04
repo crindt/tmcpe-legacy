@@ -17,18 +17,23 @@
 
     <!-- visualization toolkits -->
     <p:javascript src='polymaps' />
+    <p:javascript src='polymaps_cluster' />
     <p:javascript src='d3' />
     <p:javascript src='protovis' />
 
     <!-- app code -->
-    <p:javascript src='tmcpe-backbone' />
+    <p:javascript src='tmcpe/tmcpe-backbone' />
   </head>
   <body>
     <div id='tmcpeapp'>
       <div class='content'>
 	<div id='leftbox'>
 	  <div id='map'></div>
-	  <div id='detail'>Incident test</div>
+	  <div id='cluster-detail'>
+	    <ul id='cluster-list'>
+	    </ul>
+	    <p id='cluster-stats'></p>
+	  </div>
 	</div>
 	<div id='content'>
 	  <div class='input-block'>
