@@ -240,6 +240,14 @@ $(function(){
 	alert( 'Selected cluster ' + c.data );
     }
 
+
+    window.IncidentCluster = window.IncidentList.extend({
+	selected: 0
+    });
+
+    // The map view manages the (active) cluster list
+    var clusterList = new IncidentCluster();
+
     // This view is designed to manage the polymaps map window.
     // Generally, this is handled through events pushing changes to the incident
     // list to polymaps
@@ -315,7 +323,11 @@ $(function(){
 		    // collection of GeoJson features so polymaps can understand
 		    // it.  We may want to implement a custom layer for handling
 		    // Backbone.js collections instead, but this works for now
-		    _.map(this.model.models, function( item ) { var geoj = item.attributes; geoj.model = item; return geoj; } )
+		    _.map(this.model.models, function( item ) { 
+			var geoj = item.attributes; 
+			geoj.model = item.attributes; 
+			return geoj; 
+		    } )
 		)
 		.id("incidents")
 		.zoom( 13 )
@@ -350,7 +362,7 @@ $(function(){
 			// Add a click handler
 			$(point).click(function(e) {
 			    // Call local function to handle this...
-			    view.clusterClicked( props );
+			    view.clusterClicked( value.data );
 			});
 			
 		    }
@@ -394,24 +406,38 @@ $(function(){
 	    // aggregator so that other views can listen for
 	    // this event.  Note the closure: the properties of
 	    // the clicked cluster are in the props var
-	    this.vent.trigger("clusterSelected", e);
+
+	    // raise the cluster
+	    this.clusterSelected( e.data.model );
+
+	    // Select the first element in the list
+	    this.vent.trigger( 'incidentSelected', e.elements[0].data.model );
 	},
 
 	clusterSelected: function( e ) {
-	    //alert( 'Cluster selected' + e )
+
+	    // this will update the cluster view
+	    clusterList.reset(  _.map(e.elements,function(el){ return el.data.model } ) );
+
+	    // Use the first element to do the svg work
+	    var cad_elem = e.elements[0].data.model;
 
 	    // if not visible, center on cluster
+	    if ( !this.featureVisible(cad_elem) ) this.centerOnIncident( cad_elem );
+
 	    // raise cluster
+	    this.raiseIncident( cad_elem );
+
 	    // highlight cluster
+	    this.highlightIncident( cad_elem );
+
 	},
 
 	incidentSelected: function( cad_elem ) {
-	    // determine cluster, then do the call clusterSelected, which should do the following:
-	    if ( !this.featureVisible(cad_elem) ) this.centerOnIncident( cad_elem );
-	    this.raiseIncident( cad_elem );
-	    this.highlightIncident( cad_elem );
-
-	    // here we should update the views...?
+	    // determine the cluster
+	    var cluster = polymaps_cluster.nodeForElement( cad_elem );
+	    
+	    this.clusterSelected( cluster.data );
 	},
 
 /*
@@ -431,9 +457,6 @@ $(function(){
 	    sel.addClass("selected");
 	},
     });
-
-    
-    var clusterList = new IncidentList();
     
     window.ClusterView = Backbone.View.extend({
 	el: $("#cluster-detail"),
@@ -442,25 +465,13 @@ $(function(){
 
 	
 	initialize: function( options ) {
-	    _.bindAll(this, 'render', 'clusterSelected');
-	    
-	    this.vent = (options ? (options.vent ?options.vent : window.eventAggregator) : window.eventAggregator);
-
-	    this.vent.bind('clusterSelected', this.clusterSelected);
+	    _.bindAll(this, 'render');
 
 	    // listen to the clusterList
 	    clusterList.bind('add',     this.addOne);
 	    clusterList.bind('refresh', this.addAll);
+	    clusterList.bind('reset', this.render);
 	    clusterList.bind('all',     this.render);
-	},
-
-	// Here, the cluster view updates the cluster with new data
-	clusterSelected: function( e ) {
-
-	    clusterList.reset(  _.map(e.elements,function(el){ return el.data.model } ) );
-
-	    // select the first
-	    this.vent.trigger('incidentSelected', e.elements[0].data.model );
 	},
 
 	render: function() {
@@ -529,7 +540,7 @@ $(function(){
 	// what to do user selects the incident row
 	incidentRowSelected: function(e) {
 	    // propogate
-	    this.vent.trigger( 'incidentSelected', e.currentTarget.parentElement.__data__ ); // fixme: crindt: using d3 internals here
+	    this.vent.trigger( 'incidentSelected', e.currentTarget.parentNode.__data__.attributes ); // fixme: crindt: using d3 internals here
  	},
 
 	incidentSelected: function(e) {
@@ -538,10 +549,10 @@ $(function(){
 	    // scroll to row if it's not visible
 	},
 
-	highlightIncidentRow: function(e) {
+	highlightIncidentRow: function(incident) {
 	    //d3.select(e.currentTarget.parent).each( function(d) { d.addClass
 	    $('tr.selected').removeClass('selected')
-	    $("tr[cad~='"+e.attributes.cad+"']").addClass('selected');
+	    $("tr[cad~='"+incident.cad+"']").addClass('selected');
 //	    $(e.currentTarget.parentElement).addClass('selected');
 	},
 
