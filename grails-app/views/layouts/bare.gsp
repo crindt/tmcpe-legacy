@@ -20,8 +20,8 @@
     </head>
 
     <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
-      <!-- ================ common banner ================= -->
 
+      <!-- ================ common banner ================= -->
       <div id="menu">
 	<div id="account">
 	  <ul>
@@ -33,8 +33,8 @@
 		<g:link controller='login'>Login</g:link>
 	      </sec:ifNotLoggedIn>
 	    </li>
-	    <li><a href="problem/report">Report Problem</a></li>
-	    <li><a href="help">Help</a></li>
+	    <li><a target="_blank" href="problem/report">Report Problem</a></li>
+	    <li><a target="_blank" href="help">Help</a></li>
 	  </ul>
 	</div>
 	<ul>
