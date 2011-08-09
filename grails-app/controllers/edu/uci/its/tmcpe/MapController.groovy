@@ -32,6 +32,10 @@ class MapController extends BaseController {
 	return [ ]
     }
 
+    def revamp_map = {
+	return [ ]
+    }
+
     def simple = {
         return [ ]
     }
