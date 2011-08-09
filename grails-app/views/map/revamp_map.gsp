@@ -41,7 +41,7 @@
 	    <span class='ui-tooltip-top'>Press Enter to search</span>
 	  </div>
 	  <div id='incident-table'></div>
-	  <div id='incident-stats'></div>
+	  <div id='incident-stats' style="height:200px"></div>
 	</div>
       </div>
       <div id='loading'>
