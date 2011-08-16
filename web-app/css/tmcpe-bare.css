@@ -98,9 +98,6 @@ body {
     text-align: right;
 }
 
-
-
-
 /* highlight row we're hovering over */
 #incident-list tr:hover td {
     border-top: 2px solid blue;
@@ -313,6 +310,42 @@ body {
     margin-right: auto;
 }
 
+#cluster-detail {
+    font-size: 10pt;
+}
+
+#cluster-detail table td {
+    vertical-align:top;
+    white-space:nowrap;
+    overflow-x:hidden;
+    text-overflow:ellipsis;
+}
+
+#cluster-detail table th {
+    text-align:right;
+    vertical-align:top;
+}
+
+#cluster-detail h1 {
+    font-size: 12pt;
+    font-weight: bold;
+    text-align:center;
+    color: black;
+    background: gray;
+}
+
+#cluster-detail ul {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+#cluster-detail li {
+    visibility:hidden;
+    display:none;
+}
+
 #cluster-detail li.selected {
-    color: yellow;
+    /*color: yellow;*/
+    visibility:visible;
+    display:block;
 }

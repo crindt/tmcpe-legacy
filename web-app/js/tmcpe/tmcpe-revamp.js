@@ -17,8 +17,8 @@ function boundedScale( dom, ran ) {
 }
 
 
-// Red to green color range
-function color( ff ) {
+// Red to green color range for delay
+function delayColor( ff ) {
     var colorPV = boundedScale( [0, 400, 800], [ "#00ff00", "#ffff00", "#ff0000" ] );
     return function( v ) {
 	var col = colorPV( v ).color;
@@ -127,8 +127,8 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  tbody = element.append('tbody');
 	  $('#incident-list')
-	      .dataTable({bPaginate:false,"bAutoWidth":false})
-	      .fnFilter(true,null,true,false) // Use regex filtering, not "smart"
+	      .dataTable({bPaginate:false,"bAutoWidth":false/*,"sDom":"<t>"*/})
+	      //.fnFilter(true,null,true,false) // Use regex filtering, not "smart"
 	  ;
 
 	  tfoot = element.append('tfoot');
@@ -154,7 +154,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  return d.cad
 	      } )
 	      .attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
-	      .style("background-color",function(d){return color(160)(d.properties.tmcpe_delay)})
+	      .style("background-color",function(d){return delayColor(160)(d.properties.tmcpe_delay)})
 	      .on("click",function(d,e) { 
 		  $(window).trigger( "tmcpe.incidentSelected", d );
 	      } )
@@ -182,8 +182,8 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  // Use jquery.dataTable to make the table pretty and sortable
 	  $('#incident-list')
-	      .dataTable({bPaginate:false,"bAutoWidth":false,"bDestroy":true})
-	      .fnFilter($('#incident-list_filter input').val(),null,true,false) // Use regex filtering, not "smart"
+	      .dataTable({bPaginate:false,"bAutoWidth":false,"bDestroy":true/*,"sDom":"<t>"*/})
+	      //.fnFilter($('#incident-list_filter input').val(),null,true,false) // Use regex filtering, not "smart"
 	  ;
 	  resetColumnWidths();
 	  
@@ -316,7 +316,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  map = po.map()
 	      .container(svg)
 	      .zoom(13)
-	      .zoomRange([1,/*6*/,18])
+	      .zoomRange([1,/*6*/,80])
 	      .add(po.interact())
 	      .center({lat: 33.739, lon: -117.830})
 	  ;
@@ -334,13 +334,18 @@ if ( !tmcpe ) var tmcpe = {};
 	      .tile(true)
 	      .features( x.features )
 	      .id("incidents")
-	      .zoom( 13 )
+	      .zoom(  function(z) { return Math.max(4, Math.min(18, z)); } )
 	      .on("load",polymaps_cluster.Cluster_load( {
 		  point_cb: function( point, value ) {
 		      // This callback is used to customize the circle drawn
 		      // by polymaps_cluster
 
 		      var props = value.data.properties;
+
+		      // sort the elements
+		      props.elements = props.elements.sort(function(a,b){ 
+			  return b.data.properties.tmcpe_delay - a.data.properties.tmcpe_delay 
+		      });
 
 		      // Here, we want to tweak the point styling for tmcpe
 		      point.setAttribute("cads",
@@ -353,10 +358,10 @@ if ( !tmcpe ) var tmcpe = {};
 		      var arr = $.map(props.elements,function(d){
 			  return d.data.properties.tmcpe_delay;
 		      });
-		      point.setAttribute('fill', color(0)(_.max(arr)));
+		      point.setAttribute('fill', delayColor(0)(_.max(arr)));
 
 		      
-                      var more_wider = value.data.properties.elements.length * 2;
+                      var more_wider = value.data.properties.elements.length / 3;
                       point.setAttribute("r", polymaps_cluster.base_radius() + more_wider );
 
 
@@ -476,7 +481,12 @@ if ( !tmcpe ) var tmcpe = {};
 	  //clusterSelected( e.properties );
 	  
 	  // Select the first element in the list
-	  $(window).trigger( 'tmcpe.clusterSelected', e );
+
+	  if ( e != selectedCluster ) {
+	      // only update if we've clicked on a new cluster
+	      $(window).trigger( 'tmcpe.clusterSelected', e );
+	      $(window).trigger( 'tmcpe.incidentSelected', e.elements[0].data );
+	  }
       }
 
       function featureVisible( d ) {
@@ -520,11 +530,27 @@ if ( !tmcpe ) var tmcpe = {};
   ////////////////////////////////////////////////////////////////////////////////
   // Instantiates and manages the incident detail as a function of cluster
   tmcpe.query.detailView = function() {
+      // use mustache style templates
+      _.templateSettings = {
+	  interpolate : /\{\{(.+?)\}\}/g
+      };
+
       var detailView = {}
       ,container
       ,list
+      ,nav
       ,selectedCluster
       ,selectedIncident
+      ,detailTemplate = _.template(
+	  ''
+	      +'<h1 style="background:{{color}}">{{cad}}</h1>'
+	      +'<table>'
+	      +'<tr><th>Type:</th><td>{{eventType}}</td></tr>'
+	      +'<tr><th>Location:</th><td>{{properties.locString}}</td></tr>'
+	      +'<tr><th>Delay:</th><td>{{properties.tmcpe_delay.toFixed(0)}} veh-hr</td></tr>'
+	      +'</table>'
+	      +'<a target="_blank" href="incident/d3_tsd?cad={{cad}}">Show detailed analysis</a>'
+      )
       ;
 
       function init() {
@@ -532,6 +558,40 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // empty container
 	  $(container[0]).children().remove();
+
+	  nav = container.append("div")
+	      .attr("id","cluster-nav")
+	      .style("width","100%")
+	      .style("text-align","center")
+	  ;
+	  nav.append("a")
+	      .html("Prev")
+	      .style("float","left")
+	      .on("click",function(d){ 
+		  // get the previous li child
+		  var prev = $(container[0]).find('li.selected').prev();
+
+		  if ( prev.length > 0 ) {
+		      // move to the previous li child
+		      $(window).trigger('tmcpe.incidentSelected',prev[0].__data__);
+		  }
+	      });
+	  nav.append("span")
+	      .attr('class','nav-count')
+	      .html("");
+	  nav.append("a")
+	      .html("Next")
+	      .style("float","right")
+	      .on("click",function(d){ 
+		  // get the previous li child
+		  var next = $(container[0]).find('li.selected').next();
+
+		  if ( next.length > 0 ) {
+		      // move to the previous li child
+		      $(window).trigger('tmcpe.incidentSelected',next[0].__data__);
+		  }
+	      });
+
 
 	  // create the detail view skeleton
 	  list = container.append("div")
@@ -543,13 +603,18 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( list == null ) return;
 
 	  var li = list.selectAll("li")
-	      .data(x, function(d) { return d.data.cad; } );
+	      .data($.map(x,function(t){return t.data;}), function(d) { return d.cad; } );
 
 	  li.enter()
 	      .append("li")
-	      .attr('cad',function(d){ return d.data.cad; })
-	      .on('click',function(d){ $(window).trigger('tmcpe.incidentSelected',d.data); })
-	      .html(function(d){ return d.data.cad; });
+	      .on('click',function(d){ $(window).trigger('tmcpe.incidentSelected',d); })
+	      .attr('cad',function(d){ return d.cad; })
+	      .html(function(d){ 
+		  // Set the h1 color
+		  var tt = _.clone( d ); 
+		  tt.color = delayColor(160)(tt.properties.tmcpe_delay); 
+		  return detailTemplate( tt ); 
+	      });
 
 	  li.exit().remove();
       }
@@ -582,6 +647,13 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
       detailView.incidentSelected = function( d ) {
+	  var all = $(list[0]).find('li');
+	  var idx = 0;
+	  for ( idx = 0; 
+		selectedCluster.elements[idx].data.cad != d.cad && idx < selectedCluster.elements.length; 
+		++idx );
+	  if ( idx > selectedCluster.elements.length ) alert( "Can't find selected incident in detail cluster" );
+	  nav.selectAll('.nav-count').html("Incident " + (idx+1) + " of " + selectedCluster.elements.length );
 	  $(container[0]).find("li.selected").removeClass('selected');
 	  $(container[0]).find("li[cad~='"+d.cad+"']").addClass('selected');//style("color","yellow");
       }
@@ -635,14 +707,15 @@ if ( !tmcpe ) var tmcpe = {};
 	      // fix the map and thead a the top of the page
 	      $('#leftbox').css({'position':'fixed','top':21,'left':'0px'});
 	      $('#incident-list thead').css({'position':'fixed','top':'21px',
-					     'left':(250 // width of map
-						     +5 // content margin
-						     +10)  // content padding
-					     +'px'});
+					     'left':(250         // width of map
+						     +5          // content margin
+						     +10)+'px',  // content padding
+					     
+					    });
 	      $('#incident-list tfoot').css({'position':'fixed','bottom':'0px',
-					     'left':(250 // width of map
-						     +5 // content margin
-						     +10)  // content padding
+					     'left':(250         // width of map
+						     +5          // content margin
+						     +10)        // content padding
 					     +'px'});
 
 	      

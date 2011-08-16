@@ -36,5 +36,8 @@ class HelpController {
 			 userAgentIdentService.getBrowserVersion(),
 			 "is not supported"].join(" ")
     }
+
+    def prezi = {
+    }
 	
 }

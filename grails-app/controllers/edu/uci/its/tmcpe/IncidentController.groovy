@@ -246,7 +246,7 @@ class IncidentController extends BaseController {
 	    geojson {
 		log.info( "===========RENDERING GEOJSON" );
 		def json = [];
-		theList.each() { json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, properties: it ] ) }
+		theList.each() { json.add( [ id: it.id, cad: it.cad, geometry: it.locationGeom?:it.section?.geom, eventType: it.eventType, properties: it ] ) }
 		def fjson = [ type: "FeatureCollection", features: json ]
 		log.info( "===========EMITTING ${theList.size()} GEOJSON" );
 		render fjson as JSON
