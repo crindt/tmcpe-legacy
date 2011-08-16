@@ -612,6 +612,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .html(function(d){ 
 		  // Set the h1 color
 		  var tt = _.clone( d ); 
+		  if ( tt.eventType == null ) tt.eventType = "<unknown>";
 		  tt.color = delayColor(160)(tt.properties.tmcpe_delay); 
 		  return detailTemplate( tt ); 
 	      });
