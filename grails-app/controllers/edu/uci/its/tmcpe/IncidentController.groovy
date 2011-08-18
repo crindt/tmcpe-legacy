@@ -279,6 +279,58 @@ class IncidentController extends BaseController {
 
     }
 
+    def listGroups = {
+        log.debug("=============LISTING GROUPS: " + params )
+
+	// columns to group by, specified as parameters
+	def groups = params.groups.tokenize(",").collect{ 
+	    if ( it =~ /year/ ) return [k:it,v:"year(i.startTime)"];
+	    if ( it =~ /month/ ) return [k:it,v:"month(i.startTime)"];
+	    if ( it =~ /district/ ) return [k:it,v:"i.section.district"];
+	    if ( it =~ /eventType/ ) return [k:it,v:"i.eventType"];
+	    if ( it =~ /sigAlert/ ) return [k:it,v:"(i.isSigalert )"];
+	    return null;
+	}
+
+	// (aggregate) data to return 
+	def data = [
+	    [k:"cnt",v:"count(*)"],                          // total number of events in this group
+	    [k:"vtime",v:"avg(i.verificationTimeInSeconds)"], // verification time of group
+	    //	    [k:"iia",v:"avg(count(i.analyses))"]
+	    ]
+	    
+
+	if ( groups.size() == 0 ) groups = [1];
+
+	withFormat {
+
+	    json {
+		def results = Incident.executeQuery(
+		    "select "
+		    +groups.collect{ return it.v + " as " + it.k }.join(",")
+		    +","
+		    +data.collect{ return it.v + " as " + it.k }.join(",")
+		    +" from Incident i group by "
+		    +groups.collect{ return it.v }.join(",")
+		    +" order by "
+		    +groups.collect{ return it.v }.join(",")
+		)
+		render results.collect{ 
+		    def ret = [:];
+		    def j = groups.size()-1
+		    for ( i in 0..j) {
+			ret[groups[i].k] = it[i]
+		    }
+		    for ( i in 0..data.size()-1) {
+			ret[data[i].k] = it[j+i]
+		    }
+		    return ret;
+		} as JSON
+	    }
+	}
+
+    }
+
     def create = {
         def ii = new Incident()
         ii.properties = params

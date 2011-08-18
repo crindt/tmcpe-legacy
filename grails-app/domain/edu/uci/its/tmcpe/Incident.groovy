@@ -34,6 +34,8 @@ class Incident {
     TmcLogEntry sigalertBegin
     TmcLogEntry sigalertEnd
 
+    Boolean     isSigalert
+
     TmcLogEntry firstCall        // equivalent to t0
     TmcLogEntry verification     // equivalent to t1
     TmcLogEntry lanesClear       // equivalent to t2
@@ -43,6 +45,9 @@ class Incident {
     // The estimated freeway section where the incident occurred (the
     // location of the capacity reduction)
     FacilitySection section
+
+    Integer verificationTimeInSeconds
+
     
     Point locationGeom = new Point( x: 0, y: 0 )
     Point bestGeom     = new Point( x: 0, y: 0 )
@@ -52,7 +57,7 @@ class Incident {
     SortedSet analyses
     static hasMany = [analyses:IncidentImpactAnalysis]
 
-    static transients = [ 'samplePercent' ]
+    static transients = [ 'samplePercent', 'year' ]
     
     static constraints = {
         // Only allow one Incident object per cadid
@@ -61,7 +66,7 @@ class Incident {
     
     static mapping = {
         //table 'sigalert_locations_grails'
-        table name: 'full_incidents', schema: 'actlog'
+        table name: 'full_incidents_calcs', schema: 'actlog'
         id column: 'id'
         cad column: 'cad'
         startTime column: 'start_time'
@@ -78,6 +83,8 @@ class Incident {
 	verification  column: 'verification'
 	lanesClear    column: 'lanes_clear'    // equivalent to t2
 	incidentClear column: 'incident_clear' // equivalent to t3
+
+	verificationTimeInSeconds column: 'vertime'
         
         // turn off optimistic locking, i.e., versioning.  This class is mapped to an externally generated table
         version false
