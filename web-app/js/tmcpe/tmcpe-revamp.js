@@ -544,12 +544,14 @@ if ( !tmcpe ) var tmcpe = {};
       ,detailTemplate = _.template(
 	  ''
 	      +'<h1 style="background:{{color}}">{{cad}}</h1>'
+	      +'<hr/>'
 	      +'<table>'
 	      +'<tr><th>Type:</th><td>{{eventType}}</td></tr>'
 	      +'<tr><th>Location:</th><td>{{properties.locString}}</td></tr>'
 	      +'<tr><th>Delay:</th><td>{{properties.tmcpe_delay.toFixed(0)}} veh-hr</td></tr>'
 	      +'</table>'
-	      +'<a target="_blank" href="incident/d3_tsd?cad={{cad}}">Show detailed analysis</a>'
+	      +'<hr/>'
+	      +'<div style="width=100%;text-align:center;"><a target="_blank" href="incident/d3_tsd?cad={{cad}}">Show detailed analysis</a></div>'
       )
       ;
 
@@ -703,23 +705,25 @@ if ( !tmcpe ) var tmcpe = {};
       /* gmail-like hack to fix specific elements once we've scrolled past a point */
       $(window).scroll(function(e) { 
 
+
+	  var scrollLeft = $(window).scrollLeft();
+
 	  if ( $(window).scrollTop() > (21+60) ) {
 	      // We've scrolled such that the banner should disappear
 	      // fix the map and thead a the top of the page
+
+
 	      $('#leftbox').css({'position':'fixed','top':21,'left':'0px'});
 	      $('#incident-list thead').css({'position':'fixed','top':'21px',
 					     'left':(250         // width of map
 						     +5          // content margin
-						     +10)+'px',  // content padding
+						     +10         // content padding
+						     -scrollLeft /* move it left
+								  * if we've
+								  * scrolled */
+						    )+'px',
 					     
 					    });
-	      $('#incident-list tfoot').css({'position':'fixed','bottom':'0px',
-					     'left':(250         // width of map
-						     +5          // content margin
-						     +10)        // content padding
-					     +'px'});
-
-	      
 	      
 
 	      // now we need to adjust the th widths because they tend to get out of sync
@@ -743,9 +747,21 @@ if ( !tmcpe ) var tmcpe = {};
 	      $('#leftbox').css({'position':'absolute','top':'101px','left':'0px'});
 	      $('#content').css({'position':'absolute','left':'250px'});
 	      $('#incident-list thead').css({'position':'static'});
+
 	  }
 	  if ( $(window).scrollTop() >= ( $(document).height() - $(window).height() - $('#incident-stats').height() ) ) {
 	      $('#incident-list tfoot').css({'position':'static'});
+	  } else {
+	      $('#incident-list tfoot').css({'position':'fixed','bottom':'0px',
+					     'left':(250         // width of map
+						     +5          // content margin
+						     +10         // content padding
+						     -scrollLeft /* move it left
+								  * if we've
+								  * scrolled */
+						    )        
+					     +'px'});
+
 	  }
       })
 

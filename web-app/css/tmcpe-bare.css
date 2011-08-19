@@ -39,6 +39,10 @@ body {
     position:absolute;
     left: 0px;
     top:101px;
+    z-index: 100;  /* Put this on top of #content */
+    background-color: #1A2C45;
+    padding-right:10px;
+    height:100%;
 }
 
 #map {
@@ -63,6 +67,7 @@ body {
     padding-left: 5px;
     padding-right: 5px;
     font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+    z-index: 50;
 }
 
 #incident-list {
@@ -314,6 +319,12 @@ body {
     font-size: 10pt;
 }
 
+#cluster-detail table {
+    table-layout: fixed;
+    width: 100%;
+    font-size: 10pt;
+}
+
 #cluster-detail table td {
     vertical-align:top;
     white-space:nowrap;
@@ -322,8 +333,13 @@ body {
 }
 
 #cluster-detail table th {
+    vertical-align:top;
+    white-space:nowrap;
+    overflow-x:hidden;
+    text-overflow:ellipsis;
     text-align:right;
     vertical-align:top;
+    width: 75px;
 }
 
 #cluster-detail h1 {
@@ -348,4 +364,9 @@ body {
     /*color: yellow;*/
     visibility:visible;
     display:block;
+}
+
+#cluster-detail a {
+    text-align:center;
+    color: white;
 }
