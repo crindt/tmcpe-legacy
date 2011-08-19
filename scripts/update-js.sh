@@ -141,6 +141,16 @@ if [ $? -gt 0 ]; then
     exit 1
 fi
 
+# underscore
+UNDERSCORE_SRCDIR=`pwd`/src/js/underscore
+UNDERSCORE_STAGEDIR=`pwd`/stage
+( mkdir -p $UNDERSCORE_STAGEDIR/js  && \
+    rsync -avz $UNDERSCORE_SRCDIR/under*.js $UNDERSCORE_STAGEDIR/js )
+if [ $? -gt 0 ]; then
+    echo "FAILED @ UNDERSCORE"
+    exit 1
+fi
+
     
 rsync -avz `pwd`/stage/ `pwd`/web-app
 
