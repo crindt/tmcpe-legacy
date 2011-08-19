@@ -15,6 +15,10 @@
     box-shadow: 1px 1px 3px rgba(0,0,0,0.25);
 }
 
+.slide {
+    color: black;
+}
+
 .slide .title {
     stroke: black;
 }
@@ -23,12 +27,14 @@
     stroke: black;
 }
 
+/*
 @font-face {
     font-family: 'Alice';
     font-style: normal;
     font-weight: normal;
     src: local('Alice'), local('Alice-Regular'), url('http://themes.googleusercontent.com/static/fonts/alice/v1/_H4kMcdhHr0B8RDaQcqpTA.woff') format('woff');
 }
+*/
 
 g.viewgroup text {
     /*font-family: 'Lato'; */
@@ -70,4 +76,10 @@ g.viewgroup text {
     stroke: blue;
     stroke-width: 2px;
     fill: none;
+}
+
+circle.cor {
+    stroke:red;
+    stroke-width: 2px;
+    fill:none;
 }

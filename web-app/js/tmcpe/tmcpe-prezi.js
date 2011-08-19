@@ -42,27 +42,45 @@ if ( !tmcpe ) var tmcpe = {};
 	      .enter()
 	      .append("svg:g")
 	      .attr("class","viewgroup")
-	      .append("svg:g")
-	      .attr("class","scale")
-	      .append("svg:g")
-	      .attr("class","translate")
-	      .append("svg:g")
-	      .attr("class","rotate")
 	  ;
 
 	  // Create the "title" slide
 	  var titleSlide = createSlide(
 	      {
-		  x:-0,y:-1000,id:"titleSlide",
-		  text:"<h1>Test</h1>",
+		  x:-300,y:-700,id:"titleSlide",
+		  text:'<h1 style="text-align:center;">Traffic Management is filtered through assets managed by the TMC</h1>',
 		  idx:0,
-		  w:5000,
-		  h:5000
+		  w:200,
+		  h:150,
+		  scale:10,
+		  rotate:0
 	      });
 					
 
 	  // Create the TMC activity slide
-	  var tmcActivitySlide = createSlide({x:20,y:20,id:"tmcActivity",t:"TMC Activity",z:3.0,w:300,h:300,rotate:0,idx:1});
+	  var tmcActivitySlide = createSlide({x:20,y:20,id:"tmcActivity",t:"TMC Activity",z:3.0,w:300,h:300,rotate:0,idx:1,frame:true});
+
+/*
+	  var mapSlide = createSlide({x:0,y:1000,id:"map",scale:.01,w:25600,h:25600,rotate:0,idx:4,frame:true});
+	  var imagerows = mapSlide.selectAll("#map g.imagerow")
+	      .data(_.range(450559,450659))
+	      .enter().append("svg:g")
+	      .attr("class","imagerow")
+	      .attr("transform",function(d,i) {
+		  return "translate(0,"+((d-450559)*256)+")";
+	      });
+
+	  imagerows.selectAll("image")
+	      .data(function(d){ return _.map(_.range(181264,181364),function(x){return { "x":x, "y":d }}) })
+	      .enter().append("svg:image")
+	      .attr("id",function(d){ return "img_"+d; })
+	      .attr("width",256)
+	      .attr("height",256)
+	      .attr("xlink:href",function(d){return "http://khmdb0.google.com/kh?v=41&x="+d.x+"&y="+d.y+"&z=20&s=G&deg=0"})
+	      .attr("x",function(d){return (d.x-181264)*256})
+	      .attr("y",0)
+	  ;
+*/
 
 	  tmcActivitySlide.selectAll("rect")
 	      .attr("class","frame")
@@ -98,8 +116,8 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  
 
-	  embedExternalSvgAsSlide({src:"images/tst.svg",x:350,y:350,id:"example",t:"Example",z:3.0,w:800,h:300,rotate:30,idx:2});
-	  embedExternalSvgAsSlide({src:"images/loops.svg",x:0,y:550,id:"loops",t:"Loops",z:3.0,w:450,h:150,rotate:30,idx:3});
+	  embedExternalSvgAsSlide({src:"images/tst.svg",x:350,y:350,id:"example",t:"Example",z:3.0,w:800,h:300,rotate:60,idx:2,frame:true});
+	  embedExternalSvgAsSlide({src:"images/loops.svg",x:0,y:1000,id:"loops",t:"Loops",z:3.0,w:400,h:100,rotate:0,idx:3,scale:1,frame:true});
 
 	  function createSlide(da) {
 	      var slide = vis.selectAll("g.slide")
@@ -107,26 +125,39 @@ if ( !tmcpe ) var tmcpe = {};
 		  .enter().append("svg:g")
 		  .attr("class","slide")
 		  .attr("idx",function(d) { return d.idx; })
-		  .attr("id",function(d) { return "slide_"+d.id; });
-	      
+		  .attr("id",function(d) { return "slide_"+d.id; })
+		  .attr("width",da.w)
+		  .attr("height",da.h)
+/*	      
+	      ;
 	      var inner = 
 		  slide.append("svg:g")
-		  .attr("transform",function(d){return "translate("+d.x+","+d.y+")";})
-		  .append("svg:g")
-		  .attr("transform",function(d){return "rotate("+d.rotate+",0,0)";});
-	      
+*/
+		  .attr("transform",function(d){
+		      return [
+			  "translate("+[v(d.x),v(d.y)].join(",")+")",
+			  "scale("+v(d.scale,1.0)+")",
+			  "rotate("+[v(d.rotate,0),-v(d.x),-v(d.y)].join(",")+")",
+		      ].join("");
+		  });
 
+	      if ( da.frame ) {
+		  slide
+		      .append("svg:rect")
+		      .attr("width",da.w)
+		      .attr("height",da.h)
+		      .attr("style","stroke:black;stroke-width:2;fill:none;");
+	      }
 
 	      if ( da.text != null ) {
 		  // create text
-		  inner.append("svg:foreignObject")
+		  slide.append("svg:foreignObject")
 		      .attr("width",da.w)
 		      .attr("height",da.h)
 		      .append("div")
-		      .attr("style","font-size:200px;color:black;")
 		      .html(da.text);
 	      }
-	      return inner;
+	      return slide;
 	  }
 
 	  function v(d,vv) { return d == null ? (vv==null?0:vv) : d; };
@@ -149,21 +180,34 @@ if ( !tmcpe ) var tmcpe = {};
 		      .enter().append("svg:g")
 		      .attr("class","slide")
 		      .attr("idx",function(d) { return d.idx; })
-		      .attr("id",function(d) { return "slide_"+d.id; });
+		      .attr("id",function(d) { return "slide_"+d.id; })
+/*
+  ;
 		  var inner = 
 		      slide
 		      .append("svg:g")
-		      .attr("class","scale")
-		      .attr("transform",function(d){return "scale("+v(d.scale,1)+",0,0)";})
-		      .append("svg:g")
-		      .attr("class","translate")
-		      .attr("transform",function(d){return "translate("+v(d.x)+","+v(d.y)+")";})
-		      .append("svg:g")
-		      .attr("class","rotate")
-		      .attr("transform",function(d){return "rotate("+v(d.rotate)+",0,0)";})
+		      .attr("class","transform")
+*/
+		      .attr("transform",function(d){
+			  return [
+			      "translate("+[v(d.x),v(d.y)].join(",")+")",
+			      "scale("+v(d.scale,1)+")",
+			      "rotate("+[v(d.rotate),v(d.rox),v(d.roy)].join(",")+")",
+			  ].join("")
+		      });
 		  ;
+
+		  if ( da.frame ) {
+		      slide
+			  .append("svg:rect")
+			  .attr("width",function(d){return d.w;})
+			  .attr("height",function(d){return d.h;})
+			  .attr("style","stroke:black;stroke-width:2;fill:none;");
+		  }
 		  
-		  $(inner[0]).append(xml.documentElement);
+		  
+		  //$(inner[0]).append(xml.documentElement);
+		  $(slide[0]).append(xml.documentElement);
 
 		  // move the embedded svg up
 		  //$(inner[0]).find("svg").children().detach().appendTo(inner[0]);
@@ -171,136 +215,32 @@ if ( !tmcpe ) var tmcpe = {};
 	  }
 
 
-	  function transformView(change,speed) {
-	      d3.selectAll("g.viewgroup > g.scale > g.translate")
-		  .transition()
-		  .duration(speed)
-		  .attr("transform",function(d) {
-		      if ( change.dx != null ) {    
-			  var dx = 0;
-			  var dy = 0;
-			  if ( d.rotate != null ) {
-			      dx = change.dx*Math.cos(-d.rotate*Math.PI/180.0);
-			      dy = change.dx*Math.sin(-d.rotate*Math.PI/180.0);
-			  } else {
-			      dx = change.dx;
-			  }
-			  d.x += dx;
-			  d.y += dy;
-		      }
-		      if ( change.dy != null ) {
-			  var dx = 0;
-			  var dy = 0;
-			  if ( d.rotate != null ) {
-			      dx = change.dy*Math.sin(d.rotate*Math.PI/180.0);
-			      dy = change.dy*Math.cos(d.rotate*Math.PI/180.0);
-			  } else {
-			      dy = change.dy;
-			  }
-			  d.x += dx;
-			  d.y += dy;
-
-		      }
-		      if ( change.drorate != null ) d.rotate += change.drotate;
-		      if ( change.scale != null )  d.scale  = change.scale;
-		      if ( change.x  != null )     d.x      = change.x;
-		      if ( change.y  != null )     d.y      = change.y;
-		      if ( change.rotate != null ) d.rotate = change.rotate;
-		      if ( d.rotate == null ) d.rotate = 0;
-		      if ( d.scale == null ) d.scale = 1;
-		      return "translate("+[v(d.x),v(d.y)].join(",")+")";
-		  });
-	      d3.selectAll("g.viewgroup > g.scale > g.translate > g.rotate")
-		  .transition()
-		  .duration(speed)
-		  .attr("transform",function(d) {
-		      if ( change.dx != null ) {    
-			  var dx = 0;
-			  var dy = 0;
-			  if ( d.rotate != null ) {
-			      dx = change.dx*Math.cos(-d.rotate*Math.PI/180.0);
-			      dy = change.dx*Math.sin(-d.rotate*Math.PI/180.0);
-			  } else {
-			      dx = change.dx;
-			  }
-			  d.x += dx;
-			  d.y += dy;
-		      }
-		      if ( change.dy != null ) {
-			  var dx = 0;
-			  var dy = 0;
-			  if ( d.rotate != null ) {
-			      dx = change.dy*Math.sin(d.rotate*Math.PI/180.0);
-			      dy = change.dy*Math.cos(d.rotate*Math.PI/180.0);
-			  } else {
-			      dy = change.dy;
-			  }
-			  d.x += dx;
-			  d.y += dy;
-
-		      }
-		      if ( change.drorate != null ) d.rotate += change.drotate;
-		      if ( change.scale != null )  d.scale  = change.scale;
-		      if ( change.x  != null )     d.x      = change.x;
-		      if ( change.y  != null )     d.y      = change.y;
-		      if ( change.rotate != null ) d.rotate = change.rotate;
-		      if ( d.rotate == null ) d.rotate = 0;
-		      if ( d.scale == null ) d.scale = 1;
-		      return "rotate("+v(d.rotate)+")";
-		  });
-	      d3.selectAll("g.viewgroup > g.scale")
-		  .transition()
-		  .duration(speed)
-		  .attr("transform",function(d) {
-		      if ( change.dx != null ) {    
-			  var dx = 0;
-			  var dy = 0;
-			  if ( d.rotate != null ) {
-			      dx = change.dx*Math.cos(-d.rotate*Math.PI/180.0);
-			      dy = change.dx*Math.sin(-d.rotate*Math.PI/180.0);
-			  } else {
-			      dx = change.dx;
-			  }
-			  d.x += dx;
-			  d.y += dy;
-		      }
-		      if ( change.dy != null ) {
-			  var dx = 0;
-			  var dy = 0;
-			  if ( d.rotate != null ) {
-			      dx = change.dy*Math.sin(d.rotate*Math.PI/180.0);
-			      dy = change.dy*Math.cos(d.rotate*Math.PI/180.0);
-			  } else {
-			      dy = change.dy;
-			  }
-			  d.x += dx;
-			  d.y += dy;
-
-		      }
-		      if ( change.drorate != null ) d.rotate += change.drotate;
-		      if ( change.scale != null )  d.scale  = change.scale;
-		      if ( change.x  != null )     d.x      = change.x;
-		      if ( change.y  != null )     d.y      = change.y;
-		      if ( change.rotate != null ) d.rotate = change.rotate;
-		      if ( d.rotate == null ) d.rotate = 0;
-		      if ( d.scale == null ) d.scale = 1;
-		      return "scale("+v(d.scale)+")";
-		  });
-
-		  /*
+	  function transformView(change,speed,absolute) {
 	      d3.selectAll("g.viewgroup")
 		  .transition()
 		  .duration(speed)
-		  .attr("transform",function(d) { 
+		  .attr("transform",function(d) {
+		      if ( change.drorate != null ) d.rotate += change.drotate;
+		      if ( change.scale != null )  d.scale  = change.scale;
+		      if ( change.x  != null )     d.x      = change.x;
+		      if ( change.y  != null )     d.y      = change.y;
+		      if ( change.rotate != null ) d.rotate = change.rotate;
 		      if ( change.dscale != null ) d.scale *= change.dscale;
+		      if ( d.rotate == null ) d.rotate = 0;
+		      if ( d.scale == null ) d.scale = 1;
+		      if ( change.rox != null ) d.rox = change.rox;
+		      if ( change.roy != null ) d.roy = change.roy;
+
+		      var ss = absolute ? d.scale : 1;
+
 		      if ( change.dx != null ) {    
 			  var dx = 0;
 			  var dy = 0;
 			  if ( d.rotate != null ) {
-			      dx = change.dx*Math.cos(-d.rotate*Math.PI/180.0);
-			      dy = change.dx*Math.sin(-d.rotate*Math.PI/180.0);
+			      dx = change.dx/ss*Math.cos(-d.rotate*Math.PI/180.0);
+			      dy = change.dx/ss*Math.sin(-d.rotate*Math.PI/180.0);
 			  } else {
-			      dx = change.dx;
+			      dx = change.dx/ss;
 			  }
 			  d.x += dx;
 			  d.y += dy;
@@ -309,46 +249,88 @@ if ( !tmcpe ) var tmcpe = {};
 			  var dx = 0;
 			  var dy = 0;
 			  if ( d.rotate != null ) {
-			      dx = change.dy*Math.sin(d.rotate*Math.PI/180.0);
-			      dy = change.dy*Math.cos(d.rotate*Math.PI/180.0);
+			      dx = change.dy/ss*Math.sin(d.rotate*Math.PI/180.0);
+			      dy = change.dy/ss*Math.cos(d.rotate*Math.PI/180.0);
 			  } else {
-			      dy = change.dy;
+			      dy = change.dy/ss;
 			  }
 			  d.x += dx;
 			  d.y += dy;
 
 		      }
-		      if ( change.drorate != null ) d.rotate += change.drotate;
-		      if ( change.scale != null )  d.scale  = change.scale;
-		      if ( change.x  != null )     d.x      = change.x;
-		      if ( change.y  != null )     d.y      = change.y;
-		      if ( change.rotate != null ) d.rotate = change.rotate;
-		      if ( d.rotate == null ) d.rotate = 0;
-		      if ( d.scale == null ) d.scale = 1;
-		      return renewTransform( d ); 
+		      return [
+			  "scale("+v(d.scale,1.0)+")",
+			  "translate("+[v(d.x,0),v(d.y,0)].join(",")+")",
+			  "rotate("+[v(d.rotate,0),-v(d.rox),-v(d.roy)].join(",")+")",
+		      ].join("");
+			      
 		  });
-		  */
 	  }
 
-	  function showSlide( idx ) {
+	  function showSlide( idx, centera ) {
 	      // select by idx
-	      var slide = vis.selectAll('g.slide[idx="'+idx+'"]')[0][0];
+	      var slides = vis.selectAll('g.slide[idx="'+idx+'"]');
+	      var slide = slides[0][0];
+	      var center = v(centera,true);
 
 	      if ( slide == null ) {
 		  alert( "Unknown slide " + idx );
 	      } else {
 		  curSlide = idx;
 		  var d = slide.__data__;
-		  var w = d.w;
-		  var h = d.h;
+		  var w = d.w*v(d.scale,1);
+		  var h = d.h*v(d.scale,1);
 		  
-		  var scalex = (viewWidth-2*viewMargin)/w;
-		  var scaley = (viewHeight-2*viewMargin)/h;
+
+		  var bbox = slide.getBBox();
+		  var ww = w;
+		  var hh = h;
+/*
+		  var ww = bbox.width/v(d.scale,1);
+		  var hh = bbox.height/v(d.scale,1);
+*/
+
+		  var scalex = (viewWidth-2*viewMargin)/ww;
+		  var scaley = (viewHeight-2*viewMargin)/hh;
 		  if ( scalex == null && scaley == null ) 
 		      scalex = scaley = 1.0;
-		  var trans = { x: (-d.x+viewMargin), y: (-d.y+viewMargin), scale: Math.min(scalex,scaley), rotate:-d.rotate };
-		  
+		  var scale = Math.min(scalex,scaley) 
+
+		  margx = viewMargin/v(scale,1);
+		  margy = viewMargin/v(scale,1);
+
+		  if ( center ) {
+		      // adjust margins to center slide content in view
+		      var res;
+		      if ( scalex != scale ) {
+			  res = ((viewWidth-2*viewMargin)-ww*scale);
+			  margx += res/2/v(scale,1);
+		      }
+		      if ( scaley != scale ) {
+			  res = ((viewHeight-2*viewMargin)-hh*scale);
+			  margy += res/2/v(scale,1);
+		      }
+		  }
+
+		  var trans = { x: (-v(d.x)+margx), y: (-v(d.y)+margy), 
+				scale: scale,
+				rotate:-v(d.rotate),
+				rox: -v(d.x),
+				roy: -v(d.y),
+			      };
 		  transformView(trans,1000);
+
+		  /* 
+		  // debugging: places circle on slide origin/rotation point
+		  slides.selectAll(".cor").remove();
+
+		  slides
+		      .append("svg:circle")
+		      .attr("class","cor")
+		      .attr("r",20)
+		  ;
+		  */
+		  
 	      }
 	      
 	  }
@@ -360,14 +342,6 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  function nextSlide() {
 	      showSlide( ++curSlide );
-	  }
-
-	  function renewTransform(d) {
-	      var s = (d.scale == null ? 1.0 : d.scale );
-	      return ["scale("+s+")",
-		      "rotate("+d.rotate+")",
-		      "translate("+d.x+","+d.y+")",
-		     ].join("");
 	  }
 
 	  d3.select(window).on("keydown",function(){
@@ -383,11 +357,16 @@ if ( !tmcpe ) var tmcpe = {};
 		  if (d3.event.shiftKey ) { 
 		      prevSlide(); 
 		  } else { 
-		      transformView( {dx:50}, 100 );
+		      transformView( {dx:50}, 100, true );
 		  }; break;
-	      case 39:  if (d3.event.shiftKey ) { nextSlide() } else { transformView( {dx:-50}, 100 ) }; break;
-	      case 38:  transformView( {dy:50}, 100 );      break;
-	      case 40:  transformView( {dy:-50}, 100 );     break;
+	      case 39:
+		  if (d3.event.shiftKey ) { 
+		      nextSlide() 
+		  } else { 
+		      transformView( {dx:-50}, 100, true ) 
+		  }; break;
+	      case 38:  transformView( {dy:50}, 100, true );      break;
+	      case 40:  transformView( {dy:-50}, 100, true );     break;
 	      }
 	      var num = d3.event.keyCode-48;
 	      if ( num >=0 && num <= 9 ) {
@@ -396,7 +375,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  });
 
 	  // start it
-	  showSlide(1);
+	  showSlide(0);
 
       }
 
