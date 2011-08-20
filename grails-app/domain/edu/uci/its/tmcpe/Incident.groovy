@@ -51,6 +51,8 @@ class Incident {
 
     SortedSet analyses
     static hasMany = [analyses:IncidentImpactAnalysis]
+
+    static transients = [ 'samplePercent' ]
     
     static constraints = {
         // Only allow one Incident object per cadid
@@ -86,6 +88,8 @@ class Incident {
     {
         return TmcLogEntry.findAllByCad( cad );
     }
+
+    
     
 
     public Period computeTimeToVerify()
@@ -273,8 +277,14 @@ class Incident {
             d12_delay( analyses?.size() ? analyses?.first()?.d12Delay() : null )
             tmcpe_delay( analyses?.size() ? analyses?.first()?.netDelay() : null )
             savings( 0 ) // FIXME: update this.
+	    samplePercent( analyses?.size() ? analyses?.first()?.samplePercent() : null )
             analysesCount( analyses?.size() )
         }
+    }
+
+    public Float getSamplePercent() {
+	if ( analyses == null || analyses.size() == 0 ) return null
+	return analyses?.first()?.samplePercent();
     }
 
     String toString() {

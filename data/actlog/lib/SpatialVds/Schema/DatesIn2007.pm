@@ -29,8 +29,8 @@ __PACKAGE__->table("dates_in_2007");
 __PACKAGE__->add_columns("dates", { data_type => "date", is_nullable => 1 });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:35:13
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:++VvEQYScfw11EITwpNDAA
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-19 17:21:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VLOtzDgyNfZhNnLnzKbNvg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

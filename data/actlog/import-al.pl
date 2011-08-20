@@ -1089,8 +1089,10 @@ INCDEL: while( my $inc = $incrs->next ) {
 	$dc->write_to_db;
 
 	if ( not $dc->bad_solution() ) {
+	    $dc->compute_fraction_observed();
+
 	    $dc->compute_incident_clear();
-	    
+
 	    $dc->compute_diversion();
 	    
 	    $dc->compute_delay2();

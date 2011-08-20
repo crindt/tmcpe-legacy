@@ -142,6 +142,7 @@ use Class::MethodMaker
      scalar => [ qw/ computed_delay2 computed_maxq computed_maxq_time/ ],
      scalar => [ qw/ mintimeofday mindate / ],
      scalar => [ qw/ bad_solution d12_delay tot_delay avg_delay net_delay / ],
+     scalar => [ qw/ min_miles_observed min_miles_total / ],
      scalar => [ qw/ solution_time_bounded solution_space_bounded / ],
      scalar => [ { -default => 'tmcpe_test' }, 'tmcpe_db_name' ],
      scalar => [ { -default => 'localhost' }, 'tmcpe_db_host' ],
@@ -1616,6 +1617,9 @@ sub write_to_db {
 					max_incident_speed => $self->max_incident_speed,
 					bad_solution => $self->bad_solution,
 
+					min_miles_observed => $self->min_miles_observed,
+					min_miles_total => $self->min_miles_total,
+
 					# only flag as time/space bounded if the number of bording cells is > 1
 					solution_time_bounded => ($self->solution_time_bounded>1?1:0),
 					solution_space_bounded => ($self->solution_space_bounded>1?1:0),
@@ -1772,11 +1776,16 @@ sub index_from_timestring() {
 
 sub section_from_index() {
     my ( $self, $index ) = ( @_ );
+    return $self->station_data_from_index($index)->{vds};
+}
+
+sub station_data_from_index() {
+    my ( $self, $index ) = ( @_ );
     my $num = scalar(@{$self->stationdata})-1;
     if ( $self->dir =~ /[NE]/ ) {
-	return $self->stationdata->[$num-$index]->{vds};
+	return $self->stationdata->[$num-$index];
     } else {
-	return $self->stationdata->[$index]->{vds};
+	return $self->stationdata->[$index];
     }
 }
 
@@ -1927,6 +1936,38 @@ sub compute_diversion() {
     $self->ifa->update();
 
     return $self->computed_diversion;
+}
+
+sub compute_fraction_observed() {
+    my ( $self ) = @_;
+
+    croak "No incident facility analysis has been performed" if ( !$self->ifa );
+
+    # compute fraction observed
+    my $j = 0;
+    my $obs_min_mi=0;
+    my $tot_min_mi=0;
+    my $J = $self->J;
+    my $M = $self->M;
+
+    foreach my $j ( 0..($J-1) ) {
+	my $new_obs = 0;
+	foreach my $m ( 0..($M-1) ) {
+	    my $dat = $self->rawdata->[$j][$m];
+	    $new_obs++ if ( $dat->{p_j_m} != $self->unknown_evidence_value );
+	}
+	$tot_min_mi += 
+	    5 * $M                                             # possible minutes to observe
+	    * $self->station_data_from_index( $j )->{seglen}   # segment length
+	; 
+	$obs_min_mi += 
+	    5 * $new_obs                                       # actual minutes observed
+	    * $self->station_data_from_index( $j )->{seglen};  # segment length
+    }
+    $self->ifa->min_miles_total( $tot_min_mi );
+    $self->ifa->min_miles_observed( $obs_min_mi );
+
+    $self->ifa->update;
 }
 
 =item compute_delay2()

@@ -203,6 +203,16 @@ class IncidentController extends BaseController {
 		    if ( params.onlySigalerts == "onlySigalerts" ) {
 			not { isNull( 'sigalertBegin' ) }
 		    }
+
+		    // Finally, figured out how to do projections!
+		    projections {
+			analyses {
+			    incidentFacilityImpactAnalyses {
+				//				not { isNull( 'minMilesObserved' ) }
+				not { isNull( 'badSolution' ) };
+			    }
+			}
+		    }
 		}
 	    }
         }

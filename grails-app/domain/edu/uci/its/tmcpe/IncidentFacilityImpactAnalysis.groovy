@@ -38,6 +38,8 @@ class IncidentFacilityImpactAnalysis implements Comparable {
     Boolean BoundIncidentTime
     Double d12DelaySpeed
     Double maxIncidentSpeed
+    Double minMilesObserved
+    Double minMilesTotal
 
     // Treat this as a sorted set.  IncidentSectionData has an induced ordering
     // upstream to downstream by absolute postmile

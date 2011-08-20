@@ -33,6 +33,12 @@ class IncidentSectionData implements Comparable {
         version false
     }
 
+    Boolean isValid() {
+	// Basically, it's valid if p_j_m is 0 or 1.  We do the following to
+	// handle precision issues
+	return (p_j_m - 0.5).abs() > 0.45;
+    }
+
     String toString() {
         def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")
         return df.format( fivemin ) + ":[" + [ vol, spd, occ, incident_flag, tmcpe_delay, d12_delay ].join( ", " ) + "]"

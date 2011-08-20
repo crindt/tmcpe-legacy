@@ -34,6 +34,13 @@ class IncidentImpactAnalysis implements Comparable {
         }
     }
 
+    Float samplePercent() {
+	def cnt = (incidentFacilityImpactAnalyses.sum() { it.minMilesObserved });
+	def tot = (incidentFacilityImpactAnalyses.sum() { it.minMilesTotal });
+	if ( tot == 0 || tot == null ) return null;
+	return ( cnt / tot );
+    }
+
     Float netDelay() {
         def f = 0
         incidentFacilityImpactAnalyses?.collect{ 

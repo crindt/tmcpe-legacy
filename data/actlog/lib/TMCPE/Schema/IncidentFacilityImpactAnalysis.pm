@@ -264,6 +264,16 @@ __PACKAGE__->table("tmcpe.incident_facility_impact_analysis");
   is_nullable: 1
   size: 255
 
+=head2 min_miles_observed
+
+  data_type: 'double precision'
+  is_nullable: 1
+
+=head2 min_miles_total
+
+  data_type: 'double precision'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -368,6 +378,10 @@ __PACKAGE__->add_columns(
   { data_type => "timestamp", is_nullable => 1 },
   "bad_solution",
   { data_type => "varchar", is_nullable => 1, size => 255 },
+  "min_miles_observed",
+  { data_type => "double precision", is_nullable => 1 },
+  "min_miles_total",
+  { data_type => "double precision", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -403,8 +417,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-05-09 10:34:24
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7MtktqF5s9A3TWRwwQsVww
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-19 17:21:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Se7xzo6w+lRXUZtIm+gv8A
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
