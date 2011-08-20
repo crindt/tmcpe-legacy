@@ -1,6 +1,6 @@
 <html>
     <head>
-      <!-- layouts/main.gsp head -->
+      <!-- layouts/bare.gsp head -->
       <title>Caltrans D12 TMC Performance Evaluation (Version <tmcpe:version />) <g:layoutTitle default="" /></title>
 
       <!-- The named base url for this site.  This is used by the
@@ -12,10 +12,9 @@
       <p:css name="ui-lightness/jquery-ui-1.8.13.custom" /> <!-- Load the jquery ui theme css -->
       <p:css name="tmcpe-bare" />
       
-<!--      <p:favicon src="${resource(dir:'images',file:'favicon.ico')}" /> -->
       <p:favicon src="images/favicon.ico" />
 
-      <!-- layouts/main.gsp layout head -->
+      <!-- target page layout head -->
       <g:layoutHead />
     </head>
 
@@ -23,6 +22,13 @@
 
       <!-- ================ common banner ================= -->
       <div id="menu">
+	<!-- Link block -->
+	<ul>
+	  <li><a href="${resource(dir:'/',absolute:true)}">Home</a></li>
+	  <li><a href="">CTMLabs</a></li>
+	</ul>
+
+	<!-- account block -->
 	<div id="account">
 	  <ul>
 	    <li id='loginLink'>
@@ -37,10 +43,6 @@
 	    <li><a target="_blank" href="help">Help</a></li>
 	  </ul>
 	</div>
-	<ul>
-	  <li><a href="${resource(dir:'/',absolute:true)}">Home</a></li>
-	  <li><a href="">CTMLabs</a></li>
-	</ul>
       </div>
 
       <div class="header">
@@ -50,8 +52,8 @@
       </div>
 
 
-      <!-- ================ layouts/main.gsp BODY ============== -->
-	<g:layoutBody />		
+      <!-- ================ target BODY ============== -->
+      <g:layoutBody />		
       
       <!-- Now render the rest of the page javascript -->
       <p:renderDependantJavascript />

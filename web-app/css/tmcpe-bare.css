@@ -35,7 +35,7 @@ body {
 }
 
 #leftbox {
-    width:250px;
+    width:240px;
     position:absolute;
     left: 0px;
     top:101px;
@@ -43,6 +43,7 @@ body {
     background-color: #1A2C45;
     padding-right:10px;
     height:100%;
+    padding-left: 10px;
 }
 
 #map {
