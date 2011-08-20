@@ -17,8 +17,10 @@ location-parse*.log
 import-*.log
 *.aux
 *.lof
+*.lot
 *.log
 *.toc
 *_latexmk
 *.blg
 *.bbl
+stage/
