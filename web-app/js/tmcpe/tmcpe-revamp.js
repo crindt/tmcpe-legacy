@@ -770,7 +770,7 @@ if ( !tmcpe ) var tmcpe = {};
       // When the data is loaded, it gets pushed to the views through the event bindings
       var query = tmcpe
 	  .query()
-	  .url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&Analyzed=onlyAnalyzed&samplePercent=0.5&max=1000');
+	  .url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&Analyzed=onlyAnalyzed&solution=good&notBounded&samplePercent=0.5&max=1000');
   });
 
  })();

@@ -209,7 +209,21 @@ class IncidentController extends BaseController {
 			analyses {
 			    incidentFacilityImpactAnalyses {
 				//				not { isNull( 'minMilesObserved' ) }
-				not { isNull( 'badSolution' ) };
+
+				if ( params.solution ) {
+				    if ( params.solution != "bad" ) {
+					isNull( 'badSolution' )
+				    }
+				    if ( params.solution == "notBounded" ) {
+					and { 
+					    isFalse( 'solutionTimeBounded' )
+					    isFalse( 'solutionSpaceBounded' )
+					}
+				    }
+				    if ( params.solution == "bad" ) {
+					not { isNull( 'badSolution' ) }
+				    }
+				}
 			    }
 			}
 		    }
