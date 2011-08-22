@@ -1068,12 +1068,12 @@ INCDEL: while( my $inc = $incrs->next ) {
 	
 	my $cnt=0;
 	do {
-	    if ( $dc->solution_time_bounded() ) {
+	    if ( $dc->solution_time_bounded() > 1 ) {
 		# increment time post window by 60 minutes
 		warn "INCREMENTING INCIDENT POST TIME WINDOW BY ".$procopt->{extend_time_increment}." MINUTES";
 		$dc->postwindow( $dc->postwindow() + $procopt->{extend_time_increment} );
 	    } 
-	    if ( $dc->solution_space_bounded() ) {
+	    if ( $dc->solution_space_bounded() > 1 ) {
 		# increment upstream space bound by 2 miles
 		# FIXME: need to account for freeway termination.
 		warn "INCREMENTING INCIDENT POST TIME WINDOW BY ".$procopt->{extend_space_increment}." MILES";
@@ -1083,7 +1083,7 @@ INCDEL: while( my $inc = $incrs->next ) {
 	    $dc->compute_delay;
 
 	} while ( !$dc->bad_solution()
-		  && ( $dc->solution_time_bounded() || $dc->solution_space_bounded() )
+		  && ( $dc->solution_time_bounded()>1 || $dc->solution_space_bounded()>1 )
 		  && $cnt++ < $procopt->{max_recompute_loops} );
 
 	$dc->write_to_db;
