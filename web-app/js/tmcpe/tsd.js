@@ -1001,7 +1001,11 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // Add activity log entries
 	  var times2 = vis.selectAll("g.timebar")
-	      .data( json.log )
+	      .data( json.log, 
+		     // use an ID function to allow for logtimebars in addition to timebars
+		     // so we can highligh them onmouseover
+		     function(d,i) { return "log_"+d.id; }  
+		   )
 	      .enter().append("svg:g")
 	      .attr("class", "logtimebar activitylog hidden")
 	      .attr("logid", function(d,i) { return d.id; } )
