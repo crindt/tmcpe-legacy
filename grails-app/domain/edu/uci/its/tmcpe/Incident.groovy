@@ -281,17 +281,17 @@ class Incident {
 		   )
             location( bestGeom )
             //geometry( section?.segGeom )
-            d12_delay( analyses?.size() ? analyses?.first()?.d12Delay() : null )
-            tmcpe_delay( analyses?.size() ? analyses?.first()?.netDelay() : null )
+            d12_delay( analyses.size() > 0 ? analyses?.first().d12Delay() : null )
+            tmcpe_delay( analyses.size() > 0 ? analyses?.first().netDelay() : null )
             savings( 0 ) // FIXME: update this.
-	    samplePercent( analyses?.size() ? analyses?.first()?.samplePercent() : null )
+	    samplePercent( analyses.size() > 0 ? analyses?.first().samplePercent() : null )
             analysesCount( analyses?.size() )
         }
     }
 
     public Float getSamplePercent() {
-	if ( analyses == null || analyses.size() == 0 ) return null
-	return analyses?.first()?.samplePercent();
+	if ( analyses == null  || analyses.size() < 1 ) return null
+	return analyses.first()?.samplePercent();
     }
 
     String toString() {

@@ -17,8 +17,8 @@ class IncidentImpactAnalysis implements Comparable {
         incidentFacilityImpactAnalyses: IncidentFacilityImpactAnalysis
     ]
 
-    Incident incident;
-    static belongsTo = [incident:Incident]
+    ProcessedIncident incident;
+    static belongsTo = [incident:ProcessedIncident]
 
     Float d12Delay() {
         def f = 0

@@ -68,8 +68,8 @@ class TmcLogEntry implements Comparable {
 
     }
 
-    Incident computeIncident( ) {
-        List is = Incident.findAllByCad( cad )
+    ProcessedIncident computeIncident( ) {
+        List is = ProcessedIncident.findAllByCad( cad )
         return is?.first();
     }
 

@@ -19,8 +19,8 @@ class IncidentController extends BaseController {
         System.err.println("=============LISTING FACILITIES: " + params )
         // should order by distance from center of viewport
         def items =
-            Incident.executeQuery( 
-		"SELECT distinct i.section.freewayId,i.section.freewayDir from Incident"
+            AnalyzedIncident.executeQuery( 
+		"SELECT distinct i.section.freewayId,i.section.freewayDir from AnalyzedIncident"
 		+" i order by i.section.freewayId,i.section.freewayDir" ).collect() { 
             [facdir: it[0]+'-'+it[1]]
         }
@@ -34,7 +34,7 @@ class IncidentController extends BaseController {
 
     def listEventTypes = {
         def items = 
-	Incident.executeQuery( "select distinct i.eventType from Incident i" ).collect { [evtype: it] };
+	AnalyzedIncident.executeQuery( "select distinct i.eventType from AnalyzedIncident i" ).collect { [evtype: it] };
         items.reverse
         items.push( [evtype: '<Show All>'] )
         items.reverse
@@ -232,7 +232,7 @@ class IncidentController extends BaseController {
         }
 
         // now get the page...
-        def c = Incident.createCriteria()
+        def c = AnalyzedIncident.createCriteria()
 	log.info( "===================PERFORMING QUERY" )
         def theList = c.list {
             maxResults(maxl)
@@ -247,7 +247,7 @@ class IncidentController extends BaseController {
 	withFormat {
 	    html {
 		// Get the total number for paging
-		c = Incident.createCriteria()
+		c = AnalyzedIncident.createCriteria()
 		int totalCount = c.get {
 		    projections {
 			count( 'id' )
@@ -280,24 +280,27 @@ class IncidentController extends BaseController {
     }
 
     def listGroups = {
+
         log.debug("=============LISTING GROUPS: " + params )
 
 	// columns to group by, specified as parameters
-	def groups = params.groups.tokenize(",").collect{ 
-	    if ( it =~ /year/ ) return [k:it,v:"year(i.startTime)"];
-	    if ( it =~ /month/ ) return [k:it,v:"month(i.startTime)"];
-	    if ( it =~ /district/ ) return [k:it,v:"i.section.district"];
-	    if ( it =~ /eventType/ ) return [k:it,v:"i.eventType"];
-	    if ( it =~ /sigAlert/ ) return [k:it,v:"(i.isSigalert )"];
-	    return null;
+	def groupsraw = [:]
+	params.groups.tokenize(",").each() { 
+	  if ( it =~ /year/ ) groupsraw[it] = "year(i.startTime)";
+	  if ( it =~ /month/ ) groupsraw[it] = "month(i.startTime)";
+	  if ( it =~ /district/ ) groupsraw[it] = "i.section.district";
+	  if ( it =~ /eventType/ ) groupsraw[it] = "i.eventType";
+	  if ( it =~ /sigAlert/ ) groupsraw[it] = "(i.isSigalert )";
+	  //	  if ( it =~ /cctv/ ) groupsraw[it] = "(i.verification.pMeas.pmType)";
 	}
+	def groups = new TreeMap(groupsraw)
 
 	// (aggregate) data to return 
-	def data = [
-	    [k:"cnt",v:"count(*)"],                          // total number of events in this group
-	    [k:"vtime",v:"avg(i.verificationTimeInSeconds)"], // verification time of group
-	    //	    [k:"iia",v:"avg(count(i.analyses))"]
-	    ]
+	def dataraw = ["cnt":"count(*)",
+		       "vtime":"avg(case when i.verificationTimeInSeconds > 0 AND i.verificationTimeInSeconds < 60*30 THEN i.verificationTimeInSeconds ELSE null END)"
+		      ] // verification time of group
+	    //[k:"iia",v:"avg(count(i.analyses))"]
+	def data = new TreeMap(dataraw)
 	    
 
 	if ( groups.size() == 0 ) groups = [1];
@@ -305,24 +308,35 @@ class IncidentController extends BaseController {
 	withFormat {
 
 	    json {
-		def results = Incident.executeQuery(
-		    "select "
-		    +groups.collect{ return it.v + " as " + it.k }.join(",")
-		    +","
-		    +data.collect{ return it.v + " as " + it.k }.join(",")
-		    +" from Incident i group by "
-		    +groups.collect{ return it.v }.join(",")
-		    +" order by "
-		    +groups.collect{ return it.v }.join(",")
+	      def qq = "select "+
+		groups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }.join(",")+
+		    ","+
+		    data.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }.join(",")+
+		    " from AnalyzedIncident i group by "+
+		    groups.entrySet().sort{it.key}.collect{ return it.value }.join(",")+
+		    " order by "+
+		    groups.entrySet().sort{it.key}.collect{ return it.value }.join(",")
+  	        System.err.println(qq)
+		def results = AnalyzedIncident.executeQuery(
+		    qq
 		)
+		System.err.println(groups)
+		System.err.println(data)
+		System.err.println(results)
 		render results.collect{ 
 		    def ret = [:];
-		    def j = groups.size()-1
-		    for ( i in 0..j) {
-			ret[groups[i].k] = it[i]
+		    def i = 0;
+		    for ( k in groups.keySet().sort() ) {
+			ret[k] = it[i]
+			System.err.println(k+"=="+it[i])
+			++i
 		    }
-		    for ( i in 0..data.size()-1) {
-			ret[data[i].k] = it[j+i]
+		    i = 0
+		    def j = groups.size()
+		    for ( k in data.keySet() ) {
+			ret[k] = it[j+i]
+			System.err.println(k+"==["+[i,j].join(",")+"]:="+it[j+i])
+			++i
 		    }
 		    return ret;
 		} as JSON
@@ -332,15 +346,15 @@ class IncidentController extends BaseController {
     }
 
     def create = {
-        def ii = new Incident()
+        def ii = new AnalyzedIncident()
         ii.properties = params
         return [incidentInstance: ii]
     }
 
     def save = {
-        def ii = new Incident(params)
+        def ii = new AnalyzedIncident(params)
         if (ii.save(flush: true)) {
-            flash.message = "${message(code: 'default.created.message', args: [message(code: 'incident.label', default: 'Incident'), ii.id])}"
+            flash.message = "${message(code: 'default.created.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), ii.id])}"
             redirect(action: "show", id: ii.id)
         }
         else {
@@ -349,9 +363,9 @@ class IncidentController extends BaseController {
     }
 
     def show = {
-        def ii = Incident.get(params.id)
+        def ii = AnalyzedIncident.get(params.id)
         if (!ii) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
             redirect(action: "list")
         }
         else {
@@ -370,10 +384,10 @@ class IncidentController extends BaseController {
     def showCustom = {
         def ii
         if ( params.id ) {
-            ii = Incident.get(params.id)
+            ii = AnalyzedIncident.get(params.id)
         } else if ( params.cad ) {
             // specified as a cad search for it.
-            def c = Incident.createCriteria()
+            def c = AnalyzedIncident.createCriteria()
             def theList = c.list {
                 eq( "cad", params.cad )
             }
@@ -383,7 +397,7 @@ class IncidentController extends BaseController {
             }
         }
         if (!ii) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
             redirect(action: "list")
         }
         else {
@@ -407,9 +421,9 @@ class IncidentController extends BaseController {
     }
 
     def showAnalyses = {
-        def ii = Incident.get(params.id)
+        def ii = AnalyzedIncident.get(params.id)
         if (!ii) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
             redirect(action: "list")
         } else {
             def analyses = ii.analyses.collect { ia -> 
@@ -430,9 +444,9 @@ class IncidentController extends BaseController {
     }
 
     def edit = {
-        def ii = Incident.get(params.id)
+        def ii = AnalyzedIncident.get(params.id)
         if (!ii) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
             redirect(action: "list")
         }
         else {
@@ -441,12 +455,12 @@ class IncidentController extends BaseController {
     }
 
     def d3_tsd = {
-	def ii = Incident.get(params.id)
+	def ii = AnalyzedIncident.get(params.id)
         if ( params.id ) {
-            ii = Incident.get(params.id)
+            ii = AnalyzedIncident.get(params.id)
         } else if ( params.cad ) {
             // specified as a cad search for it.
-            def c = Incident.createCriteria()
+            def c = AnalyzedIncident.createCriteria()
             def theList = c.list {
                 eq( "cad", params.cad )
             }
@@ -457,7 +471,7 @@ class IncidentController extends BaseController {
         }
 
         if (!ii) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
             redirect(action: "list")
         }
         else {
@@ -466,20 +480,20 @@ class IncidentController extends BaseController {
     }
 
     def update = {
-        def ii = Incident.get(params.id)
+        def ii = AnalyzedIncident.get(params.id)
         if (ii) {
             if (params.version) {
                 def version = params.version.toLong()
                 if (ii.version > version) {
                     
-                    ii.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'incident.label', default: 'Incident')] as Object[], "Another user has updated this Incident while you were editing")
+                    ii.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'incident.label', default: 'AnalyzedIncident')] as Object[], "Another user has updated this Incident while you were editing")
                     render(view: "edit", model: [incidentInstance: ii])
                     return
                 }
             }
             ii.properties = params
             if (!ii.hasErrors() && ii.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'incident.label', default: 'Incident'), ii.id])}"
+                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), ii.id])}"
                 redirect(action: "show", id: ii.id)
             }
             else {
@@ -487,26 +501,26 @@ class IncidentController extends BaseController {
             }
         }
         else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
             redirect(action: "list")
         }
     }
 
     def delete = {
-        def ii = Incident.get(params.id)
+        def ii = AnalyzedIncident.get(params.id)
         if (ii) {
             try {
                 ii.delete(flush: true)
-                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
                 redirect(action: "list")
             }
             catch (org.springframework.dao.DataIntegrityViolationException e) {
-                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
                 redirect(action: "show", id: params.id)
             }
         }
         else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'Incident'), params.id])}"
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incident.label', default: 'AnalyzedIncident'), params.id])}"
             redirect(action: "list")
         }
     }
