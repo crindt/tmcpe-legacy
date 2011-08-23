@@ -545,7 +545,7 @@ class IncidentController extends BaseController {
         }
     }
 
-    def d3_tsd = {
+    def tsd = {
 	def ii = ProcessedIncident.get(params.id)
         if ( params.id ) {
             ii = ProcessedIncident.get(params.id)

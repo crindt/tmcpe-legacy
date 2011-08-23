@@ -6,11 +6,11 @@
     <title>Incident ${incidentInstance.cad} Detail</title>
 
     <p:css name="tmcpe-common" />
-    <p:css name="d3-tsd" />
+    <p:css name="incident-tsd" />
 
     <p:javascript src='d3' />
     <p:javascript src='d3.geom' />
-    <p:javascript src='tmcpe/tsd' />
+    <p:javascript src='tmcpe/incident-tsd' />
     <p:javascript src='jquery-1.6.1.min' />
     <p:javascript src='jquery-ui-1.8.13.custom.min' />
     <p:javascript src='jquery.format-1.2.min' />
