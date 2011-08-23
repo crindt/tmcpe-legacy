@@ -134,7 +134,11 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  tbody = element.append('tbody');
 	  $('#incident-list')
-	      .dataTable({bPaginate:false,"bAutoWidth":false/*,"sDom":"<t>"*/})
+	      .dataTable({
+		  bPaginate:false,
+		  "bAutoWidth":false,
+		  "bFilter": false,
+		  /*,"sDom":"<t>"*/})
 	      //.fnFilter(true,null,true,false) // Use regex filtering, not "smart"
 	  ;
 
