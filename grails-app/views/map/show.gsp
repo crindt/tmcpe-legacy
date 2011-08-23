@@ -23,7 +23,7 @@
     <p:javascript src='protovis' />
 
     <!-- app code -->
-    <p:javascript src='tmcpe/map-show />
+    <p:javascript src='tmcpe/map-show' />
   </head>
   <body>
     <div id='tmcpeapp'>
