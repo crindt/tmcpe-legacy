@@ -29,14 +29,23 @@
 
   var themeScale=1.0;
 
+  function maxSpeed() {
+     var maxSpd = $("#maxspdslider").slider("option","value");
+     if ( maxSpd.length == 0 ) maxSpd = 60;
+     return maxSpd;
+  }
+
+  function speedScale() {
+     var scale  = $("#scaleslider").slider("option","value");
+     if ( scale.length == 0 ) scale = 1.0;
+     return scale;
+  }
 
   function cellStyle(d) {
      var themeWid = $("#theme")[0];
      var theme = themeWid.options[themeWid.selectedIndex].value;
-     var scale  = $("#scaleslider").slider("option","value");
-     var maxSpd = $("#maxspdslider").slider("option","value");
-     // override
-     if ( maxSpd.length == 0 ) maxSpd = 60;
+     var scale  = speedScale();
+     var maxSpd = maxSpeed();
 
      // return grey if evidence is uncertain (imputed data)
      if ( d.p_j_m > 0 && d.p_j_m < 1 ) {
@@ -77,8 +86,8 @@
 
 
   function cellAugmentStyle(d) {
-     var v1 = $("#scaleslider").slider("option","value");
-     var v2 = $("#maxspdslider").slider("option","value");
+     var v1 = speedScale();
+     var v2 = maxSpeed();
      var ev = evidenceOfIncident( d, v1, v2 );
      return ev ? "fill:black;" : "fill:none;";
   }
@@ -434,6 +443,7 @@
 	      </select>
 	    </th>
 	  </tr>
+<!--
 	  <tr>
 	    <th id="speed_parameter">Scale:</th>
 	    <td>
@@ -443,6 +453,7 @@
 	      <span id="alpha">1.0</span>
 	    </td>
 	  </tr>
+-->
 <!--
 	  <tr>
 	    <th>Max Speed:</th>
@@ -520,7 +531,7 @@
 	</div>
       </div>
       
-      <div style="height:50%">
+      <div style="height:45%">
 	<div id="chartcontainer" class="grid_8 alpha">
 	  <div id="chartbox" style="height:65%;"></div>
 	  <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  

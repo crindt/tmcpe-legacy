@@ -201,8 +201,12 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  // Use jquery.dataTable to make the table pretty and sortable
 	  $('#incident-list')
-	      .dataTable({bPaginate:false,"bAutoWidth":false,"bDestroy":true,/*,"sDom":"<t>"*/
-			  'aaSorting':[[1,"asc"]]
+	      .dataTable({
+		  bPaginate:false,
+		  "bAutoWidth":false,
+		  "bDestroy":true,
+		  'aaSorting':[[1,"asc"]],
+		  "bFilter": false,
 			 })
 	  //.fnFilter($('#incident-list_filter input').val(),null,true,false) // Use regex filtering, not "smart"
 	  ;
