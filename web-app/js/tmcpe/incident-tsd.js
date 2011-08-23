@@ -970,7 +970,9 @@ if ( !tmcpe ) var tmcpe = {};
 	  var times = vis.selectAll("g.timebar")
 	      .data( tr )
 	      .enter().append("svg:g")
-	      .attr("class", "timebar");
+	      .attr("class", "timebar")
+	      .attr("critevent", function(d) { return d.n } )
+	  ;
 
 	  times.append("svg:line")
 	      .attr("x1", function (d) { 
@@ -982,11 +984,16 @@ if ( !tmcpe ) var tmcpe = {};
 	      .on("mouseover", function(d,i) {
 		  this.style.stroke="red";
 		  updateText( $.format.date( new Date(d.t*1000), "HH:mm" ) + ":: " + d.l );
+
+		  // Add tooltips to lines
+		  $(this).tipsy( "test" ) 
+
 	      })
 	      .on("mouseout", function(d,i) {
 		  this.style.stroke="";
 	      })
 	  ;
+
 
 	  d3.selectAll("g.timebar")
 	      .append("svg:text")

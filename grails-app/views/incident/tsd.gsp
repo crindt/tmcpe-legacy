@@ -14,6 +14,7 @@
     <p:javascript src='jquery-1.6.1.min' />
     <p:javascript src='jquery-ui-1.8.13.custom.min' />
     <p:javascript src='jquery.format-1.2.min' />
+    <p:javascript src='jquery.tipsy' />
     <p:javascript src='polymaps' />
     <p:javascript src='protovis' />
     <p:javascript src='jquery.dataTables' />
@@ -254,7 +255,8 @@
 	  .text( function(dd) { return dd; } );
 
       $("#activityLog").dataTable({ 
-	  bPaginate: false, sScrollY:"300px","bAutoWidth":false,
+	  bPaginate: false, sScrollY:"200px","bAutoWidth":false,"bFilter": false,
+
 	  "aoColumns": [
 	      {"sWidth": "20%", "sType":"date" },
 	      {"sWidth": "20%", "sType":"string" },
@@ -514,9 +516,9 @@
 	</div>
       </div>
       
-      <div style="height:40%">
+      <div style="height:50%">
 	<div id="chartcontainer" class="grid_8 alpha">
-	  <div id="chartbox" style="height:90%;"></div>
+	  <div id="chartbox" style="height:65%;"></div>
 	  <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
 	</div>
 	<div id="databox" style="height:100%" class="grid_8 omega">
@@ -530,14 +532,14 @@
     <thead>
 		<tr>
 		  <th class="label">Facility</th>
-		  <th class="label">&Delta;<sub>d12</sub></th>
-		  <th class="label">&Delta;<sub>tmcpe</sub></th>
+		  <th class="numlabel">Delay<35</th>
+		  <th class="numlabel">Delay</th>
 <!--
 		  <th class="label">&Delta;q</th>
 		  <th class="label">max(q)</th>
 -->
-		  <th class="label">&Delta;<sub>"what-if"</sub></th>
-		  <th class="label">&Delta;<sub>TMC</sub></th>
+		  <th class="numlabel">Delay<br/>(no TMC)</th>
+		  <th class="numlabel">TMC Savings</th>
 		</tr>
     </thead>
     <tbody>

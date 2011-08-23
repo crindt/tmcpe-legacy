@@ -580,6 +580,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  ;
 	  nav.append("a")
 	      .html("Prev")
+	      .attr("class","navbutton navprev")
 	      .style("float","left")
 	      .on("click",function(d){ 
 		  // get the previous li child
@@ -588,6 +589,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  if ( prev.length > 0 ) {
 		      // move to the previous li child
 		      $(window).trigger('tmcpe.incidentSelected',prev[0].__data__);
+		      checkDetailButtons();
 		  }
 	      });
 	  nav.append("span")
@@ -595,6 +597,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .html("");
 	  nav.append("a")
 	      .html("Next")
+	      .attr("class","navbutton navnext")
 	      .style("float","right")
 	      .on("click",function(d){ 
 		  // get the previous li child
@@ -603,8 +606,10 @@ if ( !tmcpe ) var tmcpe = {};
 		  if ( next.length > 0 ) {
 		      // move to the previous li child
 		      $(window).trigger('tmcpe.incidentSelected',next[0].__data__);
+		      checkDetailButtons()
 		  }
 	      });
+	  checkDetailButtons();
 
 
 	  // create the detail view skeleton
@@ -612,6 +617,26 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("id","cluster-list")
 	      .append("ul");
       }
+
+
+      function checkDetailButtons() {
+	  var checknext = $(container[0]).find('li.selected').next();
+	  if ( checknext.length == 0 ) {
+	      // we're at the end, disable the button
+	      $(".navnext").addClass("disabled");
+	  } else {
+	      $(".navnext").removeClass("disabled");
+	  }
+	  var checkprev = $(container[0]).find('li.selected').prev();
+	  if ( checkprev.length == 0 ) {
+	      // we're at the end, disable the button
+	      $(".navprev").addClass("disabled");
+	  } else {
+	      $(".navprev").removeClass("disabled");
+	  }
+
+      }
+
 
       function update(x) {
 	  if ( list == null ) return;
@@ -671,6 +696,8 @@ if ( !tmcpe ) var tmcpe = {};
 	  nav.selectAll('.nav-count').html("Incident " + (idx+1) + " of " + selectedCluster.elements.length );
 	  $(container[0]).find("li.selected").removeClass('selected');
 	  $(container[0]).find("li[cad~='"+d.cad+"']").addClass('selected');//style("color","yellow");
+
+	  checkDetailButtons();
       }
 
       return detailView;

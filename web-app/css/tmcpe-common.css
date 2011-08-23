@@ -3,6 +3,8 @@ body {
     background-color: #1A2C45; /*#A2C5DA;*/
     color: #fff;
     font-size: 8pt;
+    padding-top: 21px;
+    margin:0px;
 }
 
 
@@ -20,11 +22,12 @@ body {
 #header ul.menu li {
     display:inline;
     border: solid 1px white;
-    padding: 5px;
+//    padding: 5px;
 }
 
 #content {
     background-color: #006;
+    margin: 5px;
 }
 
 .loading {
@@ -50,12 +53,46 @@ body {
     border: 1px solid white;
 }
 
+/*
 #menu {
     height: 21px;
     background-color: black;
     color: grey;
     position: relative;
     padding: 0;
+}
+*/
+
+#account {
+    float: right;
+}
+
+body {
+    margin-top: 0px;
+}
+
+
+/* the following two records are used to position the nav div at the bottom of the info element */
+#info {
+    position:relative;
+}
+
+#incidentDetailPager {
+    position:absolute;
+    bottom:0;
+}
+
+
+#menu {
+    height: 21px;
+    background-color: black;
+    color: grey;
+    position: fixed;
+    width: 100%;
+    padding: 0;
+    margin: 0px;
+    top: 0px;
+    z-index: 100;
 }
 
 #account {
@@ -91,17 +128,32 @@ body {
     color: yellow;
 }
 
-body {
-    margin-top: 0px;
+
+#menu ul {
+    padding: 0 21px;
+    display: inline;
 }
 
-
-/* the following two records are used to position the nav div at the bottom of the info element */
-#info {
-    position:relative;
+#menu li {
+    line-height: 21px;
+    margin-right: 4px;
+    float: left;
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    white-space: nowrap;
 }
 
-#incidentDetailPager {
-    position:absolute;
-    bottom:0;
+#menu li a {
+    padding: 4px 5px;
+}
+
+#menu a, #menu a:link, #menu a:visited {
+    margin-right: 8px;
+    text-decoration: none;
+    color: #ddd;
+}
+
+#menu a:hover {
+    color: yellow;
 }

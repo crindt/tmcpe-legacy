@@ -10,6 +10,7 @@
 
 
       <p:css name="ui-lightness/jquery-ui-1.8.13.custom" /> <!-- Load the jquery ui theme css -->
+      <p:css name="tmcpe-common" />
       <p:css name="tmcpe-bare" />
       
       <p:favicon src="images/favicon.ico" />

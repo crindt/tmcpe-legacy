@@ -19,6 +19,10 @@
     background-color: #ddd;
 }
 
+body {
+    min-width: 960px;
+    min-height: 764px;
+}
 
 .dataTables_scrollHead, .dataTables_scrollBody, .dataTables_scrollFoot {
     background-color: #fff;
@@ -41,6 +45,12 @@
 #tabs table td,#tabs table th {
     color: black;
 }
+
+
+#tabs table th {
+    vertical-align: bottom;
+}
+
 svg {
 //  border: solid 1px #ccc;
   fill: #006;
@@ -181,7 +191,11 @@ circle.area {
     
 }
 
-td.label {
+th.label, td.label {
+    text-align: left;
+}
+
+th.numlabel, td.numlabel {
     text-align: right;
 }
 
@@ -273,4 +287,8 @@ circle.incidentLocation {
 
 table {
     font-size: 8pt;
+}
+
+#activityLog_info {
+    text-weight: bold;
 }
