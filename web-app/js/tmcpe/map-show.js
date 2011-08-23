@@ -861,6 +861,14 @@ if ( !tmcpe ) var tmcpe = {};
 	  query.url("incident/list.geojson?max=1000&Analyzed=onlyAnalyzed&solution=good&"+this.value);
        }
       });
+
+      $('#year').change(function(){
+	  var year = this.value;
+	  query.url("incident/list.geojson?max=1000&Analyzed=onlyAnalyzed&solution=good"
+		    +"&startDate="+year+"-01-01"
+		    +"&endDate="+(parseInt(year)+1)+"-01-01"
+		    );
+      });
   });
 
  })();

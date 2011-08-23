@@ -45,6 +45,18 @@
 	  <div class='input-block'>
 	    <input id='new-incident' placeholder='What data do you want?' type='text' />
 	    <span class='ui-tooltip-top'>Press Enter to search</span>
+	    <table style="float:right;">
+	      <tr>
+		<th>Year</th>
+		<td>
+		  <select id="year">
+		    <option value="2011">2011</option>
+		    <option selected="true" value="2010">2010</option>
+		    <option value="2009">2009</option>
+		  </select>
+		</td>
+	      </tr>
+	    </table>
 	  </div>
 	  <div id='incident-table'></div>
 	  <div id='incident-stats' style="height:200px"></div>
