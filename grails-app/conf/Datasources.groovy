@@ -28,7 +28,7 @@ datasources = {
         driverClassName('org.postgis.DriverWrapper')
 //        url('jdbc:postgresql://192.168.0.2:5432/osm')
 //        url('jdbc:postgresql://parsons.its.uci.edu:5432/tmcpe')
-        url('jdbc:postgresql://localhost:5432/tmcpe_test')
+        url('jdbc:postgresql://localhost:5432/tmcpe')
 //        url('jdbc:postgresql://192.168.0.2:5433/osm')
         username('VDSUSER')
         password('VDSPASSWORD')
