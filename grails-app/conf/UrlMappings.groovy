@@ -14,7 +14,7 @@ class UrlMappings {
 */
         "/" {
             controller = "map"
-            action = [GET: "d3_show"]
+            action = [GET: "show"]
         }
         "500"(view:'/error')
     }
