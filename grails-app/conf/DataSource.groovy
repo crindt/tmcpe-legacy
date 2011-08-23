@@ -35,8 +35,8 @@ environments {
 	    driverClassName = 'org.postgis.DriverWrapper'
 	    dbCreate = "update"
 	    url = 'jdbc:postgresql://localhost:5432/tmcpe'
-	    username('VDSUSER')
-	    password('VDSPASSWORD')
+	    username = 'VDSUSER'
+	    password = 'VDSPASSWORD'
         }
     }
 }
