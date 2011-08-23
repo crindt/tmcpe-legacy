@@ -20,4 +20,8 @@ class User {
 		username(blank:false, unique:true)
 	}
 
+	static mapping = {
+	  table name: 'users'
+	}
+
 }
