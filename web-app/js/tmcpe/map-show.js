@@ -151,16 +151,20 @@ if ( !tmcpe ) var tmcpe = {};
 
 
 
+      var nodatacolor = "#eeeeee";
 
+      var first = true;
 
 
       function v(x,da) { var d = (da == null ? 0 : da ); return x != null ? x : da; }
 
       // Update the table view with the given data (change in the model)
       function update(x) {
-	  var rows = tbody.selectAll("tr")
-	      .data(x.features)
-	      .enter().append("tr")
+	  var rows = tbody.selectAll("tr").data(_.filter(x.features,function(d){return d!=null;}) ,function(d,i) { 
+	      if ( d ) return d.cad;
+	  } );
+	  
+	  rows.enter().append("tr")
 	      .attr("id", function( d ) { 
 		  return "table_incident_id_"+d.properties.id;
 	      } )
@@ -172,18 +176,12 @@ if ( !tmcpe ) var tmcpe = {};
 	      .style("background-color",function(d){
 		  return ( d.properties.tmcpe_delay != null 
 			   ? delayColor(160)(d.properties.tmcpe_delay)
-			   : "gray" )
+			   : nodatacolor )
 	      } )
 	      .on("click",function(d,e) { 
 		  $(window).trigger( "tmcpe.incidentSelected", d );
 	      } )
-	  ;
-
-
-	  //rows.exit().remove();
-
-	  // Now (re)populate each row with the relevant data
-	  rows.selectAll("td")
+	      .selectAll("td")
 	      .data(function(d) {
 		  // extract properties
 		  var props = [];
@@ -199,12 +197,16 @@ if ( !tmcpe ) var tmcpe = {};
 		  return dd;
 	      } );
 
+	  rows.exit().remove();
 	  
 	  // Use jquery.dataTable to make the table pretty and sortable
 	  $('#incident-list')
-	      .dataTable({bPaginate:false,"bAutoWidth":false,"bDestroy":true/*,"sDom":"<t>"*/})
-	      //.fnFilter($('#incident-list_filter input').val(),null,true,false) // Use regex filtering, not "smart"
+	      .dataTable({bPaginate:false,"bAutoWidth":false,"bDestroy":true,/*,"sDom":"<t>"*/
+			  'aaSorting':[[1,"asc"]]
+			 })
+	  //.fnFilter($('#incident-list_filter input').val(),null,true,false) // Use regex filtering, not "smart"
 	  ;
+
 	  resetColumnWidths();
 	  
       }
@@ -379,7 +381,7 @@ if ( !tmcpe ) var tmcpe = {};
 			  return d.data.properties.tmcpe_delay;
 		      });
 		      var mm = _.max(arr)
-		      point.setAttribute('fill', mm == -Infinity ? "gray" : delayColor(0)(mm));
+		      point.setAttribute('fill', mm == -Infinity ? nodatacolor : delayColor(0)(mm));
 
 		      
                       var more_wider = value.data.properties.elements.length / 3;
@@ -458,7 +460,9 @@ if ( !tmcpe ) var tmcpe = {};
 	  // propogate as a global tmcpe event
 	  var cldata = {cluster:sel[0].data,elementIndex:elIndex};
 	  */
-	  $(window).trigger( 'tmcpe.clusterSelected', sel[0].data );
+	  if ( sel[0] ) {
+	      $(window).trigger( 'tmcpe.clusterSelected', sel[0].data );
+	  }
       }
 
       mapView.clusterSelected = function(d) {
@@ -569,7 +573,10 @@ if ( !tmcpe ) var tmcpe = {};
 	      +'<table>'
 	      +'<tr><th>Type:</th><td>{{eventType}}</td></tr>'
 	      +'<tr><th>Location:</th><td>{{properties.locString}}</td></tr>'
-	      +'<tr><th>Delay:</th><td>{{properties.tmcpe_delay.toFixed(0)}} veh-hr</td></tr>'
+	      +'<tr title="The delay associated with this event using the D12 < 35-mph method"><th>Delay<35:</th><td>{{properties.d12_delay.toFixed(0)}} veh-hr</td></tr>'
+	      +'<tr title="The delay associated with this event using the TMCPE method"><th>Delay:</th><td>{{properties.tmcpe_delay.toFixed(0)}} veh-hr</td></tr>'
+	      +'<tr title="The fraction of savings attributable to TMC actions"><th>Savings:</th><td>{{properties.savings.toFixed(0)}} veh-hr</td></tr>'
+	      +'<tr title="The approximate percent of time-space cells sampled for the incident"><th>Sample%:</th><td>{{(properties.samplePercent*100).toFixed(1)}}%</td></tr>'
 	      +'</table>'
 	      +'<hr/>'
 	      +'<div style="width=100%;text-align:center;"><a target="_blank" href="incident/tsd?cad={{cad}}">Show detailed analysis</a></div>'
@@ -671,6 +678,9 @@ if ( !tmcpe ) var tmcpe = {};
 		  return detailTemplate( tt ); 
 	      });
 
+	  // add tool tips to the rows
+	  $(list[0]).find('tr').tipsy();
+
 	  li.exit().remove();
       }
 
@@ -704,13 +714,18 @@ if ( !tmcpe ) var tmcpe = {};
       detailView.incidentSelected = function( d ) {
 	  var all = $(list[0]).find('li');
 	  var idx = 0;
-	  for ( idx = 0; 
-		selectedCluster.elements[idx].data.cad != d.cad && idx < selectedCluster.elements.length; 
-		++idx );
-	  if ( idx > selectedCluster.elements.length ) alert( "Can't find selected incident in detail cluster" );
-	  nav.selectAll('.nav-count').html("Incident " + (idx+1) + " of " + selectedCluster.elements.length );
-	  $(container[0]).find("li.selected").removeClass('selected');
-	  $(container[0]).find("li[cad~='"+d.cad+"']").addClass('selected');//style("color","yellow");
+	  if ( selectedCluster && selectedCluster.elements && selectedCluster.elements.length ) {
+	      for ( idx = 0; 
+		    selectedCluster.elements[idx] && selectedCluster.elements[idx].data.cad != d.cad && idx < selectedCluster.elements.length; 
+		    ++idx );
+	      if ( idx > selectedCluster.elements.length )
+		  alert( "Can't find selected incident in detail cluster" );
+	      nav.selectAll('.nav-count').html("Incident " + (idx+1) + " of " + selectedCluster.elements.length );
+	      $(container[0]).find("li.selected").removeClass('selected');
+	      $(container[0]).find("li[cad~='"+d.cad+"']").addClass('selected');//style("color","yellow");
+	  } else {
+	      alert( "Can't find incident in dataset" );
+	  }
 
 	  checkDetailButtons();
       }
@@ -734,7 +749,11 @@ if ( !tmcpe ) var tmcpe = {};
       $(window).bind("tmcpe.incidentsLoaded", function(caller, d) { 
 	  $("#loading").css('visibility','hidden');
 
+	  // this hack to handle requery needs to be fixed
+	  var it = d3.select('#incident-table');
+	  tableView.container(it);
 	  tableView.data(d) 
+
 	  mapView.data(d) 
       } );
 
@@ -825,7 +844,15 @@ if ( !tmcpe ) var tmcpe = {};
       var query = tmcpe
 	  .query()
 	  .url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&Analyzed=onlyAnalyzed&solution=good&notBounded&samplePercent=0.5&max=1000');
-	  //.url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&max=1000');
+	  //.url('incident/list.geojson?startDate=2011-06-01&endDate=2012-01-01&max=1000');
+
+
+      // read query box
+      $('#new-incident').keypress(function(e){
+      if(e.which == 13){
+	  query.url("incident/list.geojson?max=1000&Analyzed=onlyAnalyzed&solution=good&"+this.value);
+       }
+      });
   });
 
  })();
