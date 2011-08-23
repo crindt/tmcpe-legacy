@@ -14,29 +14,13 @@ class MapController extends BaseController {
         title:'Query Incidents',
 	isVisible: { org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN,ROLE_TMCPE,ROLE_CALTRANS_D12_TMC") }
     ]
+
+    // the delete, save and update actions are not allowed
+    static allowedMethods = []
     
+    // The default action for the map controller is show
     def index = { redirect(action:show,params:params) }
 
-    // the delete, save and update actions only accept POST requests
-    static allowedMethods = [delete:'POST', save:'POST', update:'POST']
-
-    def show = {
-        return [ ]
-    }
-
-    def d3_show = {
-	return [ ]
-    }
-
-    def backbone_map = {
-	return [ ]
-    }
-
-    def revamp_map = {
-	return [ ]
-    }
-
-    def simple = {
-        return [ ]
-    }
+    // Shows the map
+    def show = {}
 }
