@@ -35,6 +35,8 @@
      var theme = themeWid.options[themeWid.selectedIndex].value;
      var scale  = $("#scaleslider").slider("option","value");
      var maxSpd = $("#maxspdslider").slider("option","value");
+     // override
+     if ( maxSpd.length == 0 ) maxSpd = 60;
 
      // return grey if evidence is uncertain (imputed data)
      if ( d.p_j_m > 0 && d.p_j_m < 1 ) {
@@ -441,6 +443,7 @@
 	      <span id="alpha">1.0</span>
 	    </td>
 	  </tr>
+<!--
 	  <tr>
 	    <th>Max Speed:</th>
 	    <td>
@@ -450,6 +453,7 @@
 	      <span id="maxspd">60</span>
 	    </td>
 	  </tr>
+-->
 	</table>
 	<table style="float:left;border:solid 1px white">
 <!--
