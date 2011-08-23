@@ -81,6 +81,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 255 },
   "d12cadalt",
   { data_type => "varchar", is_nullable => 0, size => 255 },
+  "area",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
   "location",
   { data_type => "varchar", is_nullable => 0, size => 255 },
   "log_id",
