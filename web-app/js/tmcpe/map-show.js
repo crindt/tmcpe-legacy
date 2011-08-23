@@ -1,3 +1,8 @@
+/**
+ * Contains logic for implementing the TMCPE incident list view
+ * combining a scrollable table, a polymaps window, and a detail box
+ */
+
 // Creates a bounded scale...FIXME: crindt: clarify the implementation here...
 function boundedScale( dom, ran ) {
     var dommin = dom[0];
