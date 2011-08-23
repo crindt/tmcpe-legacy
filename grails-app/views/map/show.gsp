@@ -12,6 +12,7 @@
     <!-- formatting -->
     <p:javascript src='jquery.format-1.2.min' />
     <p:javascript src='jquery.dataTables' />
+    <p:javascript src='jquery.tipsy' />
     <p:javascript src='jquery.svg' />    <!-- plugins for manipulating svg using jquery -->
     <p:javascript src='jquery.svgdom' /> <!-- plugins for manipulating svg using jquery -->
 
@@ -21,6 +22,10 @@
     <p:javascript src='d3' />
     <p:javascript src='d3.time' />
     <p:javascript src='protovis' />
+
+    <!-- supporting css -->
+    <p:css name="tipsy" />
+
 
     <!-- app code -->
     <p:javascript src='tmcpe/map-show' />
@@ -37,12 +42,10 @@
 	  </div>
 	</div>
 	<div id='content'>
-	  <!--
 	  <div class='input-block'>
 	    <input id='new-incident' placeholder='What data do you want?' type='text' />
 	    <span class='ui-tooltip-top'>Press Enter to search</span>
 	  </div>
--->
 	  <div id='incident-table'></div>
 	  <div id='incident-stats' style="height:200px"></div>
 	</div>

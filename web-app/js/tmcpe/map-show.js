@@ -106,8 +106,8 @@ if ( !tmcpe ) var tmcpe = {};
 		  {key:"timestamp",title:"Time",render:renderDate}, 
 		  {key:"locString",title:"Location"}, 
 		  {key:"memo",title:"Description"}, 
-		  {key:"d12_delay",title:"D<sub>d12</sub>",render:renderNumber}, 
-		  {key:"tmcpe_delay",title:"D<sub>tmcpe</sub>",render:renderNumber}, 
+		  {key:"d12_delay",title:"Delay<35",render:renderNumber}, 
+		  {key:"tmcpe_delay",title:"Delay",render:renderNumber}, 
 		  {key:"savings",title:"Savings",render:renderNumber},
 		];
       ;
@@ -128,7 +128,9 @@ if ( !tmcpe ) var tmcpe = {};
 	  hrow.selectAll('th').data(fields).enter()
 	      .append('th')
 	      .attr('class',function(d){return d.key;})
-	      .html(function(d){return d.title;});
+	      .html(function(d){return d.title;})
+	      .attr('title',function(d) { $(this).tipsy(); return "Click to toggle sort"; })
+	  ;
 
 	  tbody = element.append('tbody');
 	  $('#incident-list')
@@ -141,10 +143,15 @@ if ( !tmcpe ) var tmcpe = {};
 	  hrow.selectAll('th').data(fields).enter()
 	      .append('th')
 	      .attr('class',function(d){return d.key==null?"":d.key;})
-	      .html(function(d){return d.key=="memo" ? "Totals:" : ""; });
+	      .html(function(d){return d.key=="memo" ? "Totals:" : ""; })
+	  ;
 	  
 	  resetColumnWidths();
       }
+
+
+
+
 
 
       function v(x,da) { var d = (da == null ? 0 : da ); return x != null ? x : da; }
@@ -160,6 +167,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("cad", function( d ) { 
 		  return d.cad
 	      } )
+	      .attr("title", function( d ) { $(this).tipsy(); return "Click row to view details in the left pane"; })
 	      .attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
 	      .style("background-color",function(d){
 		  return ( d.properties.tmcpe_delay != null 
@@ -170,6 +178,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  $(window).trigger( "tmcpe.incidentSelected", d );
 	      } )
 	  ;
+
 
 	  //rows.exit().remove();
 
@@ -563,7 +572,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      +'<tr><th>Delay:</th><td>{{properties.tmcpe_delay.toFixed(0)}} veh-hr</td></tr>'
 	      +'</table>'
 	      +'<hr/>'
-	      +'<div style="width=100%;text-align:center;"><a target="_blank" href="incident/d3_tsd?cad={{cad}}">Show detailed analysis</a></div>'
+	      +'<div style="width=100%;text-align:center;"><a target="_blank" href="incident/tsd?cad={{cad}}">Show detailed analysis</a></div>'
       )
       ;
 
@@ -581,6 +590,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  nav.append("a")
 	      .html("Prev")
 	      .attr("class","navbutton navprev")
+	      .attr("title",function(d){$(this).tipsy({"gravity":"nw"});})
 	      .style("float","left")
 	      .on("click",function(d){ 
 		  // get the previous li child
@@ -598,6 +608,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  nav.append("a")
 	      .html("Next")
 	      .attr("class","navbutton navnext")
+	      .attr("title",function(d){$(this).tipsy();})
 	      .style("float","right")
 	      .on("click",function(d){ 
 		  // get the previous li child
@@ -624,15 +635,19 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( checknext.length == 0 ) {
 	      // we're at the end, disable the button
 	      $(".navnext").addClass("disabled");
+	      $(".navnext").attr("title",null );
 	  } else {
 	      $(".navnext").removeClass("disabled");
+	      $(".navnext").attr("title","There are more incidents here, click for the next" );
 	  }
 	  var checkprev = $(container[0]).find('li.selected').prev();
 	  if ( checkprev.length == 0 ) {
 	      // we're at the end, disable the button
 	      $(".navprev").addClass("disabled");
+	      $(".navprev").attr("title",null );
 	  } else {
 	      $(".navprev").removeClass("disabled");
+	      $(".navprev").attr("title","There are more incidents here, click for the previous" );
 	  }
 
       }
