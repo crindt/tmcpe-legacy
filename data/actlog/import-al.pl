@@ -206,10 +206,10 @@ my $tbmapdb = TBMAP::Schema->connect(
     );
 
 
-my $logfile = io( "import-$$.log" );
+my $logfile = io( "./logs/import-$$.log" );
 $logfile < "IMPORT RUN AT ".time2str( "%D %T", localtime() )."\n";
 
-my $loclogfile = io ( "location-parse-$$.log" );
+my $loclogfile = io ( "./logs/location-parse-$$.log" );
 $loclogfile < "IMPORT RUN AT ".time2str( "%D %T", localtime() )."\n";
 
 
@@ -608,7 +608,7 @@ while ( my $t = $rs->next ) {
 	eval { $rec = $tmcpeal->resultset('Icad')->create( 
 		   {
 		       keyfield => $t->keyfield,
-		       logid => $t->logid,
+		       log_id => $t->logid,
 		       logtime => $t->logtime,
 		       logtype => $t->logtype,
 		       location => $t->location,
@@ -652,7 +652,7 @@ while ( my $t = $rs->next ) {
 	# now, push 'em into the db in order
 	foreach my $det ( sort { str2time( $a->{stamp} ) cmp str2time( $b->{stamp} ) } @dets )
 	{
-	    eval { $rec->create_related( 'icad_detail_icads', { stamp => $det->{stamp}, detail => $det->{detail} } ); };
+	    eval { $rec->create_related( 'icad_details', { stamp => $det->{stamp}, detail => $det->{det} } ); };
 	    croak join( "", "ERROR: ", ( $@->{msg} ? $@->{msg} : $@ ) ) if ( $@ );
 	}
 

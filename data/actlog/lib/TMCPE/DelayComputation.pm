@@ -100,6 +100,7 @@ use Class::MethodMaker
      scalar => [ { -default_ctor => sub { my $self = shift; return $self->cad."-".$self->facil."=".$self->dir.".lst" } }, 
 		 'lstfile' ],
      scalar => [ { -default => 0 }, 'debug' ],
+     scalar => [ { -default => './gamsdata/' }, 'directory' ],
      scalar => [ { -default => 1 }, 'compute_vds_upstream_fallback' ],
      scalar => [ { -default => 10 }, 'vds_upstream_fallback' ],
      scalar => [ { -default => 1 }, 'vds_downstream_fudge' ],
@@ -269,7 +270,7 @@ sub get_gams_data {
     my ( $self, @avds ) = @_;
 
     my $if;
-    $if = io ( $self->get_gams_file );
+    $if = io ( $self->directory."./".$self->get_gams_file );
     if ( ! $if->is_file() ) { $if = io ( 'done/'.$self->get_gams_file ) }
     if ( ! $if->is_file() ) { croak 'NO EXISTING GAMS DATA FOR '.$self->cad; }
 
@@ -904,7 +905,7 @@ sub write_gams_program {
 
     my $facilkey = join( ":", $self->facil, $self->dir );
 
-    my $of = io ( $self->get_gams_file );
+    my $of = io ( $self->directory."./".$self->get_gams_file );
 
     # compute number of sections
     my $J = $self->J;
@@ -1371,10 +1372,10 @@ sub solve_program {
     my $gf = $self->get_gams_file;
     my $gu = $self->gams_user;
     my $gh = $self->gams_host;
-    my $rsynccmd = "rsync -avz $gf $gu\@$gh:tmcpe/work\n";
+    my $rsynccmd = "rsync -avz ".$self->directory."$gf $gu\@$gh:tmcpe/work\n";
     ### =: "SYNCING...$rsynccmd"
 
-    system( "rsync -avz $gf $gu\@$gh:tmcpe/work" );
+    system( $rsynccmd );
     
     my $RESLIM="";
     $RESLIM = join( " = ", "RESLIM", $self->gams_reslim ) if $self->gams_reslim;
@@ -1383,7 +1384,7 @@ sub solve_program {
     system( $gamscmd );
     
     my $lf = $self->get_lst_file;
-    $rsynccmd = "rsync -avz $gu\@$gh:tmcpe/work/$lf .";
+    $rsynccmd = "rsync -avz $gu\@$gh:tmcpe/work/$lf ./".$self->directory;
     ### =: "SYNCING BACK...$rsynccmd"
     system( $rsynccmd );
 
@@ -1396,7 +1397,7 @@ sub parse_results {
 
     $self->rawdata( [] );
 
-    my $resf = io( $self->get_lst_file );
+    my $resf = io( $self->directory."./".$self->get_lst_file );
     $self->bad_solution( "RESULTS FILE ".$self->get_lst_file." DOESN'T EXIST" ) if !$resf->exists();
     
     my $found = 0;
@@ -1427,17 +1428,17 @@ sub parse_results {
 	}
 	/^\*\*\*\* \d+ ERROR/ && do
 	{
-	    warn "GENERAL ERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    warn "GENERAL ERROR: CONSULT ".$self->directory."./".$self->get_lst_file." FOR DETAILS";
 	    $self->bad_solution( $_ );
 	};
 	/EXECERROR/ && do 
 	{
-	    warn "EXECERROR: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    warn "EXECERROR: CONSULT ".$self->directory."./".$self->get_lst_file." FOR DETAILS";
 	    $self->bad_solution( $_ );
 	};
 	/Error solving MIP subprogram/ && do 
 	{
-	    warn "Error solving MIP: CONSULT ".$self->get_lst_file." FOR DETAILS (and possibly the CPLEX subdir)";
+	    warn "Error solving MIP: CONSULT ".$self->directory."./".$self->get_lst_file." FOR DETAILS (and possibly the CPLEX subdir)";
 	    $self->bad_solution( $_ );
 	};
 	/RESOURCE INTERRUPT/ && do
@@ -1446,7 +1447,7 @@ sub parse_results {
 	};
 	/No solution returned/ && do 
 	{
-	    warn "No solution?: CONSULT ".$self->get_lst_file." FOR DETAILS";
+	    warn "No solution?: CONSULT ".$self->directory."./".$self->get_lst_file." FOR DETAILS";
 	    $self->bad_solution( $_ );
 	};
 	
