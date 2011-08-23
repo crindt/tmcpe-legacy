@@ -18,7 +18,7 @@ class IncidentImpactAnalysis implements Comparable {
     ]
 
     ProcessedIncident incident;
-    static belongsTo = [incident:ProcessedIncident]
+    static belongsTo = [incident:ProcessedIncident] // This causes cascade delete
 
     Float d12Delay() {
         def f = 0

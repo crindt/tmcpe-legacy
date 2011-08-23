@@ -147,4 +147,24 @@ class IncidentImpactAnalysisController {
             render(view:'create',model:[incidentImpactAnalysisInstance:incidentImpactAnalysisInstance])
         }
     }
+
+    /*
+    def listGroup = {
+	def crit = {
+	    
+	    projections {
+		groupProperty('cad')
+		count('cad'), 'cnt'
+	    }
+	}
+
+	def c = IncidentImpactAnalysis.createCriteria()
+
+	withFormat {
+	    def json = theList.collect { [] }
+	    render json as JSON
+	}
+	
+    }
+    */
 }

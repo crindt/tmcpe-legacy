@@ -85,8 +85,8 @@ __PACKAGE__->set_primary_key(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-19 17:22:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/+DycLsX9g9NH2SwvhVi2A
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-22 13:20:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:w1aBoR9rVTRJNtxT/O7wHQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

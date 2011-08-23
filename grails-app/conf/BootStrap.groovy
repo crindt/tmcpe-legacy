@@ -62,6 +62,11 @@ class BootStrap {
 		inc?.toJSON( json )
 	}
 		
+	grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.ProcessedIncident, cc++ ){ 
+	    inc, json ->
+		inc?.toJSON( json )
+	}
+		
 	grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.TmcLogEntry, cc++ ){ 
 	    le, json ->
 		def df = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm")

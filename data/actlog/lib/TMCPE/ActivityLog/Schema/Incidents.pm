@@ -89,6 +89,22 @@ __PACKAGE__->table("actlog.incidents");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 best_geom
+
+  data_type: 'bytea'
+  is_nullable: 1
+
+=head2 class
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 255
+
+=head2 active_analysis_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -121,11 +137,32 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "incident_clear",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  "best_geom",
+  { data_type => "bytea", is_nullable => 1 },
+  "class",
+  { data_type => "varchar", is_nullable => 1, size => 255 },
+  "active_analysis_id",
+  { data_type => "integer", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("incidents_cad_key", ["cad"]);
 
 =head1 RELATIONS
+
+=head2 analyzed_incident_incident_impact_analyses
+
+Type: has_many
+
+Related object: L<TMCPE::ActivityLog::Schema::AnalyzedIncidentIncidentImpactAnalysis>
+
+=cut
+
+__PACKAGE__->has_many(
+  "analyzed_incident_incident_impact_analyses",
+  "TMCPE::ActivityLog::Schema::AnalyzedIncidentIncidentImpactAnalysis",
+  { "foreign.analyzed_incident_analyses_id" => "self.id" },
+  {},
+);
 
 =head2 incident_clear
 
@@ -212,8 +249,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-19 17:21:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9Hy3KW9xqjYSi9JaE0x5DA
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-22 13:19:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PGtlSiLAGmdV668jmtxsqw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

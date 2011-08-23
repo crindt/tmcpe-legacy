@@ -1584,7 +1584,6 @@ sub write_to_db {
 	    }
 	    $ex->delete;	    
 	}
-
 	# create a new incident impact analysis to store this result
 	$ia = $self->tmcpe_db->resultset( 'IncidentImpactAnalysis' )->create(
 	    {
@@ -1635,7 +1634,7 @@ sub write_to_db {
 					avg_delay => $self->avg_delay,
 
 				    } );
-	$ifa->update;
+	$ifa->update;	
     };
     if ( $@ ) {
     	warn ( ref $@ ? $@->{msg} : $@ );

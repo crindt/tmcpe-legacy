@@ -92,8 +92,8 @@ Related object: L<SpatialVds::Schema::OctamNodes>
 __PACKAGE__->belongs_to("frnode", "SpatialVds::Schema::OctamNodes", { id => "frnode" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-19 17:21:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XXpFRDvy29O5I80+v3/8UQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-22 13:20:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hool840alk20k8HZspCAQQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

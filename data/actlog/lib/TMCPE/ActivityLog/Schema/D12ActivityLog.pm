@@ -312,7 +312,7 @@ __PACKAGE__->has_many(
   {},
 );
 
-=head2 performance_measures_log_ids
+=head2 performance_measures
 
 Type: has_many
 
@@ -321,30 +321,15 @@ Related object: L<TMCPE::ActivityLog::Schema::PerformanceMeasures>
 =cut
 
 __PACKAGE__->has_many(
-  "performance_measures_log_ids",
-  "TMCPE::ActivityLog::Schema::PerformanceMeasures",
-  { "foreign.log_id" => "self.keyfield" },
-  {},
-);
-
-=head2 performance_measures_log_ids
-
-Type: has_many
-
-Related object: L<TMCPE::ActivityLog::Schema::PerformanceMeasures>
-
-=cut
-
-__PACKAGE__->has_many(
-  "performance_measures_log_ids",
+  "performance_measures",
   "TMCPE::ActivityLog::Schema::PerformanceMeasures",
   { "foreign.log_id" => "self.keyfield" },
   {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-19 17:21:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5/IsAuWreq6InRJHTPrrOA
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-22 13:19:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:kIqck8usjcFWSoYRzvo1Sw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

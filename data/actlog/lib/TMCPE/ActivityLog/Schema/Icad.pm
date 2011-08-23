@@ -24,72 +24,52 @@ __PACKAGE__->table("actlog.icad");
   data_type: 'integer'
   is_nullable: 0
 
-=head2 logid
-
-  data_type: 'varchar'
-  is_nullable: 0
-  size: 40
-
-=head2 logtime
-
-  data_type: 'varchar'
-  default_value: NULL::character varying
-  is_nullable: 1
-  size: 80
-
-=head2 logtype
-
-  data_type: 'varchar'
-  default_value: NULL::character varying
-  is_nullable: 1
-  size: 240
-
-=head2 location
-
-  data_type: 'varchar'
-  default_value: NULL::character varying
-  is_nullable: 1
-  size: 240
-
-=head2 area
-
-  data_type: 'varchar'
-  default_value: NULL::character varying
-  is_nullable: 1
-  size: 240
-
-=head2 thomasbrothers
-
-  data_type: 'varchar'
-  default_value: NULL::character varying
-  is_nullable: 1
-  size: 80
-
-=head2 tbxy
-
-  data_type: 'varchar'
-  default_value: NULL::character varying
-  is_nullable: 1
-  size: 40
-
 =head2 d12cad
 
   data_type: 'varchar'
-  default_value: NULL::character varying
-  is_nullable: 1
-  size: 80
+  is_nullable: 0
+  size: 255
 
 =head2 d12cadalt
 
   data_type: 'varchar'
-  default_value: NULL::character varying
-  is_nullable: 1
-  size: 80
+  is_nullable: 0
+  size: 255
+
+=head2 location
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 255
 
 =head2 log_id
 
   data_type: 'varchar'
-  is_nullable: 1
+  is_nullable: 0
+  size: 255
+
+=head2 logtime
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 255
+
+=head2 logtype
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 255
+
+=head2 tbxy
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 255
+
+=head2 thomasbrothers
+
+  data_type: 'varchar'
+  is_nullable: 0
   size: 255
 
 =cut
@@ -97,72 +77,28 @@ __PACKAGE__->table("actlog.icad");
 __PACKAGE__->add_columns(
   "keyfield",
   { data_type => "integer", is_nullable => 0 },
-  "logid",
-  { data_type => "varchar", is_nullable => 0, size => 40 },
-  "logtime",
-  {
-    data_type => "varchar",
-    default_value => \"NULL::character varying",
-    is_nullable => 1,
-    size => 80,
-  },
-  "logtype",
-  {
-    data_type => "varchar",
-    default_value => \"NULL::character varying",
-    is_nullable => 1,
-    size => 240,
-  },
-  "location",
-  {
-    data_type => "varchar",
-    default_value => \"NULL::character varying",
-    is_nullable => 1,
-    size => 240,
-  },
-  "area",
-  {
-    data_type => "varchar",
-    default_value => \"NULL::character varying",
-    is_nullable => 1,
-    size => 240,
-  },
-  "thomasbrothers",
-  {
-    data_type => "varchar",
-    default_value => \"NULL::character varying",
-    is_nullable => 1,
-    size => 80,
-  },
-  "tbxy",
-  {
-    data_type => "varchar",
-    default_value => \"NULL::character varying",
-    is_nullable => 1,
-    size => 40,
-  },
   "d12cad",
-  {
-    data_type => "varchar",
-    default_value => \"NULL::character varying",
-    is_nullable => 1,
-    size => 80,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 255 },
   "d12cadalt",
-  {
-    data_type => "varchar",
-    default_value => \"NULL::character varying",
-    is_nullable => 1,
-    size => 80,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "location",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
   "log_id",
-  { data_type => "varchar", is_nullable => 1, size => 255 },
+  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "logtime",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "logtype",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "tbxy",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "thomasbrothers",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
 );
 __PACKAGE__->set_primary_key("keyfield");
 
 =head1 RELATIONS
 
-=head2 icad_detail_icads
+=head2 icad_details
 
 Type: has_many
 
@@ -171,30 +107,15 @@ Related object: L<TMCPE::ActivityLog::Schema::IcadDetail>
 =cut
 
 __PACKAGE__->has_many(
-  "icad_detail_icads",
-  "TMCPE::ActivityLog::Schema::IcadDetail",
-  { "foreign.icad" => "self.keyfield" },
-  {},
-);
-
-=head2 icad_detail_icad_ids
-
-Type: has_many
-
-Related object: L<TMCPE::ActivityLog::Schema::IcadDetail>
-
-=cut
-
-__PACKAGE__->has_many(
-  "icad_detail_icad_ids",
+  "icad_details",
   "TMCPE::ActivityLog::Schema::IcadDetail",
   { "foreign.icad_id" => "self.keyfield" },
   {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-19 17:21:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:CqJpLQ5kaEEQi4fnv5jTGQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-08-22 13:19:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/3hta5MQajD1C3H/+l3Tog
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

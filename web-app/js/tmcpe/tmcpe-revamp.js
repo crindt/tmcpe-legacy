@@ -142,6 +142,8 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
 
+      function v(x,da) { var d = (da == null ? 0 : da ); return x != null ? x : da; }
+
       // Update the table view with the given data (change in the model)
       function update(x) {
 	  var rows = tbody.selectAll("tr")
@@ -154,7 +156,11 @@ if ( !tmcpe ) var tmcpe = {};
 		  return d.cad
 	      } )
 	      .attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
-	      .style("background-color",function(d){return delayColor(160)(d.properties.tmcpe_delay)})
+	      .style("background-color",function(d){
+		  return ( d.properties.tmcpe_delay != null 
+			   ? delayColor(160)(d.properties.tmcpe_delay)
+			   : "gray" )
+	      } )
 	      .on("click",function(d,e) { 
 		  $(window).trigger( "tmcpe.incidentSelected", d );
 	      } )
@@ -358,7 +364,8 @@ if ( !tmcpe ) var tmcpe = {};
 		      var arr = $.map(props.elements,function(d){
 			  return d.data.properties.tmcpe_delay;
 		      });
-		      point.setAttribute('fill', delayColor(0)(_.max(arr)));
+		      var mm = _.max(arr)
+		      point.setAttribute('fill', mm == -Infinity ? "gray" : delayColor(0)(mm));
 
 		      
                       var more_wider = value.data.properties.elements.length / 3;
@@ -770,8 +777,8 @@ if ( !tmcpe ) var tmcpe = {};
       // When the data is loaded, it gets pushed to the views through the event bindings
       var query = tmcpe
 	  .query()
-	  //.url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&Analyzed=onlyAnalyzed&solution=good&notBounded&samplePercent=0.5&max=1000');
-	  .url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&max=1000');
+	  .url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&Analyzed=onlyAnalyzed&solution=good&notBounded&samplePercent=0.5&max=1000');
+	  //.url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&max=1000');
   });
 
  })();

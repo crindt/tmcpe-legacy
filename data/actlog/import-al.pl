@@ -238,6 +238,7 @@ sub process_performance_measures {
 
     my $pmtype;
     my $data;
+
     if ( $type ) {
 	($_) = ( $type =~ /^\s*(.*?)\s*$/ );
 	my $logid = $log->keyfield;
@@ -366,7 +367,7 @@ sub process_performance_measures {
 		detail => $detail
 	    };
 	    $data->{blocklanes} = $lanes;
-	    $log->create_related( 'performance_measures_log_ids', $data );
+	    $log->create_related( 'performance_measures', $data );
 	}
     }
     return $data;
@@ -809,6 +810,9 @@ eval {
 		$proxyver = $log;
 	    }
 
+	    # first, delete existing performance measures, we'll recompute
+	    $log->delete_related( 'performance_measures' );
+
 	    my @details = split( /:DOSEP:/, $log->memo );
 	    my $memo = shift @details;
 	    foreach ( @details ) {
@@ -852,6 +856,7 @@ eval {
 		    } elsif ( $pm->{pmtype} eq 'VERIFICATION' && 
 				not defined( $inc->verification ) ) {
 			# assume first verification is t1
+			print STDERR "-----------------SETTING VERIFICATION------------------\n";
 			$inc->verification( $log );
 
 		    } elsif ( $pm->{pmtype} eq 'LANES BLOCKED' && 
@@ -891,7 +896,9 @@ eval {
 		$_ = $memo;
 		if ( /TMC HAS VISUAL/ || /VISUAL PER CCTV/) {
 		    $inc->verification( $log );
-		} elsif ( $inc->sigalert_begin ) {
+		} elsif ( $inc->sigalert_begin 
+			  && !$inc->verification
+		    ) {
 		    $inc->verification( $inc->sigalert_begin );
 		}
 	    }

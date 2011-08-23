@@ -13,8 +13,12 @@ hibernate {
 environments {
     development {
         dataSource {
-            dbCreate = "create-drop" // one of 'create', 'create-drop','update'
-            url = "jdbc:hsqldb:mem:devDB"
+            //dbCreate = "create-drop" // one of 'create', 'create-drop','update'
+            //url = "jdbc:hsqldb:mem:devDB"
+	    driverClassName = 'org.postgis.DriverWrapper'
+	    username = "postgres"
+	    dbCreate = "update"
+	    url = 'jdbc:postgresql://192.168.0.2:5432/tmcpe_test'
         }
     }
     test {
@@ -25,8 +29,14 @@ environments {
     }
     production {
         dataSource {
-            dbCreate = "update"
-            url = "jdbc:hsqldb:file:prodDb;shutdown=true"
+            //dbCreate = "update"
+            //url = "jdbc:hsqldb:file:prodDb;shutdown=true"
+
+	    driverClassName = 'org.postgis.DriverWrapper'
+	    dbCreate = "update"
+	    url('jdbc:postgresql://localhost:5432/tmcpe')
+	    username('VDSUSER')
+	    password('VDSPASSWORD')
         }
     }
 }
