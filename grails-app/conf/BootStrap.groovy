@@ -57,11 +57,6 @@ class BootStrap {
 		inc?.toJSON( json )
 	}
 		
-	grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.AnalyzedIncident, cc++ ){ 
-	    inc, json ->
-		inc?.toJSON( json )
-	}
-		
 	grails.converters.JSON.registerObjectMarshaller(edu.uci.its.tmcpe.ProcessedIncident, cc++ ){ 
 	    inc, json ->
 		inc?.toJSON( json )
