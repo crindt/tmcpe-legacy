@@ -34,7 +34,7 @@
     <div id='tmcpeapp'>
       <div class='content'>
 	<div id='leftbox'>
-	  <div id='mapview'></div>
+	  <div id='mapview' tabindex="1"></div>
 	  <div id='cluster-detail'>
 	    <ul id='cluster-list'>
 	    </ul>
