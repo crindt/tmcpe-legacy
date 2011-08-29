@@ -305,6 +305,23 @@ class IncidentController extends BaseController {
 	}
 	def groups = new TreeMap(groupsraw)
 
+	def stackgroupsraw = [:]
+	def stackgroupsstr = params.stackgroups ?: "";
+	stackgroupsstr.tokenize(",").each() { 
+	  if ( it =~ /(?i)year/ ) stackgroupsraw[it] = "extract(year from inc_start_time)";
+	  if ( it =~ /(?i)month/ ) stackgroupsraw[it] = "extract(month from inc_start_time)";
+	  if ( it =~ /(?i)district/ ) stackgroupsraw[it] = "district";
+	  if ( it =~ /(?i)facility/ ) {
+	      stackgroupsraw["facility_id"] = "freeway_id";
+	      stackgroupsraw["freeway_dir"] = "freeway_dir";
+	  }
+	  if ( it =~ /(?i)eventType/ ) stackgroupsraw[it] = "event_type";
+	  if ( it =~ /(?i)sigAlert/ ) stackgroupsraw[it] = "(sigalert_begin IS NOT NULL)";
+	  if ( it =~ /(?i)analyzed/ ) stackgroupsraw[it] = "(id IS NOT NULL)"
+	  //	  if ( it =~ /cctv/ ) groupsraw[it] = "(i.verification.pMeas.pmType)";
+	}
+	def stackgroups = new TreeMap(stackgroupsraw)
+
 	
 
 	def dataraw = ["cnt":"count(distinct cad)"]
@@ -392,45 +409,68 @@ class IncidentController extends BaseController {
 
 	    json {
 		def qq = ("select "+
-		    groups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
-		.join(",")+","+data.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
-		.join(",")+" from tmcpe.incall i "+
-		     // where clause
-		     (filtersraw.entrySet().size()>0?
-		      " where " +
-		      filtersraw.entrySet().collect{ 
-			  return it.value 
-		      }
-		     .join(" AND ") : "" )+
+			  groups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
+			  .join(",")
+			  +( stackgroups.entrySet().size() > 0
+			     ? ","+stackgroups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }.join(",")
+			     : "" )
+			  +","+data.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
+			  .join(",")+" from tmcpe.incall i "+
+			  // where clause
+			  (filtersraw.entrySet().size()>0?
+			   " where " +
+			   filtersraw.entrySet().collect{ 
+			       return it.value 
+			   }
+			  .join(" AND ") : "" )+
 			  " group by "+groups.entrySet().sort{it.key}.collect{ 
 			      return it.value 
  			  }.join(",")+
+			  ( stackgroups.entrySet().size() > 0 
+			    ? ","+stackgroups.entrySet().sort{it.key}.collect{return it.value}.join(",")
+			    : "" )+
 			  " order by "+
-			  groups.entrySet().sort{it.key}.collect{ return it.value }.join(","))
+			  groups.entrySet().sort{it.key}.collect{ return it.value }.join(",")+
+			  ( stackgroups.entrySet().size() > 0
+			    ? ","+stackgroups.entrySet().sort{it.key}.collect{return it.value}.join(",")
+			    : "" )
+			 )
   	        System.err.println(qq)
 		
 		System.err.println(groups)
 		System.err.println(data)
 		//		System.err.println(results)
 		//qq = "select * from tvd"
-		render session.createSQLQuery(qq).list()
-		.collect{ 
+		def ll = session.createSQLQuery(qq).list().collect{ 
+		    System.err.println("ROW: "+it)
 		    def retgroups = [:]
 		    def i = 0;
 		    for ( k in groups.keySet().sort() ) {
 			retgroups[k] = it[i]
 			++i
 		    }
-		    def retstats = [:]
-		    i = 0
+		    
+		    def retstackgroups = [:]
 		    def j = groups.size()
+		    i = 0;
+		    for ( k in stackgroups.keySet().sort() ) {
+			retstackgroups[k] = it[j+i]
+			++i
+		    }
+
+		    def jj = stackgroups.size()
+		    i = 0
+		    def retstats = [:]
 		    for ( k in data.keySet() ) {
-			retstats[k] = it[j+i]
+			retstats[k] = it[j+jj+i]
 			++i
 		    }
 		    return [ "groups": retgroups,
+			     "stackgroups": retstackgroups,
 			     "stats": retstats ]
-		} as JSON
+		};
+		def json = [ ll ]
+		render json as JSON
 	    }
 	}
 
