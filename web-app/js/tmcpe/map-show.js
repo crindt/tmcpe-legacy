@@ -58,20 +58,16 @@ if ( !tmcpe ) var tmcpe = {};
       function executeQuery() {
 	  if ( url == null ) return; // more checks
 
-	  // loading hook should go here
-
+	  // loading event
 	  $(window).trigger( "tmcpe.incidentsRequested", query );
 
 	  d3.json( url,
 		   function(e) {
-		       // hold the json response here
-		       data = e;
+		       data = e; // hold the json response here
 
+		       // done loading event
 		       $(window).trigger( "tmcpe.incidentsLoaded", data );
 		   });
-
-
-	  
       }
 
       // Setting the url executes the query
@@ -744,8 +740,7 @@ if ( !tmcpe ) var tmcpe = {};
   $(document).ready(function() {
 
       // create view objects
-      var it = d3.select('#incident-table');
-      var tableView = tmcpe.tableView().container(it);
+      var tableView = tmcpe.tableView().container(d3.select('#incident-table'));
       var mapView = tmcpe.query.mapView().container(d3.select('#mapview'));
       var detailView = tmcpe.query.detailView().container(d3.select('#cluster-detail'));
       
