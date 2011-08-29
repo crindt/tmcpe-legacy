@@ -11,7 +11,7 @@ datasources = {
 //        readOnly(false)
         domainClasses([edu.uci.its.tmcpe.TmcLogEntry,/*edu.uci.its.tmcpe.Incident,*/edu.uci.its.tmcpe.ProcessedIncident/*,edu.uci.its.tmcpe.AnalyzedIncident*/,edu.uci.its.tmcpe.FacilitySection,edu.uci.its.tmcpe.IncidentImpactAnalysis,edu.uci.its.tmcpe.IncidentFacilityImpactAnalysis,edu.uci.its.tmcpe.TmcFacilityImpactAnalysis,edu.uci.its.tmcpe.AnalyzedSection,edu.uci.its.tmcpe.IncidentSectionData,edu.uci.its.tmcpe.Icad,edu.uci.its.tmcpe.IcadDetail,edu.uci.its.tmcpe.TmcPerformanceMeasures,edu.uci.its.testbed.Vds,edu.uci.its.tmcpe.CommLogEntry])
         dbCreate('update')
-        loggingSql(true)
+        loggingSql(false)
         dialect(org.postgis.hibernate.PostGISDialect)
 //        dialect(org.hibernatespatial.postgis.PostGISDialect) 
         environments(['development','test'])
