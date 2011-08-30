@@ -39,6 +39,7 @@
 	  <h1>Aggregates</h1>
 	</div>
 	<div id='content'>
+	  <input type="text" id='querybox' value='groups=year&stackgroups=eventType' style="width:30em"></input>
 	  <div id='aggchart'></div>
 	</div>
       </div>

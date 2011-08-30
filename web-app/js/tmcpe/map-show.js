@@ -852,9 +852,9 @@ if ( !tmcpe ) var tmcpe = {};
 
       // read query box
       $('#new-incident').keypress(function(e){
-      if(e.which == 13){
-	  query.url("incident/list.geojson?max=1000&Analyzed=onlyAnalyzed&solution=good&"+this.value);
-       }
+	  if(e.which == 13){
+	      query.url("incident/list.geojson?max=1000&Analyzed=onlyAnalyzed&solution=good&"+this.value);
+	  }
       });
 
       $('#year').change(function(){

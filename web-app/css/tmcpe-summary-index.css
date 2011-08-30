@@ -1,8 +1,24 @@
-#chart {
+#aggchart {
 }
 
-.chart {
-    background: white;
+#aggchart .chart {
+    background: #dddddd;
     stroke: white;
     fill: steelblue;
+    padding: 20px;
+    shape-rendering: crispEdges;
 }
+
+#aggchart text.label {
+    stroke-width: 0px;
+    text-align: right;
+    font: 10px sans-serif;
+    fill: black;
+}
+
+#aggchart .rule {
+    stroke: white;
+    stroke-opacity: 0.3;
+    shape-rendering: crispEdges;
+}
+
