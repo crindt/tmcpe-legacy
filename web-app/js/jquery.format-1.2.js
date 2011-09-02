@@ -7,7 +7,7 @@
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  *
- * Date: 2011-08-19 16:02:40 -0700 (Fri, 19 Aug 2011)
+ * Date: 2011-08-30 13:45:05 -0700 (Tue, 30 Aug 2011)
  */
 (function ($) {
 
@@ -447,7 +447,7 @@
                                 parts = value.toString().split('.');
                             if (typeof parts[1] != UNDEFINED) {
                                 for (i = 0; i < maxFraction; i++) {
-                                    if (parts[1].substr(i, 1) == '0' && i < maxFraction - 1) {
+                                    if (parts[1].substr(i, 1) == '0' && i < maxFraction - 1 && (tempFraction.length != maxFraction || tempFraction.substr(0, 1) == '0')) {
                                         tempFraction = '0' + tempFraction;
                                     } else {
                                         break;

@@ -58,15 +58,15 @@ if [ $? -gt 0 ]; then
 fi
 
 # jquery-ui
-JQUERYUI_SRCDIR=`pwd`/src/js
-JQUERYUI_STAGEDIR=`pwd`/stage
-JQUERYUI_VERSION=1.8.13
-( ( mkdir -p $JQUERYUI_STAGEDIR && cd $JQUERYUI_STAGEDIR && \
-    unzip $JQUERYUI_SRCDIR/jquery-ui-$JQUERYUI_VERSION.custom.zip -x development-bundle/* -x index.html ) ) 
-if [ $? -gt 0 ]; then
-    echo "FAILED @ JQUERYUI"
-    exit 1
-fi
+# JQUERYUI_SRCDIR=`pwd`/src/js
+# JQUERYUI_STAGEDIR=`pwd`/stage
+# JQUERYUI_VERSION=1.8.13
+# ( ( mkdir -p $JQUERYUI_STAGEDIR && cd $JQUERYUI_STAGEDIR && \
+#     unzip $JQUERYUI_SRCDIR/jquery-ui-$JQUERYUI_VERSION.custom.zip -x development-bundle/* -x index.html ) ) 
+# if [ $? -gt 0 ]; then
+#     echo "FAILED @ JQUERYUI"
+#     exit 1
+# fi
 
 # polymaps
 POLYMAPS_SRCDIR=`pwd`/src/js/polymaps
@@ -88,17 +88,17 @@ if [ $? -gt 0 ]; then
     exit 1
 fi
 
-# tipsy
-PROTOVIS_SRCDIR=`pwd`/src/js/tipsy
-PROTOVIS_STAGEDIR=`pwd`/stage
-( mkdir -p $PROTOVIS_STAGEDIR && cd $PROTOVIS_SRCDIR && \
-    rsync -avz src/javascripts/* $PROTOVIS_STAGEDIR/js && \
-    rsync -avz src/stylesheets/* $PROTOVIS_STAGEDIR/css \
-    )
-if [ $? -gt 0 ]; then
-    echo "FAILED @ PROTOVIS"
-    exit 1
-fi
+# # tipsy
+# PROTOVIS_SRCDIR=`pwd`/src/js/tipsy
+# PROTOVIS_STAGEDIR=`pwd`/stage
+# ( mkdir -p $PROTOVIS_STAGEDIR && cd $PROTOVIS_SRCDIR && \
+#     rsync -avz src/javascripts/* $PROTOVIS_STAGEDIR/js && \
+#     rsync -avz src/stylesheets/* $PROTOVIS_STAGEDIR/css \
+#     )
+# if [ $? -gt 0 ]; then
+#     echo "FAILED @ PROTOVIS"
+#     exit 1
+# fi
 
 # d3
 D3_SRCDIR=`pwd`/src/js/d3

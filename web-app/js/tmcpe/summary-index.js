@@ -103,9 +103,18 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  
 
+	  function last_subgroup_data(sgidx,gidx) {
+	      if ( sgidx <= 0 ) return 0;
+
+	      return ( odata[sgidx-1][gidx] != null 
+		       ? odata[sgidx-1][gidx].x
+		       : last_subgroup_data( sgidx-1, gidx ) );
+	  }
+
 	  _.each(data,function(it){
 	      var sgstr = stringifyMap(it.stackgroups);
 	      var gstr  = stringifyMap(it.groups);
+	      var filtstr = stringifyMap(it.filters);
 	      var sgidx;
 	      var gidx;
 	      if ( (sgidx = sg[sgstr]) == null ) {
@@ -117,14 +126,25 @@ if ( !tmcpe ) var tmcpe = {};
 	      if ( odata[sgidx] == null ) odata[sgidx] = new Array();
 	      odata[sgidx][gidx] = { y: gidx, 
 				     x: it.stats["cnt"],  // FIXME: hardwire
-				     x0: (sgidx > 0 ? ( odata[sgidx-1][gidx] != null ? odata[sgidx-1][gidx].x : 0 ) : 0 ) };
+				     group: gstr,
+				     subgroup: sgstr,
+				     filters: filtstr,
+				   };
 	  });
 
 	  // make sure everything is initialized (in case of missing data from the controller)
-	  for( i = 0; i < _.keys(sg).length; ++i )
-	      for ( j = 0; j < _.keys(g).length; ++j )
-		  if ( odata[i][j] == null ) odata[i][j] = {y: j, x:0, x0: (i > 0 ? ( odata[i-1][j] != null ? odata[i-1][j].x : 0 ) : 0 ) };
+	  var sgk = _.keys(sg),
+	  gk = _.keys(g);
+	  for( i = 0; i < sgk.length; ++i )
+	      for ( j = 0; j < gk.length; ++j )
+		  if ( odata[i][j] == null ) odata[i][j] = {y: j, x:0 };
 
+	  // now set the last subgroup data
+	  _.each(odata,function(it,sgidx){
+	      _.each(it,function(d,gidx){
+		  d.x0 = last_subgroup_data(sgidx,gidx)
+	      });
+	  });
 
 	  // n is the number of "layers", a.k.a. subgroups
 	  var n = odata.length;
@@ -172,22 +192,86 @@ if ( !tmcpe ) var tmcpe = {};
 	      .enter().append("svg:g")
 	      .attr("class","bar")
 	      .attr("transform",function(d){return "translate(0,"+y(d)+")";})
-	      .attr("title",function(d){ 
-		  $(this).tipsy(); 
-		  return d == null ? "" : d.x;})
 	  ;
 
 	  bars.append("svg:rect")
 	      .attr("height",20)
 	      .attr("y",0)
-	      .attr("x",0)
-	      .attr("width",0)
-	      .transition()
-	      .delay(function(d, i) { return i * 10; })
+	      //.attr("x",0)
+	      //.attr("width",0)
+	      //.transition()
+	      //.delay(function(d, i) { return i * 10; })
 	      .attr("x", x0)
 	      .attr("width", function(d) { 
 		  return x1(d) - x0(d); })
+	      .attr("title",function(d){ return ( d == null ? "" : d.x) })
+	      .on("mouseover",function(d){ 
+		  d3.select('#aggchartdetail').text( d == null ? "" : d.subgroup +":"+d.x)
+	      })
+	      .on("click",function(d){ 
+		  var gparams = $.parseJSON(d.group);
+		  var sgparams = $.parseJSON(d.subgroup);
+		  var filtparams = $.parseJSON(d.filters);
+		  var parstr = new Array();
+		  for ( k in gparams ) {
+		      parstr.push(k+"="+gparams[k]);
+		  }
+		  for ( k in sgparams ) {
+		      parstr.push(k+"="+sgparams[k]);
+		  }
+		  if ( filtparams instanceof Array ) {
+		      for ( k in filtparams ) {
+			  // filters my be a single item (not a key value pair), catch this here
+			  if(isNaN(parseInt(k * 1))) {
+			      // key isn't a number, so assume it's an actual key
+			      parstr.push(k+"="+filtparams[k]);
+			  } else 
+			      // Oops, key is a number, assume this param is a singleton
+			      parstr.push(filtparams[k]);
+		      }
+		  } else {
+		      // not array, just push filtparams
+		      parstr.push( filtparams );
+		  }
+		  window.open('map/show?'+parstr.join("&"));
+	      })
+					     
 	  ;
+
+	  // Add tooltips for each bar
+	  $('#aggchart rect[title]').tooltip();
+
+/*
+	  bars.each(function(d){
+	      var bb = this.getBBox();
+	      // anchor = bottom
+	      var x = bb.x;
+	      var y = bb.y;
+
+	      var m = this.getScreenCTM();
+	      var mi = m.inverse();
+	      var point = (this.ownerSVGElement || this).createSVGPoint();
+	      point.x = x;
+	      point.y = y;
+	      
+	      point = point.matrixTransform(m);
+
+	      var tip = d3.select("#aggchart").append("div")
+		  .attr("style",["position:absolute",
+				 //"visibility:hidden",
+				 "background-color:yellow",
+				 "z-index:100000",
+				 "left:"+point.x+"px",
+				 "top:"+point.y+"px",
+				 "width:"+bb.width+"px",
+				 "height:"+bb.height+"px"].join(";"))
+		  .attr("title",d3.select(this).attr("title"))
+	      ;
+
+	      $(tip[0]).tipsy(); 
+	  });
+*/
+	  
 
 	  var gkeys = _.keys(g);
 

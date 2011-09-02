@@ -86,6 +86,13 @@ class IncidentController extends BaseController {
 			    eq( "freewayDir", params.direction )
 			}
 		    }
+		    
+		    if ( params.year ) {
+			def from = Date.parse("yyyy-MM-dd",  params.year.toInteger() + '-01-01')
+			def to =   Date.parse("yyyy-MM-dd", (params.year.toInteger()+1) + '-01-01')
+			log.info("============DATES: " + from + " <<>> "  + to )
+			between( 'startTime', from, to )
+		    }
       
 		    // Limit to particular date range
 		    if ( params.startDate || params.endDate ) {
@@ -114,11 +121,12 @@ class IncidentController extends BaseController {
 		    }
 
 		    // Limit depending on whether the incident has been analyzed
-		    if ( params.Analyzed == "onlyAnalyzed" ) {
+		    def a = params.Analyzed?: params.analyzed?:"";
+		    if ( a == "ONLYANALYZED" || a == "true") {
 			// Limit to analyzed...
 			not { sizeEq("analyses", 0) }
 	    
-		    } else if ( params.Analyzed == "unAnalyzed" ) {
+		    } else if ( a == "UNANALYZED" || a == "false" ) {
 			// ...or unanalyzed incidents
 			sizeEq("analyses", 0)
 		    }
@@ -201,8 +209,11 @@ class IncidentController extends BaseController {
 		    } 
 
 		    // Limit to sigalerts
-		    if ( params.onlySigalerts == "onlySigalerts" ) {
+		    if ( params.sigalerts == "onlySigalerts" ) {
 			not { isNull( 'sigalertBegin' ) }
+		    }
+		    if ( params.sigalerts == "noSigalerts" ) {
+			isNull( 'sigalertBegin' )
 		    }
 
 		    // Finally, figured out how to do projections!
@@ -354,8 +365,22 @@ class IncidentController extends BaseController {
 			filtersraw[key] = "("+["inc_start_time",
 					       match[0][2],
 					       "'"+match[0][3]+"'"].join(" ")+")"
+		    } else if ( it =~ /analyzed/ ) {
+			System.err.println( "ANALYZED" );
+			if ( match[0][3] =~ /(?i)onlyAnalyzed/ ) {
+			    filtersraw[key] = "(id IS NOT NULL)"   // in this query "id" is the id of the ifia
+			} else if ( match[0][3] =~ /(?i)unAnalyzed/ ) {
+			    filtersraw[key] = "(id IS NULL)"   // in this query "id" is the id of the ifia			    
+			} else {
+			System.err.println( "   BOG A LOG" );
+			}
+
 		    } else if ( it =~ /sigalerts/ ) {
-			filtersraw[key] = "(sigalert_begin IS " + (match[0][3] == "true" ? "" : "NOT" )  + " NULL"
+			if ( match[0][3] =~ /(?i)onlySigalerts/ ) {
+			    filtersraw[key] = "(sigalert_begin IS NOT NULL)"
+			} else if ( match[0][3] =~ /(?i)noSigalerts/ ) {
+			    filtersraw[key] = "(sigalert_begin IS NULL)"
+			}
 		    } else if ( it =~ /solution/ ) {
 			def not = ""
 			if ( match[0][2] == '<>' ) not = " NOT "
@@ -388,11 +413,6 @@ class IncidentController extends BaseController {
 			else if ( match[0][3] =~ /(?i)UNKNOWN/ ) type = "^UNKNOWN.*"
 			filtersraw[key] = "$not (event_type ~* '$type')"
 		    }
-		} else if ( it =~ /(?i)onlyAnalyzed/ ) {
-		    filtersraw[it] = "(id IS NOT NULL)"   // in this query "id" is the id of the ifia
-
-		} else if ( it =~ /(?i)onlyUnanalyzed/ ) {
-		    filtersraw[it] = "(id IS NULL)"   // in this query "id" is the id of the ifia
 
 		} else if ( it =~ /(?i)onlySigalerts/ ) {
 		    filtersraw[it] = "(sigalert_begin IS NOT NULL)"
@@ -465,8 +485,10 @@ class IncidentController extends BaseController {
 			retstats[k] = it[j+jj+i]
 			++i
 		    }
+
 		    return [ "groups": retgroups,
 			     "stackgroups": retstackgroups,
+			     "filters": params.filters,
 			     "stats": retstats ]
 		};
 		def json = [ ll ]

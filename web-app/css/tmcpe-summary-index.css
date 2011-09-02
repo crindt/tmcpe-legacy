@@ -22,3 +22,10 @@
     shape-rendering: crispEdges;
 }
 
+.chart rect {
+    stroke: white;
+    shape-rendering: crispEdges;
+}
+.chart rect:hover {
+    fill-opacity: 0.8;
+}

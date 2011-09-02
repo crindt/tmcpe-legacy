@@ -44,6 +44,8 @@ if ( !tmcpe ) var tmcpe = {};
   };
   tmcpe.query = {};
 
+  tmcpe.nodatacolor = "#eeeeee";
+
   po = org.polymaps;
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -150,9 +152,6 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
 
-
-      var nodatacolor = "#eeeeee";
-
       var first = true;
 
 
@@ -176,7 +175,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .style("background-color",function(d){
 		  return ( d.properties.tmcpe_delay != null 
 			   ? delayColor(160)(d.properties.tmcpe_delay)
-			   : nodatacolor )
+			   : tmcpe.nodatacolor )
 	      } )
 	      .on("click",function(d,e) { 
 		  $(window).trigger( "tmcpe.incidentSelected", d );
@@ -385,7 +384,7 @@ if ( !tmcpe ) var tmcpe = {};
 			  return d.data.properties.tmcpe_delay;
 		      });
 		      var mm = _.max(arr)
-		      point.setAttribute('fill', mm == -Infinity ? nodatacolor : delayColor(0)(mm));
+		      point.setAttribute('fill', mm == -Infinity ? tmcpe.nodatacolor : delayColor(0)(mm));
 
 		      
                       var more_wider = value.data.properties.elements.length / 3;
@@ -577,10 +576,10 @@ if ( !tmcpe ) var tmcpe = {};
 	      +'<table>'
 	      +'<tr><th>Type:</th><td>{{eventType}}</td></tr>'
 	      +'<tr><th>Location:</th><td>{{properties.locString}}</td></tr>'
-	      +'<tr title="The delay associated with this event using the D12 < 35-mph method"><th>Delay<35:</th><td>{{properties.d12_delay.toFixed(0)}} veh-hr</td></tr>'
-	      +'<tr title="The delay associated with this event using the TMCPE method"><th>Delay:</th><td>{{properties.tmcpe_delay.toFixed(0)}} veh-hr</td></tr>'
-	      +'<tr title="The fraction of savings attributable to TMC actions"><th>Savings:</th><td>{{properties.savings.toFixed(0)}} veh-hr</td></tr>'
-	      +'<tr title="The approximate percent of time-space cells sampled for the incident"><th>Sample%:</th><td>{{(properties.samplePercent*100).toFixed(1)}}%</td></tr>'
+	      +'<tr title="The delay associated with this event using the D12 < 35-mph method"><th>Delay<35:</th><td>{{(properties.d12_delay||0).toFixed(0)}} veh-hr</td></tr>'
+	      +'<tr title="The delay associated with this event using the TMCPE method"><th>Delay:</th><td>{{(properties.tmcpe_delay||0).toFixed(0)}} veh-hr</td></tr>'
+	      +'<tr title="The fraction of savings attributable to TMC actions"><th>Savings:</th><td>{{(properties.savings||0).toFixed(0)}} veh-hr</td></tr>'
+	      +'<tr title="The approximate percent of time-space cells sampled for the incident"><th>Sample%:</th><td>{{((properties.samplePercent*100)||0).toFixed(1)}}%</td></tr>'
 	      +'</table>'
 	      +'<hr/>'
 	      +'<div style="width=100%;text-align:center;"><a target="_blank" href="incident/tsd?cad={{cad}}">Show detailed analysis</a></div>'
@@ -601,7 +600,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  nav.append("a")
 	      .html("Prev")
 	      .attr("class","navbutton navprev")
-	      .attr("title",function(d){$(this).tipsy({"gravity":"nw"});})
+	      .attr("title",function(d){$(this).tooltip()})
 	      .style("float","left")
 	      .on("click",function(d){ 
 		  // get the previous li child
@@ -619,7 +618,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  nav.append("a")
 	      .html("Next")
 	      .attr("class","navbutton navnext")
-	      .attr("title",function(d){$(this).tipsy();})
+	      .attr("title",function(d){$(this).tooltip();})
 	      .style("float","right")
 	      .on("click",function(d){ 
 		  // get the previous li child
@@ -683,7 +682,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      });
 
 	  // add tool tips to the rows
-	  $(list[0]).find('tr').tipsy();
+	  $(list[0]).find('tr').tooltip();
 
 	  li.exit().remove();
       }
@@ -844,9 +843,16 @@ if ( !tmcpe ) var tmcpe = {};
       
       // Create query object and load the data.
       // When the data is loaded, it gets pushed to the views through the event bindings
+      map_show_params['max'] = 1000;
+      var qparm = _.map(_.filter(_.keys(map_show_params),function(x){
+		   return x != 'action' && x!= 'controller';
+	       }), function (key) { 
+		   return key+"="+map_show_params[key]; 
+	       });
       var query = tmcpe
 	  .query()
-	  .url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&Analyzed=onlyAnalyzed&solution=good&notBounded&samplePercent=0.5&max=1000');
+	  .url('incident/list.geojson?'+ qparm.join('&'));
+	  //.url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&Analyzed=onlyAnalyzed&solution=good&notBounded&samplePercent=0.5&max=1000');
 	  //.url('incident/list.geojson?startDate=2011-06-01&endDate=2012-01-01&max=1000');
 
 

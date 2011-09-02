@@ -15,6 +15,7 @@
     <p:javascript src='jquery.tipsy' />
     <p:javascript src='jquery.svg' />    <!-- plugins for manipulating svg using jquery -->
     <p:javascript src='jquery.svgdom' /> <!-- plugins for manipulating svg using jquery -->
+    <script type="text/javascript" src="http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js" />
 
     <!-- visualization toolkits -->
     <p:javascript src='polymaps' />
@@ -41,6 +42,7 @@
 	<div id='content'>
 	  <input type="text" id='querybox' value='groups=year&stackgroups=eventType' style="width:30em"></input>
 	  <div id='aggchart'></div>
+	  <div id='aggchartdetail'></div>
 	</div>
       </div>
       <div id='loading'>

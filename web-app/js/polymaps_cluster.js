@@ -131,7 +131,7 @@
 
 	    var key = polymaps_cluster.coordKey( coord );
 
-	    console.log( key );
+	    //console.log( key );
             if(!points[key]){
                 // create a new cluster, initializing with the current point
                 newpoint = elem;

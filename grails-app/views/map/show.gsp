@@ -22,6 +22,10 @@
     <p:javascript src='d3' />
     <p:javascript src='d3.time' />
     <p:javascript src='protovis' />
+    <p:javascript src='jquery.tools.min'/>
+<!--
+    <script type="text/javascript" src="http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js" />
+-->
 
     <!-- supporting css -->
     <p:css name="tipsy" />
@@ -29,6 +33,11 @@
 
     <!-- app code -->
     <p:javascript src='tmcpe/map-show' />
+
+    <script type="text/javascript">
+      var map_show_params = ${tparams};
+    </script>
+
   </head>
   <body>
     <div id='tmcpeapp'>

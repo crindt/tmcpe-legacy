@@ -1,5 +1,6 @@
 package edu.uci.its.tmcpe
 
+import grails.converters.*
 import grails.plugins.springsecurity.Secured
 
 @Secured(["ROLE_ADMIN","ROLE_TMCPE","ROLE_CALTRANS_D12_TMC"])
@@ -22,5 +23,8 @@ class MapController extends BaseController {
     def index = { redirect(action:show,params:params) }
 
     // Shows the map
-    def show = {}
+    def show = {
+	def json = new JSON(params);
+	[tparams:json.toString(true)]
+    }
 }
