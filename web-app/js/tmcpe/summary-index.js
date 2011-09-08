@@ -220,18 +220,15 @@ if ( !tmcpe ) var tmcpe = {};
 		      parstr.push(k+"="+sgparams[k]);
 		  }
 		  if ( filtparams instanceof Array ) {
-		      for ( k in filtparams ) {
+		      for ( e in filtparams ) {
 			  // filters my be a single item (not a key value pair), catch this here
-			  if(isNaN(parseInt(k * 1))) {
-			      // key isn't a number, so assume it's an actual key
-			      parstr.push(k+"="+filtparams[k]);
-			  } else 
-			      // Oops, key is a number, assume this param is a singleton
-			      parstr.push(filtparams[k]);
+			  parstr.push(e.value);
 		      }
 		  } else {
 		      // not array, just push filtparams
-		      parstr.push( filtparams );
+		      for ( k in filtparams ) {
+			  parstr.push( filtparams[k] );
+		      }
 		  }
 		  window.open('map/show?'+parstr.join("&"));
 	      })

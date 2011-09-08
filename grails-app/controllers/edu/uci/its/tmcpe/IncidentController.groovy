@@ -121,7 +121,7 @@ class IncidentController extends BaseController {
 		    }
 
 		    // Limit depending on whether the incident has been analyzed
-		    def a = params.Analyzed?: params.analyzed?:"";
+		    def a = (params.Analyzed?: params.analyzed?:"").toUpperCase();
 		    if ( a == "ONLYANALYZED" || a == "true") {
 			// Limit to analyzed...
 			not { sizeEq("analyses", 0) }
@@ -494,11 +494,13 @@ class IncidentController extends BaseController {
 		    }
 
 		    def retfilt = [:]
-		    for ( k in filtersraw ) {
+		    System.err.println( "FILTERSRAW := "+filtersraw );
+		    for ( e in filtersraw ) {
 			
-			retfilt[k] = k //[filtersraw[k]?.param,filtersraw[k]?.cmp,filtersraw[k]?.val].grep({it != null}).join("")
+			System.err.println( "FILTERSRAW ["+e.key+"]"+filtersraw[e.key] )
+			retfilt[e.key] = [e.value.param,e.value.cmp,e.value.val].grep({it != null}).join("")
 
-			System.err.println( "K: " +k + " := " + retfilt[k] );
+			System.err.println( "K: " +e.key + " := " + retfilt[e.key] );
 
 		    }
 
