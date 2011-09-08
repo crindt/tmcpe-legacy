@@ -165,7 +165,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  return (d != null ? d.x : -Infinity );
 	      });
 	  }),
-	  y = function(d) { return d != null ? d.y * barheight : 0; },
+	  y = function(d,bh) { return d != null ? d.y * (bh==null?barheight:bh) : 0; },
 	  x0 = function(d) { return d.x0 * w / mx; },
 	  x1 = function(d) { return (d.x + d.x0) * w / mx; }
 	  ;
@@ -175,7 +175,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .append("svg:svg")
 	      .attr("id","aggchart")
 	      .attr("class","chart")
-	      .attr("height",(m+1)*barheight)
+	      .attr("height",(m+1)*barheight*2)
 	      .attr("width",ww);
 
 
@@ -235,6 +235,51 @@ if ( !tmcpe ) var tmcpe = {};
 					     
 	  ;
 
+	  // create the legend
+	  var legend = svg.append("svg:g")
+	      .attr("class","legend")
+	      .attr("transform","translate("+(margin+20)+","+(y({y:odata.length}))+")")
+	  ;
+
+	  var items = legend.selectAll("g.legenditem")
+	      .data(odata)
+	      .enter().append("svg:g")
+	      .attr("class","legenditem")
+	      .attr("transform",function(d,i){
+		  return "translate(0,"+y({y:i},barheight*.65)+")";})
+	  ;
+
+	  items.append("svg:rect")
+	      .attr("x",0)
+	      .attr("y",0)
+	      .attr("height",10)
+	      .attr("width",10)
+	      .style("fill",function(d,i){return color(i/(n-1))})
+	  ;
+	  items.append("svg:rect")
+	      .attr("x",0)
+	      .attr("y",0)
+	      .attr("height",10)
+	      .attr("width",10)
+	      .style("fill",function(d,i){return color(i/(n-1))})
+	  ;
+	  items.append("svg:text")
+	      .attr("class", "label")
+	      .attr("text-anchor", "left")
+	      .attr("x",15)
+	      .attr("y",0)
+	      .attr("dy","9px")
+	      .text(function(d){
+		  var good_data = _.filter(d,function(val){return val.subgroup != null});
+		  var sg = $.parseJSON(good_data[0].subgroup);
+		  return _.map(sg,function(val,key){return val;}).join(", ");
+	      })
+	  ;
+
+
+	  
+	  
+
 	  // Add tooltips for each bar
 	  $('#aggchart rect[title]').tooltip();
 
@@ -271,8 +316,11 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 
 	  var gkeys = _.keys(g);
+	  var gvals = _.map(gkeys,function(d){return $.parseJSON(d)});
 
-	  var labels = svg.selectAll("text.label")
+	  var labelblock = svg.append("svg:g");
+
+	  var labels = labelblock.selectAll("text.label")
 	      .data(odata[0])
 	      .enter().append("svg:text")
 	      .attr("class", "label")
@@ -282,7 +330,9 @@ if ( !tmcpe ) var tmcpe = {};
 	      //.attr("dx", x({x: .45}))
 	      .attr("dy", "15px")
 	      .attr("text-anchor", "end")
-	      .text(function(d, i) { return gkeys[i] });
+	      .text(function(d, i) { 
+		  return _.values(gvals[i]).join(", ");
+	      });
 
 	  var xscale = d3.scale.linear().domain([0,mx]).range([0,w]);
 
