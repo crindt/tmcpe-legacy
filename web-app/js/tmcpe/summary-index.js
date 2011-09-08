@@ -107,9 +107,9 @@ if ( !tmcpe ) var tmcpe = {};
 	      if ( sgidx <= 0 ) return 0;
 
 	      return ( odata[sgidx-1][gidx] != null 
-		       ? odata[sgidx-1][gidx].x
-		       : last_subgroup_data( sgidx-1, gidx ) );
-	  }
+		       ? odata[sgidx-1][gidx].x : 0 )
+		  + last_subgroup_data( sgidx-1, gidx );
+      }
 
 	  _.each(data,function(it){
 	      var sgstr = stringifyMap(it.stackgroups);
