@@ -360,43 +360,50 @@ class IncidentController extends BaseController {
 		def match = it =~ /(.*?)(=|[<>]=*|<>)(.*)/;
 		if ( match.size() == 1 ) {
 		    System.err.println("Adding filter " + match[0].join(" "))
-		    def key = match[0][0]+match[0][1]
+		    def key = match[0][0]
+		    System.err.println("FILTER KEY " + match[0][0])
+		    System.err.println("FILTER KEY2 " + key)
+		    filtersraw[key] = [:]
+		    filtersraw[key].param = match[0][1]
+		    filtersraw[key].cmp = match[0][2]
+		    filtersraw[key].val = match[0][3]
+
 		    if ( it =~ /date/ ) {
-			filtersraw[key] = "("+["inc_start_time",
+			filtersraw[key].impl = "("+["inc_start_time",
 					       match[0][2],
 					       "'"+match[0][3]+"'"].join(" ")+")"
 		    } else if ( it =~ /analyzed/ ) {
 			System.err.println( "ANALYZED" );
 			if ( match[0][3] =~ /(?i)onlyAnalyzed/ ) {
-			    filtersraw[key] = "(id IS NOT NULL)"   // in this query "id" is the id of the ifia
+			    filtersraw[key].impl = "(id IS NOT NULL)"   // in this query "id" is the id of the ifia
 			} else if ( match[0][3] =~ /(?i)unAnalyzed/ ) {
-			    filtersraw[key] = "(id IS NULL)"   // in this query "id" is the id of the ifia			    
+			    filtersraw[key].impl = "(id IS NULL)"   // in this query "id" is the id of the ifia			    
 			} else {
 			System.err.println( "   BOG A LOG" );
 			}
 
 		    } else if ( it =~ /sigalerts/ ) {
 			if ( match[0][3] =~ /(?i)onlySigalerts/ ) {
-			    filtersraw[key] = "(sigalert_begin IS NOT NULL)"
+			    filtersraw[key].impl = "(sigalert_begin IS NOT NULL)"
 			} else if ( match[0][3] =~ /(?i)noSigalerts/ ) {
-			    filtersraw[key] = "(sigalert_begin IS NULL)"
+			    filtersraw[key].impl = "(sigalert_begin IS NULL)"
 			}
 		    } else if ( it =~ /solution/ ) {
 			def not = ""
 			if ( match[0][2] == '<>' ) not = " NOT "
 		    
 			if ( match[0][3] == 'good' ) {
-			    filtersraw[key] = "$not (bad_solution IS NULL AND id IS NOT NULL)"
+			    filtersraw[key].impl = "$not (bad_solution IS NULL AND id IS NOT NULL)"
 			} else if ( match[0][3] == 'bad' ) {
-			    filtersraw[key] = "$not (bad_solution IS NOT NULL)"
+			    filtersraw[key].impl = "$not (bad_solution IS NOT NULL)"
 			} else if ( match[0][3] == 'bounded' ) {
-			    filtersraw[key] = "$not (solution_time_bounded OR solution_space_bounded AND id IS NOT NULL)"
+			    filtersraw[key].impl = "$not (solution_time_bounded OR solution_space_bounded AND id IS NOT NULL)"
 			} else if ( match[0][3] == 'timeBounded' ) {
-			    filtersraw[key] = "$not (solution_time_bounded and id IS NOT NULL)"
+			    filtersraw[key].impl = "$not (solution_time_bounded and id IS NOT NULL)"
 			} else if ( match[0][3] == 'spaceBounded' ) {
-			    filtersraw[key] = "$not (solution_space_bounded and id IS NOT NULL)"
+			    filtersraw[key].impl = "$not (solution_space_bounded and id IS NOT NULL)"
 			} else if ( match[0][3] == 'resourceConstrained' ) {
-			    filtersraw[key] = "$not (bad_solution ~ 'RESOURCE')"
+			    filtersraw[key].impl = "$not (bad_solution ~ 'RESOURCE')"
 			}
 
 		    } else if ( it =~ /eventType/ ) {
@@ -411,7 +418,7 @@ class IncidentController extends BaseController {
 			else if ( match[0][3] =~ /(?i)HONDA/ ) type = "^HONDA.*"
 			else if ( match[0][3] =~ /(?i)OCFAIR/ ) type = "^OCFAIR.*"
 			else if ( match[0][3] =~ /(?i)UNKNOWN/ ) type = "^UNKNOWN.*"
-			filtersraw[key] = "$not (event_type ~* '$type')"
+			filtersraw[key].impl = "$not (event_type ~* '$type')"
 		    }
 
 		} else if ( it =~ /(?i)onlySigalerts/ ) {
@@ -440,7 +447,7 @@ class IncidentController extends BaseController {
 			  (filtersraw.entrySet().size()>0?
 			   " where " +
 			   filtersraw.entrySet().collect{ 
-			       return it.value 
+			       return it.value.impl 
 			   }
 			  .join(" AND ") : "" )+
 			  " group by "+groups.entrySet().sort{it.key}.collect{ 
@@ -486,12 +493,22 @@ class IncidentController extends BaseController {
 			++i
 		    }
 
+		    def retfilt = [:]
+		    for ( k in filtersraw ) {
+			
+			retfilt[k] = k //[filtersraw[k]?.param,filtersraw[k]?.cmp,filtersraw[k]?.val].grep({it != null}).join("")
+
+			System.err.println( "K: " +k + " := " + retfilt[k] );
+
+		    }
+
 		    return [ "groups": retgroups,
 			     "stackgroups": retstackgroups,
-			     "filters": params.filters,
+			     "filters": retfilt,
 			     "stats": retstats ]
 		};
 		def json = [ ll ]
+		System.err.println( "JSON###"+json )
 		render json as JSON
 	    }
 	}
