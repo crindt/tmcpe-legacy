@@ -26,6 +26,12 @@
     stroke: white;
     shape-rendering: crispEdges;
 }
+
 .chart rect:hover {
     fill-opacity: 0.8;
 }
+/*
+.legenditem:hover {
+    fill-opacity: 0.8;
+}
+*/

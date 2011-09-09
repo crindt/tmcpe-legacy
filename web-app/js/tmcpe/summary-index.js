@@ -56,7 +56,7 @@ if ( !tmcpe ) var tmcpe = {};
       ,svg
       ,data
       ,barheight = 20
-      ,ww = 600
+      ,ww = 800
       ,margin = 100
       ,w=ww-margin
       ;
@@ -99,7 +99,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  var sg = new Array();
 	  var g = new Array();
 //	  var color = d3.interpolateRgb("#aad", "#556");
-	  var color = d3.interpolateRgb("#ff0000", "#0000ff");
+	  var color = d3.interpolateRgb("#ff0000", "#00ff00");
 	  
 	  
 
@@ -128,6 +128,7 @@ if ( !tmcpe ) var tmcpe = {};
 				     x: it.stats["cnt"],  // FIXME: hardwire
 				     group: gstr,
 				     subgroup: sgstr,
+				     sgidx: sgidx,
 				     filters: filtstr,
 				   };
 	  });
@@ -151,7 +152,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  // m is the number of samples per layer, a.k.a. groups
 	  var m = odata[0].length;
 
-	  var h = m*barheight;
+	  var h = (m+1.5)*barheight;
 
 
 	  var my = m,
@@ -173,16 +174,16 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  svg = container
 	      .append("svg:svg")
-	      .attr("id","aggchart")
+	      .attr("id","aggchartsvg")
 	      .attr("class","chart")
-	      .attr("height",(m+1)*barheight*2)
+	      .attr("height",(m+(n+2))*barheight)
 	      .attr("width",ww);
 
 
 	  var layers = svg.selectAll("g.layer")
 	      .data(odata)
 	      .enter().append("svg:g")
-	      .style("fill",function(d,i){return color(i/(n-1));})
+	      .style("fill",function(d,i){return n<=1 ? color(0) : color((i)/(n-1));})
 	      .attr("class","layer")
 	      .attr("transform","translate("+margin+",0)")
 	  ;
@@ -202,6 +203,8 @@ if ( !tmcpe ) var tmcpe = {};
 	      //.transition()
 	      //.delay(function(d, i) { return i * 10; })
 	      .attr("x", x0)
+	      .attr("sgidx", function(d,i) { 
+		  return d.sgidx; })
 	      .attr("width", function(d) { 
 		  return x1(d) - x0(d); })
 	      .attr("title",function(d){ return ( d == null ? "" : d.x) })
@@ -238,7 +241,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  // create the legend
 	  var legend = svg.append("svg:g")
 	      .attr("class","legend")
-	      .attr("transform","translate("+(margin+20)+","+(y({y:odata.length}))+")")
+	      .attr("transform","translate("+(margin+20)+","+(y({y:m})+50)+")")
 	  ;
 
 	  var items = legend.selectAll("g.legenditem")
@@ -247,6 +250,21 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("class","legenditem")
 	      .attr("transform",function(d,i){
 		  return "translate(0,"+y({y:i},barheight*.65)+")";})
+/*
+	      .on("mouseover",function(d,i){
+		  // mousing over legend item should select 
+		  var good_data = _.filter(d,function(val){return val.subgroup != null});
+		  var selstr = "#aggchart .bar rect[sgidx='"+good_data[0].sgidx+"']";
+		  var sel = $(selstr);
+//		  sel.svg().addClass("highlight");
+	      })
+	      .on("mouseout",function(d,i){
+		  var good_data = _.filter(d,function(val){return val.subgroup != null});
+		  var selstr = "#aggchart .bar rect[sgidx='"+good_data[0].sgidx+"']";
+		  var sel = $(selstr);
+//		  sel.svg().removeClass("highlight");
+	      })
+*/
 	  ;
 
 	  items.append("svg:rect")
@@ -254,14 +272,14 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("y",0)
 	      .attr("height",10)
 	      .attr("width",10)
-	      .style("fill",function(d,i){return color(i/(n-1))})
+	      .style("fill",function(d,i){return n<=1 ? color(0) : color((i)/(n-1));})
 	  ;
 	  items.append("svg:rect")
 	      .attr("x",0)
 	      .attr("y",0)
 	      .attr("height",10)
 	      .attr("width",10)
-	      .style("fill",function(d,i){return color(i/(n-1))})
+	      .style("fill",function(d,i){return n<=1 ? color(0) : color((i)/(n-1));})
 	  ;
 	  items.append("svg:text")
 	      .attr("class", "label")
@@ -280,10 +298,11 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  
 
-	  // Add tooltips for each bar
-	  $('#aggchart rect[title]').tooltip();
 
+	  // Add tooltips for each bar
+	  //$('#aggchart rect[title]').tooltip();
 /*
+
 	  bars.each(function(d){
 	      var bb = this.getBBox();
 	      // anchor = bottom
@@ -355,7 +374,8 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("class", "label")
 	      .attr("text-anchor", "middle")
 	      .attr("y",h+15)
-	      .text(function(d){return d;})
+	      .text(function(d){
+		  return d;})
 	  ;
 
 	  
