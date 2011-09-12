@@ -291,6 +291,92 @@ class IncidentController extends BaseController {
 
     }
 
+
+    /**
+     * Discussion of group/stackgroup/filter implementation for summary/index interface
+     *
+     * The problem here is that to create a good query interface, we need to be
+     * able to present the user with the set of possible group/stack/filter
+     * options.  The existing implementation hardcoded these in the controller
+     * logic in a manner that would be difficult to maintain.  This commit
+     * implements an approach that maps possible parameters to the backend
+     * database implementations.  This mapping permits the possible parameters
+     * to be offered to the UI via the controller and interpreted by the
+     * controller when sent as part of a GET.
+     * 
+     * Below, we define a groupMap and a filtersMap that define the acceptable
+     * parameters.  The groupMap is used to interpret the groups and stackgroups
+     * parameters and the filtersMap is to interpret the filters parameter.
+     */
+
+    // mapping of group and stackgroup parameters to group strings for the query
+    static groupMap = [
+	year:  [ pretty: "Year", groupImpl: [ year: "extract( year from inc_start_time )" ] ],
+	month: [ pretty: "Month", groupImpl: [ month: "extract( month from inc_start_time )" ] ],
+	district: [ pretty: "District", groupImpl: [ district: "district" ] ],
+	facility: [ pretty: "Facility", groupImpl: [ facility_id: "facility_id", freeway_dir: "freeway_dir" ] ],
+	eventType: [ pretty: "Event Type", groupImpl: [ event_type: "event_type" ] ],
+	sigAlert:  [ pretty: "Sigalerts", groupImpl: [ sigAlert: "(sigalert_begin IS NOT NULL)" ] ],
+	analyzed:  [ pretty: "Has Been Analyzed", groupImpl: [analyzed: "(id IS NOT NULL)"] ]
+    ];
+
+    // mapping of filter parameters to where strings for the query
+    static filtersMap = [
+	date: [ pretty: "Date", filtImpl: { match -> 
+	    return "("+["inc_start_time", match[0][2],"'"+match[0][3]+"'"].join(" ")+")" 
+	    } ],
+	analyzed: [ pretty: "Analyzed", filtImpl: { match -> 
+	    if ( match[0][3] =~ /(?i)onlyAnalyzed/ ) {
+		return "(id IS NOT NULL)"   // in this query "id" is the id of the ifia
+	    } else if ( match[0][3] =~ /(?i)unAnalyzed/ ) {
+		return "(id IS NULL)"   // in this query "id" is the id of the ifia			    
+	    } else {
+		System.err.println( "   BOG A LOG" );
+	    }
+	    } ],
+	sigalerts: [ pretty: "Sigalerts", filtImpl: { match ->
+	    if ( match[0][3] =~ /(?i)onlySigalerts/ ) {
+		return "(sigalert_begin IS NOT NULL)"
+	    } else if ( match[0][3] =~ /(?i)noSigalerts/ ) {
+		return "(sigalert_begin IS NULL)"
+	    }
+	    } ],
+	solution: [ pretty: "Solution", filtImpl: { match ->
+	    def not = ""
+	    if ( match[0][2] == '<>' ) not = " NOT "
+		    
+	    if ( match[0][3] == 'good' ) {
+		return "$not (bad_solution IS NULL AND id IS NOT NULL)"
+	    } else if ( match[0][3] == 'bad' ) {
+		return "$not (bad_solution IS NOT NULL)"
+	    } else if ( match[0][3] == 'bounded' ) {
+		return "$not (solution_time_bounded OR solution_space_bounded AND id IS NOT NULL)"
+	    } else if ( match[0][3] == 'timeBounded' ) {
+		return "$not (solution_time_bounded and id IS NOT NULL)"
+	    } else if ( match[0][3] == 'spaceBounded' ) {
+		return "$not (solution_space_bounded and id IS NOT NULL)"
+	    } else if ( match[0][3] == 'resourceConstrained' ) {
+		return "$not (bad_solution ~ 'RESOURCE')"
+	    }
+	    } ],
+	eventType: [ pretty: "Event Type", filtImpl: { match ->
+	    def not = ""
+	    if ( match[0][2] == '<>' ) not = " NOT "
+	    def type = '';
+	    if ( match[0][3] =~ /(?i)INCIDENT/ ) type = "INCIDENT"
+	    else if ( match[0][3] =~ /(?i)CONSTRUCTION/ ) type = "^CONSTRUCTION"
+	    else if ( match[0][3] =~ /(?i)MAINTENANCE/ ) type = "^MAINTENANCE"
+	    else if ( match[0][3] =~ /(?i)EMERGENCY/ ) type = "^EMERGENCY"
+	    else if ( match[0][3] =~ /(?i)ANGEL/ ) type = "^ANGEL.*"
+	    else if ( match[0][3] =~ /(?i)HONDA/ ) type = "^HONDA.*"
+	    else if ( match[0][3] =~ /(?i)OCFAIR/ ) type = "^OCFAIR.*"
+	    else if ( match[0][3] =~ /(?i)UNKNOWN/ ) type = "^UNKNOWN.*"
+	    return "$not (event_type ~* '$type')"
+	    } ],
+	onlySigalerts: [ pretty: "Only Sigalerts", filtImpl: { return "(sigalert_begin IS NOT NULL" } ],
+	noSigalerts: [ pretty: "No Sigalerts", filtImpl: { return "(sigalert_begin IS NULL" } ]
+    ];
+
     def listGroups = {
 
 	// Get session from hibernate to perform raw query
@@ -301,42 +387,39 @@ class IncidentController extends BaseController {
 
 	// columns to group by, specified as parameters
 	def groupsraw = [:]
-	params.groups.tokenize(",").each() { 
-	  if ( it =~ /(?i)year/ ) groupsraw[it] = "extract(year from inc_start_time)";
-	  if ( it =~ /(?i)month/ ) groupsraw[it] = "extract(month from inc_start_time)";
-	  if ( it =~ /(?i)district/ ) groupsraw[it] = "district";
-	  if ( it =~ /(?i)facility/ ) {
-	      groupsraw["facility_id"] = "freeway_id";
-	      groupsraw["freeway_dir"] = "freeway_dir";
-	  }
-	  if ( it =~ /(?i)eventType/ ) groupsraw[it] = "event_type";
-	  if ( it =~ /(?i)sigAlert/ ) groupsraw[it] = "(sigalert_begin IS NOT NULL)";
-	  if ( it =~ /(?i)analyzed/ ) groupsraw[it] = "(id IS NOT NULL)"
-	  //	  if ( it =~ /cctv/ ) groupsraw[it] = "(i.verification.pMeas.pmType)";
-	}
-	def groups = new TreeMap(groupsraw)
 
+	// loop over groups parameters and convert them to group strings for the query
+	params.groups.tokenize(",").each() { 
+	    for ( e in groupMap ) {
+		if ( it.toLowerCase() =~ "(?i)${e.key}" ) {
+		    for ( ee in e.value.groupImpl ) {
+			//System.err.println( "${it}: Adding GROUP ${ee.key} as ${ee.value}" )
+			groupsraw[ ee.key ] = ee.value;
+		    }
+		}
+	    }
+	}
+	def groups = new TreeMap(groupsraw)  // creates and ordered map so we can retreive data from the query results
+
+	// loop over stackgroups parameters and convert them to group strings for the query
 	def stackgroupsraw = [:]
 	def stackgroupsstr = params.stackgroups ?: "";
 	stackgroupsstr.tokenize(",").each() { 
-	  if ( it =~ /(?i)year/ ) stackgroupsraw[it] = "extract(year from inc_start_time)";
-	  if ( it =~ /(?i)month/ ) stackgroupsraw[it] = "extract(month from inc_start_time)";
-	  if ( it =~ /(?i)district/ ) stackgroupsraw[it] = "district";
-	  if ( it =~ /(?i)facility/ ) {
-	      stackgroupsraw["facility_id"] = "freeway_id";
-	      stackgroupsraw["freeway_dir"] = "freeway_dir";
-	  }
-	  if ( it =~ /(?i)eventType/ ) stackgroupsraw[it] = "event_type";
-	  if ( it =~ /(?i)sigAlert/ ) stackgroupsraw[it] = "(sigalert_begin IS NOT NULL)";
-	  if ( it =~ /(?i)analyzed/ ) stackgroupsraw[it] = "(id IS NOT NULL)"
-	  //	  if ( it =~ /cctv/ ) groupsraw[it] = "(i.verification.pMeas.pmType)";
+	    for ( e in groupMap ) {
+		//System.err.println( "CHECKING ${it} VERSUS ${e.key}" )
+		if ( it.toLowerCase() =~ "(?i)${e.key}" ) {
+		    for ( ee in e.value.groupImpl ) {
+			//System.err.println( "${it}: Adding STACKGROUP ${ee.key} as ${ee.value}" )
+			stackgroupsraw[ ee.key ] = ee.value;
+		    }
+		}
+	    }
 	}
 	def stackgroups = new TreeMap(stackgroupsraw)
 
 	
-
-	def dataraw = ["cnt":"count(distinct cad)"]
-
+	// Define the data types to return.  These need to be aggregates
+	def dataraw = ["cnt":"count(distinct cad)"]  // always return counts
 	if ( params.data ) {
 	    params.data.tokenize(",").each() {
 		if ( it =~ /d12_delay/ ) dataraw[it] = "avg(d12delay)"
@@ -350,6 +433,7 @@ class IncidentController extends BaseController {
 	def data = new TreeMap(dataraw)
 
 
+	// Loop over the filters parameters and convert them to where criteria for the query
 	def filtersraw = [:]
 	System.err.println("FILTERS " + params.filters)
 	def filt = params.filters ?: params.filter;
@@ -368,65 +452,12 @@ class IncidentController extends BaseController {
 		    filtersraw[key].cmp = match[0][2]
 		    filtersraw[key].val = match[0][3]
 
-		    if ( it =~ /date/ ) {
-			filtersraw[key].impl = "("+["inc_start_time",
-					       match[0][2],
-					       "'"+match[0][3]+"'"].join(" ")+")"
-		    } else if ( it =~ /analyzed/ ) {
-			System.err.println( "ANALYZED" );
-			if ( match[0][3] =~ /(?i)onlyAnalyzed/ ) {
-			    filtersraw[key].impl = "(id IS NOT NULL)"   // in this query "id" is the id of the ifia
-			} else if ( match[0][3] =~ /(?i)unAnalyzed/ ) {
-			    filtersraw[key].impl = "(id IS NULL)"   // in this query "id" is the id of the ifia			    
-			} else {
-			System.err.println( "   BOG A LOG" );
+		    for ( e in filtersMap ) {
+			if ( it =~ "(?i)${e.key}" ) {
+			    filtersraw[key].impl = e.value.filtImpl( match )
 			}
-
-		    } else if ( it =~ /sigalerts/ ) {
-			if ( match[0][3] =~ /(?i)onlySigalerts/ ) {
-			    filtersraw[key].impl = "(sigalert_begin IS NOT NULL)"
-			} else if ( match[0][3] =~ /(?i)noSigalerts/ ) {
-			    filtersraw[key].impl = "(sigalert_begin IS NULL)"
-			}
-		    } else if ( it =~ /solution/ ) {
-			def not = ""
-			if ( match[0][2] == '<>' ) not = " NOT "
-		    
-			if ( match[0][3] == 'good' ) {
-			    filtersraw[key].impl = "$not (bad_solution IS NULL AND id IS NOT NULL)"
-			} else if ( match[0][3] == 'bad' ) {
-			    filtersraw[key].impl = "$not (bad_solution IS NOT NULL)"
-			} else if ( match[0][3] == 'bounded' ) {
-			    filtersraw[key].impl = "$not (solution_time_bounded OR solution_space_bounded AND id IS NOT NULL)"
-			} else if ( match[0][3] == 'timeBounded' ) {
-			    filtersraw[key].impl = "$not (solution_time_bounded and id IS NOT NULL)"
-			} else if ( match[0][3] == 'spaceBounded' ) {
-			    filtersraw[key].impl = "$not (solution_space_bounded and id IS NOT NULL)"
-			} else if ( match[0][3] == 'resourceConstrained' ) {
-			    filtersraw[key].impl = "$not (bad_solution ~ 'RESOURCE')"
-			}
-
-		    } else if ( it =~ /eventType/ ) {
-			def not = ""
-			if ( match[0][2] == '<>' ) not = " NOT "
-			def type = '';
-			if ( match[0][3] =~ /(?i)INCIDENT/ ) type = "INCIDENT"
-			else if ( match[0][3] =~ /(?i)CONSTRUCTION/ ) type = "^CONSTRUCTION"
-			else if ( match[0][3] =~ /(?i)MAINTENANCE/ ) type = "^MAINTENANCE"
-			else if ( match[0][3] =~ /(?i)EMERGENCY/ ) type = "^EMERGENCY"
-			else if ( match[0][3] =~ /(?i)ANGEL/ ) type = "^ANGEL.*"
-			else if ( match[0][3] =~ /(?i)HONDA/ ) type = "^HONDA.*"
-			else if ( match[0][3] =~ /(?i)OCFAIR/ ) type = "^OCFAIR.*"
-			else if ( match[0][3] =~ /(?i)UNKNOWN/ ) type = "^UNKNOWN.*"
-			filtersraw[key].impl = "$not (event_type ~* '$type')"
 		    }
-
-		} else if ( it =~ /(?i)onlySigalerts/ ) {
-		    filtersraw[it] = "(sigalert_begin IS NOT NULL)"
-		} else if ( it =~ /(?i)noSigalerts/ ) {
-		    filtersraw[it] = "(sigalert_begin IS NULL)"
 		}
-
 	    }
 	}	
 
