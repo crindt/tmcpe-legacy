@@ -54,6 +54,8 @@ class IncidentController extends BaseController {
 
 	def incidentCriteria = null
 
+	System.err.println( "PARAMS ARE: ${params.location_id}" )
+
 	// Use the database id or CAD id if they're provided
 	if ( params.id )  { 
 	    incidentCriteria = { 
@@ -79,11 +81,20 @@ class IncidentController extends BaseController {
 
 		    // Limit the section to particular facility/directions
 		    section {
-			if ( params.freeway && params.freeway != '' ) {
-			    eq( "freewayId", params.freeway.toInteger() )
+			def fwy = ( ( params.freeway ?: params.facility_id ) ?: params.freeway_id ) ?: '';
+			if ( fwy != '' ) {
+			    eq( "freewayId", fwy.toInteger() )
 			}
-			if ( params.direction && params.direction != '' ) {
-			    eq( "freewayDir", params.direction )
+			def dir = ( params.direction ?: params.freeway_dir ) ?: '';
+			if ( dir != '' ) {
+			    eq( "freewayDir", dir )
+			}
+
+
+			if ( params.location_id == '-' ) {
+			    isNull( 'id' )
+			} else if ( params.location_id ) {
+			    'in'( 'id', params.location_id.split(',')*.toInteger() )
 			}
 		    }
 		    
@@ -92,6 +103,29 @@ class IncidentController extends BaseController {
 			def to =   Date.parse("yyyy-MM-dd", (params.year.toInteger()+1) + '-01-01')
 			log.info("============DATES: " + from + " <<>> "  + to )
 			between( 'startTime', from, to )
+		    }
+
+		    if ( params.hour ) {
+			// grep out anything that's not 0..23
+			def hour = params.hour.split(",").grep{ 
+			    try {
+				def val = it.toInteger(); 
+				if ( val >= 0 && val <= 23 ) return true
+
+			    } catch ( java.lang.NumberFormatException e ) {
+				// oops, coverting to integer failed
+				log.warn( "Invalid hour of day '${it}' passed as query argument" )
+				return false
+			    }
+			    return false
+			}
+
+			if ( hour.size() > 0 ) {
+			    addToCriteria( 
+				Restrictions.sqlRestriction( 
+				    "extract( hour from start_time ) IN ( ${hour.join(',')} )"
+				) )
+			}
 		    }
       
 		    // Limit to particular date range
@@ -189,8 +223,9 @@ class IncidentController extends BaseController {
 		    }
 
 		    // Limit to particular event types
-		    if ( params.eventType && params.eventType != '<Show All>' ) {
-			eq( 'eventType', params.eventType )
+		    def et = ( params.eventType ?: params.event_type ) ?: ''
+		    if ( et != '' && et != '<Show All>' ) {
+			eq( 'eventType', et )
 		    }
 
 		    if ( params.located == '1' ) {
@@ -313,11 +348,13 @@ class IncidentController extends BaseController {
     static groupMap = [
 	year:  [ pretty: "Year", groupImpl: [ year: "extract( year from inc_start_time )" ] ],
 	month: [ pretty: "Month", groupImpl: [ month: "extract( month from inc_start_time )" ] ],
+	hour:  [ pretty: "Hour", groupImpl: [ hour: "extract( hour from inc_start_time )" ] ],
 	district: [ pretty: "District", groupImpl: [ district: "district" ] ],
-	facility: [ pretty: "Facility", groupImpl: [ facility_id: "facility_id", freeway_dir: "freeway_dir" ] ],
+	facility: [ pretty: "Facility", groupImpl: [ facility_id: "freeway_id", freeway_dir: "freeway_dir" ] ],
 	eventType: [ pretty: "Event Type", groupImpl: [ event_type: "event_type" ] ],
 	sigAlert:  [ pretty: "Sigalerts", groupImpl: [ sigAlert: "(sigalert_begin IS NOT NULL)" ] ],
-	analyzed:  [ pretty: "Has Been Analyzed", groupImpl: [analyzed: "(id IS NOT NULL)"] ]
+	analyzed:  [ pretty: "Has Been Analyzed", groupImpl: [analyzed: "(id IS NOT NULL)"] ],
+	location:  [ pretty: "Location", groupImpl: [location_id: "location_id"] ],
     ];
 
     // mapping of filter parameters to where strings for the query
@@ -374,7 +411,42 @@ class IncidentController extends BaseController {
 	    return "$not (event_type ~* '$type')"
 	    } ],
 	onlySigalerts: [ pretty: "Only Sigalerts", filtImpl: { return "(sigalert_begin IS NOT NULL" } ],
-	noSigalerts: [ pretty: "No Sigalerts", filtImpl: { return "(sigalert_begin IS NULL" } ]
+	noSigalerts: [ pretty: "No Sigalerts", filtImpl: { return "(sigalert_begin IS NULL" } ],
+	facility: [ pretty: "Facility", filtImpl: { match ->
+	    def not = ""
+	    if ( match[0][2] == '<>' ) not = " NOT "
+	    def facarr = match[0][3].tokenize("-")
+	    System.err.println( "FACARR: ${facarr}" )
+	    if ( facarr.size() == 1 ) {
+		// this is only a freeway or direction
+		if ( facarr[0].isInteger() ) { // it's a freeway spec
+		    return "$not ( freeway_id = ${facarr[0]} )"
+		} else {
+		    return "$not ( freeway_dir='${facarr[0].toUpperCase()}' )"
+		}
+	    } else if ( facarr.size() == 2 ) {
+		if ( facarr[0].isInteger() && !facarr[1].isInteger() ) { // e.g., 5-N
+		    return "$not ( freeway_id = ${facarr[0]} AND freeway_dir='${facarr[1].toUpperCase()}' )"		    
+		} else if ( facarr[1].isInteger() && !facarr[0].isInteger() ) { // e.g., N-5
+		    return "$not ( freeway_id = ${facarr[1]} AND freeway_dir='${facarr[0].toUpperCase()}' )"
+		}
+	    } else if ( facarr.size == 0 ) {
+		return "$not ( freeway_id IS NULL AND freeway_dir IS NULL )"
+	    }
+
+	    } ],
+	location_id: [ pretty: "Location VDSID", filtImpl: { match ->
+	    def not = ""
+	    if ( match[0][2] == '<>' ) not = " NOT "
+	    if ( match[0][3] == '-' ) { // it's a freeway spec
+		return "$not ( location_id IS NULL )"
+	    } else {
+		return "$not ( location_id = ${match[0][3]} )";
+	    }
+	    }],
+	located: [ pretty: "Incidents with known locations", filtImpl: { return "( location_id IS NOT NULL )"; } ],
+	notLocated: [ pretty: "Incidents with known locations", filtImpl: { return "( location_id IS NULL )"; } ],
+	    
     ];
 
     def listGroups = {
@@ -384,6 +456,8 @@ class IncidentController extends BaseController {
 	def session = sessionFactory.getCurrentSession()
 
         log.debug("=============LISTING GROUPS: " + params )
+
+	def orderby = []
 
 	// columns to group by, specified as parameters
 	def groupsraw = [:]
@@ -395,6 +469,7 @@ class IncidentController extends BaseController {
 		    for ( ee in e.value.groupImpl ) {
 			//System.err.println( "${it}: Adding GROUP ${ee.key} as ${ee.value}" )
 			groupsraw[ ee.key ] = ee.value;
+			orderby.push(ee.value);
 		    }
 		}
 	    }
@@ -411,6 +486,7 @@ class IncidentController extends BaseController {
 		    for ( ee in e.value.groupImpl ) {
 			//System.err.println( "${it}: Adding STACKGROUP ${ee.key} as ${ee.value}" )
 			stackgroupsraw[ ee.key ] = ee.value;
+			orderby.push(ee.value);
 		    }
 		}
 	    }
@@ -441,7 +517,8 @@ class IncidentController extends BaseController {
 	    filt.tokenize(",").each() {
 		System.err.println("FILTER " + it)
 
-		def match = it =~ /(.*?)(=|[<>]=*|<>)(.*)/;
+		// look for filter specified as an equation <key cmp value>
+		def match = it =~ /^(.*?)(=|[<>]=*|<>)([^=<>].*$|$)/;
 		if ( match.size() == 1 ) {
 		    System.err.println("Adding filter " + match[0].join(" "))
 		    def key = match[0][0]
@@ -457,6 +534,16 @@ class IncidentController extends BaseController {
 			    filtersraw[key].impl = e.value.filtImpl( match )
 			}
 		    }
+		} else {
+		    // assume single word filter
+		    def key = it
+		    filtersraw[key] = [:]
+		    filtersraw[key].param
+		    for ( e in filtersMap ) {
+			if ( it =~ "(?i)${e.key}" ) {
+			    filtersraw[key].impl = e.value.filtImpl( match )
+			}
+		    }
 		}
 	    }
 	}	
@@ -466,6 +553,7 @@ class IncidentController extends BaseController {
 	withFormat {
 
 	    json {
+		// create the query string from the processed parameters
 		def qq = ("select "+
 			  groups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
 			  .join(",")
