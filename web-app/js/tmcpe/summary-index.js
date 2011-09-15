@@ -99,7 +99,8 @@ if ( !tmcpe ) var tmcpe = {};
 	  var sg = new Array();
 	  var g = new Array();
 //	  var color = d3.interpolateRgb("#aad", "#556");
-	  var color = d3.interpolateRgb("#ff0000", "#00ff00");
+	  var color = d3.interpolateRgb("#ff0000", "#0000ff");
+//	  var color = d3.interpolateRgb("#ff0000", "#00ff00");
 	  
 	  
 
@@ -109,8 +110,9 @@ if ( !tmcpe ) var tmcpe = {};
 	      return ( odata[sgidx-1][gidx] != null 
 		       ? odata[sgidx-1][gidx].x : 0 )
 		  + last_subgroup_data( sgidx-1, gidx );
-      }
+	  }
 
+	  // Here we make sure the data is organized properly
 	  _.each(data,function(it){
 	      var sgstr = stringifyMap(it.stackgroups);
 	      var gstr  = stringifyMap(it.groups);
