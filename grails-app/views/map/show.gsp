@@ -51,6 +51,7 @@
 	  </div>
 	</div>
 	<div id='content'>
+	  <!--
 	  <div class='input-block'>
 	    <input id='new-incident' placeholder='What data do you want?' type='text' />
 	    <span class='ui-tooltip-top'>Press Enter to search</span>
@@ -67,6 +68,7 @@
 	      </tr>
 	    </table>
 	  </div>
+	    -->
 	  <div id='incident-table'></div>
 	  <div id='incident-stats' style="height:200px"></div>
 	</div>
