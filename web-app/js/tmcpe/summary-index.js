@@ -463,12 +463,17 @@ if ( !tmcpe ) var tmcpe = {};
 
       } );
       
-
       // create (default) query
       var aggquery = tmcpe
 	  .aggquery()
 	  .url("incident/listGroups.json?groups=year&stackgroups=eventType")
       ;
+
+
+      /////////// QUERY FORM MANIP
+
+      // jquery ui tabs
+      $('ul.tabs').tabs('div.panes > div');
 
       // update if the querybox changes
       $("#querybox").keypress(function(e){

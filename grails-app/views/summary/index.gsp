@@ -30,6 +30,7 @@
     <!-- supporting css -->
     <p:css name="tipsy" />
     <p:css name="tmcpe-summary-index" />
+    <p:css name="jquery-ui/tabs-no-images" />
 
 
   </head>
@@ -40,7 +41,19 @@
 	  <h1>Aggregates</h1>
 	</div>
 	<div id='content'>
-	  <input type="text" id='querybox' value='groups=year&stackgroups=eventType' style="width:30em"></input>
+	  <div id='qbox'>
+	    <!-- the tabs -->
+	    <ul class="tabs">
+	      <li><a href="#">Basic Query</a></li>
+	      <li><a href="#">Advanced Query</a></li>
+	    </ul>
+	    
+	    <!-- tab "panes" -->
+	    <div class="panes">
+	      <div>Test</div>
+	      <div><input type="text" id='querybox' value='groups=year&stackgroups=eventType' style="width:30em"></input></div>
+	    </div>
+	  </div>
 	  <div id='aggchart'></div>
 	  <div id='aggchartdetail'></div>
 	</div>
