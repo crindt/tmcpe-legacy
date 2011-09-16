@@ -1,0 +1,289 @@
+@import "tmcpe-colors.less";
+
+
+#incident-list {
+    position:relative;
+    color: black;
+    cell-padding: 0px;
+    font-size:10px;
+    cell-spacing: 0px;
+    border-collapse: collapse;
+
+    .theadfoot() {
+	text-weight: bold;
+	padding-left: 5px;
+	padding-right: 5px;
+	height: 36px;
+	background: @content-background;
+    }
+    
+    tfoot {
+	th {
+	    .theadfoot;
+
+	    height:24px;
+	    text-align:right;
+
+	    &.memo {
+		text-align: right;
+	    }
+	}
+    }
+
+    thead {
+	th {
+	    .theadfoot;
+	    &:hover {
+		background: blue;
+		color: white;
+	    }
+
+	    &:first-child {
+		border-left: 0px gray;
+	    }
+	}
+    }
+
+    tr {
+	/* highlight row we're hovering over */
+	&:hover {
+	    td {
+		border-top: 2px solid blue;
+		border-bottom: 2px solid blue;
+
+		&:first-child {
+		    border-left: 0px solid blue;
+		}
+
+		&:last-child {
+		    border-right: 1px solid blue;
+		}
+	    }
+	}
+
+	&.selected {
+	    td {
+		background-color: blue;
+		color: white;
+		border-top: 2px solid black;
+		border-bottom: 2px solid black;
+		font-weight: bold;
+	    }
+	}
+
+	td {
+	    padding-left: 5px;
+	    padding-right: 5px;
+	    border-bottom: 1px dotted;
+	    min-height: 24px;
+	    height: 36px;
+	}
+
+	td, th {
+	    &:last-child {
+		border-right: 1px;
+	    }
+	}
+    }
+
+
+}
+
+.selected {
+   stroke-width: 10px;
+   stroke: blue;/*cyan;*/
+   fill-opacity: 0.85;
+}
+
+.col {
+    white-space:nowrap;
+    overflow-x:hidden;
+    text-overflow:ellipsis;
+}
+
+.cad {
+    min-width: 100px;
+    max-width: 100px;
+    width: 100px;
+    text-align:right;
+}
+
+.timestamp {
+    min-width: 150px;
+    max-width: 150px;
+    width: 150px;
+    text-align: center;
+}
+
+.locString {
+    min-width: 150px;
+    max-width: 200px;
+    width: 200px;
+    text-align:left;
+}
+.memo {
+    min-width: 200px;
+    max-width: 200px;
+    width: 200px;
+    text-align:left;
+}
+.d12_delay,.tmcpe_delay,.savings {
+    min-width: 50px;
+    max-width: 50px;
+    width: 50px;
+    text-align:right;
+}
+/*
+#header ul.menu {
+    float:right;
+    display:inline;
+}
+#header ul.menu li {
+    display:inline;
+    border: solid 1px white;
+    padding: 5px;
+}
+
+#content {
+    background-color: #006;
+}
+*/
+.loading {
+    background-color: #fff;
+    color: #000;
+    position: absolute;
+    left:40%;
+    top:40%;
+    width:20%;
+    height:20%;
+    visibility: hidden;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top:100px;
+    padding-bottom:100px;
+    text-align:center;
+}
+
+/*
+#settings table th {
+    text-align: right;
+}
+#settings table {
+    border: 1px solid white;
+}
+*/
+
+/* the following two records are used to position the nav div at the bottom of the info element */
+#info {
+    position:relative;
+}
+
+#incidentDetailPager {
+    position:absolute;
+    bottom:0;
+}
+
+#loading {
+    position: fixed;
+    top:21px;
+    left:0px;
+    width: 100%;
+    text-align: center;
+    z-index:1000;
+}
+#loading_block {
+    position:relative;
+    background:yellow;
+    color:black;
+    padding:20px;
+    font-size:16pt;
+    width:120pt;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#cluster-detail {
+    font-size: 10pt;
+}
+
+#cluster-detail table {
+    table-layout: fixed;
+    width: 100%;
+    font-size: 10pt;
+}
+
+#cluster-detail table td {
+    vertical-align:top;
+    white-space:nowrap;
+    overflow-x:hidden;
+    text-overflow:ellipsis;
+}
+
+#cluster-detail table th {
+    vertical-align:top;
+    white-space:nowrap;
+    overflow-x:hidden;
+    text-overflow:ellipsis;
+    text-align:right;
+    vertical-align:top;
+    width: 75px;
+}
+
+#cluster-detail h1 {
+    font-size: 12pt;
+    font-weight: bold;
+    text-align:center;
+    color: black;
+    background: gray;
+}
+
+#cluster-detail ul {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+#cluster-detail li {
+    visibility:hidden;
+    display:none;
+}
+
+#cluster-detail li.selected {
+    /*color: yellow;*/
+    visibility:visible;
+    display:block;
+}
+
+#cluster-detail a {
+    text-align:center;
+    color: white;
+}
+
+.navbutton {
+    background-color: blue;
+    color: white;
+    padding: 5px;
+    width: 30px;
+    border: 1px solid gray;
+}
+
+.navbutton:hover {
+    background-color: red;
+    color: yellow;
+}
+
+.navbutton.disabled {
+    background-color: gray;
+}
+.navbutton.disabled:hover {
+    background-color: gray;
+}
+
+
+#cluster-nav {
+    margin-top: 5px;
+}
+
+#cluster-list {
+    margin-top: 5px;
+}
+

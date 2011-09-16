@@ -449,6 +449,15 @@ class IncidentController extends BaseController {
 	    
     ];
 
+    def formData = {
+	def json = [groups:[], filters:[]];
+	for ( e in groupMap ) {
+	    json.groups.push( [ key: e.key, text: e.value.pretty ] );
+	}
+
+	render json as JSON;
+    }
+
     def listGroups = {
 
 	// Get session from hibernate to perform raw query

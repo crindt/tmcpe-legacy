@@ -59,8 +59,14 @@
 	    
 	    <!-- tab "panes" -->
 	    <div class="panes">
-	      <div>Test</div>
-	      <div><input type="text" id='advancedqueryinput' value='groups=year&stackgroups=eventType' style="width:30em"></input></div>
+	      <div>
+		<div style="display:inline;" id='groupby'></div>
+		<div style="display:inline;" id='stackby'></div>
+		<div style="display:inline;" id='filterby'></div>
+	      </div>
+	      <div>
+		<input type="text" id='advancedqueryinput' value='groups=year&stackgroups=eventType' style="width:30em"></input>
+	      </div>
 	    </div>
 	  </div>
 	  <div id='aggchart'></div>

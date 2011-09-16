@@ -37,6 +37,7 @@ if ( !tmcpe ) var tmcpe = {};
       query.url = function(x) {
 	  if ( !arguments.length ) return url;
 	  url = x;
+	  $(window).trigger( "tmcpe.queryChanged", url );
 	  executeQuery()
 	  return query;
       }
@@ -462,6 +463,9 @@ if ( !tmcpe ) var tmcpe = {};
 	  aggchart.data(d);
 
       } );
+
+      $(window).bind("tmcpe.queryChanged", function(caller, d) {
+      });
       
       // create (default) query
       var aggquery = tmcpe
@@ -472,8 +476,68 @@ if ( !tmcpe ) var tmcpe = {};
 
       /////////// QUERY FORM MANIP
 
-      // jquery ui tabs
+      // jquerytools tabs
       $('ul.tabs').tabs('div.panes > div');
+
+      function radioFromArray( sel, data ) {
+	  var spans = sel.selectAll('span')
+	      .data(data)
+	      .enter()
+	      .append('span')
+	      .attr('class','radiospan')
+	  ;
+	  spans.append('input')
+	      .attr('type','radio')
+	      .attr('name','groups')
+	      .attr('value',function(d){
+		  return d.key;
+	      })
+	  ;
+	  spans.append('span')
+	      .text( function( d ) {
+		  return d.text;
+	      })
+	  ;
+	  spans.append('br');
+      }
+
+      function selectFromArray( sel, data ) {
+	  var select = sel.append('select');
+	  select.selectAll('option')
+	      .data(data)
+	      .enter()
+	      .append('option')
+	      .attr('value',function(d){return d.key;})
+	      .text(function(d){ return d.text; })
+	  ;
+	  return select;
+      }
+
+
+      function updateQuery() {
+	  // pull data from form
+	  var q = ["groups="+$('select[name=groups]').val(),
+		   "stackgroups="+$('select[name=stacks]').val()
+		  ].join("&");
+	  aggquery.url("incident/listGroups.json?"+q);
+      }
+
+      // create basic query form
+      //$('groupby')
+      $.get('incident/formData', function(data){
+	  //radioFromArray(d3.select('#groupby'),data.groups);
+	  selectFromArray( d3.select('#groupby'),data.groups)
+	      .attr('name',"groups")
+	      .on('change',function(d){
+		  updateQuery();
+	      });
+	  selectFromArray( d3.select('#stackby'),data.groups)
+	      .attr('name',"stacks")
+	      .on('change',function(d){
+		  updateQuery();
+	      });
+
+      });
 
       // update if the querybox changes
       $("#advancedqueryinput").keypress(function(e){

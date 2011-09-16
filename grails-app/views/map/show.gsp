@@ -30,6 +30,9 @@
     <!-- supporting css -->
     <p:css name="tipsy" />
 
+    <!-- supporting stylesheets -->
+    <less:stylesheet name="tmcpe-map-show" />
+
 
     <!-- app code -->
     <p:javascript src='tmcpe/map-show' />
