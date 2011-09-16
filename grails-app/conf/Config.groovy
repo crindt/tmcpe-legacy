@@ -35,7 +35,8 @@ grails.mime.types = [
 	geojson: ['application/json','text/json'],
 	form: 'application/x-www-form-urlencoded',
 	multipartForm: 'multipart/form-data',
-	kml: 'application/vnd.google-earth.kml+xml .kml'
+	kml: 'application/vnd.google-earth.kml+xml .kml',
+	less: 'text/css'
 ]
 
 

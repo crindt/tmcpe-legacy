@@ -1,0 +1,41 @@
+/* Baseline */
+@background: #1A2C45;
+@color: #fff;
+@font-size: 12pt;
+@border-color: white;
+
+/* Content */
+@content-background: lighten( @background, 50% );
+@content-color: darken( @color, 10% );
+@content-inactive-background: darken( @content-background, 20% );
+@content-inactive-color: lighten( @content-color, 50% );
+
+/* Info (Modal) */
+@info-background: white;
+@info-color: black;
+
+/* Alert */
+@alert-background: yellow;
+@alert-color: red;
+
+/* Menu */
+@menu-background: #000;
+@menu-color: #ddd;
+@menu-border: solid 1px @border-color;
+
+/* Tooltip */
+@tooltip-background: black;
+@tooltip-color: white;
+
+/* Charts */
+@chart-background: @content-background;
+@chart-stroke: #fff;
+@chart-font-color: lighten( @chart-stroke, 50% );
+@chart-fill: steelblue;
+@chart-label-fill: black;
+@chart-range-start: blue;
+@chart-range-end: red;
+
+/* Borders */
+@border-color: black;
+

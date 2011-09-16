@@ -1,0 +1,66 @@
+@import "tmcpe-colors.less";
+@import "tmcpe-mixins.less";
+
+/* root element for tabs  */
+ul.tabs {  
+    margin:0 !important; 
+    padding:0;
+    height:30px;
+    border-bottom:1px solid @border-color;	 	
+
+    li {  
+	float:left;	 
+	padding:0; 
+	margin:0;  
+	list-style-type:none;	
+    }
+
+    /* link inside the tab. uses a background image */
+    a { 
+	float:left;
+	font-size:13px;
+	display:block;
+	padding:5px 30px;	
+	text-decoration:none;
+	border:1px solid @border-color;	
+	border-bottom:0px;
+	height:18px;
+	background-color:@content-inactive-background;
+	color:@content-inactive-color;
+	margin-right:2px;
+	position:relative;
+	top:1px;	
+	outline:0;
+
+	.rounded-top-corners( 5px );
+
+	&:hover { .highlight-dark-block( @content-inactive-background, @content-inactive-color ); }
+
+	
+	/* selected tab */
+	&.current {
+	    background-color: @content-background;
+	    color: @content-color;
+	    border-bottom:1px solid @content-background; /* same color as background to disappear */
+	    color:#000;	
+	    cursor:default;
+	}
+    }
+
+}
+
+	
+/* tab pane */
+.panes div {
+	display:none;
+	border:1px solid @border-color;
+	border-width:0 1px 1px 1px;
+	/*min-height:150px;*/
+	min-height:30px;
+	padding:15px 20px;
+	background-color: @content-background;	
+	color: @content-color;
+}
+
+
+

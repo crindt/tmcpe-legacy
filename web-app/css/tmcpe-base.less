@@ -1,0 +1,149 @@
+@import "tmcpe-colors.less";
+
+@banner-height: 21px;
+
+
+body {
+    background-color: @background;
+    color: @color;
+    font-size: @font-size;
+    padding-top: @banner-height;
+    margin:0px;
+    min-width: 960px;
+}
+
+
+.header {
+    h1 {
+	color: @color;
+	background-image: url(/tmcpe/images/logo_jem_060.png);
+	background-repeat: no-repeat;
+	margin-top: @banner-height;
+	height: 60px;
+	padding-left: 160px;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	padding-top: 25px;
+	font-size: 30px;
+    }
+
+    ul.menu {
+	float:right;
+	display:inline;
+
+	li {
+	    display:inline;
+	    border: @menu-border;
+	    //    padding: 5px;
+	}
+
+    }
+}
+
+#leftbox { 
+    width:240px;
+    position:absolute;
+    left: 0px;
+    top:101px;
+    z-index: 100;  /* Put this on top of #content */
+    background-color: @background;
+    padding-right:10px;
+    height:100%;
+    padding-left: 10px;
+}
+
+#content {
+    background-color: @content-background;
+    font-color: @content-color;
+    display:inline;
+    width:fill;
+    float:top;
+    position:absolute;
+    left:250px;
+    top: 101px;
+    margin-left: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+    z-index: 50;
+
+}
+
+.loading {
+    background-color: @info-background;
+    color: @info-color;
+    position: absolute;
+    left:40%;
+    top:40%;
+    width:20%;
+    height:20%;
+    visibility: hidden;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top:100px;
+    padding-bottom:100px;
+    text-align:center;
+}
+
+#settings table th {
+    text-align: right;
+}
+#settings table {
+    border: 1px solid white;
+}
+
+#account {
+    float: right;
+}
+
+/* the following two records are used to position the nav div at the bottom of the info element */
+#info {
+    position:relative;
+}
+
+#menu {
+    height: @banner-height;
+    background-color: @menu-background;
+    color: @menu-color;
+    position: fixed;
+    width: 100%;
+    padding: 0;
+    margin: 0px;
+    top: 0px;
+    z-index: 100;
+
+
+    ul {
+	padding: 0 @banner-height;
+	display: inline;
+
+	li {
+	    line-height: @banner-height;
+	    margin-right: 4px;
+	    float: left;
+	    list-style-type: none;
+	    margin: 0px;
+	    padding: 0px;
+	    white-space: nowrap;
+
+	    a {
+		padding: 4px 5px;
+		margin-right: 8px;
+		text-decoration: none;
+		color: @menu-color;
+		&:hover { background-color: desaturate(@menu-background, 20%); /* was: yellow */ }
+	    }
+
+	}
+    }
+}
+
+.title {
+    margin-top: @banner-height;
+}
+
+
+
+#account {
+    float: right;
+}

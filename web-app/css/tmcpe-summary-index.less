@@ -1,0 +1,36 @@
+@import "tmcpe-colors.less";
+
+#aggchart {
+
+    .chart {
+	background: @chart-background;
+	stroke: @chart-stroke;
+	fill: steelblue;
+	padding: 20px;
+	shape-rendering: crispEdges;
+	
+	
+	rect {
+	    stroke: @chart-stroke;
+	    shape-rendering: crispEdges;
+	    fill-opacity: 1.0;
+	    
+	    &:hover { fill-opacity: 0.8; }
+
+	    &.highlight { fill: white; }
+	}
+    }
+
+    text.label {
+	stroke-width: 0px;
+	text-align: right;
+	font: 10px sans-serif;
+	fill: @chart-font-color;
+    }
+    
+    .rule {
+	stroke: @chart-stroke;
+	stroke-opacity: 0.3;
+	shape-rendering: crispEdges;
+    }
+}

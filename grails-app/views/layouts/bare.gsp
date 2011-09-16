@@ -9,14 +9,15 @@
       <base id="htmldom"  href="${resource(dir:'/',absolute:true)}" />
 
 
-      <p:css name="ui-lightness/jquery-ui-1.8.13.custom" /> <!-- Load the jquery ui theme css -->
-      <p:css name="tmcpe-common" />
-      <p:css name="tmcpe-bare" />
+      <!-- less stylesheets -->
+      <less:stylesheet name="tmcpe-base" />
       
       <p:favicon src="images/favicon.ico" />
 
       <!-- target page layout head -->
       <g:layoutHead />
+
+      <less:scripts />
     </head>
 
     <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
@@ -26,7 +27,7 @@
 	<!-- Link block -->
 	<ul>
 	  <li><a href="${resource(dir:'/',absolute:true)}">Home</a></li>
-	  <li><a href="">CTMLabs</a></li>
+	  <li><a href="http://www.ctmlabs.net/">CTMLabs</a></li>
 	</ul>
 
 	<!-- account block -->

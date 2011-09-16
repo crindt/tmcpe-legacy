@@ -254,11 +254,11 @@ if ( !tmcpe ) var tmcpe = {};
 		  return "translate(0,"+y({y:i},barheight*.65)+")";})
 /*
 	      .on("mouseover",function(d,i){
-		  // mousing over legend item should select 
+		  // mousing over legend item should highlight blocks in chart
 		  var good_data = _.filter(d,function(val){return val.subgroup != null});
 		  var selstr = "#aggchart .bar rect[sgidx='"+good_data[0].sgidx+"']";
 		  var sel = $(selstr);
-//		  sel.svg().addClass("highlight");
+//		  sel.addClass("highlight");
 	      })
 	      .on("mouseout",function(d,i){
 		  var good_data = _.filter(d,function(val){return val.subgroup != null});
@@ -476,7 +476,7 @@ if ( !tmcpe ) var tmcpe = {};
       $('ul.tabs').tabs('div.panes > div');
 
       // update if the querybox changes
-      $("#querybox").keypress(function(e){
+      $("#advancedqueryinput").keypress(function(e){
 	  if(e.which == 13){
 	      aggquery.url("incident/listGroups.json?"+this.value);
 	  }

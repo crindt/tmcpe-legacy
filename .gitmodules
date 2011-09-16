@@ -55,3 +55,6 @@
 [submodule "src/js/underscore"]
 	path = src/js/underscore
 	url = https://github.com/documentcloud/underscore.git
+[submodule "src/js/jquerytools"]
+	path = src/js/jquerytools
+	url = https://github.com/jquerytools/jquerytools

@@ -28,20 +28,29 @@
     <p:javascript src='tmcpe/summary-index' />
 
     <!-- supporting css -->
-    <p:css name="tipsy" />
-    <p:css name="tmcpe-summary-index" />
-    <p:css name="jquery-ui/tabs-no-images" />
+    <p:css name="debug" />
+<!--
+    <p:css name="tst" />
+-->
 
+    <!-- less stylesheets -->
+    <less:stylesheet name="tmcpe-summary-index" />
+    <less:stylesheet name="tabs-no-images" />
+
+   <!-- note: less:scripts loaded by base.gsp -->
 
   </head>
   <body>
+    <!-- Main body of TMCPE Summary/Index -->
     <div id='tmcpeapp'>
+      <!-- Start of content block -->
       <div class='content'>
-	<div id='leftbox'>
+	<!-- Start of left info box -->
+	<div id='leftbox' class="">
 	  <h1>Aggregates</h1>
 	</div>
 	<div id='content'>
-	  <div id='qbox'>
+	  <div class='querybox'>
 	    <!-- the tabs -->
 	    <ul class="tabs">
 	      <li><a href="#">Basic Query</a></li>
@@ -51,7 +60,7 @@
 	    <!-- tab "panes" -->
 	    <div class="panes">
 	      <div>Test</div>
-	      <div><input type="text" id='querybox' value='groups=year&stackgroups=eventType' style="width:30em"></input></div>
+	      <div><input type="text" id='advancedqueryinput' value='groups=year&stackgroups=eventType' style="width:30em"></input></div>
 	    </div>
 	  </div>
 	  <div id='aggchart'></div>
