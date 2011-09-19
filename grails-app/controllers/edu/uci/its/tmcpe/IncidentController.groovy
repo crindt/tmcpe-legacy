@@ -157,11 +157,11 @@ class IncidentController extends BaseController {
 
 		    // Limit depending on whether the incident has been analyzed
 		    def a = (params.Analyzed?: params.analyzed?:"").toUpperCase();
-		    if ( a == "ONLYANALYZED" || a == "true") {
+		    if ( a == "ONLYANALYZED" || a == "TRUE") {
 			// Limit to analyzed...
 			not { sizeEq("analyses", 0) }
 	    
-		    } else if ( a == "UNANALYZED" || a == "false" ) {
+		    } else if ( a == "UNANALYZED" || a == "FALSE" ) {
 			// ...or unanalyzed incidents
 			sizeEq("analyses", 0)
 		    }
