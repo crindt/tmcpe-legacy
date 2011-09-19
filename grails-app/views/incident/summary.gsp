@@ -26,16 +26,12 @@
     <p:javascript src='protovis' />
 
     <!-- app code -->
-    <p:javascript src='tmcpe/summary-index' />
+    <p:javascript src='tmcpe/map-summary' />
 
     <!-- supporting css -->
-    <p:css name="debug" />
-<!--
-    <p:css name="tst" />
--->
 
     <!-- less stylesheets -->
-    <less:stylesheet name="tmcpe-summary-index" />
+    <less:stylesheet name="tmcpe-map-summary" />
     <less:stylesheet name="tabs-no-images" />
 
    <!-- note: less:scripts loaded by base.gsp -->
