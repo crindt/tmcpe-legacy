@@ -13,8 +13,8 @@ class UrlMappings {
         }
 */
         "/" {
-            controller = "summary"
-            action = [GET: "index"]
+            controller = "map"
+            action = [GET: "summary"]
         }
         "500"(view:'/error')
     }

@@ -15,8 +15,9 @@ if ( !tmcpe ) var tmcpe = {};
 
   tmcpe.aggquery = function () {
       var query = {}
-      ,data
-      ,url
+      ,model  // the JSON representation of the query
+      ,data   // the result of the query
+      ,url    // the URL representation of the query
       ;
 
       function executeQuery() {
@@ -26,11 +27,31 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  d3.json( url,
 		   function(e) {
+		       // Report an error
+		       if ( e == null ) {
+			   $('#server_error').overlay({load:true});
+			   return;
+		       }
+
 		       // hold the json response here
 		       data = e;
 		       
+		       // broadcast the newly loaded data
 		       $(window).trigger( "tmcpe.aggregatesLoaded", data );
 		   });
+      }
+
+      function modelToUrl() {
+	  q = [ "groups="+[model.groups].join(","),
+		"stackgroups="+[model.stackgroups].join(",")
+	  ].join("&");
+	  return "incident/listGroups.json?"+q;
+      }
+
+      query.model = function(x) {
+	  if ( !arguments.length ) return model;
+	  model = x;
+	  return query.url( modelToUrl() );
       }
       
       // Setting the url executes the query
@@ -49,6 +70,95 @@ if ( !tmcpe ) var tmcpe = {};
 	  return query;
       }
       return query;
+  }
+
+  /**
+   * A view for representing the aggregate query in a form
+   */
+  tmcpe.queryView = function () {
+
+      // use mustache style templates
+      _.templateSettings = {
+	  interpolate : /\{\{(.+?)\}\}/g
+      };
+
+      var queryView = {}
+      ,query     // the query model this view is tied to
+      ,container
+      ,groupSelect
+      ,stackSelect
+      ,selectTemplate = '<select name="{{name}}">{{#choices}}<option value="{{key}}">{{text}}</option>{{/choices}}</select>'
+      ,radioTemplate = '{{#choices}}<input type="radio" name="{{name}}" value="{{key}}"><span type="label">{{text}}</span><br/>{{/choices}}'
+      ;
+
+      function init() {
+	  if ( container == null ) return;
+
+	  // set a trigger on form elements being changed
+	  d3.selectAll('#basicQueryPane select')
+	      .on('change',function(d){
+		  $(window).trigger("tmcpe.queryFormChanged", formAsModel() );
+	      });
+
+      }
+
+      queryView.query = function(x) {
+	  if ( x == null ) return query;
+	  query = x;
+	  update();
+      }
+
+
+      queryView.container = function(x) {
+	  if ( !arguments.length ) return container;
+	  container = x;
+	  init();
+	  return queryView;
+      }
+
+      // This will insert radio buttons inside the given selector for the given
+      // array of data
+      function radioFromArray( sel, data ) {
+	  return sel.html( Mustache.to_html( radioTemplate, {name:name, choices: data} ) )
+      }
+
+      // This will a select group inside the given selector for the given array
+      // of data
+      function selectFromArray( sel, name, data ) {
+	  return sel.html( Mustache.to_html( selectTemplate, {name:name, choices: data } ) );
+
+      }
+
+      /**
+       * Returns the form data as a JSON model
+       */
+      function formAsModel() {
+	  return { groups:[$('select[name=groups]').val()],
+		   stackgroups:[$('select[name=stackgroups]').val()]
+		 };
+      }
+
+      /**
+       * 
+       */
+      function update() {
+
+	  if ( query ) {
+	      if ( query.groups ) {
+		  var s = $("select[name='groups']");
+		  s.val(query.groups[0]);
+	      }
+	      if ( query.stackgroups ) {
+		  $("select[name=stackgroups]").val(query.stackgroups[0]);
+	      }
+	  }
+
+	  // create the groups box
+	  $(window).trigger("tmcpe.queryFormChanged", formAsModel() );
+
+      }
+
+      return queryView;
   }
 
   tmcpe.aggchart = function () {
@@ -298,45 +408,6 @@ if ( !tmcpe ) var tmcpe = {};
 	  ;
 
 
-	  
-	  
-
-
-	  // Add tooltips for each bar
-	  //$('#aggchart rect[title]').tooltip();
-/*
-
-	  bars.each(function(d){
-	      var bb = this.getBBox();
-	      // anchor = bottom
-	      var x = bb.x;
-	      var y = bb.y;
-
-	      var m = this.getScreenCTM();
-	      var mi = m.inverse();
-	      var point = (this.ownerSVGElement || this).createSVGPoint();
-	      point.x = x;
-	      point.y = y;
-	      
-	      point = point.matrixTransform(m);
-
-	      var tip = d3.select("#aggchart").append("div")
-		  .attr("style",["position:absolute",
-				 //"visibility:hidden",
-				 "background-color:yellow",
-				 "z-index:100000",
-				 "left:"+point.x+"px",
-				 "top:"+point.y+"px",
-				 "width:"+bb.width+"px",
-				 "height:"+bb.height+"px"].join(";"))
-		  .attr("title",d3.select(this).attr("title"))
-	      ;
-
-	      $(tip[0]).tipsy(); 
-	  });
-*/
-	  
-
 	  var gkeys = _.keys(g);
 	  var gvals = _.map(gkeys,function(d){return $.parseJSON(d)});
 
@@ -381,43 +452,6 @@ if ( !tmcpe ) var tmcpe = {};
 		  return d;})
 	  ;
 
-	  
-
-/*
-	  // scales
-	  var xscale = d3.scale.linear()
-	      .domain([0, d3.max(_.map(odata,function(d){
-		  return d.stats.cnt;
-	      }))])
-	      .range([0, w]);
-
-	  // sort and assign indices (FIXME: do server side?)
-	  var idx = 0;
-	  _.each(data,function(d){ d.idx = idx++; });
-
-	  var yscale = d3.scale.ordinal()
-	      .domain(_.range(data.length))
-	      .rangeBands([0, data.length*barheight]);
-
-	  svg.selectAll("rect")
-	      .data(data)
-	      .enter().append("svg:rect")
-	      .attr("y", function(d) { 
-		  return yscale(d.idx); })
-	      .attr("width", function(d) { 
-		  return xscale(d.stats.cnt); })
-	      .attr("height", yscale.rangeBand());
-
-	  svg.selectAll("text")
-	      .data(data)
-	      .enter().append("svg:text")
-	      .attr("x", function(d) { return xscale(d.stats.cnt); })
-	      .attr("y", function(d) { return yscale(d.idx) + yscale.rangeBand() / 2; })
-	      .attr("dx", -3) // padding-right
-	      .attr("dy", ".35em") // vertical-align: middle
-	      .attr("text-anchor", "end") // text-align: right
-	      .text(function(d) { return d.stats.cnt; } );
-*/
       }
 
       aggchart.container = function(x) {
@@ -451,6 +485,16 @@ if ( !tmcpe ) var tmcpe = {};
 	  .container(d3.select('#aggchart'))
       ;
 
+      var queryView = tmcpe
+	  .queryView()
+	  .container( d3.select('#basicQueryPane') )
+      ;
+
+      // create (default) query
+      var aggquery = tmcpe
+	  .aggquery()
+      ;
+
 
       // create view event bindings
       $(window).bind("tmcpe.aggregatesRequested", function(caller, d) { 
@@ -461,17 +505,14 @@ if ( !tmcpe ) var tmcpe = {};
 	  $("#loading").css('visibility','hidden');
 
 	  aggchart.data(d);
-
       } );
-
-      $(window).bind("tmcpe.queryChanged", function(caller, d) {
-      });
       
-      // create (default) query
-      var aggquery = tmcpe
-	  .aggquery()
-	  .url("incident/listGroups.json?groups=year&stackgroups=eventType")
-      ;
+
+      $(window).bind("tmcpe.queryFormChanged", function(caller, d) {
+	  // d contains the query form data as a JSON object
+	  // Update the aggregate query
+	  aggquery.model( d );
+      });
 
 
       /////////// QUERY FORM MANIP
@@ -479,65 +520,8 @@ if ( !tmcpe ) var tmcpe = {};
       // jquerytools tabs
       $('ul.tabs').tabs('div.panes > div');
 
-      function radioFromArray( sel, data ) {
-	  var spans = sel.selectAll('span')
-	      .data(data)
-	      .enter()
-	      .append('span')
-	      .attr('class','radiospan')
-	  ;
-	  spans.append('input')
-	      .attr('type','radio')
-	      .attr('name','groups')
-	      .attr('value',function(d){
-		  return d.key;
-	      })
-	  ;
-	  spans.append('span')
-	      .text( function( d ) {
-		  return d.text;
-	      })
-	  ;
-	  spans.append('br');
-      }
-
-      function selectFromArray( sel, data ) {
-	  var select = sel.append('select');
-	  select.selectAll('option')
-	      .data(data)
-	      .enter()
-	      .append('option')
-	      .attr('value',function(d){return d.key;})
-	      .text(function(d){ return d.text; })
-	  ;
-	  return select;
-      }
-
-
-      function updateQuery() {
-	  // pull data from form
-	  var q = ["groups="+$('select[name=groups]').val(),
-		   "stackgroups="+$('select[name=stacks]').val()
-		  ].join("&");
-	  aggquery.url("incident/listGroups.json?"+q);
-      }
-
       // create basic query form
       //$('groupby')
-      $.get('incident/formData', function(data){
-	  //radioFromArray(d3.select('#groupby'),data.groups);
-	  selectFromArray( d3.select('#groupby'),data.groups)
-	      .attr('name',"groups")
-	      .on('change',function(d){
-		  updateQuery();
-	      });
-	  selectFromArray( d3.select('#stackby'),data.groups)
-	      .attr('name',"stacks")
-	      .on('change',function(d){
-		  updateQuery();
-	      });
-
-      });
 
       // update if the querybox changes
       $("#advancedqueryinput").keypress(function(e){
@@ -547,6 +531,15 @@ if ( !tmcpe ) var tmcpe = {};
 
       });
 
+
+
+      // Now, fire things up by setting a default query
+      //aggquery.url("incident/listGroups.json?groups=year&stackgroups=eventType")
+      queryView.query( { groups: [ "year" ], stackgroups: ["eventType"] } );
+
+
+      // set up the overlays
+      
       
 
   });

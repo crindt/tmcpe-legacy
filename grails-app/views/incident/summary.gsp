@@ -8,6 +8,7 @@
     <!-- frameworks -->
     <p:javascript src='jquery-1.6.1' />
     <p:javascript src='underscore' />
+    <p:javascript src='mustache' />
 
     <!-- formatting -->
     <p:javascript src='jquery.format-1.2.min' />
@@ -59,9 +60,21 @@
 	    
 	    <!-- tab "panes" -->
 	    <div class="panes">
-	      <div>
-		<div style="display:inline;" id='groupby'></div>
-		<div style="display:inline;" id='stackby'></div>
+	      <div id="basicQueryPane">
+		<div style="display:inline;" id='groupby'>
+		  <g:select name="groups"
+			    from="${formData}"
+			    optionKey="key" 
+			    optionValue="text"
+			    />
+		</div>
+		<div style="display:inline;" id='stackby'>
+		  <g:select name="stackgroups"
+			    from="${formData}"
+			    optionKey="key" 
+			    optionValue="text"
+			    />
+		</div>
 		<div style="display:inline;" id='filterby'></div>
 	      </div>
 	      <div>
@@ -73,8 +86,18 @@
 	  <div id='aggchartdetail'></div>
 	</div>
       </div>
+
+      <!-- Some overlays we'll bring up from time to time -->
       <div id='loading'>
 	<div id='loading_block'>Loading data...</div>
+      </div>
+      <div class="simple_overlay error" id="server_error">
+	<h1>The connection to the server failed!</h1>
+	You can:
+	<ul>
+	<li><a href="#" onclick="window.location.reload()">try reloading the page,</a></li>
+	<li><a href="http://tracker.ctmlabs.net/projects/tmcpe/issues/new?issue[tracker_id]=1&issue[subject]=Network failure loading aggregate query">report a problem</a> using the CTMLabs tracker, or</li>
+	<li>try again later...</li>
       </div>
     </div>
   </body>

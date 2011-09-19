@@ -743,13 +743,15 @@ if ( !tmcpe ) var tmcpe = {};
       var mapView = tmcpe.query.mapView().container(d3.select('#mapview'));
       var detailView = tmcpe.query.detailView().container(d3.select('#cluster-detail'));
       
+      var loadingOverlay;
+
       // create view event bindings
       $(window).bind("tmcpe.incidentsRequested", function(caller, d) { 
-	  $("#loading").css('visibility','visible');
+	  loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
       } );
 
       $(window).bind("tmcpe.incidentsLoaded", function(caller, d) { 
-	  $("#loading").css('visibility','hidden');
+	  if ( loadingOverlay ) loadingOverlay.close();
 
 	  // this hack to handle requery needs to be fixed
 	  var it = d3.select('#incident-table');

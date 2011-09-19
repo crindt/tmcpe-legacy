@@ -123,7 +123,8 @@ class IncidentController extends BaseController {
 			if ( hour.size() > 0 ) {
 			    addToCriteria( 
 				Restrictions.sqlRestriction( 
-				    "extract( hour from start_time ) IN ( ${hour.join(',')} )"
+				    // fixme: the this_ prefix here is a HQL-specific modifier to avoid name ambiguity
+				    "extract( hour from this_.start_time ) IN ( ${hour.join(',')} )"
 				) )
 			}
 		    }
@@ -448,6 +449,10 @@ class IncidentController extends BaseController {
 	notLocated: [ pretty: "Incidents with known locations", filtImpl: { return "( location_id IS NULL )"; } ],
 	    
     ];
+
+    def summary = {
+	return [ formData: groupMap.collect { [ key:it.key, text: it.value.pretty] } ]
+    }
 
     def formData = {
 	def json = [groups:[], filters:[]];

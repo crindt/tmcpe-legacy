@@ -58,3 +58,6 @@
 [submodule "src/js/jquerytools"]
 	path = src/js/jquerytools
 	url = https://github.com/jquerytools/jquerytools
+[submodule "src/js/mustache"]
+	path = src/js/mustache
+	url = https://github.com/janl/mustache.js

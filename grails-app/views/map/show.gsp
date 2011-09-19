@@ -76,8 +76,10 @@
 	  <div id='incident-stats' style="height:200px"></div>
 	</div>
       </div>
-      <div id='loading'>
-	<div id='loading_block'>Loading data...</div>
+
+      <!-- Some overlays we'll bring up from time to time -->
+      <div class='simple_overlay info' id='loading'>
+	<h1>Loading data...</h1>
       </div>
     </div>
   </body>
