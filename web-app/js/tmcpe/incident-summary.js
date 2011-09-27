@@ -21,31 +21,41 @@ if ( !tmcpe ) var tmcpe = {};
       ;
 
       function executeQuery() {
-	  if ( url == null ) return; // fixme: more checks
+	  if ( url == null ) throw "undefined URL in tmcpe.aggquery.executeQuery()";
 	  
 	  $(window).trigger( "tmcpe.aggregatesRequested", query );
 	  
-	  d3.json( url,
-		   function(e) {
-		       // Report an error
-		       if ( e == null ) {
-			   $('#server_error').overlay({load:true});
-			   return;
-		       }
-
-		       // hold the json response here
-		       data = e;
-		       
-		       // broadcast the newly loaded data
-		       $(window).trigger( "tmcpe.aggregatesLoaded", data );
-		   });
+	  try {
+	      d3.json( url,
+		       function(e) {
+			   // Catch network errors
+			   if ( e == null ) throw "Error retreiving query data from server.";
+			   
+			   // hold the json response here
+			   data = e;
+			   
+			   // broadcast the newly loaded data
+			   $(window).trigger( "tmcpe.aggregatesLoaded", data );
+		       });
+	  } catch( e ) {
+	      alert( "Error!" );
+	  }
       }
 
       function modelToUrl() {
-	  q = [ "groups="+[model.groups].join(","),
-		"stackgroups="+[model.stackgroups].join(",")
-	  ].join("&");
-	  return "incident/listGroups.json?"+q;
+	  // assert
+	  if ( model == null ) throw "Undefined model in tmcpe.aggquery";
+	  if ( model.groups == null ) throw "Undefined model.groups in tmcpe.aggquery";
+	  if ( model.stackgroups == null ) throw "Undefined model.stackgroups in tmcpe.aggquery";
+
+	  var url = g.createLink( { controller: 'incident',
+					 action: 'listGroups.json',
+					 params: {
+					     groups: model.groups,
+					     stackgroups: model.stackgroups
+					 }
+				       });
+	  return url;
       }
 
       query.model = function(x) {
@@ -178,6 +188,10 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // empty container
 	  $(container[0]).children().remove();
+
+	  // add dummy elements to determine chart coloring from css
+	  container.append("div").attr("class","dummy-chart-start-color");
+	  container.append("div").attr("class","dummy-chart-end-color");
       }
 
       function stringifyMap(map) {
@@ -208,10 +222,12 @@ if ( !tmcpe ) var tmcpe = {};
 	  //           /*subgroupM*/ [ {group1}, {group2}, ..., {groupN} ]]
 	  var odata = new Array();
 	  var sg = new Array();
-	  var g = new Array();
-//	  var color = d3.interpolateRgb("#aad", "#556");
-	  var color = d3.interpolateRgb("#ff0000", "#0000ff");
-//	  var color = d3.interpolateRgb("#ff0000", "#00ff00");
+	  var gr = new Array();
+
+	  // Obtain the color range for the chart using the fill value from the
+	  // css-classed dummy divs created in the init() function
+	  var color = d3.interpolateRgb($(".dummy-chart-start-color").css("fill"), 
+					$(".dummy-chart-end-color").css("fill"));
 	  
 	  
 
@@ -233,8 +249,8 @@ if ( !tmcpe ) var tmcpe = {};
 	      if ( (sgidx = sg[sgstr]) == null ) {
 		  sgidx = sg[sgstr] = _.keys(sg).length;
 	      }
-	      if ( (gidx = g[gstr]) == null ) {
-		  gidx = g[gstr] = _.keys(g).length;
+	      if ( (gidx = gr[gstr]) == null ) {
+		  gidx = gr[gstr] = _.keys(gr).length;
 	      }
 	      if ( odata[sgidx] == null ) odata[sgidx] = new Array();
 	      odata[sgidx][gidx] = { y: gidx, 
@@ -248,7 +264,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // make sure everything is initialized (in case of missing data from the controller)
 	  var sgk = _.keys(sg),
-	  gk = _.keys(g);
+	  gk = _.keys(gr);
 	  for( i = 0; i < sgk.length; ++i )
 	      for ( j = 0; j < gk.length; ++j )
 		  if ( odata[i][j] == null ) odata[i][j] = {y: j, x:0 };
@@ -346,7 +362,9 @@ if ( !tmcpe ) var tmcpe = {};
 			  parstr.push( filtparams[k] );
 		      }
 		  }
-		  window.open('map/show?'+parstr.join("&"));
+		  url = g.createLink( { controller: 'map',
+					     action: 'show' } ) + "?" + parstr.join("&");
+		  window.open(url);
 	      })
 					     
 	  ;
@@ -408,7 +426,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  ;
 
 
-	  var gkeys = _.keys(g);
+	  var gkeys = _.keys(gr);
 	  var gvals = _.map(gkeys,function(d){return $.parseJSON(d)});
 
 	  var labelblock = svg.append("svg:g");
@@ -497,14 +515,14 @@ if ( !tmcpe ) var tmcpe = {};
 
 
       // create view event bindings
+      var loadingOverlay;
       $(window).bind("tmcpe.aggregatesRequested", function(caller, d) { 
-	  $("#loading").css('visibility','visible');
+	  loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
       } );
 
       $(window).bind("tmcpe.aggregatesLoaded", function(caller, d) { 
-	  $("#loading").css('visibility','hidden');
-
 	  aggchart.data(d);
+	  if ( loadingOverlay ) loadingOverlay.close();
       } );
       
 
@@ -526,7 +544,10 @@ if ( !tmcpe ) var tmcpe = {};
       // update if the querybox changes
       $("#advancedqueryinput").keypress(function(e){
 	  if(e.which == 13){
-	      aggquery.url("incident/listGroups.json?"+this.value);
+	      var url = g.createLink( { controller: 'incident',
+					action: 'listGroups.json'
+				      } ) + "?"+this.value;
+	      aggquery.url(url);
 	  }
 
       });

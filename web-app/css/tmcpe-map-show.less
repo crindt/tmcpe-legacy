@@ -1,4 +1,5 @@
 @import "tmcpe-colors.less";
+@import "tmcpe-mixins.less";
 
 
 #incident-list {
@@ -33,13 +34,46 @@
     thead {
 	th {
 	    .theadfoot;
+	    background: @button-active-background;
+	    color: @button-active;
+//	    padding-left: 20px;
+
 	    &:hover {
-		background: blue;
-		color: white;
+		background: @button-hover-background;
+		color: @button-hover-color;
 	    }
 
 	    &:first-child {
 		border-left: 0px gray;
+	    }
+	    
+	    /* Datatables */
+	    &.sorting_asc {
+		background-image: url(../images/sort_asc.png);
+		background-repeat: no-repeat;
+		background-position: top left;
+
+		&.d12_delay,&.tmcpe_delay,&.savings {
+		    background-position: top right;
+		}
+		
+		&.timestamp {
+		    background-position: top center;
+		}
+		
+	    }
+
+	    &.sorting_desc {
+		background-image: url(../images/sort_desc.png);
+		background-repeat: no-repeat;
+		background-position: bottom left;
+		&.d12_delay,&.tmcpe_delay,&.savings {
+		    background-position: bottom right;
+		}
+		&.timestamp {
+		    background-position: bottom center;
+		}
+
 	    }
 	}
     }
@@ -48,23 +82,23 @@
 	/* highlight row we're hovering over */
 	&:hover {
 	    td {
-		border-top: 2px solid blue;
-		border-bottom: 2px solid blue;
+		border-top: 2px solid @selected-background;
+		border-bottom: 2px solid @selected-background;
 
 		&:first-child {
-		    border-left: 0px solid blue;
+		    border-left: 0px solid @selected-background;
 		}
 
 		&:last-child {
-		    border-right: 1px solid blue;
+		    border-right: 1px solid @selected-background;
 		}
 	    }
 	}
 
 	&.selected {
 	    td {
-		background-color: blue;
-		color: white;
+		background-color: @selected-background;
+		color: @selected-color;
 		border-top: 2px solid black;
 		border-bottom: 2px solid black;
 		font-weight: bold;
@@ -90,9 +124,9 @@
 }
 
 .selected {
-   stroke-width: 10px;
-   stroke: blue;/*cyan;*/
-   fill-opacity: 0.85;
+    stroke-width: 10px;
+    stroke: blue;/*cyan;*/
+    fill-opacity: 0.85;
 }
 
 .col {
@@ -147,58 +181,58 @@
 
 #cluster-detail {
     font-size: 10pt;
-}
 
-#cluster-detail table {
-    table-layout: fixed;
-    width: 100%;
-    font-size: 10pt;
-}
+    table {
+	table-layout: fixed;
+	width: 100%;
+	font-size: 10pt;
 
-#cluster-detail table td {
-    vertical-align:top;
-    white-space:nowrap;
-    overflow-x:hidden;
-    text-overflow:ellipsis;
-}
+	td {
+	    vertical-align:top;
+	    white-space:nowrap;
+	    overflow-x:hidden;
+	    text-overflow:ellipsis;
+	}
 
-#cluster-detail table th {
-    vertical-align:top;
-    white-space:nowrap;
-    overflow-x:hidden;
-    text-overflow:ellipsis;
-    text-align:right;
-    vertical-align:top;
-    width: 75px;
-}
+	th {
+	    vertical-align:top;
+	    white-space:nowrap;
+	    overflow-x:hidden;
+	    text-overflow:ellipsis;
+	    text-align:right;
+	    vertical-align:top;
+	    width: 75px;
+	}
+    }
 
-#cluster-detail h1 {
-    font-size: 12pt;
-    font-weight: bold;
-    text-align:center;
-    color: black;
-    background: gray;
-}
+    h1 {
+	font-size: 12pt;
+	font-weight: bold;
+	text-align:center;
+	color: black;
+	background: gray;
+    }
+    
+    ul {
+	margin-left: 0px;
+	padding-left: 0px;
+    }
 
-#cluster-detail ul {
-    margin-left: 0px;
-    padding-left: 0px;
-}
-
-#cluster-detail li {
-    visibility:hidden;
-    display:none;
-}
-
-#cluster-detail li.selected {
-    /*color: yellow;*/
-    visibility:visible;
-    display:block;
-}
-
-#cluster-detail a {
-    text-align:center;
-    color: white;
+    li {
+	visibility:hidden;
+	display:none;
+	
+	&.selected {
+	    /*color: yellow;*/
+	    visibility:visible;
+	    display:block;
+	}
+    }
+    
+    a {
+	text-align:center;
+	color: white;
+    }
 }
 
 .navbutton {
@@ -207,18 +241,20 @@
     padding: 5px;
     width: 30px;
     border: 1px solid gray;
-}
 
-.navbutton:hover {
-    background-color: red;
-    color: yellow;
-}
+    &:hover {
+	.highlight-dark-block( @content-background, @content-color );
+    }
 
-.navbutton.disabled {
-    background-color: gray;
-}
-.navbutton.disabled:hover {
-    background-color: gray;
+    &.disabled {
+	background-color: @disabled-background;
+	color: @disabled-color;
+	
+	&:hover {
+	    background-color: @disabled-background;
+	    color: @disabled-color;
+	}
+    }
 }
 
 

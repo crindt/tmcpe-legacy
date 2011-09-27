@@ -1,4 +1,5 @@
 @import "tmcpe-colors.less";
+@import "tmcpe-mixins.less";
 
 @banner-height: 21px;
 
@@ -14,17 +15,20 @@ body {
 
 
 .header {
-    h1 {
-	color: @color;
-	background-image: url(/tmcpe/images/logo_jem_060.png);
-	background-repeat: no-repeat;
-	margin-top: @banner-height;
-	height: 60px;
-	padding-left: 160px;
-	text-decoration: none;
-	vertical-align: text-bottom;
-	padding-top: 25px;
-	font-size: 30px;
+    a {
+	float: left;
+	h1 {
+	    color: @color;
+	    background-image: url(../images/logo_jem_060.png);
+	    background-repeat: no-repeat;
+	    margin-top: @banner-height;
+	    height: 60px;
+	    padding-left: 160px;
+	    text-decoration: none;
+	    vertical-align: text-bottom;
+	    padding-top: 25px;
+	    font-size: 30px;
+	}
     }
 
     ul.menu {
@@ -115,7 +119,10 @@ body {
 		margin-right: 8px;
 		text-decoration: none;
 		color: @menu-color;
-		&:hover { background-color: desaturate(@menu-background, 20%); /* was: yellow */ }
+		&:hover { 
+                    background-color: desaturate(@menu-background, 20%); /* was: yellow */ 
+                    border-bottom: 3px #f00;
+                }
 	    }
 
 	}
@@ -158,15 +165,29 @@ body {
 	color: @info-color;
 
 	&.error {
-	background-color:@alert-background;
-	color: @alert-color;
+	    background-color:@alert-background;
+	    color: @alert-color;
+
+	    table {
+
+		td {
+		    background-color: darken( @alert-background, 10% );
+		    color: saturate( @alert-color, 30% );
+		    text-weight: bold;
+		    font-size: @font-size * 1.2;
+		    padding: 5px;
+		    text-shadow: darken( @alert-background, 20% ) 1px 1px;
+
+		    &.label { text-align: right }
+		}
+	    }
 	}
 
 }
 
 /* close button positioned on upper right corner */
 .simple_overlay .close {
-	background-image:url(../img/overlay/close.png);
+	background-image:url(../images/jquery-tools/overlay/close.png);
 	position:absolute;
 	right:-15px;
 	top:-15px;
@@ -174,3 +195,27 @@ body {
 	height:35px;
 	width:35px;
 }
+
+/* from jquery tools tooltip styling. by default the element to be styled is .tooltip  */
+.tooltip {
+	font-size:12px;
+	height:70px;
+	width:160px;
+	padding:25px;
+	color:@tooltip-color;	
+	z-index:10000;
+
+	/* default is to position on top */
+	background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow.png);
+
+
+	&.bottom {
+	    background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow_bottom.png);
+	    padding-top: 35px; /* shift the text down a bit */
+	}
+
+	&.right {
+	    background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow_right.png);
+	    padding-left: 35px;
+	}
+}}

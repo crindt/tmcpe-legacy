@@ -34,3 +34,9 @@
 .rounded-top-corners ( @radius: 5px ) {
     .rounded-corners( @radius, @radius, 0px, 0px );
 }
+
+.box-shadow( @scale: 5px ) {
+    -moz-box-shadow: 2*@scale 2*@scale @scale #888;  // check color
+    -webkit-box-shadow: 2*@scale 2*@scale @scale #888;
+    box-shadow: 2*@scale 2*@scale @scale #888;    
+}

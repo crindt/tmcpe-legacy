@@ -65,6 +65,8 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  d3.json( url,
 		   function(e) {
+		       if ( e == null ) throw "Error retreiving query data from server.";
+
 		       data = e; // hold the json response here
 
 		       // done loading event
@@ -113,7 +115,7 @@ if ( !tmcpe ) var tmcpe = {};
       // constructors and private methods
       function init() {
 	  // If the container doesn't fit, you must aquit
-	  if ( container == null ) return; 
+	  if ( container == null ) throw "Container missing for tableView."
 
 	  // Clear container
 	  var divs = container.selectAll('div');
@@ -127,7 +129,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .append('th')
 	      .attr('class',function(d){return d.key;})
 	      .html(function(d){return d.title;})
-	      .attr('title',function(d) { $(this).tipsy(); return "Click to toggle sort"; })
+	      .attr('title',function(d) { return "Click to toggle sort by "+d.title; })
 	  ;
 
 	  tbody = element.append('tbody');
@@ -149,6 +151,8 @@ if ( !tmcpe ) var tmcpe = {};
 	  ;
 	  
 	  resetColumnWidths();
+
+	  $('#incident-list th[title]').tooltip({position:"bottom center", tipClass: "tooltip bottom"});
       }
 
 
@@ -170,7 +174,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("cad", function( d ) { 
 		  return d.cad
 	      } )
-	      .attr("title", function( d ) { $(this).tipsy(); return "Click row to view details in the left pane"; })
+	      .attr("title", "Click row to view details in the left pane")
 	      .attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
 	      .style("background-color",function(d){
 		  return ( d.properties.tmcpe_delay != null 
@@ -209,6 +213,9 @@ if ( !tmcpe ) var tmcpe = {};
 			 })
 	  //.fnFilter($('#incident-list_filter input').val(),null,true,false) // Use regex filtering, not "smart"
 	  ;
+
+	  $('#incident-list tbody tr[title]').tooltip({tip:"#trtip", position:"bottom center", tipClass: "tooltip bottom"});
+	  $('#incident-list tbody tr[title] td').tooltip({tip:"#trtip", position:"bottom center", tipClass: "tooltip bottom"});
 
 	  resetColumnWidths();
 	  
@@ -272,9 +279,10 @@ if ( !tmcpe ) var tmcpe = {};
       // utility methods
       function resetColumnWidths() {
 	  var wid = $(window).width();
-	  var table_fudge=100;
+	  var table_fudge=100;//100;
+	  var padding_fudge=0;//20*7; /* 20px padding by 7 columns */
 
-	  $('#incident-list').width(wid-250-table_fudge);
+	  $('#incident-list').width(wid-250-table_fudge-padding_fudge);
 
 	  // On this, we pretty much want to resize the memo column and that's it...
 	  var cwid = $(container[0]).width();
@@ -289,7 +297,7 @@ if ( !tmcpe ) var tmcpe = {};
 		     hold[d] = twid;
 		 });
 //	  var avwid = cwid-(widsum);
-	  var avwid = wid-table_fudge-250-(widsum-mwid);
+	  var avwid = wid-table_fudge-padding_fudge-250-(widsum-mwid);
 
 	  if ( avwid < mwid_min || avwid < 200 ) avwid = 200;
 	  var sel = $('#incident-list .memo').css('width',avwid+'px').css('max-width',avwid+'px');
@@ -563,6 +571,12 @@ if ( !tmcpe ) var tmcpe = {};
 	  interpolate : /\{\{(.+?)\}\}/g
       };
 
+      var tsdurl = g.createLink({controller:'incident',
+				 action:'tsd',
+				 //params: {cad:'{{cad}}'}  // a param for the template
+				});
+      tsdurl += "?cad={{cad}}";  // can't use createLink because it encodes {{}}
+
       var detailView = {}
       ,container
       ,list
@@ -582,7 +596,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      +'<tr title="The approximate percent of time-space cells sampled for the incident"><th>Sample%:</th><td>{{((properties.samplePercent*100)||0).toFixed(1)}}%</td></tr>'
 	      +'</table>'
 	      +'<hr/>'
-	      +'<div style="width=100%;text-align:center;"><a target="_blank" href="incident/tsd?cad={{cad}}">Show detailed analysis</a></div>'
+	      +'<div style="width=100%;text-align:center;"><a target="_blank" href="'+tsdurl+'" title="Open a new window showing a time-space diagram of this incident and details of the delay analysis">Show detailed analysis</a></div>'
       )
       ;
 
@@ -600,7 +614,6 @@ if ( !tmcpe ) var tmcpe = {};
 	  nav.append("a")
 	      .html("Prev")
 	      .attr("class","navbutton navprev")
-	      .attr("title",function(d){$(this).tooltip()})
 	      .style("float","left")
 	      .on("click",function(d){ 
 		  // get the previous li child
@@ -618,7 +631,6 @@ if ( !tmcpe ) var tmcpe = {};
 	  nav.append("a")
 	      .html("Next")
 	      .attr("class","navbutton navnext")
-	      .attr("title",function(d){$(this).tooltip();})
 	      .style("float","right")
 	      .on("click",function(d){ 
 		  // get the previous li child
@@ -640,24 +652,26 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
 
+      var oldshow;
+
       function checkDetailButtons() {
 	  var checknext = $(container[0]).find('li.selected').next();
 	  if ( checknext.length == 0 ) {
 	      // we're at the end, disable the button
 	      $(".navnext").addClass("disabled");
-	      $(".navnext").attr("title",null );
 	  } else {
 	      $(".navnext").removeClass("disabled");
-	      $(".navnext").attr("title","There are more incidents here, click for the next" );
+	      $(".navnext").attr("title","There are more incidents at this location, click for the next" ).tooltip({tip:"#nexttip"});
 	  }
 	  var checkprev = $(container[0]).find('li.selected').prev();
 	  if ( checkprev.length == 0 ) {
 	      // we're at the end, disable the button
 	      $(".navprev").addClass("disabled");
-	      $(".navprev").attr("title",null );
 	  } else {
 	      $(".navprev").removeClass("disabled");
-	      $(".navprev").attr("title","There are more incidents here, click for the previous" );
+	      $(".navprev")
+		  .attr("title","There are more incidents at this location, click for the previous" )
+		  .tooltip({position: "top right", tip:"#prevtip"});
 	  }
 
       }
@@ -681,8 +695,8 @@ if ( !tmcpe ) var tmcpe = {};
 		  return detailTemplate( tt ); 
 	      });
 
-	  // add tool tips to the rows
-	  $(list[0]).find('tr').tooltip();
+	  // reset tooltips
+	  $('#cluster-list [title]').tooltip({position: 'center right', tipClass:'tooltip right'});
 
 	  li.exit().remove();
       }
@@ -846,32 +860,56 @@ if ( !tmcpe ) var tmcpe = {};
       // Create query object and load the data.
       // When the data is loaded, it gets pushed to the views through the event bindings
       map_show_params['max'] = 1000;
-      var qparm = _.map(_.filter(_.keys(map_show_params),function(x){
+      var qparm = [];
+      _.map(_.filter(_.keys(map_show_params),function(x){
 		   return x != 'action' && x!= 'controller';
 	       }), function (key) { 
-		   return key+"="+map_show_params[key]; 
+		   qparm[key] = map_show_params[key]; 
 	       });
+      var url = g.createLink({controller: 'incident',
+			      action: 'list.geojson',
+			      params: qparm 
+			     });
       var query = tmcpe
 	  .query()
-	  .url('incident/list.geojson?'+ qparm.join('&'));
-	  //.url('incident/list.geojson?startDate=2011-01-01&endDate=2012-01-01&Analyzed=onlyAnalyzed&solution=good&notBounded&samplePercent=0.5&max=1000');
-	  //.url('incident/list.geojson?startDate=2011-06-01&endDate=2012-01-01&max=1000');
+	  .url(url);
 
 
       // read query box
       $('#new-incident').keypress(function(e){
+	  url = g.createLink({controller: 'incident',
+			      action: 'list.geojson',
+			      param: {
+				  max:1000,
+				  Analyzed: 'onlyAnalyzed',
+				  solution: 'good'
+			      }
+			     });
+	  url = url + "&" + this.value;
+
 	  if(e.which == 13){
-	      query.url("incident/list.geojson?max=1000&Analyzed=onlyAnalyzed&solution=good&"+this.value);
+	      query.url(url);
 	  }
       });
 
       $('#year').change(function(){
 	  var year = this.value;
-	  query.url("incident/list.geojson?max=1000&Analyzed=onlyAnalyzed&solution=good"
-		    +"&startDate="+year+"-01-01"
-		    +"&endDate="+(parseInt(year)+1)+"-01-01"
-		    );
+	  var url = g.createLink({controller: 'incident',
+			      action: 'list.geojson',
+			      param: {
+				  max:1000,
+				  Analyzed: 'onlyAnalyzed',
+				  solution: 'good',
+				  startDate: year+"-01-01",
+				  endDate: year+"-01-01"
+			      }
+			     });
+	  query.url(url);
       });
+
+      // Add tooltips to any titled elements at this point
+      $("#mapview").tooltip({tipClass: "tooltip right", position: "center right"});
+
   });
 
  })();

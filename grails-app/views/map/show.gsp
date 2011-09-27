@@ -12,7 +12,6 @@
     <!-- formatting -->
     <p:javascript src='jquery.format-1.2.min' />
     <p:javascript src='jquery.dataTables' />
-    <p:javascript src='jquery.tipsy' />
     <p:javascript src='jquery.svg' />    <!-- plugins for manipulating svg using jquery -->
     <p:javascript src='jquery.svgdom' /> <!-- plugins for manipulating svg using jquery -->
 
@@ -24,11 +23,10 @@
     <p:javascript src='protovis' />
     <p:javascript src='jquery.tools.min'/>
 <!--
+    <g:javascript src='jquery.tools.js'/>
+    <p:javascript src='jquery.tools'/>
     <script type="text/javascript" src="http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js" />
 -->
-
-    <!-- supporting css -->
-    <p:css name="tipsy" />
 
     <!-- supporting stylesheets -->
     <less:stylesheet name="tmcpe-map-show" />
@@ -46,7 +44,7 @@
     <div id='tmcpeapp'>
       <div class='content'>
 	<div id='leftbox'>
-	  <div id='mapview' tabindex="1"></div>
+	  <div id='mapview' tabindex="1" title="Click on a visible circle to view the incidents at that location"></div>
 	  <div id='cluster-detail'>
 	    <ul id='cluster-list'>
 	    </ul>
@@ -77,10 +75,11 @@
 	</div>
       </div>
 
-      <!-- Some overlays we'll bring up from time to time -->
-      <div class='simple_overlay info' id='loading'>
-	<h1>Loading data...</h1>
-      </div>
     </div>
+
+    <!-- Manual definition of tooltips-->
+    <div class="tooltip bottom" id="trtip" style="display:none"></div>
+    <div class="tooltip top" id="nexttip" style="display:none"></div> <!-- should be right -->
+    <div class="tooltip top" id="prevtip" style="display:none"></div> <!-- should be right -->
   </body>
 </html>

@@ -26,12 +26,12 @@
     <p:javascript src='protovis' />
 
     <!-- app code -->
-    <p:javascript src='tmcpe/map-summary' />
+    <p:javascript src='tmcpe/incident-summary' />
 
     <!-- supporting css -->
 
     <!-- less stylesheets -->
-    <less:stylesheet name="tmcpe-map-summary" />
+    <less:stylesheet name="tmcpe-incident-summary" />
     <less:stylesheet name="tabs-no-images" />
 
    <!-- note: less:scripts loaded by base.gsp -->
@@ -83,18 +83,6 @@
 	</div>
       </div>
 
-      <!-- Some overlays we'll bring up from time to time -->
-      <div id='loading'>
-	<div id='loading_block'>Loading data...</div>
-      </div>
-      <div class="simple_overlay error" id="server_error">
-	<h1>The connection to the server failed!</h1>
-	You can:
-	<ul>
-	<li><a href="#" onclick="window.location.reload()">try reloading the page,</a></li>
-	<li><a href="http://tracker.ctmlabs.net/projects/tmcpe/issues/new?issue[tracker_id]=1&issue[subject]=Network failure loading aggregate query">report a problem</a> using the CTMLabs tracker, or</li>
-	<li>try again later...</li>
-      </div>
     </div>
   </body>
 </html>

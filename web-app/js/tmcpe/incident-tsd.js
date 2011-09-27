@@ -12,7 +12,7 @@ if ( !tmcpe ) var tmcpe = {};
   
   tmcpe.util = {};
 
-  tmcpe.util.getGRColor = function( val, min, max,  minval, maxval ) {
+  tmcpe.util.getGRColor = function( val, min, max,  minval, midval, maxval ) {
       // summary:
       //		Computes a color between green and red based upon the given value and limits
       // description:
@@ -44,7 +44,7 @@ if ( !tmcpe ) var tmcpe = {};
       //	var ret = [ parseInt( r*255 ), parseInt( g*255 ), parseInt( b*255 ), 1.0 ];
       //var ret = "#"+[ tmcpe.util.toColorHex( r*255 ), tmcpe.util.toColorHex( g*255 ), tmcpe.util.toColorHex( b*255 ) ].join("");
 
-      var color = pv.Scale.linear(0,0.5,1.0).range("green","yellow","red");
+      var color = pv.Scale.linear(0,0.5,1.0).range(minval,midval,maxval);
       
       return color( r ).color;
   };
@@ -58,6 +58,11 @@ if ( !tmcpe ) var tmcpe = {};
   };
 
   tmcpe.util.color = function( d, trans, scale ) {
+      // get colors from css
+      var startColor = $('.dummy-tsd-speed-start-color').css('fill') || '#ff0000';
+      var midColor   = $('.dummy-tsd-speed-mid-color').css('fill')   || '#ffff00';
+      var endColor   = $('.dummy-tsd-speed-end-color').css('fill')   || '#00ff00';
+
       var col = "#ccc";
       trans = trans ? trans : function( dd ) { return (dd.spd-dd.spd_avg)/dd.spd_std };
       var themeScale=scale?scale:-1.0;
@@ -66,7 +71,7 @@ if ( !tmcpe ) var tmcpe = {};
 	   //		 && d.days_in_avg < 30  // fixme: make this a parameter
 	   //		 && d.pct_obs_avg < 30  // fixme: make this a parameter
 	 ) {
-	  col = tmcpe.util.getGRColor( trans( d ), 0, 1, '#ff0000','#00ff00' );
+	  col = tmcpe.util.getGRColor( trans( d ), 0, 1, startColor, midColor, endColor );
       }
       return col;
   };
@@ -91,6 +96,7 @@ if ( !tmcpe ) var tmcpe = {};
   };
 
 
+  // view of the affected sections in time and space on one facility
   tmcpe.tsd = function() {
       var tsd = {},
       container,
@@ -212,10 +218,12 @@ if ( !tmcpe ) var tmcpe = {};
 	  var data = json.data,
 	  sections = json.sections
 
-	  if ( sections == null || sections.length == 0 || selectedTime < 0 ) return;
+	  // assertions
+	  if ( sections == null || sections.length == 0 ) throw "Missing section data to show selected time";
+	  if ( selectedTime < 0 ) throw "Asked to throw undefined (<0) selected time in TSD";
 
 	  // update cross line by translating it to the proper section
-	  var cross = tsd.svg.selectAll("#tsdsec")
+	  var cross = d3.select(container).selectAll("#tsdsec")
 	      .data([1])
 	      .attr("transform", function(dd, ii) { 
 		  var dist = 0;
@@ -260,17 +268,31 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
       tsd.redraw = function() {
-	  // remove any existing children
+	  // assertions
+	  if ( json == null ) throw "Can't redraw cumflow diagram without data";
+	  if ( json.analysis == null ) throw "Can't display data without a solution result";
+
+	  // clear any existing
 	  $(container).children().remove();
 
-	  if ( json.data == null || json.data.length == 0 || json.data[0].length == 0 ) {
-	      // NO DATA AVAILABLE
-	      $(container).append('<p>NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
+
+	  if ( json.analysis.badSolution ) {
+	      // catch bad solution and display info
+	      $(container).append('<p style="text-align:right">NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
 							      ? ' BECAUSE: '+json.analysis.badSolution 
 							      : '' )+'</p>');
 	      // nothing to see here.
 	      return tsd;
 	  }
+
+	  if ( json.data == null || 
+	       json.data.length == 0 || 
+	       json.data[0].length == 0 ) throw "Bad solution data returned from server";
+
+	  // Insert dummy elements to pull styling from css into tsd construction
+	  $(container).append("<div class='dummy-tsd-speed-start-color'/>");
+	  $(container).append("<div class='dummy-tsd-speed-mid-color'/>");
+	  $(container).append("<div class='dummy-tsd-speed-end-color'/>");
 
 	  var data = json.data,
 	  sections = json.sections
@@ -409,6 +431,12 @@ if ( !tmcpe ) var tmcpe = {};
               .attr("transform", translateX )
               .attr("height", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum); })
 	      .attr("style", cellStyle)
+	      .on("click", function(d,i) {
+		  // when clicked, create a tmcpe selection event
+		  $(window).trigger("tmcpe.tsd.selectedSection", 
+				    {sectionidx: d.i }
+				   );
+	      })
 	      .text("test")
 /*
 	      .attr("tt", function(d){ 
@@ -481,10 +509,23 @@ if ( !tmcpe ) var tmcpe = {};
 
       }
 
+      // some events this view listens to
+      $(window).bind("tmcpe.tsd.selectedSection", function( caller, data ) {
+	  // new selection selected, update the time selection in the tsd
+	  tsd.selectedTime( data.sectionidx );
+      });
+
+      $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, json) {
+	  // new analysis loaded, update the data
+	  tsd.data( json );
+      });
+
+
       return tsd;
   }
 
-
+  // view of the cumulative flow past an affected section during the timeframe
+  // of the incident
   tmcpe.cumflow = function() {
       var cumflow = {},
       container,
@@ -505,21 +546,6 @@ if ( !tmcpe ) var tmcpe = {};
       
       p = 20
       ;
-
-
-      // get section index from vdsid
-      getSectionIndex = function( id ) {
-	  if ( json.sections == null || json.sections.length == 0 ) {
-	      return null;
-	  }
-	  var sec = json.sections.length-1; // default to the last
-	  var ii;
-	  for( ii = 0; ii < json.sections.length; ++ii ) {
-	      if ( json.sections[ii].vdsid == id ) 
-		  sec = (ii==json.sections.length-1?ii:ii+1);
-	  }
-	  return sec;
-      }
 
       // recursive function to sum all of a given cell property from time 0 to time j
       function sfunc (i,j,ff,vol) {
@@ -584,7 +610,7 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
       cumflow.section = function(x) {
-	  if ( !arguments.length ) return section != null ? section : getSectionIndex( json.sec )-1;
+	  if ( !arguments.length ) return section != null ? section : json.getSectionIndex( json.sec )-1;
 	  section = x;
 
 	  cumflow.redraw();
@@ -648,17 +674,28 @@ if ( !tmcpe ) var tmcpe = {};
 
 
       cumflow.redraw = function() {
+	  // assertions
+	  if ( json == null ) throw "Can't redraw cumflow diagram without data";
+	  if ( json.analysis == null ) throw "Can't display data without a solution result";
+
 	  // clear any existing
 	  $(container).children().remove();
 
-	  if ( json.data == null || json.data.length == 0 || json.data[0].length == 0 || section < 0 ) {
-	      // NO DATA AVAILABLE
-	      $(container).append('<p>NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
+
+	  if ( json.analysis.badSolution ) {
+	      // catch bad solution and display info
+	      $(container).append('<p style="text-align:right">NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
 							      ? ' BECAUSE: '+json.analysis.badSolution 
 							      : '' )+'</p>');
 	      // nothing to see here.
 	      return tsd;
 	  }
+
+	  if ( json.data == null || 
+	       json.data.length == 0 || 
+	       json.data[0].length == 0 || 
+	       section < 0 ) throw "Bad solution data returned from server";
+
 
 
 	  var t0 = new Date( json.t0 ).getTime()/1000;
@@ -670,7 +707,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  var volscale = 1/1000;
 	  var volscale = 1;
 
-	  var incidentSectionIndex = getSectionIndex(json.sec)-1;
+	  var incidentSectionIndex = json.getSectionIndex(json.sec)-1;
 
 	  d3.select("#chart_location").html(json.sections[section].name);
 
@@ -1053,9 +1090,22 @@ if ( !tmcpe ) var tmcpe = {};
 
 
       }
+
+      // some events this view listens to
+      $(window).bind("tmcpe.tsd.selectedSection", function( caller, data ) {
+	  cumflow.section( data.sectionidx );
+      });
+
+      $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, json) {
+	  // new analysis loaded, update the data
+	  cumflow.data( json );
+      });
+
       return cumflow;
   };
 
+  // view of the traffic conditions during the incident displayed on a map using
+  // vds line segments
   tmcpe.segmap = function() {
       var segmap = {},
       container,
@@ -1335,12 +1385,19 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
       function readSegments() {
-	  d3.json
-	  ("vds/list.geojson?freewayDir="+json.sections[0].dir+"&idIn="+json.sections.map( function( sec ) {return sec.vdsid;}).join(","), 
-	   function(e){
-	       // update the section layer json
-	       segmap.secjson( e );
-	   });
+	  // assertions
+	  if ( json == undefined || json.sections == undefined ) throw "Missing TSD analysis data";
+	  
+	  var url = g.createLink({controller:'vds', 
+				  action:'list.geojson',
+				  params: {freewayDir: json.sections[0].dir,
+					   idIn: json.sections.map( function( sec ) {return sec.vdsid;}).join(",")}
+				 });
+
+	  d3.json(url, function(e){
+	      // update the section layer json
+	      segmap.secjson( e );
+	  });
       }
 
       segmap.getSectionIndex = function( sec, e  ) {
@@ -1438,8 +1495,459 @@ if ( !tmcpe ) var tmcpe = {};
 
       }
 
+      $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, adata) {
+	  segmap.data( adata ).redraw();
+      });
 
       return segmap;
   };
+
+
+
+  var i = 0;
+  var tsd;
+  var cumflow;
+  var map;
+
+  var themeScale=1.0;
+
+  function maxSpeed() {
+      //var maxSpd = $("#maxspdslider").slider("option","value");
+      var maxSpd = [];
+      if ( maxSpd.length == 0 ) maxSpd = 60;
+      return maxSpd;
+  }
+
+  function speedScale() {
+      //var scale  = $("#scaleslider").slider("option","value");
+      var scale = [];
+      if ( scale.length == 0 ) scale = 1.0;
+      return scale;
+  }
+
+  function cellStyle(d) {
+     var themeWid = $("#theme")[0];
+     var theme = themeWid.options[themeWid.selectedIndex].value;
+     var scale  = speedScale();
+     var maxSpd = maxSpeed();
+
+     // return grey if evidence is uncertain (imputed data)
+     if ( d.p_j_m > 0 && d.p_j_m < 1 ) {
+        return "fill:#999;stroke:#eee;"
+     } 
+
+     if ( theme == "stdspd" ) {
+        var color = pv.Scale.linear(-scale,
+                  -(scale/2),0 ).range("#ff0000","#ffff00","#00ff00");
+        var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
+        var col = "fill:"+color(vv).color+";stroke:#eee;"
+        return col;
+     } else if ( theme == "spd" ) {
+        var minspd = 15;
+        var color = pv.Scale.linear(minspd,
+                                    minspd+(maxSpd-minspd)/2,
+                                    maxSpd)
+                      .range("#ff0000","#ffff00","#00ff00");
+        var col = "fill:"+color(d.spd).color+";stroke:#eee;"
+        return col;
+     }
+  }
+
+  function evidenceOfIncident( d, scale, maxIncidentSpeed ) {
+      var stdlev = (d.spd - d.spd_avg)/d.spd_std;
+      var tmppjm = 1; // no incident probability is default
+      if ( d.p_j_m != 0 && d.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
+	  tmppjm = 0.5;
+      else if ( stdlev < 0 
+		&& stdlev < -scale
+		&& d.spd < maxIncidentSpeed
+	      )
+      {
+	  tmppjm = 0.0;
+      }
+      return tmppjm == 0.0;
+  }
+
+
+  function cellAugmentStyle(d) {
+     var v1 = speedScale();
+     var v2 = maxSpeed();
+     var ev = evidenceOfIncident( d, v1, v2 );
+     return ev ? "fill:black;" : "fill:none;";
+  }
+
+  function syncchart(tsd,cumflow) {
+      return function( d, i ) { 
+	  tsd.selectedTime( d.i );
+
+          // updates the chart's data
+	  cumflow.section( d.i );
+      };
+  };
+
+
+  function rotateMap( v ) {
+     map.rotate( v.value );
+  }
+
+  function handleFailure( e ) {
+      return "poof";
+  }
+
+  function updateStats( json ) {
+      if ( json.analysis.badSolution != null ) {
+          //$( '#generalStats td' ).text( "" );   // clear everything
+	  $( '#generalStats_wrapper').remove();
+	  $( '#generalStatsContainer').append("<p>ANALYSIS FOR THIS FACILITY FAILED: "+json.analysis.badSolution+"</p>");
+      } else {
+	  // FIXME: This dups a similar function in tsd.js
+	  $.each(["netDelay","d12Delay","computedDiversion","computedMaxq","whatIfDelay","tmcSavings"], function (i,v) {
+              if ( json.analysis[v] != null  && v != 'computedMaxqTime' ) {
+		  var val = json.analysis[v].toFixed(0);
+		  d3.select("#"+v).html( val < 0 ? 0 : val  );
+              }
+	  });
+
+	  // Update the download analysis link.  Currently tied to the currently displayed analysis...
+	  $('#tmcpe_tsd_download_link').html( 'Download XLS for facility analysis ' + json.id );
+	  $('#tmcpe_tsd_download_link').attr( 'href', "${resource(dir:'/',absolute:true)}"+'incidentFacilityImpactAnalysis/show.xls?id='+json.id );
+
+
+	  // Update the report problem link
+	  $('#tmcpe_report_analysis_problem_link').html( 'Report problem with this analysis' );
+	  url = "http://tracker.ctmlabs.net/projects/tmcpe/issues/new?tracker_id=3&"
+		+ encodeURIComponent( "issue[subject]=Problem with analysis of Incident "+json.cad+"["+json.id+"]" )
+		+ "&" + encodeURIComponent( "issue[description]=Bad analysis for available for ["+json.cad+"["+json.id+"]"+"]("
+					    +window.location.href
+					    +")\n\n"
+					    +"User Agent: " + navigator.userAgent
+					  )
+	  $('#tmcpe_report_analysis_problem_link').attr('href',url);
+	  $('#tmcpe_report_analysis_problem_link').attr('target', "_blank" );
+      }
+  }
+
+  function updateLog( json ) {
+      // clear existing
+      var container = d3.select( '#logtableContainer' );
+
+      $('#logtableContainer').children().remove();
+
+      // select table element (for d3)
+      var tab = container
+	  .append("table")
+	  .attr("id","activityLog");
+
+      function renderLogTimestamp(obj) {
+	  dd = new Date( obj );
+	  return $.format.date(dd,'yyyy-MM-dd kk:mm');
+      };
+
+      var fields = [ {key:"stampDateTime",title:"Time",render:renderLogTimestamp}, 
+		     {key:"activitySubject",title:"Activity"}, 
+		     {key:"memoOnly",title:"Description"}, 
+		   ];
+
+      var head = tab.append("thead");
+
+
+      head.append("tr").selectAll("th").data(fields).enter()
+	  .append("th")
+	  .attr("class",function(d){return d.key ? d.key : d;})
+	  .html(function(d){return d.title ? d.title : d});
+
+
+      var body = tab.append("tbody");
+
+      function raiseLogEntry( d ) {
+	  // In SVG, the z-index is the element's index in the dom.  To raise an
+	  // element, just detach it from the dom and append it back to its parent
+	  var targets = $("g[logid="+d.id+"]");
+	  var target = targets[0];
+	  var parent = target.parentNode;
+	  targets.detach().appendTo( parent );
+	  return 
+      }
+
+      // create log rows
+      var rows = body.selectAll("tr")
+	  .data(json.log,function(d) {return d.id})
+	  .enter().append("tr")
+	  .attr("id", function( d ) { return ["log",d.id].join("-"); })
+	  .attr("logid", function( d ) { return d.id; })
+	  .attr("class", function( d, i ) { return ( i % 2 ? "even" : "odd" ) + " " + d.type } )
+	  .on("mouseover",function(d,e) {
+	      // placehold, should highlight on TSD
+	      d3.selectAll('g.activitylog').attr("class","logtimebar activitylog hidden");
+	      d3.selectAll('g.activitylog[logid="'+d.id+'"]')
+		  .attr("class",function(dd,e){
+		      raiseLogEntry(dd);
+		      return "logtimebar activitylog";
+		  });
+	  } );
+      
+      // now populate rows
+      rows.selectAll("td")
+	  .data(function(d) {
+	      var props = [];
+	      $.each( fields, function( i, dd ) {
+		  var item = d[dd.key];
+		  props.push( dd.render ? dd.render( item ) : item );
+	      });
+	      return props;
+	  })
+	  .enter().append("td")
+	  .attr("class", function(d,i) { return fields[i].key } )
+	  .text( function(dd) { return dd; } );
+
+      $("#activityLog").dataTable({ 
+	  bPaginate: false, sScrollY:"200px","bAutoWidth":false,"bFilter": false,
+
+	  "aoColumns": [
+	      {"sWidth": "20%", "sType":"date" },
+	      {"sWidth": "20%", "sType":"string" },
+	      {"sWidth": "60%", "sType":"string" }
+	  ]});
+      
+      
+  }
+
+  function updateTsd() {
+     tsd.updateCellStyle( ); // update style
+     tsd.updateCellAugmentation( ); // update style
+  }
+
+  function updateCumFlowStats() {
+     cumflow.tmcDivPct( $("#tmcpct").text() );
+
+      var unit = $('input[name=delayUnit]:checked').val();
+      var vot = $("#valueOfTime")[0];
+
+      if ( unit == 'usd' ) {
+          $('#valueOfTime').attr("disabled","");
+
+          if ( vot != "" ) {
+	      $(".delayValue").each(function() { 
+		  var val = this.innerText*vot.value;
+		  this.innerHTML = val.toFixed();
+	      });
+              $(".delayUnit").each(function() { 
+		  this.innerHTML = "USD";
+	      });
+          }
+      } else {
+          $('#valueOfTime').attr("disabled","disabled");
+          $(".delayUnit").each(function() { 
+	      this.innerHTML = "veh-hr";
+	  });
+      }
+  }
+
+  function changeUnit(v) {
+      updateCumFlowStats();
+  }
+
+  function updateAnalysis( id ) {
+      $(window).trigger( "tmcpe.analysisRequested", { id: id } );
+      
+      var url = g.createLink({controller:'incidentFacilityImpactAnalysis', 
+			      action:'tsdData',
+			      params: {id: id.value} 
+			     });
+      d3.json(url,function(e){
+	  if ( e == null || e.timesteps == null ) {
+	      // this is an error condition
+	      $('#server_error').overlay({load:true});
+	      return;
+	  }
+
+	  // convert date strings to date objects
+	  e.timesteps = e.timesteps.map( function( d ) { return new Date(d); } ); 
+
+	  // add the sectionindex conversion function
+	  // get section index from vdsid
+	  e.getSectionIndex = function( id ) {
+	      if ( e.sections == null || e.sections.length == 0 ) {
+		  return null;
+	      }
+	      var sec = e.sections.length-1; // default to the last
+	      var ii;
+	      for( ii = 0; ii < e.sections.length; ++ii ) {
+		  if ( e.sections[ii].vdsid == id ) 
+		      sec = (ii==e.sections.length-1?ii:ii+1);
+	      }
+	      return sec;
+	  }
+	  
+	  // broadcast the new data
+	  $(window).trigger( "tmcpe.tsd.analysisLoaded", e );
+      });
+      
+      $('#generalStats #facility').html(id.children[0].innerHTML);
+  }
+
+  $(document).ready(function() {
+      // create the various views to show the data
+      var tsdView = tmcpe.tsd()
+	  .container( $("#tsdbox")[0] )
+      	  .cellStyle( cellStyle )
+	  .cellAugmentStyle( cellAugmentStyle );
+
+      var cumflowView = tmcpe.cumflow()
+              .container( $("#chartbox")[0] )
+
+      var mapView = tmcpe.segmap().container( $("#mapbox")[0] );
+
+
+      // put the settings in the true header (from base.gsp)
+      var settings = $("#settings").detach();
+      settings.appendTo('.header');
+      
+      // bind events
+      var loadingOverlay;
+      $(window).bind("tmcpe.analysisRequested", function( caller, d ) {
+	  loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
+      });
+
+      // Event called when a new analysis has been processed from the server
+      $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, json) {
+
+	  updateViews( json );
+
+	  if ( loadingOverlay ) loadingOverlay.close();
+      });
+
+      
+      // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
+
+      $("#ifia").each(function() {
+	  if ( this.value != "" ) {
+  	      updateAnalysis( this ); 
+ 	  } else {
+	      $("#msgtxt").text("NO ANALYSES AVAILABLE");
+	  }
+      });
+      d3.select('#ifia').on("change",function(d){this.options[this.selectedIndex]});
+      d3.select('#theme').on("change",function(d){updateTsd()});
+      d3.select('#valueOfTime').on("change",function(d){updateCumFlowStats()});
+      
+/*
+      $("#scaleslider").slider({
+	  value:1,
+	  min: 0,
+	  max: 10,
+	  step: 0.25,
+	  slide: function(event,ui) {
+  	      $("#alpha").text( $("#scaleslider").slider("option","value") );
+   	      updateTsd();
+	  },
+	  change: function( event, ui ) { 
+  	      $("#alpha").text( $("#scaleslider").slider("option","value") );
+	      //   	        updateTsd();
+	  }
+      });
+      $("#alpha").text($("#scaleslider").slider("option","value"));
+
+      $("#maxspdslider").slider({
+	  value:60,
+	  min: 0,
+	  max: 85,
+	  step: 5,
+	  slide: function(event,ui) {
+  	      $("#maxspd").text( $("#maxspdslider").slider("option","value") );
+	      updateTsd();
+	  },
+	  change: function( event, ui ) { 
+	      $("#maxspd").text( $("#maxspdslider").slider("option","value") );
+	      updateTsd() ;
+	  }
+      });
+      $("#maxspd").text("60");
+      
+      $("#tmcpctslider").slider({
+	  value:50,
+	  min: 0,
+	  max: 100,
+	  step: 1,
+	  slide: function(event,ui) {
+  	      $("#tmcpct").text( $("#tmcpctslider").slider("option","value") );
+	      updateCumFlowStats();
+	  },
+	  change: function( event, ui ) { 
+	      $("#tmcpct").text( $("#tmcpctslider").slider("option","value") );
+	      updateCumFlowStats();
+	  }
+      });
+      $("#tmcpct").text("50");
+*/
+
+      $("#tabs").tabs( 'div.panes > div' );
+
+/*
+      {
+	  // hack to resize columns in a tab: http://datatables.net/examples/api/tabs_and_scrolling.html
+	  "show": function(event, ui) {
+	      var oTable = $('div.dataTables_scrollBody>table', ui.panel).dataTable();
+	      if ( oTable.length > 0 ) {
+		  oTable.fnAdjustColumnSizing();
+	      }
+	  }
+      } );
+*/
+      var gs = $("#generalStats");
+      gs.dataTable({
+	  "bPaginate": false,
+	  "sScrollY": gs.parent().height()*.5,
+	  "bLengthChange": false,
+	  "bFilter": false,
+	  "bSort": false,
+	  "bInfo": false,
+	  "aoColumns": [
+	      {"sWidth": "60%", "sType":"string", "sClass":"right" },
+	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "10%", "sType":"number", "sClass":"left" }
+	  ]
+      } );
+      
+
+      // Helper function to update views based upon (analysis) data received from the server
+      function updateViews( data ) {
+
+	  // Select a time to synchronize
+	  $(window).trigger("tmcpe.tsd.selectedSection",{sectionidx:cumflowView.section()});
+
+	  updateStats( data );
+
+	  updateLog( data );
+
+	  // update the $$ calc
+	  cumflowView.tmcDivPct( $("#tmcpct").text() );
+
+	  // update the band and max speed sliders
+	  /*
+	    $('#maxspdslider').slider('value',json.parameters.maxIncidentSpeed);
+	    $('#maxspd').text(json.parameters.maxIncidentSpeed);
+	  */
+
+	  // create the map
+	  //doMap( json );
+
+	  // if the window is resized, recompute the bounds of all the components.
+	  $(window).resize(function() { 
+              tsdView.resize(); 
+              tsdView.redraw(); 
+	      cumflowView.resize( );
+	      cumflowView.redraw( );
+	      updateStats( data );
+	      updateLog( data );
+	      //	 doMap( data );
+              mapView.data(data).redraw();
+	  });
+      }
+
+
+  });
 
  })()
