@@ -7,6 +7,7 @@
 
     <!-- frameworks -->
     <p:javascript src='jquery-1.6.1' />
+    <p:javascript src="jquery.tools.min" />
     <p:javascript src='underscore' />
     <p:javascript src='mustache' />
 
@@ -16,7 +17,6 @@
     <p:javascript src='jquery.tipsy' />
     <p:javascript src='jquery.svg' />    <!-- plugins for manipulating svg using jquery -->
     <p:javascript src='jquery.svgdom' /> <!-- plugins for manipulating svg using jquery -->
-    <script type="text/javascript" src="http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js" />
 
     <!-- visualization toolkits -->
     <p:javascript src='polymaps' />
@@ -44,9 +44,29 @@
       <div class='content'>
 	<!-- Start of left info box -->
 	<div id='leftbox' class="">
-	  <h1>Aggregates</h1>
+	  <!--
+	      <h1>Aggregates</h1>
+	  -->
+	  <p>
+	    The TMC Performance Evaluation project is designed to offer measures
+	    of effectiveness for Caltrans Traffic Management centers by
+	    analyzing the delay impacts of accidents, maintenance activities,
+	    construction activities, and special events.
+	  </p>
+	  <p>
+	    The analyses compute delays for incidents using an optimization
+	    algorithm to bound the range of incident-induced delay and infer
+	    savings attributable to TMC activity by projecting the likely
+	    impacts of the same events if TMC management actions weren't taken.
+	  </p>
+	  <p>
+	    The chart to the right offers a summary of the analyses.  Clicking
+	    on the bars will open a new window providing the details of the
+	    associated group of incidents.
+	  </p>
 	</div>
 	<div id='content'>
+	  <h3>Performance Summary (total number of incidents)</h3>
 	  <div class='querybox'>
 	    <!-- the tabs -->
 	    <ul class="tabs">
@@ -57,21 +77,48 @@
 	    <!-- tab "panes" -->
 	    <div class="panes">
 	      <div id="basicQueryPane">
-		<div style="display:inline;" id='groupby'>
-		  <g:select name="groups"
-			    from="${formData}"
-			    optionKey="key" 
-			    optionValue="text"
-			    />
-		</div>
-		<div style="display:inline;" id='stackby'>
-		  <g:select name="stackgroups"
-			    from="${formData}"
-			    optionKey="key" 
-			    optionValue="text"
-			    />
-		</div>
-		<div style="display:inline;" id='filterby'></div>
+		<table>
+		  <tr>
+		    <th>
+		      Group vertically by:
+		    </th>
+		    <th>
+		      Stack horizontally by:
+		    </th>
+		    <th>
+		      Filter by:
+		    </th>
+		  </tr>
+		  <tr>
+		    <td>
+		      <div style="display:inline;" id='groupby'>
+			<g:select name="groups"
+				  from="${formData}"
+				  optionKey="key" 
+				  optionValue="text"
+				  />
+		      </div>
+		    </td>
+		    <td>
+		      <div style="display:inline;" id='stackby'>
+			<g:select name="stackgroups"
+				  from="${formData}"
+				  optionKey="key" 
+				  optionValue="text"
+				  />
+		      </div>
+		    </td>
+		    <td>
+		      <div style="display:inline;" id='filterby'>
+			<g:select name="filters"
+				  from="${filterData}"
+				  optionKey="key"
+				  optionValue="text"
+				  />
+		      </div>
+		    </td>
+		  </tr>
+		</table>
 	      </div>
 	      <div>
 		<input type="text" id='advancedqueryinput' value='groups=year&stackgroups=eventType' style="width:30em"></input>

@@ -360,10 +360,11 @@ class IncidentController extends BaseController {
 
     // mapping of filter parameters to where strings for the query
     static filtersMap = [
+	none: [ pretty: "No Filter", deflt: "", filtImpl: {return ""} ],
 	date: [ pretty: "Date", filtImpl: { match -> 
 	    return "("+["inc_start_time", match[0][2],"'"+match[0][3]+"'"].join(" ")+")" 
 	    } ],
-	analyzed: [ pretty: "Analyzed", filtImpl: { match -> 
+	analyzed: [ pretty: "Analyzed", deflt: "analyzed=onlyAnalyzed", filtImpl: { match -> 
 	    if ( match[0][3] =~ /(?i)onlyAnalyzed/ ) {
 		return "(id IS NOT NULL)"   // in this query "id" is the id of the ifia
 	    } else if ( match[0][3] =~ /(?i)unAnalyzed/ ) {
@@ -447,11 +448,13 @@ class IncidentController extends BaseController {
 	    }],
 	located: [ pretty: "Incidents with known locations", filtImpl: { return "( location_id IS NOT NULL )"; } ],
 	notLocated: [ pretty: "Incidents with known locations", filtImpl: { return "( location_id IS NULL )"; } ],
-	    
     ];
 
     def summary = {
-	return [ formData: groupMap.collect { [ key:it.key, text: it.value.pretty] } ]
+	return [ 
+	    formData: groupMap.collect { [ key:it.key, text: it.value.pretty] }, 
+	    filterData: filtersMap.grep { it.value.deflt != null }.collect { [ key:it.value.deflt, text: it.value.pretty] }
+	]
     }
 
     def formData = {

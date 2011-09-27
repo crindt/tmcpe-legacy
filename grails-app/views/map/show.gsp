@@ -78,7 +78,9 @@
     </div>
 
     <!-- Manual definition of tooltips-->
+    <!--
     <div class="tooltip bottom" id="trtip" style="display:none"></div>
+    -->
     <div class="tooltip top" id="nexttip" style="display:none"></div> <!-- should be right -->
     <div class="tooltip top" id="prevtip" style="display:none"></div> <!-- should be right -->
   </body>

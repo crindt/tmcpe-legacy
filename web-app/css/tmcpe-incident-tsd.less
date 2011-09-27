@@ -51,8 +51,18 @@
     height:100%;
 }
 
-#activityLog tr.odd td {
-    background-color: #ddd;
+#activityLog {
+    background-color: @content-background;
+    tr {
+	&.odd td {
+	    background-color: darken( @content-background, 20% );
+	    color: @content-color;
+	}
+	&.even td {
+	    background-color: @content-background;
+	    color: spin( lighten(@content-background,20%), -10);
+	}
+    }
 }
 
 body {
@@ -61,17 +71,16 @@ body {
 }
 
 .dataTables_scrollHead, .dataTables_scrollBody, .dataTables_scrollFoot {
-    background-color: #fff;
+    /*background-color: #fff;*/
     border-top: 4px solid #000;
     border-bottom: 4px solid #000;
 }
 
-#logtableContainer {
-    background-color: #fff;
+#logtableContainer,#generalStatsContainer {
+    /*background-color: #fff;*/
     border: 4px solid #ccc;
     padding: 5px;
-    min-height: 200px;
-    height:200px;
+    min-height: @databoxheight - 20;
 }
 
 #tabs .ui-tabs-panel {

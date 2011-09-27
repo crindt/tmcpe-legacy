@@ -15,9 +15,10 @@
 	    shape-rendering: crispEdges;
 	    fill-opacity: 1.0;
 	    
-	    &:hover { fill-opacity: 0.8; }
-
-	    &.highlight { fill: white; }
+	    &:hover,&.highlight { 
+                fill-opacity: 0.6; 
+                stroke: lighten( @chart-stroke, 30% );
+            }
 	}
     }
 
@@ -26,6 +27,17 @@
 	text-align: right;
 	font: 10px sans-serif;
 	fill: @chart-font-color;
+    }
+
+    g.legend-item {
+
+        text.label {
+            font: 20px;
+        }
+
+        rect {
+            stroke: lighten( @chart-stroke, 30%);
+        }
     }
     
     .rule {
@@ -39,5 +51,13 @@
     }
     .dummy-chart-end-color {
 	fill: @chart-range-end;
+    }
+}
+
+#basicQueryPane {
+    table th {
+	font-weight: normal;
+	font-size: 10pt;
+	text-align: left;
     }
 }

@@ -214,8 +214,10 @@ if ( !tmcpe ) var tmcpe = {};
 	  //.fnFilter($('#incident-list_filter input').val(),null,true,false) // Use regex filtering, not "smart"
 	  ;
 
+	  /*
 	  $('#incident-list tbody tr[title]').tooltip({tip:"#trtip", position:"bottom center", tipClass: "tooltip bottom"});
 	  $('#incident-list tbody tr[title] td').tooltip({tip:"#trtip", position:"bottom center", tipClass: "tooltip bottom"});
+	  */
 
 	  resetColumnWidths();
 	  

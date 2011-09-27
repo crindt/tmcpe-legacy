@@ -52,7 +52,8 @@ if ( !tmcpe ) var tmcpe = {};
 					 action: 'listGroups.json',
 					 params: {
 					     groups: model.groups,
-					     stackgroups: model.stackgroups
+					     stackgroups: model.stackgroups,
+					     filters: model.filters
 					 }
 				       });
 	  return url;
@@ -144,12 +145,13 @@ if ( !tmcpe ) var tmcpe = {};
        */
       function formAsModel() {
 	  return { groups:[$('select[name=groups]').val()],
-		   stackgroups:[$('select[name=stackgroups]').val()]
+		   stackgroups:[$('select[name=stackgroups]').val()],
+		   filters:[$('select[name=filters]').val()]
 		 };
       }
 
       /**
-       * 
+       * make the form match the query (model)
        */
       function update() {
 
@@ -160,6 +162,9 @@ if ( !tmcpe ) var tmcpe = {};
 	      }
 	      if ( query.stackgroups ) {
 		  $("select[name=stackgroups]").val(query.stackgroups[0]);
+	      }
+	      if ( query.filters ) {
+		  $("select[name=filters]").val(query.filters[0]);
 	      }
 	  }
 
@@ -381,21 +386,35 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("class","legenditem")
 	      .attr("transform",function(d,i){
 		  return "translate(0,"+y({y:i},barheight*.65)+")";})
-/*
 	      .on("mouseover",function(d,i){
 		  // mousing over legend item should highlight blocks in chart
 		  var good_data = _.filter(d,function(val){return val.subgroup != null});
 		  var selstr = "#aggchart .bar rect[sgidx='"+good_data[0].sgidx+"']";
 		  var sel = $(selstr);
-//		  sel.addClass("highlight");
+		  //sel.addClass("highlight");
+                  // SVG doesn't work with jquery.addClass and jquery.svgdom is overridden by jquery.tools
+                  // This is a hacky copy of the svgdom implementation of addClass
+                  var ac = function(c){ return function(n) { n.className ? n.className.baseVal += " " + c : n.setAttribute('class', c);} };
+                  _.each(sel,ac('highlight'));
+                  /*_.each($(this).find('text'),ac('highlight'));*/
 	      })
 	      .on("mouseout",function(d,i){
 		  var good_data = _.filter(d,function(val){return val.subgroup != null});
 		  var selstr = "#aggchart .bar rect[sgidx='"+good_data[0].sgidx+"']";
 		  var sel = $(selstr);
-//		  sel.svg().removeClass("highlight");
+                  // SVG doesn't work with jquery.removeClass and jquery.svgdom is overridden by jquery.tools
+                  // This is a hacky copy of the svgdom implementation of removeClass
+                  var className = 'highlight';
+                  var rc = function(c){ return function(node){
+                      var classes = (node.className ? node.className.baseVal : node.getAttribute('class'));
+                      classes = $.grep(classes.split(/\s+/), function(n, i) { return n != c; }).
+						join(' ');
+		      (node.className ? node.className.baseVal = classes :
+		       node.setAttribute('class', classes));
+                  } };
+                  _.each(sel,rc('highlight'));
+                  /*_.each($(this).find('text'),rc('highlight'));*/
 	      })
-*/
 	  ;
 
 	  items.append("svg:rect")
@@ -556,7 +575,7 @@ if ( !tmcpe ) var tmcpe = {};
 
       // Now, fire things up by setting a default query
       //aggquery.url("incident/listGroups.json?groups=year&stackgroups=eventType")
-      queryView.query( { groups: [ "year" ], stackgroups: ["eventType"] } );
+      queryView.query( { groups: [ "year" ], stackgroups: ["eventType"], filters: ["none"] } );
 
 
       // set up the overlays

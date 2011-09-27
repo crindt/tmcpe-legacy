@@ -95,6 +95,80 @@ if ( !tmcpe ) var tmcpe = {};
       return document.createElementNS(tmcpe.ns.svg, type);
   };
 
+  tmcpe.tsdParams = function() {
+      var tsdparams = {}
+      ;      
+      
+      return tsdparams;
+  };
+
+  // Handle view elements for the TSD parameters
+  tmcpe.tsdParamsView = function () {
+      var tsdParamsView = {},
+      container,
+      tsdParams   // the tsdParams (model) this view is tied to
+      ;
+
+      function init() {
+
+	  // handle some element styling
+	  $('input[type=range]',container).rangeinput();
+
+	  // connect form elements to change events
+	  $('input[type=radio]',container)
+	      .change(function(d){
+		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
+	      });
+	  $('input[type=text]',container)
+	      .change(function(d){
+		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
+	      });
+	  $('select',container)
+	      .change(function(d){
+		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
+	      });
+      }
+
+      function formAsModel() {
+	  var form = [];
+	  $('input:radio:checked',container).each(function(i, e) {
+	      var t = e.value;
+	      form[e.name] = t;
+	  });
+	  $('input:text',container).each(function(i,e) {
+	      form[e.name] = e.value;
+	  });
+	  $('select',container).each(function(i,e) {
+	      form[e.name] = e.value;
+	  });
+	  return form;
+      }
+
+      tsdParamsView.container = function(x) {
+	  if (!arguments.length) return container;
+	  container = x;
+	  container.attr("class", "tsdParams");
+	  init();
+	  return tsdParamsView;
+      }
+
+      tsdParamsView.params = function(x) {
+	  if ( x == null ) return tsdParams;
+	  tsdParams = x;
+	  update();
+      }
+
+      /**
+       * Make the form match the tsdParams (model)
+       */
+      function update() {
+	  if ( tsdParams ) {
+	  }
+      }
+
+      return tsdParamsView;
+  };
+
 
   // view of the affected sections in time and space on one facility
   tmcpe.tsd = function() {
@@ -201,7 +275,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  return tsd.updateCellAugmentation();
       }
 
-      tsd.updateCellStyle = function() {
+      tsd.updateCellStyle = function( ) {
 	  d3.select(container).selectAll("g")
 	      .selectAll("rect")
 	      .attr("style", cellStyle );
@@ -213,6 +287,11 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("style", cellAugmentStyle );
 	  return tsd;
       }
+
+      $(window).bind("tmcpe.tsd.paramsChanged", function( params ) {
+	  tsd.updateCellStyle();
+	  tsd.updateCellAugmentation();
+      });
 
       function showSelectedTime() {
 	  var data = json.data,
@@ -1748,7 +1827,7 @@ if ( !tmcpe ) var tmcpe = {};
   }
 
   function updateAnalysis( id ) {
-      $(window).trigger( "tmcpe.analysisRequested", { id: id } );
+      $(window).trigger( "tmcpe.tsd.analysisRequested", { id: id } );
       
       var url = g.createLink({controller:'incidentFacilityImpactAnalysis', 
 			      action:'tsdData',
@@ -1798,6 +1877,9 @@ if ( !tmcpe ) var tmcpe = {};
 
       var mapView = tmcpe.segmap().container( $("#mapbox")[0] );
 
+      var tsdParamsView = tmcpe.tsdParamsView()
+	  .container($('#tsdParams'))
+      ;
 
       // put the settings in the true header (from base.gsp)
       var settings = $("#settings").detach();
@@ -1805,7 +1887,7 @@ if ( !tmcpe ) var tmcpe = {};
       
       // bind events
       var loadingOverlay;
-      $(window).bind("tmcpe.analysisRequested", function( caller, d ) {
+      $(window).bind("tmcpe.tsd.analysisRequested", function( caller, d ) {
 	  loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
       });
 
@@ -1827,61 +1909,12 @@ if ( !tmcpe ) var tmcpe = {};
 	      $("#msgtxt").text("NO ANALYSES AVAILABLE");
 	  }
       });
-      d3.select('#ifia').on("change",function(d){this.options[this.selectedIndex]});
-      d3.select('#theme').on("change",function(d){updateTsd()});
-      d3.select('#valueOfTime').on("change",function(d){updateCumFlowStats()});
+      //d3.select('#ifia').on("change",function(d){this.options[this.selectedIndex]});
+      //d3.select('#theme').on("change",function(d){updateTsd()});
+      //d3.select('#valueOfTime').on("change",function(d){updateCumFlowStats()});
       
-/*
-      $("#scaleslider").slider({
-	  value:1,
-	  min: 0,
-	  max: 10,
-	  step: 0.25,
-	  slide: function(event,ui) {
-  	      $("#alpha").text( $("#scaleslider").slider("option","value") );
-   	      updateTsd();
-	  },
-	  change: function( event, ui ) { 
-  	      $("#alpha").text( $("#scaleslider").slider("option","value") );
-	      //   	        updateTsd();
-	  }
-      });
-      $("#alpha").text($("#scaleslider").slider("option","value"));
 
-      $("#maxspdslider").slider({
-	  value:60,
-	  min: 0,
-	  max: 85,
-	  step: 5,
-	  slide: function(event,ui) {
-  	      $("#maxspd").text( $("#maxspdslider").slider("option","value") );
-	      updateTsd();
-	  },
-	  change: function( event, ui ) { 
-	      $("#maxspd").text( $("#maxspdslider").slider("option","value") );
-	      updateTsd() ;
-	  }
-      });
-      $("#maxspd").text("60");
-      
-      $("#tmcpctslider").slider({
-	  value:50,
-	  min: 0,
-	  max: 100,
-	  step: 1,
-	  slide: function(event,ui) {
-  	      $("#tmcpct").text( $("#tmcpctslider").slider("option","value") );
-	      updateCumFlowStats();
-	  },
-	  change: function( event, ui ) { 
-	      $("#tmcpct").text( $("#tmcpctslider").slider("option","value") );
-	      updateCumFlowStats();
-	  }
-      });
-      $("#tmcpct").text("50");
-*/
-
-      $("#tabs").tabs( 'div.panes > div' );
+      $("#databox .tabs").tabs( 'div.panes > div' );
 
 /*
       {
@@ -1945,6 +1978,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      //	 doMap( data );
               mapView.data(data).redraw();
 	  });
+
       }
 
 
