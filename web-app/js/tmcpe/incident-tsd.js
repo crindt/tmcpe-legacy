@@ -1827,13 +1827,12 @@ if ( !tmcpe ) var tmcpe = {};
   }
 
   function updateAnalysis( id ) {
-      $(window).trigger( "tmcpe.tsd.analysisRequested", { id: id } );
-      
       var url = g.createLink({controller:'incidentFacilityImpactAnalysis', 
 			      action:'tsdData',
 			      params: {id: id.value} 
 			     });
-      d3.json(url,function(e){
+
+      tmcpe.loadData(url,function(e){
 	  if ( e == null || e.timesteps == null ) {
 	      // this is an error condition
 	      $('#server_error').overlay({load:true});
@@ -1886,17 +1885,11 @@ if ( !tmcpe ) var tmcpe = {};
       settings.appendTo('.header');
       
       // bind events
-      var loadingOverlay;
-      $(window).bind("tmcpe.tsd.analysisRequested", function( caller, d ) {
-	  loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
-      });
 
       // Event called when a new analysis has been processed from the server
       $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, json) {
-
 	  updateViews( json );
 
-	  if ( loadingOverlay ) loadingOverlay.close();
       });
 
       
@@ -1984,4 +1977,4 @@ if ( !tmcpe ) var tmcpe = {};
 
   });
 
- })()
+ })();

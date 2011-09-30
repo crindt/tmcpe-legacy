@@ -76,7 +76,7 @@
 	    
 	    <!-- tab "panes" -->
 	    <div class="panes">
-	      <div id="basicQueryPane">
+	      <div id="basicQueryPane" class="queryPane">
 		<table>
 		  <tr>
 		    <th>
@@ -120,8 +120,19 @@
 		  </tr>
 		</table>
 	      </div>
-	      <div>
-		<input type="text" id='advancedqueryinput' value='groups=year&stackgroups=eventType' style="width:30em"></input>
+	      <div class="queryPane">
+		<table>
+		  <tr>
+		    <th>
+		      Enter in custom query terms...
+		    </th>
+		  </tr>
+		  <tr>
+		    <td>
+		      <input type="text" id='advancedqueryinput' value='groups=year&stackgroups=eventType' style="width:30em"></input>
+		    </td>
+		  </tr>
+		</table>
 	      </div>
 	    </div>
 	  </div>
@@ -129,7 +140,8 @@
 	  <div id='aggchartdetail'></div>
 	</div>
       </div>
-
     </div>
+    <!-- tooltips -->
+    <div id="chartTip" style="display:none" class="tooltip bottom"></div>
   </body>
 </html>

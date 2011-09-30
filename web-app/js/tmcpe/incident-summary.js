@@ -25,21 +25,16 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  $(window).trigger( "tmcpe.aggregatesRequested", query );
 	  
-	  try {
-	      d3.json( url,
-		       function(e) {
-			   // Catch network errors
-			   if ( e == null ) throw "Error retreiving query data from server.";
-			   
-			   // hold the json response here
-			   data = e;
-			   
-			   // broadcast the newly loaded data
-			   $(window).trigger( "tmcpe.aggregatesLoaded", data );
-		       });
-	  } catch( e ) {
-	      alert( "Error!" );
-	  }
+	  tmcpe.loadData( url, function(e) {
+		       // Catch network errors
+		       if ( e == null ) throw "Error retreiving query data from server.";
+		       
+		       // hold the json response here
+		       data = e;
+		       
+		       // broadcast the newly loaded data
+		       $(window).trigger( "tmcpe.aggregatesLoaded", data );
+	  }, "Loading aggregate data" );
       }
 
       function modelToUrl() {
@@ -110,7 +105,6 @@ if ( !tmcpe ) var tmcpe = {};
 	      .on('change',function(d){
 		  $(window).trigger("tmcpe.queryFormChanged", formAsModel() );
 	      });
-
       }
 
       queryView.query = function(x) {
@@ -185,6 +179,7 @@ if ( !tmcpe ) var tmcpe = {};
       ,ww = 800
       ,margin = 100
       ,w=ww-margin
+      ,tooltipTemplate = 'Incidents matching:<ul><li>{{groups}}</li><li>{{subgroups}}</li><li>{{filters}}</li></ul>'
       ;
 
       // create the aggchart svg
@@ -308,10 +303,14 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  svg = container
 	      .append("svg:svg")
+	      .attr("title","Click on chart bars to open a new window with the list of incidents that belong to that grouping")
 	      .attr("id","aggchartsvg")
 	      .attr("class","chart")
 	      .attr("height",(m+(n+2))*barheight)
 	      .attr("width",ww);
+
+
+//	  $(svg[0]).tooltip({position:"center left", tipClass: "tooltip left"});
 
 
 	  var layers = svg.selectAll("g.layer")
@@ -341,9 +340,38 @@ if ( !tmcpe ) var tmcpe = {};
 		  return d.sgidx; })
 	      .attr("width", function(d) { 
 		  return x1(d) - x0(d); })
-	      .attr("title",function(d){ return ( d == null ? "" : d.x) })
+	      //.attr("title",function(d){ return ( d == null ? "" : d.x) })
+	      .attr("title",function(d){ d == null ? "" : d.subgroup +":"+d.x })
 	      .on("mouseover",function(d){ 
 		  d3.select('#aggchartdetail').text( d == null ? "" : d.subgroup +":"+d.x)
+
+		  // try doing a tooltip:
+		  var bbox = this.getBBox();
+		  var ctm = this.getScreenCTM();
+		  bbox.x+=ctm.e;
+		  bbox.y+=ctm.f;
+		  bbox.width*=ctm.a;
+		  bbox.height*=ctm.d;
+		  var dd = {
+		      groups:_.map(JSON.parse(d.group),function(v,i){return i+"=" + v }).join(","),
+		      subgroups:_.map(JSON.parse(d.subgroup),function(v,i){return i+"=" + v }).join(","),
+		      filters:_.map(JSON.parse(d.filters),function(v,i){return i+"=" + v }).join(",")
+		  };
+		  var tt = Mustache.to_html( tooltipTemplate, dd  );
+		  d3.select("#chartTip")
+		      .style('left',function(d){
+			  var tipdiv = $(this);
+			  var tdw = tipdiv.outerWidth();
+			  return (bbox.x+bbox.width/2) - tdw/2;
+		      })
+		      .style('top',(bbox.y+bbox.height/2))
+		      .style('position','absolute')
+		      .style('display','block')
+		      .on("mouseover",function(d){d3.select(this).style('display','none')})
+		      .html(function(d){return tt;});
+		  ;
+
+		  console.log("test");
 	      })
 	      .on("click",function(d){ 
 		  var gparams = $.parseJSON(d.group);
@@ -371,8 +399,8 @@ if ( !tmcpe ) var tmcpe = {};
 					     action: 'show' } ) + "?" + parstr.join("&");
 		  window.open(url);
 	      })
-					     
 	  ;
+//	  $("svg:rect",svg).tooltip();
 
 	  // create the legend
 	  var legend = svg.append("svg:g")

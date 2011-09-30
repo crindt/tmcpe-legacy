@@ -63,15 +63,18 @@ if ( !tmcpe ) var tmcpe = {};
 	  // loading event
 	  $(window).trigger( "tmcpe.incidentsRequested", query );
 
-	  d3.json( url,
-		   function(e) {
-		       if ( e == null ) throw "Error retreiving query data from server.";
-
-		       data = e; // hold the json response here
-
-		       // done loading event
-		       $(window).trigger( "tmcpe.incidentsLoaded", data );
-		   });
+	  tmcpe.loadData(
+	      url,
+	      function(e) {
+		  if ( e == null ) throw "Error retreiving query data from server.";
+		  
+		  data = e; // hold the json response here
+		  
+		  // done loading event
+		  $(window).trigger( "tmcpe.incidentsLoaded", data );
+	      },
+	      "Loading incident list..."
+	  );
       }
 
       // Setting the url executes the query

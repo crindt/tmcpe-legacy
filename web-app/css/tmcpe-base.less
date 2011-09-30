@@ -204,6 +204,7 @@ body {
 	padding:25px;
 	color:@tooltip-color;	
 	z-index:10000;
+	text-overflow: ellipsis;
 
 	/* default is to position on top */
 	background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow.png);
@@ -217,5 +218,10 @@ body {
 	&.right {
 	    background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow_right.png);
 	    padding-left: 35px;
+	}
+
+	&.left {
+	    background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow_left.png);
+	    padding-right: 35px;
 	}
 }}
