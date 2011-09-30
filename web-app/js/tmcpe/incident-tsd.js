@@ -1688,7 +1688,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  });
 
 	  // Update the download analysis link.  Currently tied to the currently displayed analysis...
-	  $('#tmcpe_tsd_download_link').html( 'Download XLS for facility analysis ' + json.id );
+	  $('#tmcpe_tsd_download_link').html( 'Download spreadsheet for facility analysis ' + json.id );
 	  $('#tmcpe_tsd_download_link').attr( 'href', "${resource(dir:'/',absolute:true)}"+'incidentFacilityImpactAnalysis/show.xls?id='+json.id );
 
 
