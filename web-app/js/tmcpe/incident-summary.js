@@ -105,6 +105,11 @@ if ( !tmcpe ) var tmcpe = {};
 	      .on('change',function(d){
 		  $(window).trigger("tmcpe.queryFormChanged", formAsModel() );
 	      });
+
+
+	  // set up the tooltips
+	  $(container[0]).find(':input').tooltip({position:"bottom center", tipClass:"tooltip bottom"});
+
       }
 
       queryView.query = function(x) {
@@ -179,7 +184,11 @@ if ( !tmcpe ) var tmcpe = {};
       ,ww = 800
       ,margin = 100
       ,w=ww-margin
-      ,tooltipTemplate = 'Incidents matching:<ul><li>{{groups}}</li><li>{{subgroups}}</li><li>{{filters}}</li></ul>'
+      ,legendspace = margin   // gap between chart and legend/detail boxes
+      ,legendboxsize = 10
+      ,legendlabelskip = 10
+      ,detailheight = 250     // height of the detail box
+      ,detailTemplate = '{{count}} Incident{{plural}} matching:<ul><li>{{groups}}</li><li>{{subgroups}}</li>{{#filters}}<li>{{filters}}</li>{{/filters}}</ul>'
       ;
 
       // create the aggchart svg
@@ -300,26 +309,37 @@ if ( !tmcpe ) var tmcpe = {};
 	  x1 = function(d) { return (d.x + d.x0) * w / mx; }
 	  ;
 
+	  var chartheight = m*barheight;
+	  var legendtitleheight = 25;
+	  var legendheight = (n*(legendboxsize+legendlabelskip)) + 50 + legendtitleheight;
+
+	  var hh = chartheight + ( legendheight > detailheight ? legendheight : detailheight ) + legendspace;
+
 
 	  svg = container
 	      .append("svg:svg")
 	      .attr("title","Click on chart bars to open a new window with the list of incidents that belong to that grouping")
 	      .attr("id","aggchartsvg")
-	      .attr("class","chart")
-	      .attr("height",(m+(n+2))*barheight)
+	      .attr("height",hh)
 	      .attr("width",ww);
 
+	  var chart = svg.append("svg:g")
+	      .attr("class","chart");
+	  
 
-//	  $(svg[0]).tooltip({position:"center left", tipClass: "tooltip left"});
-
-
-	  var layers = svg.selectAll("g.layer")
+	  var layers = chart.selectAll("g.layer")
 	      .data(odata)
 	      .enter().append("svg:g")
 	      .style("fill",function(d,i){return n<=1 ? color(0) : color((i)/(n-1));})
 	      .attr("class","layer")
+	      .attr("title","Click on chart bars to open a new window with the list of incidents that belong to that grouping")
 	      .attr("transform","translate("+margin+",0)")
 	  ;
+	  $(layers).tooltip({position:"top left", 
+			     tipClass: "tooltip left", 
+			     tip:'#chartTip',
+			     offset: [100, 0]
+			    });
 
 	  var bars = layers.selectAll("g.bar")
 	      .data(function(d){return d;})
@@ -342,36 +362,20 @@ if ( !tmcpe ) var tmcpe = {};
 		  return x1(d) - x0(d); })
 	      //.attr("title",function(d){ return ( d == null ? "" : d.x) })
 	      .attr("title",function(d){ d == null ? "" : d.subgroup +":"+d.x })
+	      .attr("class","highlightable")
 	      .on("mouseover",function(d){ 
-		  d3.select('#aggchartdetail').text( d == null ? "" : d.subgroup +":"+d.x)
+		  // Update the chart box
+                  var dd = {
+		      count: d.x,
+		      plural: d.x == 1 ? "" : "s" ,
+                      groups:_.map(JSON.parse(d.group),function(v,i){return i+"=" + v }).join(","),
+                      subgroups:_.map(JSON.parse(d.subgroup),function(v,i){return i+"=" + v }).join(","),
+                      filters:_.map(JSON.parse(d.filters),function(v,i){
+			  return i }).join(",")
+                  };
+                  var tt = Mustache.to_html( detailTemplate, dd  );
 
-		  // try doing a tooltip:
-		  var bbox = this.getBBox();
-		  var ctm = this.getScreenCTM();
-		  bbox.x+=ctm.e;
-		  bbox.y+=ctm.f;
-		  bbox.width*=ctm.a;
-		  bbox.height*=ctm.d;
-		  var dd = {
-		      groups:_.map(JSON.parse(d.group),function(v,i){return i+"=" + v }).join(","),
-		      subgroups:_.map(JSON.parse(d.subgroup),function(v,i){return i+"=" + v }).join(","),
-		      filters:_.map(JSON.parse(d.filters),function(v,i){return i+"=" + v }).join(",")
-		  };
-		  var tt = Mustache.to_html( tooltipTemplate, dd  );
-		  d3.select("#chartTip")
-		      .style('left',function(d){
-			  var tipdiv = $(this);
-			  var tdw = tipdiv.outerWidth();
-			  return (bbox.x+bbox.width/2) - tdw/2;
-		      })
-		      .style('top',(bbox.y+bbox.height/2))
-		      .style('position','absolute')
-		      .style('display','block')
-		      .on("mouseover",function(d){d3.select(this).style('display','none')})
-		      .html(function(d){return tt;});
-		  ;
-
-		  console.log("test");
+		  d3.select('#aggchartdetail').html( tt );
 	      })
 	      .on("click",function(d){ 
 		  var gparams = $.parseJSON(d.group);
@@ -395,108 +399,23 @@ if ( !tmcpe ) var tmcpe = {};
 			  parstr.push( filtparams[k] );
 		      }
 		  }
+		  // create the query url and open map/show
 		  url = g.createLink( { controller: 'map',
-					     action: 'show' } ) + "?" + parstr.join("&");
+					action: 'show' } ) + "?" + parstr.join("&");
 		  window.open(url);
 	      })
 	  ;
 //	  $("svg:rect",svg).tooltip();
 
-	  // create the legend
-	  var legend = svg.append("svg:g")
-	      .attr("class","legend")
-	      .attr("transform","translate("+(margin+20)+","+(y({y:m})+50)+")")
-	  ;
-
-	  var items = legend.selectAll("g.legenditem")
-	      .data(odata)
-	      .enter().append("svg:g")
-	      .attr("class","legenditem")
-	      .attr("transform",function(d,i){
-		  return "translate(0,"+y({y:i},barheight*.65)+")";})
-	      .on("mouseover",function(d,i){
-		  // mousing over legend item should highlight blocks in chart
-		  var good_data = _.filter(d,function(val){return val.subgroup != null});
-		  var selstr = "#aggchart .bar rect[sgidx='"+good_data[0].sgidx+"']";
-		  var sel = $(selstr);
-		  //sel.addClass("highlight");
-                  // SVG doesn't work with jquery.addClass and jquery.svgdom is overridden by jquery.tools
-                  // This is a hacky copy of the svgdom implementation of addClass
-                  var ac = function(c){ return function(n) { n.className ? n.className.baseVal += " " + c : n.setAttribute('class', c);} };
-                  _.each(sel,ac('highlight'));
-                  /*_.each($(this).find('text'),ac('highlight'));*/
-	      })
-	      .on("mouseout",function(d,i){
-		  var good_data = _.filter(d,function(val){return val.subgroup != null});
-		  var selstr = "#aggchart .bar rect[sgidx='"+good_data[0].sgidx+"']";
-		  var sel = $(selstr);
-                  // SVG doesn't work with jquery.removeClass and jquery.svgdom is overridden by jquery.tools
-                  // This is a hacky copy of the svgdom implementation of removeClass
-                  var className = 'highlight';
-                  var rc = function(c){ return function(node){
-                      var classes = (node.className ? node.className.baseVal : node.getAttribute('class'));
-                      classes = $.grep(classes.split(/\s+/), function(n, i) { return n != c; }).
-						join(' ');
-		      (node.className ? node.className.baseVal = classes :
-		       node.setAttribute('class', classes));
-                  } };
-                  _.each(sel,rc('highlight'));
-                  /*_.each($(this).find('text'),rc('highlight'));*/
-	      })
-	  ;
-
-	  items.append("svg:rect")
-	      .attr("x",0)
-	      .attr("y",0)
-	      .attr("height",10)
-	      .attr("width",10)
-	      .style("fill",function(d,i){return n<=1 ? color(0) : color((i)/(n-1));})
-	  ;
-	  items.append("svg:rect")
-	      .attr("x",0)
-	      .attr("y",0)
-	      .attr("height",10)
-	      .attr("width",10)
-	      .style("fill",function(d,i){return n<=1 ? color(0) : color((i)/(n-1));})
-	  ;
-	  items.append("svg:text")
-	      .attr("class", "label")
-	      .attr("text-anchor", "left")
-	      .attr("x",15)
-	      .attr("y",0)
-	      .attr("dy","9px")
-	      .text(function(d){
-		  var good_data = _.filter(d,function(val){return val.subgroup != null});
-		  var sg = $.parseJSON(good_data[0].subgroup);
-		  return _.map(sg,function(val,key){return val;}).join(", ");
-	      })
-	  ;
 
 
-	  var gkeys = _.keys(gr);
-	  var gvals = _.map(gkeys,function(d){return $.parseJSON(d)});
 
-	  var labelblock = svg.append("svg:g");
-
-	  var labels = labelblock.selectAll("text.label")
-	      .data(odata[0])
-	      .enter().append("svg:text")
-	      .attr("class", "label")
-	      .attr("x", margin - 5)
-	      .attr("y", function (d) { 
-		  return y(d); } )
-	      //.attr("dx", x({x: .45}))
-	      .attr("dy", "15px")
-	      .attr("text-anchor", "end")
-	      .text(function(d, i) { 
-		  return _.values(gvals[i]).join(", ");
-	      });
+	  // draw in the vertical rules
 
 	  var xscale = d3.scale.linear().domain([0,mx]).range([0,w]);
 
-	  var rules = svg.append("svg:g");
-
-	  rules = rules.selectAll(".rule")
+	  var rulecont = svg.append("svg:g").attr("class","rules");
+	  var rules = rulecont.selectAll(".rule")
 	      .data(xscale.ticks(10))
 	      .enter().append("svg:g")
 	      .attr("class","rule")
@@ -516,6 +435,164 @@ if ( !tmcpe ) var tmcpe = {};
 	      .text(function(d){
 		  return d;})
 	  ;
+
+
+	  // draw the labels
+	  var gkeys = _.keys(gr);
+	  var gvals = _.map(gkeys,function(d){return $.parseJSON(d)});
+
+	  var labelblock = svg.append("svg:g");
+
+	  var labels = labelblock.selectAll("text.label")
+	      .data(odata[0])
+	      .enter().append("svg:text")
+	      .attr("class", "label")
+	      .attr("x", margin - 5)
+	      .attr("y", function (d) { 
+		  return y(d); } )
+	      //.attr("dx", x({x: .45}))
+	      .attr("dy", "15px")
+	      .attr("text-anchor", "end")
+	      .text(function(d, i) { 
+		  return _.values(gvals[i]).join(", ");
+	      });
+
+
+
+
+	  var legendtop = (y({y:m})+legendspace)
+
+	  // create the legend
+	  var legend = svg.append("svg:g")
+	      .attr("class","legend")
+	      .attr("transform","translate("+(margin+20)+","+legendtop+")")
+	  ;
+
+	  // create a box around the items we're going to create
+	  // must create first to be *under* the items
+	  var legendregion = legend.append("svg:rect")
+	      .attr("class","chartregion")
+	      .attr("x",-10)
+	      .attr("y",-10)
+	      .attr("width", 200 ) /* arbitrary width, will resize after labels are created */
+	      .attr("height", legendheight )
+	  ;
+
+	  // Put the legend title in
+	  var good_data = _.filter(odata[0],function(val){return val.subgroup != null});
+	  var sg = $.parseJSON(good_data[0].subgroup);
+	  for ( i in sg ) { sg = i; break; }  // get the first key 
+	  legend.append("svg:text")
+	      .attr("x", 0 )
+	      .attr("y", 0 )
+	      .attr("dy","9px")
+	      .attr("class","title label")
+	      .text(sg)
+	  ;
+
+
+	  var items = legend.selectAll("g.legenditem")
+	      .data(odata)
+	      .enter().append("svg:g")
+	      .attr("class","legenditem")
+	      .attr("sgidx", function(d,i) { 
+		  var good_data = _.filter(d,function(val){return val.subgroup != null});
+		  return good_data[0].sgidx; })
+	      .attr("transform",function(d,i){
+		  return "translate(0,"+(legendtitleheight+y({y:i},(legendboxsize+legendlabelskip)))+")";})
+	      .on("mouseover",function(d,i){
+		  // mousing over legend item should highlight blocks in chart
+		  var good_data = _.filter(d,function(val){return val.subgroup != null});
+		  var selstr = "[sgidx='"+good_data[0].sgidx+"']";
+		  var sel = svg.selectAll(selstr)
+		      .classed( 'highlight', true );
+		  d3.select(this).classed( 'highlight', true );
+	      })
+	      .on("mouseout",function(d,i){
+		  var good_data = _.filter(d,function(val){return val.subgroup != null});
+		  var selstr = "[sgidx='"+good_data[0].sgidx+"']";
+		  var sel = svg.selectAll(selstr)
+		      .classed('highlight', false );
+		  d3.select(this).classed( 'highlight', false );
+	      })
+	  ;
+
+	  items.append("svg:rect")
+	      .attr("x",0)
+	      .attr("y",0)
+	      .attr("height",legendboxsize)
+	      .attr("width",legendboxsize)
+	      .style("fill",function(d,i){return n<=1 ? color(0) : color((i)/(n-1));})
+	  ;
+	  var legendlabels = items.append("svg:text")
+	      .attr("class", "label")
+	      .attr("text-anchor", "left")
+	      .attr("x",legendboxsize+legendlabelskip)
+	      .attr("y",0)
+	      .attr("dy","9px")
+	      .text(function(d){
+		  var good_data = _.filter(d,function(val){return val.subgroup != null});
+		  var sg = $.parseJSON(good_data[0].subgroup);
+		  return _.map(sg,function(val,key){return val;}).join(", ");
+	      })
+	  ;
+
+	  var max = 0;
+	  var lw = legendlabels.each(function(d,i){ 
+	      max = $(this).width() > max ? $(this).width() : max; 
+	  });
+
+	  // resize the box around the legend
+	  legendregion.attr("width",max+50);
+
+
+	  // Add a chart title
+	  var xtitle = rulecont.append("svg:text")
+	      .attr("class","label title")
+	      .attr("text-anchor", "middle")
+	      .attr("x",margin+w/2)
+	      .attr("y",h+40)
+	      .text("Number of matching incidents")
+	  ;
+
+
+
+	  // draw the detail box
+	  var detailw = (ww-2*margin)/2;
+	  var detail = svg.append("svg:g")
+	      .attr("class","detail")
+	      .attr("transform","translate("+(ww-margin-detailw)+","+legendtop+")");
+	  var detailbox  = detail
+	      .append("svg:rect")
+	      .attr("class","chartregion")
+	      .attr("x",-10)
+	      .attr("y",-10)
+	      .attr("width",detailw)
+	      .attr("height",detailheight)
+	  ;
+	  var detailblock = detail
+	      .append("svg:foreignObject")
+	      .attr("xmlns","http://www.w3.org/1999/xhtml")
+	      .attr("x",0)
+	      .attr("y",0)
+	      .attr("width",detailw)
+	      .attr("height",detailheight)
+	      .append("p")
+	      .attr("id","aggchartdetail")
+	  ;
+/*
+	  var detailtext = detail
+	      .append("svg:text")
+	      .attr("class", "label")
+	      .attr("text-anchor", "left")
+	      .attr("x",0)
+	      .attr("y",0)
+	      .attr("dy","9px")
+	      .text("Test")
+	      */
+
+
+
 
       }
 
@@ -607,8 +684,6 @@ if ( !tmcpe ) var tmcpe = {};
 
 
       // set up the overlays
-      
-      
 
   });
  })();

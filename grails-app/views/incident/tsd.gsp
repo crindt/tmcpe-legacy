@@ -6,8 +6,8 @@
     <title>Incident ${incidentInstance.cad} Detail</title>
 
     <!-- frameworks -->
-    <p:javascript src='jquery-1.6.1' />
-    <p:javascript src='underscore' />
+    <p:javascript src='jquery-1.6.1.min' />
+    <p:javascript src='underscore-min' />
     <p:javascript src='mustache' />
 
     <!-- formatting -->

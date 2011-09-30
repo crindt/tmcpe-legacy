@@ -96,6 +96,7 @@
 				  from="${formData}"
 				  optionKey="key" 
 				  optionValue="text"
+				  title="Select the parameter for the vertical groupings in the chart"
 				  />
 		      </div>
 		    </td>
@@ -105,6 +106,7 @@
 				  from="${formData}"
 				  optionKey="key" 
 				  optionValue="text"
+				  title="Select the parameter for the horizontal groupings in the chart"
 				  />
 		      </div>
 		    </td>
@@ -114,6 +116,7 @@
 				  from="${filterData}"
 				  optionKey="key"
 				  optionValue="text"
+				  title="Select any filters you'd like to apply"
 				  />
 		      </div>
 		    </td>
@@ -137,11 +140,10 @@
 	    </div>
 	  </div>
 	  <div id='aggchart'></div>
-	  <div id='aggchartdetail'></div>
 	</div>
       </div>
     </div>
     <!-- tooltips -->
-    <div id="chartTip" style="display:none" class="tooltip bottom"></div>
+    <div id="chartTip" style="display:none" class="tooltip left"></div>
   </body>
 </html>
