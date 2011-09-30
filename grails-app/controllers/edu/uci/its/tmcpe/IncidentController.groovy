@@ -452,7 +452,7 @@ class IncidentController extends BaseController {
 
     def summary = {
 	return [ 
-	    formData: groupMap.collect { [ key:it.key, text: it.value.pretty] }, 
+	    formData: groupMap.collect { [ key:it.key, pretty: it.value.pretty] }, 
 	    filterData: filtersMap.grep { it.value.deflt != null }.collect { [ key:it.value.deflt, text: it.value.pretty] }
 	]
     }
@@ -572,9 +572,11 @@ class IncidentController extends BaseController {
 	    json {
 		// create the query string from the processed parameters
 		def qq = ("select "+
+			  // sort groups by key
 			  groups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
 			  .join(",")
 			  +( stackgroups.entrySet().size() > 0
+			     // sort stackgroups by key
 			     ? ","+stackgroups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }.join(",")
 			     : "" )
 			  +","+data.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
@@ -605,7 +607,9 @@ class IncidentController extends BaseController {
 		//		System.err.println(results)
 		//qq = "select * from tvd"
 		def ll = session.createSQLQuery(qq).list().collect{ 
-		    System.err.println("ROW: "+it)
+
+		    // process the results by mapping things back to the appropriate location
+		    // based upon the order they were selected.  Groups were first and were sorted by key
 		    def retgroups = [:]
 		    def i = 0;
 		    for ( k in groups.keySet().sort() ) {

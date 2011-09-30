@@ -93,7 +93,7 @@ if ( !tmcpe ) var tmcpe = {};
       ,container
       ,groupSelect
       ,stackSelect
-      ,selectTemplate = '<select name="{{name}}">{{#choices}}<option value="{{key}}">{{text}}</option>{{/choices}}</select>'
+      ,selectTemplate = '<select name="{{name}}">{{#choices}}<option value="{{key}}">{{pretty}}</option>{{/choices}}</select>'
       ,radioTemplate = '{{#choices}}<input type="radio" name="{{name}}" value="{{key}}"><span type="label">{{text}}</span><br/>{{/choices}}'
       ;
 
@@ -115,7 +115,7 @@ if ( !tmcpe ) var tmcpe = {};
       queryView.query = function(x) {
 	  if ( x == null ) return query;
 	  query = x;
-	  update();
+	  updateFormFromModel();
       }
 
 
@@ -136,7 +136,6 @@ if ( !tmcpe ) var tmcpe = {};
       // of data
       function selectFromArray( sel, name, data ) {
 	  return sel.html( Mustache.to_html( selectTemplate, {name:name, choices: data } ) );
-
       }
 
       /**
@@ -152,7 +151,7 @@ if ( !tmcpe ) var tmcpe = {};
       /**
        * make the form match the query (model)
        */
-      function update() {
+      function updateFormFromModel() {
 
 	  if ( query ) {
 	      if ( query.groups ) {
@@ -167,7 +166,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      }
 	  }
 
-	  // create the groups box
+	  // Let other elements know that the query form has changed
 	  $(window).trigger("tmcpe.queryFormChanged", formAsModel() );
 
       }
@@ -256,18 +255,20 @@ if ( !tmcpe ) var tmcpe = {};
 	      var sgidx;
 	      var gidx;
 	      if ( (sgidx = sg[sgstr]) == null ) {
+		  // store the index for the given subgroup
 		  sgidx = sg[sgstr] = _.keys(sg).length;
 	      }
 	      if ( (gidx = gr[gstr]) == null ) {
+		  // store the index for the given group
 		  gidx = gr[gstr] = _.keys(gr).length;
 	      }
 	      if ( odata[sgidx] == null ) odata[sgidx] = new Array();
 	      odata[sgidx][gidx] = { y: gidx, 
 				     x: it.stats["cnt"],  // FIXME: hardwire
-				     group: gstr,
-				     subgroup: sgstr,
+				     group: it.groups,
+				     subgroup: it.stackgroups,
 				     sgidx: sgidx,
-				     filters: filtstr,
+				     filters: it.filters
 				   };
 	  });
 
@@ -368,35 +369,31 @@ if ( !tmcpe ) var tmcpe = {};
                   var dd = {
 		      count: d.x,
 		      plural: d.x == 1 ? "" : "s" ,
-                      groups:_.map(JSON.parse(d.group),function(v,i){return i+"=" + v }).join(","),
-                      subgroups:_.map(JSON.parse(d.subgroup),function(v,i){return i+"=" + v }).join(","),
-                      filters:_.map(JSON.parse(d.filters),function(v,i){
-			  return i }).join(",")
+                      groups:_.map(d.group,function(v,i){return i+"=" + v }).join(","),
+                      subgroups:_.map(d.subgroup,function(v,i){return i+"=" + v }).join(","),
+                      filters:_.map(d.filters,function(v,i){return i }).join(",")
                   };
                   var tt = Mustache.to_html( detailTemplate, dd  );
 
 		  d3.select('#aggchartdetail').html( tt );
 	      })
 	      .on("click",function(d){ 
-		  var gparams = $.parseJSON(d.group);
-		  var sgparams = $.parseJSON(d.subgroup);
-		  var filtparams = $.parseJSON(d.filters);
 		  var parstr = new Array();
-		  for ( k in gparams ) {
-		      parstr.push(k+"="+gparams[k]);
+		  for ( k in d.group ) {
+		      parstr.push(k+"="+d.group[k]);
 		  }
-		  for ( k in sgparams ) {
-		      parstr.push(k+"="+sgparams[k]);
+		  for ( k in d.subgroup ) {
+		      parstr.push(k+"="+d.subgroup[k]);
 		  }
-		  if ( filtparams instanceof Array ) {
-		      for ( e in filtparams ) {
+		  if ( d.filters instanceof Array ) {
+		      for ( e in d.filters ) {
 			  // filters my be a single item (not a key value pair), catch this here
 			  parstr.push(e.value);
 		      }
 		  } else {
 		      // not array, just push filtparams
-		      for ( k in filtparams ) {
-			  parstr.push( filtparams[k] );
+		      for ( k in d.filters ) {
+			  parstr.push( d.filters[k] );
 		      }
 		  }
 		  // create the query url and open map/show
@@ -439,7 +436,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // draw the labels
 	  var gkeys = _.keys(gr);
-	  var gvals = _.map(gkeys,function(d){return $.parseJSON(d)});
+	  var gvals = _.map(gkeys,function(d){return odata[0][gr[d]].group});
 
 	  var labelblock = svg.append("svg:g");
 
@@ -480,7 +477,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // Put the legend title in
 	  var good_data = _.filter(odata[0],function(val){return val.subgroup != null});
-	  var sg = $.parseJSON(good_data[0].subgroup);
+	  var sg = good_data[0].subgroup;
 	  for ( i in sg ) { sg = i; break; }  // get the first key 
 	  legend.append("svg:text")
 	      .attr("x", 0 )
@@ -532,7 +529,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("dy","9px")
 	      .text(function(d){
 		  var good_data = _.filter(d,function(val){return val.subgroup != null});
-		  var sg = $.parseJSON(good_data[0].subgroup);
+		  var sg = good_data[0].subgroup;
 		  return _.map(sg,function(val,key){return val;}).join(", ");
 	      })
 	  ;
@@ -680,7 +677,7 @@ if ( !tmcpe ) var tmcpe = {};
 
       // Now, fire things up by setting a default query
       //aggquery.url("incident/listGroups.json?groups=year&stackgroups=eventType")
-      queryView.query( { groups: [ "year" ], stackgroups: ["eventType"], filters: ["none"] } );
+      queryView.query( { groups: [ "year" ], stackgroups: ["eventType"], filters: ["analyzed=onlyAnalyzed"] } );
 
 
       // set up the overlays

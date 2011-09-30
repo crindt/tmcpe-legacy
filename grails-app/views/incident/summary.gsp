@@ -95,7 +95,7 @@
 			<g:select name="groups"
 				  from="${formData}"
 				  optionKey="key" 
-				  optionValue="text"
+				  optionValue="pretty"
 				  title="Select the parameter for the vertical groupings in the chart"
 				  />
 		      </div>
@@ -105,7 +105,7 @@
 			<g:select name="stackgroups"
 				  from="${formData}"
 				  optionKey="key" 
-				  optionValue="text"
+				  optionValue="pretty"
 				  title="Select the parameter for the horizontal groupings in the chart"
 				  />
 		      </div>
