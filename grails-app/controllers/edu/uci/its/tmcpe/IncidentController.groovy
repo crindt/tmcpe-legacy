@@ -54,8 +54,6 @@ class IncidentController extends BaseController {
 
 	def incidentCriteria = null
 
-	System.err.println( "PARAMS ARE: ${params.location_id}" )
-
 	// Use the database id or CAD id if they're provided
 	if ( params.id )  { 
 	    incidentCriteria = { 
@@ -103,6 +101,30 @@ class IncidentController extends BaseController {
 			def to =   Date.parse("yyyy-MM-dd", (params.year.toInteger()+1) + '-01-01')
 			log.info("============DATES: " + from + " <<>> "  + to )
 			between( 'startTime', from, to )
+		    }
+
+		    if ( params.month ) {
+			// grep out anything that's not 1..12
+			def month = params.month.split(",").grep{ 
+			    try {
+				def val = it.toInteger(); 
+				if ( val >= 1 && val <= 12 ) return true
+
+			    } catch ( java.lang.NumberFormatException e ) {
+				// oops, coverting to integer failed
+				log.warn( "Invalid month of year '${it}' passed as query argument" )
+				return false
+			    }
+			    return false
+			}
+
+			if ( month.size() > 0 ) {
+			    addToCriteria( 
+				Restrictions.sqlRestriction( 
+				    // fixme: the this_ prefix here is a HQL-specific modifier to avoid name ambiguity
+				    "extract( month from this_.start_time ) IN ( ${month.join(',')} )"
+				) )
+			}
 		    }
 
 		    if ( params.hour ) {
@@ -253,28 +275,56 @@ class IncidentController extends BaseController {
 		    }
 
 		    // Finally, figured out how to do projections!
-		    projections {
-			analyses {
-			    incidentFacilityImpactAnalyses {
-				//				not { isNull( 'minMilesObserved' ) }
-
-				if ( params.solution ) {
-				    if ( params.solution != "bad" ) {
-					isNull( 'badSolution' )
+		    //projections {
+		    /*
+		    analyses {
+			incidentFacilityImpactAnalyses {
+			    
+			    //				not { isNull( 'minMilesObserved' ) }
+			    
+			    if ( params.solution ) {
+				if ( params.solution != "bad" ) {
+				    isNull( 'badSolution' )
+				}
+				if ( params.solution == "notBounded" ) {
+				    and { 
+					isFalse( 'solutionTimeBounded' )
+					isFalse( 'solutionSpaceBounded' )
 				    }
-				    if ( params.solution == "notBounded" ) {
-					and { 
-					    isFalse( 'solutionTimeBounded' )
-					    isFalse( 'solutionSpaceBounded' )
-					}
-				    }
-				    if ( params.solution == "bad" ) {
-					not { isNull( 'badSolution' ) }
-				    }
+				}
+				if ( params.solution == "bad" ) {
+				    not { isNull( 'badSolution' ) }
+				}
+				if ( params.solution == "good" ) {
+				    isNull( 'badSolution' )
 				}
 			    }
 			}
 		    }
+		    */
+		    if ( params.solution ) {
+			// use aliases to force inner join (GORM/hibernate quirk
+			//  http://adhockery.blogspot.com/search/label/criteria%20queries)
+			//  because we only want results that match the
+			//  following
+			//  
+			createAlias("analyses","a")
+			createAlias("a.incidentFacilityImpactAnalyses", "ii");
+			if ( params.solution != "bad" || params.solution == "good" ) {
+			    isNull( 'ii.badSolution' )
+			}
+			if ( params.solution == "notBounded" ) {
+			    and {
+				isFalse( 'ii.solutionTimeBounded' )
+				isFalse( 'ii.solutionSpaceBounded' )
+			    }
+			}
+			if ( params.solution == "bad" ) {
+			    not { isNull( 'ii.badSolution' ) }
+			}
+		    }
+
+		    // }
 		}
 	    }
         }
@@ -349,6 +399,7 @@ class IncidentController extends BaseController {
     static groupMap = [
 	year:  [ pretty: "Year", groupImpl: [ year: "extract( year from inc_start_time )" ] ],
 	month: [ pretty: "Month", groupImpl: [ month: "extract( month from inc_start_time )" ] ],
+	//month: [ pretty: "Month", groupImpl: [ month: "to_char( inc_start_time, 'Month' )" ] ],
 	hour:  [ pretty: "Hour", groupImpl: [ hour: "extract( hour from inc_start_time )" ] ],
 	district: [ pretty: "District", groupImpl: [ district: "district" ] ],
 	facility: [ pretty: "Facility", groupImpl: [ facility_id: "freeway_id", freeway_dir: "freeway_dir" ] ],
@@ -360,11 +411,11 @@ class IncidentController extends BaseController {
 
     // mapping of filter parameters to where strings for the query
     static filtersMap = [
-	none: [ pretty: "No Filter", deflt: "", filtImpl: {return ""} ],
+	none: [ pretty: "No Filter", deflt: "", type: "bool", filtImpl: {return ""} ],
 	date: [ pretty: "Date", filtImpl: { match -> 
 	    return "("+["inc_start_time", match[0][2],"'"+match[0][3]+"'"].join(" ")+")" 
 	    } ],
-	analyzed: [ pretty: "Analyzed", deflt: "analyzed=onlyAnalyzed", filtImpl: { match -> 
+	analyzed: [ pretty: "Analyzed", deflt: "analyzed=onlyAnalyzed", type: "bool", filtImpl: { match -> 
 	    if ( match[0][3] =~ /(?i)onlyAnalyzed/ ) {
 		return "(id IS NOT NULL)"   // in this query "id" is the id of the ifia
 	    } else if ( match[0][3] =~ /(?i)unAnalyzed/ ) {
@@ -373,14 +424,17 @@ class IncidentController extends BaseController {
 		System.err.println( "   BOG A LOG" );
 	    }
 	    } ],
-	sigalerts: [ pretty: "Sigalerts", filtImpl: { match ->
+	"^sigalerts": [ pretty: "Sigalerts", filtImpl: { match ->
 	    if ( match[0][3] =~ /(?i)onlySigalerts/ ) {
 		return "(sigalert_begin IS NOT NULL)"
 	    } else if ( match[0][3] =~ /(?i)noSigalerts/ ) {
 		return "(sigalert_begin IS NULL)"
 	    }
 	    } ],
-	solution: [ pretty: "Solution", filtImpl: { match ->
+	"^validSolution": [pretty: "Solution is valid",  deflt: "solution=good", filtImpl: {
+		return "(bad_solution IS NULL AND id IS NOT NULL)"; } 
+	    ],
+	"^solution": [ pretty: "Solution", filtImpl: { match ->
 	    def not = ""
 	    if ( match[0][2] == '<>' ) not = " NOT "
 		    
@@ -412,8 +466,8 @@ class IncidentController extends BaseController {
 	    else if ( match[0][3] =~ /(?i)UNKNOWN/ ) type = "^UNKNOWN.*"
 	    return "$not (event_type ~* '$type')"
 	    } ],
-	onlySigalerts: [ pretty: "Only Sigalerts", filtImpl: { return "(sigalert_begin IS NOT NULL" } ],
-	noSigalerts: [ pretty: "No Sigalerts", filtImpl: { return "(sigalert_begin IS NULL" } ],
+	"^onlySigalerts": [ pretty: "Only Sigalerts", deflt: "onlySigalerts", filtImpl: { return "(sigalert_begin IS NOT NULL)" } ],
+	"^noSigalerts": [ pretty: "No Sigalerts", deflt: "noSigalerts", filtImpl: { return "(sigalert_begin IS NULL)" } ],
 	facility: [ pretty: "Facility", filtImpl: { match ->
 	    def not = ""
 	    if ( match[0][2] == '<>' ) not = " NOT "
@@ -485,7 +539,7 @@ class IncidentController extends BaseController {
 		if ( it.toLowerCase() =~ "(?i)${e.key}" ) {
 		    for ( ee in e.value.groupImpl ) {
 			//System.err.println( "${it}: Adding GROUP ${ee.key} as ${ee.value}" )
-			groupsraw[ ee.key ] = ee.value;
+			groupsraw[ ee.key ] = [val:ee.value, parent:e.value];
 			orderby.push(ee.value);
 		    }
 		}
@@ -502,7 +556,7 @@ class IncidentController extends BaseController {
 		if ( it.toLowerCase() =~ "(?i)${e.key}" ) {
 		    for ( ee in e.value.groupImpl ) {
 			//System.err.println( "${it}: Adding STACKGROUP ${ee.key} as ${ee.value}" )
-			stackgroupsraw[ ee.key ] = ee.value;
+			stackgroupsraw[ ee.key ] = [val:ee.value, parent:e.value]
 			orderby.push(ee.value);
 		    }
 		}
@@ -573,11 +627,11 @@ class IncidentController extends BaseController {
 		// create the query string from the processed parameters
 		def qq = ("select "+
 			  // sort groups by key
-			  groups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
+			  groups.entrySet().sort{it.key}.collect{ return it.value.val + " as " + it.key }
 			  .join(",")
 			  +( stackgroups.entrySet().size() > 0
 			     // sort stackgroups by key
-			     ? ","+stackgroups.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }.join(",")
+			     ? ","+stackgroups.entrySet().sort{it.key}.collect{ return it.value.val + " as " + it.key }.join(",")
 			     : "" )
 			  +","+data.entrySet().sort{it.key}.collect{ return it.value + " as " + it.key }
 			  .join(",")+" from tmcpe.incall i "+
@@ -588,16 +642,14 @@ class IncidentController extends BaseController {
 			       return it.value.impl 
 			   }
 			  .join(" AND ") : "" )+
-			  " group by "+groups.entrySet().sort{it.key}.collect{ 
-			      return it.value 
- 			  }.join(",")+
+			  " group by "+groups.entrySet().sort{it.key}.collect{ return it.value.val }.join(",")+
 			  ( stackgroups.entrySet().size() > 0 
-			    ? ","+stackgroups.entrySet().sort{it.key}.collect{return it.value}.join(",")
+			    ? ","+stackgroups.entrySet().sort{it.key}.collect{return it.value.val}.join(",")
 			    : "" )+
 			  " order by "+
-			  groups.entrySet().sort{it.key}.collect{ return it.value }.join(",")+
+			  groups.entrySet().sort{it.key}.collect{ return it.value.val }.join(",")+
 			  ( stackgroups.entrySet().size() > 0
-			    ? ","+stackgroups.entrySet().sort{it.key}.collect{return it.value}.join(",")
+			    ? ","+stackgroups.entrySet().sort{it.key}.collect{return it.value.val}.join(",")
 			    : "" )
 			 )
   	        System.err.println(qq)
@@ -613,6 +665,7 @@ class IncidentController extends BaseController {
 		    def retgroups = [:]
 		    def i = 0;
 		    for ( k in groups.keySet().sort() ) {
+			//retgroups[groups[k].parent.pretty] = [retgroups[groups[k].parent.pretty]?:"",it[i]+""].join(" ");
 			retgroups[k] = it[i]
 			++i
 		    }
@@ -621,6 +674,7 @@ class IncidentController extends BaseController {
 		    def j = groups.size()
 		    i = 0;
 		    for ( k in stackgroups.keySet().sort() ) {
+			//retstackgroups[stackgroups[k].parent.pretty] = [retstackgroups[stackgroups[k].parent.pretty]?:"",it[j+i]+""].join(" ");
 			retstackgroups[k] = it[j+i]
 			++i
 		    }
@@ -634,14 +688,8 @@ class IncidentController extends BaseController {
 		    }
 
 		    def retfilt = [:]
-		    System.err.println( "FILTERSRAW := "+filtersraw );
 		    for ( e in filtersraw ) {
-			
-			System.err.println( "FILTERSRAW ["+e.key+"]"+filtersraw[e.key] )
 			retfilt[e.key] = [e.value.param,e.value.cmp,e.value.val].grep({it != null}).join("")
-
-			System.err.println( "K: " +e.key + " := " + retfilt[e.key] );
-
 		    }
 
 		    return [ "groups": retgroups,

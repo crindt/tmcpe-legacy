@@ -248,7 +248,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  }
 
 	  // Here we make sure the data is organized properly
-	  _.each(data,function(it){
+	  _.each(data, function(it){
 	      var sgstr = stringifyMap(it.stackgroups);
 	      var gstr  = stringifyMap(it.groups);
 	      var filtstr = stringifyMap(it.filters);

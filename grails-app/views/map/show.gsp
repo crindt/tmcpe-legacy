@@ -44,7 +44,7 @@
     <div id='tmcpeapp'>
       <div class='content'>
 	<div id='leftbox'>
-	  <div id='mapview' tabindex="1" title="Click on a visible circle to view the incidents at that location"></div>
+	  <div id='mapview' class="mapcontainer" tabindex="1" title="Click on a visible circle to view the incidents at that location"></div>
 	  <div id='cluster-detail'>
 	    <ul id='cluster-list'>
 	    </ul>

@@ -117,7 +117,7 @@
 	      <div id="tsdbox">
 	      </div>
 	    </div>
-	    <div id="mapbox" class="rightbox">
+	    <div id="mapbox" class="mapcontainer rightbox">
 	      <div id="map" tabindex="1"></div>
 	    </div>
 	  </div>

@@ -347,6 +347,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  var svg = container
 	      .append("svg:svg")
 	      .attr("id","mapsvg")
+	      .attr("class","map")
 	      .attr("height",250)
 	      .attr("width",250)[0][0];
 

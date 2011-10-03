@@ -1101,9 +1101,6 @@ if ( !tmcpe ) var tmcpe = {};
 		  this.style.stroke="red";
 		  updateText( $.format.date( new Date(d.t*1000), "HH:mm" ) + ":: " + d.l );
 
-		  // Add tooltips to lines
-		  $(this).tipsy( "test" ) 
-
 	      })
 	      .on("mouseout", function(d,i) {
 		  this.style.stroke="";
@@ -1286,6 +1283,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  var svg = d3.select(container)
 	      .append("svg:svg")
 	      .attr("id","segmapsvg")
+	      .attr("class","map")
 	      .attr("height",segmap.hh())
 	      .attr("width",segmap.ww())[0][0];
 
