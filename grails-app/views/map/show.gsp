@@ -29,7 +29,13 @@
 -->
 
     <!-- supporting stylesheets -->
-    <less:stylesheet name="tmcpe-map-show" />
+    <g:if env="development">
+      <less:stylesheet name="tmcpe-map-show" />
+    </g:if>
+    <g:if env="production">
+      <p:css name="tmcpe-map-show" />
+    </g:if>
+
 
 
     <!-- app code -->

@@ -10,20 +10,23 @@ if ( !tmcpe ) var tmcpe = {};
 	 if ( what != null ) $("#loading").text(what);
 	 loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
 
-	 d3.json(url,function(e) {
-	     if ( e == null ) {
-		 // this is an error condition
-		 $('#server_error').overlay({load:true});
-		 return;
-	     }
-
-	     // run the callback to manage the data
-	     callback(e);
-	     
-	     if ( loadingOverlay ) loadingOverlay.close();
-	     $(window).trigger("tmcpe.loadingFinished");
-
-	 });
+         try {
+	     d3.json(url,function(e) {
+	         if ( e == null ) {
+		     // this is an error condition
+                     throw "Invalid (or no) data returned from the server";
+	         }
+                 
+	         // run the callback to manage the data
+	         callback(e);
+	         
+	         if ( loadingOverlay ) loadingOverlay.close();
+	         $(window).trigger("tmcpe.loadingFinished");
+                 
+	     });
+         } catch ( err ) {
+             alert( err );
+         }
      }
 
      $(document).ready(function() {

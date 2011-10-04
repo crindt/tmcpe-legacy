@@ -33,9 +33,16 @@
     <!-- supporting css -->
 
     <!-- less stylesheets -->
-    <less:stylesheet name="tmcpe-incident-tsd" />
-    <less:stylesheet name="tabs-no-images" />
-    <less:stylesheet name="range-input" />
+    <g:if env="development">
+      <less:stylesheet name="tmcpe-incident-tsd" />
+      <less:stylesheet name="tabs-no-images" />
+      <less:stylesheet name="range-input" />
+    </g:if>
+    <g:if env="production">
+      <p:css name="tmcpe-incident-tsd" />
+      <p:css name="tabs-no-images" />
+      <p:css name="range-input" />
+    </g:if>
 
   </head>
   <body>

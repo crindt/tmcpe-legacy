@@ -31,8 +31,15 @@
     <!-- supporting css -->
 
     <!-- less stylesheets -->
-    <less:stylesheet name="tmcpe-incident-summary" />
-    <less:stylesheet name="tabs-no-images" />
+    <g:if env="development">
+      <less:stylesheet name="tmcpe-incident-summary" />
+      <less:stylesheet name="tabs-no-images" />
+    </g:if>
+    <g:if env="production">
+      <p:css name="tmcpe-incident-summary" />
+      <p:css name="tabs-no-images" />
+    </g:if>
+      
 
    <!-- note: less:scripts loaded by base.gsp -->
 

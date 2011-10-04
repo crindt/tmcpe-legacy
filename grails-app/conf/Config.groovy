@@ -210,6 +210,16 @@ uiperformance.exclusions = [
     "**/tablescroll/**",
     "**/numberformat/**",
     "**/DataTables/**",
+    "**/d3.*",
+    "**/jquery.*.js",
+    "**/underscore*.js",
+    "**/polymaps*.js",
+    "**/protovis*.js",
+    "**/mustache*.js",
+    "**/less*.js",
+    "**/lesscss*/**",
+    "**/prototype/**",
+    "**/plugins/**",
 ]
 
 uiperformance.bundles = [

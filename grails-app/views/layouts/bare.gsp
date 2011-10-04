@@ -4,7 +4,13 @@
       <title>Caltrans D12 TMC Performance Evaluation (Version <tmcpe:version />) <g:layoutTitle default="" /></title>
 
       <!-- less stylesheets -->
-      <less:stylesheet name="tmcpe-base" />
+      <g:if env="development">
+        <less:stylesheet name="tmcpe-base" />
+      </g:if>
+      <g:if env="production">
+        <p:css name="tmcpe-base" />
+      </g:if>
+
       
       <p:favicon src="images/favicon.ico" />
 
