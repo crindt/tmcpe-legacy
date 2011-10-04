@@ -80,6 +80,7 @@ sub get_facility {
 	} elsif ( $#res == 0 ) {
 	    # good
 	    my $rec = shift @res;
+	    #print STDERR "MATCHED FACILITY: ".join( ":",$rec->net,$rec->ref)."\n";
 	    return { cname => join( '-', $rec->net, $rec->ref ),
 		     net => $rec->net,
 		     ref => $rec->ref
@@ -112,6 +113,8 @@ sub get_vds_ramp {
     $rtype = 'ML';
 
     my $geom;
+    my $badgeom = 0;
+
     if ( not defined( $icad_geom ) ) {
 	if ( $self->use_osm_geom ) {
 	    $geom = join( '',
@@ -119,7 +122,8 @@ sub get_vds_ramp {
 			  $self->get_osm_geom( $facdir, $rstname ),
 			  "')" );
 	} else {
-	    $geom = "GEOMFROMTEXT('POINT(0,0)')";
+	    $geom = "GEOMFROMEWKT('SRID=2230;POINT(0 0)')";
+	    $badgeom = 1;
 	}
     } else {
 	$geom = ${$icad_geom};
@@ -127,7 +131,7 @@ sub get_vds_ramp {
 
     my $crit;
     my $order;
-    if ( $geom ) {
+    if ( $geom && !$badgeom ) {
 	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => $rtype,
@@ -215,6 +219,7 @@ sub get_vds_fw {
 
 
     my $geom;
+    my $badgeom = 0;
 
     if ( not defined( $icad_geom ) ) {
 	if ( $self->use_osm_geom ) {
@@ -223,7 +228,8 @@ sub get_vds_fw {
 			  $self->get_osm_geom( $facdir, $xfac ),
 			  "')" );
 	} else {
-	    $geom = "GEOMFROMTEXT('POINT(0,0)')";
+	    $geom = "GEOMFROMEWKT('SRID=2230;POINT(0 0)')";
+	    $badgeom = 1;
 	}
     } else {
 	$geom = ${$icad_geom};
@@ -232,7 +238,7 @@ sub get_vds_fw {
 
     my $crit;
     my $order;
-    if ( $geom ) {
+    if ( $geom && !$badgeom ) {
 	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => 'ML',
@@ -314,6 +320,7 @@ sub get_vds_xs {
     $xstreetname =~ s/^\s*(.*?)\s*/$1/g;
 
     my $geom;
+    my $badgeom = 0;
 
     if ( not defined( $icad_geom ) ) {
 	if ( $self->use_osm_geom ) {
@@ -322,7 +329,9 @@ sub get_vds_xs {
 			  $self->get_osm_geom( $facdir, $xstreetname ),
 			  "')" );
 	} else {
-	    $geom = "GEOMFROMTEXT('POINT(0,0)')";
+	    $geom = "GEOMFROMEWKT('SRID=2230;POINT(0 0)')";
+	    $badgeom = 1;
+	    
 	}
     } else {
 	$geom = ${$icad_geom};
@@ -330,7 +339,7 @@ sub get_vds_xs {
 
     my $crit;
     my $order;
-    if ( $geom ) {
+    if ( $geom && !$badgeom ) {
 	$crit =	{
 	    district_id => 12,  # hardcoded!
 	    type_id => 'ML',
@@ -571,7 +580,7 @@ special_stname:      # some special street names that are keywords and therefore
        /\bWEST\b/
 
 
-sttype: st | rd | dr | ave | blvd | ln | pkwy
+sttype: st | rd | dr | ave | blvd | ln | pkwy | hwy
 st: /\bST\b/ | /\bSTREET\b/
 rd: /\bRD\b/ | /\bROAD\b/
 dr: /\bDR\b/ | /\bDRIVE\b/
