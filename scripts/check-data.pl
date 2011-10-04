@@ -80,6 +80,17 @@ my ( $d, $t ) = ( $rec->stampdate, $rec->stamptime );
 my @last = split(/-/,$d);
 my $actlogage = Delta_Days( @last, @today );
 
+# also check for iCad data
+$rs =  $d12->resultset( 'UciAtIcad' )->search(
+    undef,{ 
+        order_by => 'keyfield desc',
+        rows => 1
+    });
+my $rec = $rs->first();
+my ( $d, $t ) = split(' ', $rec->logtime );
+my ($m,$d,$y) = split('/',$d);
+my $icadage = Delta_Days( $y,$m,$d, @today );
+
 
 # Check for the most recent VDS data
 $rs = $vdsdb->resultset( 'Pems5min')->search(
@@ -108,6 +119,7 @@ my $tmcpeage = Delta_Days( @last, @today );
 
 if ( $actlogage > 1 || $vdsage > 1 ) {
     print "Activity log data is old ($actlogage days)\n" if $actlogage > 1;
+    print "iCAD data is old ($icadage days)\n" if $icadage > 1;
     print "VDS data is old ($vdsage days)\n" if $vdsage > 1;
     print "TMCPE analysis data is old ($tmcpeage days)\n" if $tmcpeage > 1;
 
@@ -132,6 +144,7 @@ if ( $actlogage > 1 || $vdsage > 1 ) {
         $mailer->datasend("Subject: TMCPE-related data is not up to date\n" );
         $mailer->datasend("\n" );
         $mailer->datasend("Activity log data is old ($actlogage days)\n") if $actlogage > 1;
+        $mailer->datasend("iCad data is old ($icadage days)\n") if $icadage > 1;
         $mailer->datasend("VDS data is old ($vdsage days)\n") if $vdsage > 1;
         $mailer->datasend("TMCPE analysis data is old ($tmcpeage days)\n\n") if $tmcpeage > 1;
 
