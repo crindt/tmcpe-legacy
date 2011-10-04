@@ -2,8 +2,11 @@
 
 new=tmcpe_`date +"%Y_%m_%d_%H_%M_%S"`
 
-echo psql     -h localhost -U postgres -p 5433 -c \"ALTER DATABASE tmcpe RENAME TO $new\"
+psql     -h localhost -U postgres -p 5433 -c "ALTER DATABASE tmcpe RENAME TO $new" \
+    || ( echo "Failed renaming tmcpe database to $new" && exit 1 )
 
-echo createdb -h localhost -U postgres -p 5433 tmcpe
+createdb -h localhost -U postgres -p 5433 tmcpe \
+    || ( echo "Failed creating new tmcpe database" && exit 1 )
 
-echo "pg_dump -U postgres tmcpe_test -Fc | pg_restore -h localhost -U postgres -p 5433 -Fc -d tmcpe"
+(pg_dump -U postgres tmcpe_test -Fc | pg_restore -h localhost -U postgres -p 5433 -Fc -d tmcpe) \
+    || ( echo "Failed duplicating database" && exit 1
