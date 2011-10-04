@@ -167,6 +167,10 @@ if ( !tmcpe ) var tmcpe = {};
 	      .change(function(d){
 		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
 	      });
+
+	  // set up tooltips
+	  $('input[title]').tooltip({position: "bottom center", tipClass: "tooltip bottom"});
+	  $('select[title]').tooltip({position: "bottom center", tipClass: "tooltip bottom"});
       }
 
       tsdParamsView.container = function(x) {
@@ -1040,9 +1044,11 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 
 	  // averages
-	  vis.append("svg:g")
+	  var chg = vis.append("svg:g")
+	      .attr("class","areas")
+	      .attr("title", "" );
+	  chg.append("svg:path")
 	      .attr("class", "area2")
-	      .append("svg:path")
 	      .attr("d", d3.svg.area()
 		    .x(function(d) { 
 			return x(d.x); })
@@ -1051,21 +1057,21 @@ if ( !tmcpe ) var tmcpe = {};
 			return y(d.y2); }))
 	      .on("mouseover", function( d,i ) { 
                   updateText( "Expected Cumulative Flow" );
+		  $('#cumflowChartTip').html("Expected Cumulative Flow" );
 	      } )
 	      .on("mouseout", function (d,i) { 
 		  updateText( "&nbsp;" );
 	      } );
 	  
-	  vis.append("svg:path")
+	  chg.append("svg:path")
 	      .attr("class", "line2")
 	      .attr("d", d3.svg.line()
 		    .x(function(d) { return x(d.x); })
 		    .y(function(d) { return y(d.y2); }));
 	  // divavg
 	  if ( section == incidentSectionIndex ) {
-	      vis.append("svg:g")
+	      chg.append("svg:path")
 		  .attr("class", "area3")
-		  .append("svg:path")
 		  .attr("d", d3.svg.area()
 			.x(function(d) { return x(d.x); })
 			.y0(hh - 1)
@@ -1101,7 +1107,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 
 	  // observed
-	  vis.append("svg:path")
+	  chg.append("svg:path")
 	      .attr("class", "area")
 	      .attr("d", d3.svg.area()
 		    .x(function(d) { return x(d.x); })
@@ -1118,7 +1124,7 @@ if ( !tmcpe ) var tmcpe = {};
 		    .y(function(d) { return y(d.y); }));
 
 	  // what-if
-	  vis.append("svg:path")
+	  chg.append("svg:path")
 	      .attr("class", "whatif")
 	      .attr("d", d3.svg.area()
 		    .x(function(d) { return x(d.x); })
@@ -1126,6 +1132,8 @@ if ( !tmcpe ) var tmcpe = {};
 		    .y1(function(d) { return y(d.incflow); }))
 	      .on("mouseover", function() { updateText( "What-if" ) } )
 	      .on("mouseout", function () { updateText( "&nbsp;" ) } );
+
+	  $(chg[0]).tooltip({position:"center right", tip: '#cumflowChartTip'});
 
 
 	  // draw start of incident

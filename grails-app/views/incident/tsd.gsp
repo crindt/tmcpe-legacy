@@ -130,7 +130,7 @@
                 </th>
                 <td>
 		  <div id="respdel">
-		    <input type="range" name="respdelslider" min="0" max="60" value="15"/>
+		    <input type="range" name="respdelslider" min="0" max="60" value="15" title="Select the number of additional minutes expected for the response to restore capacity"/>
                     minutes
 		  </div>
                 </td>
@@ -158,6 +158,7 @@
 	    <div id="chartcontainer" class="leftbox">
 	      <div id="chartbox"></div>
 	      <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
+	      <div id="cumflowChartTip" class="tooltip right"></div>
 	    </div>
 	    <div id="databox" class="rightbox">
 	      <ul class="tabs">

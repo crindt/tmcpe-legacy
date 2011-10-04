@@ -190,34 +190,35 @@ svg text {
 @area-divavg-flow-fill:   #f00;    /* red */
 @area-whatif-flow-fill:   #ff0;    /* yellow */
 
-.area {
-    fill: @area-observed-flow-fill;
-    &:hover {
-        fill: lighten( @area-observed-flow-fill, 30% );
-    }
-}
+g.areas {
 
-.area2 { 
-    path {
+    path.area {
+	fill: @area-observed-flow-fill;
+	&:hover {
+            fill: lighten( @area-observed-flow-fill, 30% );
+	}
+    }
+
+    path.area2 { 
         fill: @area-expected-flow-fill;
         &:hover {
             fill: lighten( @area-expected-flow-fill, 30% );
         }
     }
-}
+
  
-.area3 {
-    fill: @area-divavg-flow-fill;
-    &:hover {
-        fill: lighten( @area-divavg-flow-fill, 30% );
+    path.area3 {
+	fill: @area-divavg-flow-fill;
+	&:hover {
+            fill: lighten( @area-divavg-flow-fill, 30% );
+	}
     }
-}
 
-
-.whatif {
-    fill: @area-whatif-flow-fill;
-    &:hover {
-        fill: lighten( @area-whatif-flow-fill, 30% );
+    path.whatif {
+	fill: @area-whatif-flow-fill;
+	&:hover {
+            fill: lighten( @area-whatif-flow-fill, 30% );
+	}
     }
 }
 
