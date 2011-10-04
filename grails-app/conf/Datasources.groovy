@@ -3,6 +3,7 @@ datasources = {
     datasource(name: 'ds2_devel') {
         driverClassName('org.postgis.DriverWrapper')
 //        url('jdbc:postgresql://192.168.0.2:5432/osm')
+
 //        url('jdbc:postgresql://parsons.its.uci.edu:5432/tmcpe')
         url('jdbc:postgresql://192.168.0.2:5432/tmcpe_test')
 //        url('jdbc:postgresql://192.168.0.2:5433/osm')
@@ -29,10 +30,9 @@ datasources = {
         driverClassName('org.postgis.DriverWrapper')
 //        url('jdbc:postgresql://192.168.0.2:5432/osm')
 //        url('jdbc:postgresql://parsons.its.uci.edu:5432/tmcpe')
-        url('jdbc:postgresql://localhost:5432/tmcpe')
+        url('jdbc:postgresql://localhost:5433/tmcpe')
 //        url('jdbc:postgresql://192.168.0.2:5433/osm')
-        username('VDSUSER')
-        password('VDSPASSWORD')
+        username('postgres')
 //        readOnly(false)
         domainClasses([edu.uci.its.tmcpe.TmcLogEntry/*,edu.uci.its.tmcpe.Incident*/,edu.uci.its.tmcpe.ProcessedIncident/*,edu.uci.its.tmcpe.AnalyzedIncident*/,edu.uci.its.tmcpe.FacilitySection,edu.uci.its.tmcpe.IncidentImpactAnalysis,edu.uci.its.tmcpe.IncidentFacilityImpactAnalysis,edu.uci.its.tmcpe.TmcFacilityImpactAnalysis,edu.uci.its.tmcpe.AnalyzedSection,edu.uci.its.tmcpe.IncidentSectionData,edu.uci.its.tmcpe.Icad,edu.uci.its.tmcpe.IcadDetail,edu.uci.its.tmcpe.TmcPerformanceMeasures,edu.uci.its.testbed.Vds,edu.uci.its.tmcpe.CommLogEntry])
         dbCreate('update')
