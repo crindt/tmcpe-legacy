@@ -106,7 +106,10 @@ if ( !tmcpe ) var tmcpe = {};
   tmcpe.tsdParamsView = function () {
       var tsdParamsView = {},
       container,
-      tsdParams   // the tsdParams (model) this view is tied to
+      tsdParams,   // the tsdParams (model) this view is tied to
+      tmcpctslider,
+      verdelslider,
+      respdelslider
       ;
 
 
@@ -132,16 +135,21 @@ if ( !tmcpe ) var tmcpe = {};
       function init() {
 
 	  // handle some element styling
-	  $('input:range').rangeinput();
+          var tmcpctslider =
           $('input[name=tmcpctslider]')
+              .rangeinput()
               .change(function(e,v){
 		  $(window).trigger("tmcpe.tsd.tmcPctChanged", formAsModel() );
               });
+          var verdelslider =
           $('input[name=verdelslider]')
+              .rangeinput()
               .change(function(e,v){
 		  $(window).trigger("tmcpe.tsd.verificationDelayChanged", formAsModel() );
               });
+          var respdelslider =
           $('input[name=respdelslider]')
+              .rangeinput()
               .change(function(e,v){
 		  $(window).trigger("tmcpe.tsd.responseDelayChanged", formAsModel() );
               });
@@ -182,6 +190,19 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( tsdParams ) {
 	  }
       }
+
+      $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, json) {
+	  // new analysis loaded, update the data
+	  var t0 = new Date( json.t0 ).getTime()/1000;
+	  var t1 = new Date( json.t1 ).getTime()/1000;
+	  var t2 = new Date( json.t2 ).getTime()/1000;
+	  var t3 = new Date( json.t3 ).getTime()/1000;
+
+          var vtime = Math.ceil((t1-t0)/60);
+          var rtime = Math.ceil((t2-t0)/60);
+
+      });
+
 
       return tsdParamsView;
   };
@@ -634,8 +655,8 @@ if ( !tmcpe ) var tmcpe = {};
       tmcDivPct = 20,
       startTime = 0,
       endTime,// = 20,
-      verificationDelay = 15, // minutes
-      responseDelay = 15,     // minutes
+      verificationDelay = 5, // minutes
+      responseDelay = 5,     // minutes
 
       
       p = 20
@@ -816,8 +837,8 @@ if ( !tmcpe ) var tmcpe = {};
 	  var t3 = new Date( json.t3 ).getTime()/1000;
 
           // what-if
-	  var t1p = new Date( json.t0 ).getTime()/1000 + verificationDelay*60;
-	  var t2p = new Date( json.t0 ).getTime()/1000 + (verificationDelay + responseDelay)*60;
+	  var t1p = new Date( json.t1 ).getTime()/1000 + verificationDelay*60;
+	  var t2p = new Date( json.t2 ).getTime()/1000 + (verificationDelay + responseDelay)*60;
 
 	  var volscale = 1/1000;
 	  var volscale = 1;
