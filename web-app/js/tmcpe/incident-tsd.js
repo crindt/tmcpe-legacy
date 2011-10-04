@@ -673,6 +673,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if (!size) {
 	      rect.setAttribute("width", "100%");
 	      rect.setAttribute("height", "100%");
+              return cumflow;
 	      b = rect.getBBox();
 	      sizeActual = {x: b.width, y: b.height};
 	      //resizer.add(map);
@@ -770,10 +771,13 @@ if ( !tmcpe ) var tmcpe = {};
 		  d3.select("#"+v).html( zeroOrBetter(json.analysis[v].toFixed(0) ) );
 	      }
 	  });
+
 	  d3.select("#chartDelay2").html( delay2.toFixed(0) );
 	  d3.select("#chartDelay3").html( delay3.toFixed(0) );
 	  d3.select("#whatIfDelay").html( delay4.toFixed(0) );
 	  d3.select("#tmcSavings").html( tmcSavings.toFixed(0) );
+
+//          return cumflow;
       }
 
       function timeSlice( d ) {
