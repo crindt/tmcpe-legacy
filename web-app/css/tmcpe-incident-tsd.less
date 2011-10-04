@@ -106,6 +106,12 @@ path.incidentBoundary {
   stroke-width: 2px;
   fill: none;
 }
+.evidence {
+    circle {
+        pointer-events: none; /* Pass click events through */
+    }
+}
+
 rect {
   fill: lightsteelblue;
   stroke: #eee;
@@ -150,35 +156,56 @@ svg text {
   stroke: #000;
 }
  
-.area {
-  fill: steelblue;
-//    fill-opacity: 0.75;
-}
  
 .line, circle.area {
   fill: none;
   stroke: cyan;
   stroke-width: 1.5px;
 }
+
+
  
-.area2 path {
-  fill: green;
-//  fill-opacity: 0.75;
+@area-expected-flow-fill: #0f0;    /* green */
+@area-observed-flow-fill: #4682B4; /* steelblue */
+@area-divavg-flow-fill:   #f00;    /* red */
+@area-whatif-flow-fill:   #ff0;    /* yellow */
+
+.area {
+    fill: @area-observed-flow-fill;
+    &:hover {
+        fill: lighten( @area-observed-flow-fill, 30% );
+    }
 }
+
+.area2 { 
+    path {
+        fill: @area-expected-flow-fill;
+        &:hover {
+            fill: lighten( @area-expected-flow-fill, 30% );
+        }
+    }
+}
+ 
+.area3 {
+    fill: @area-divavg-flow-fill;
+    &:hover {
+        fill: lighten( @area-divavg-flow-fill, 30% );
+    }
+}
+
+
+.whatif {
+    fill: @area-whatif-flow-fill;
+    &:hover {
+        fill: lighten( @area-whatif-flow-fill, 30% );
+    }
+}
+
 
 .line3 {
   fill: none;
   stroke: orange;
   stroke-width: 1.5px;
-}
- 
-.area3 path {
-  fill: red;
-//  fill-opacity: 0.5;
-}
-
-.whatif {
-    fill: gray;
 }
 
 .timebar {
@@ -372,4 +399,9 @@ table {
 	float:right;
 	margin-right:@margin/2;
     }
+}
+
+table.parambox {
+    float:left;
+    border: solid 1px #fff;
 }

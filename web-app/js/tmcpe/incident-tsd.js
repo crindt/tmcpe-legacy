@@ -109,28 +109,13 @@ if ( !tmcpe ) var tmcpe = {};
       tsdParams   // the tsdParams (model) this view is tied to
       ;
 
-      function init() {
-
-	  // handle some element styling
-	  $('input[type=range]',container).rangeinput();
-
-	  // connect form elements to change events
-	  $('input[type=radio]',container)
-	      .change(function(d){
-		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
-	      });
-	  $('input[type=text]',container)
-	      .change(function(d){
-		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
-	      });
-	  $('select',container)
-	      .change(function(d){
-		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
-	      });
-      }
 
       function formAsModel() {
 	  var form = [];
+          $('input:range',container).each(function(i,e) {
+              var t = e.value;
+              form[e.name] = t;
+          });
 	  $('input:radio:checked',container).each(function(i, e) {
 	      var t = e.value;
 	      form[e.name] = t;
@@ -141,7 +126,39 @@ if ( !tmcpe ) var tmcpe = {};
 	  $('select',container).each(function(i,e) {
 	      form[e.name] = e.value;
 	  });
-	  return form;
+	  return {data:form};
+      }
+
+      function init() {
+
+	  // handle some element styling
+	  $('input:range').rangeinput();
+          $('input[name=tmcpctslider]')
+              .change(function(e,v){
+		  $(window).trigger("tmcpe.tsd.tmcPctChanged", formAsModel() );
+              });
+          $('input[name=verdelslider]')
+              .change(function(e,v){
+		  $(window).trigger("tmcpe.tsd.verificationDelayChanged", formAsModel() );
+              });
+          $('input[name=respdelslider]')
+              .change(function(e,v){
+		  $(window).trigger("tmcpe.tsd.responseDelayChanged", formAsModel() );
+              });
+
+	  // connect form elements to change events
+	  $('input[type=radio]')
+	      .change(function(d){
+		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
+	      });
+	  $('input[type=text]')
+	      .change(function(d){
+		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
+	      });
+	  $('select')
+	      .change(function(d){
+		  $(window).trigger("tmcpe.tsd.paramsChanged", formAsModel() );
+	      });
       }
 
       tsdParamsView.container = function(x) {
@@ -288,11 +305,6 @@ if ( !tmcpe ) var tmcpe = {};
 	  return tsd;
       }
 
-      $(window).bind("tmcpe.tsd.paramsChanged", function( params ) {
-	  tsd.updateCellStyle();
-	  tsd.updateCellAugmentation();
-      });
-
       function showSelectedTime() {
 	  var data = json.data,
 	  sections = json.sections
@@ -302,7 +314,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( selectedTime < 0 ) throw "Asked to throw undefined (<0) selected time in TSD";
 
 	  // update cross line by translating it to the proper section
-	  var cross = d3.select(container).selectAll("#tsdsec")
+	  var cross = tsd.svg.selectAll("#tsdsec")
 	      .data([1])
 	      .attr("transform", function(dd, ii) { 
 		  var dist = 0;
@@ -622,6 +634,9 @@ if ( !tmcpe ) var tmcpe = {};
       tmcDivPct = 20,
       startTime = 0,
       endTime,// = 20,
+      verificationDelay = 15, // minutes
+      responseDelay = 15,     // minutes
+
       
       p = 20
       ;
@@ -705,6 +720,20 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
 
+      $(window).bind("tmcpe.tsd.tmcPctChanged", function(e, params ) {
+          tmcDivPct = params.data.tmcpctslider;
+          cumflow.updateStats();
+      });
+
+      $(window).bind("tmcpe.tsd.verificationDelayChanged", function( e, params ) {
+          verificationDelay = parseInt(params.data.verdelslider);
+          cumflow.redraw();
+      });
+      $(window).bind("tmcpe.tsd.responseDelayChanged", function( e, params ) {
+          responseDelay = parseInt(params.data.respdelslider);
+          cumflow.redraw();
+      });
+
       cumflow.updateStats = function() {
 	  // compute delay from implied queuing
 	  var delay2 = 0;
@@ -776,15 +805,23 @@ if ( !tmcpe ) var tmcpe = {};
 	       section < 0 ) throw "Bad solution data returned from server";
 
 
-
+          // measured
 	  var t0 = new Date( json.t0 ).getTime()/1000;
 	  var t1 = new Date( json.t1 ).getTime()/1000;
-	  var t1p = new Date( json.t1 ).getTime()/1000 + 15*60;
 	  var t2 = new Date( json.t2 ).getTime()/1000;
-	  var t2p = new Date( json.t2 ).getTime()/1000 + 15*60;
 	  var t3 = new Date( json.t3 ).getTime()/1000;
+
+          // what-if
+	  var t1p = new Date( json.t0 ).getTime()/1000 + verificationDelay*60;
+	  var t2p = new Date( json.t0 ).getTime()/1000 + (verificationDelay + responseDelay)*60;
+
 	  var volscale = 1/1000;
 	  var volscale = 1;
+
+          var tt1 =t1-t0;
+          var tt1p =t1p-t0;
+          var tt2 =t2-t1;
+          var tt2p =t2p-t1;
 
 	  var incidentSectionIndex = json.getSectionIndex(json.sec)-1;
 
@@ -956,14 +993,20 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("class","ylabels");
 
 	  // finally, add labels for each time step
+          var rulefreq = Math.floor( rr.length/10);  // we want approx 10 rules
+          if ( rulefreq < 1 ) rulefreq = 1;
 	  rules.append("svg:text")
 	      .attr("x", x )
 	      .attr("y", hh + 5 )
 	      .attr("dy", ".25em")
 	      .attr("text-anchor", "start")
 	      .attr("transform",function(d) { return xlabel_rotate(d); } )
-	      .text(/*x.tickFormat(10)*/ function (x) { 
-		  return $.format.date(new Date( x*1000 ), "HH:mm");
+	      .text(/*x.tickFormat(10)*/ function (x,i) { 
+                  if ( i % rulefreq == 0 ) {  // show rules as appropriate frequency
+		      return $.format.date(new Date( x*1000 ), "HH:mm");
+                  } else {
+                      return "";
+                  }
 //		  return new Date( x*1000 ).toLocaleTimeString();
 	      } )
 	      .attr("class","xlabels");
@@ -981,23 +1024,10 @@ if ( !tmcpe ) var tmcpe = {};
 		    .y1(function(d) { 
 			return y(d.y2); }))
 	      .on("mouseover", function( d,i ) { 
-		  avgmouseover( ); 
-		  /*
-		    vis.selectAll( "g.area2 path" )
-		    .transition()
-		    .attr("fill-opacity", 1 );
-		    */
+                  updateText( "Expected Cumulative Flow" );
 	      } )
 	      .on("mouseout", function (d,i) { 
 		  updateText( "&nbsp;" );
-		  /*
-		    vis.selectAll( "g.area2 path" )
-		    .filter( function (d,j) { 
-		    return j == i;
-		    } )
-		    .transition()
-		    .attr("fill-opacity", 0.5 );
-		  */
 	      } );
 	  
 	  vis.append("svg:path")
@@ -1068,7 +1098,7 @@ if ( !tmcpe ) var tmcpe = {};
 		    .x(function(d) { return x(d.x); })
 		    .y0(hh - 1)
 		    .y1(function(d) { return y(d.incflow); }))
-	      .on("mouseover", obsmouseover )
+	      .on("mouseover", function() { updateText( "What-if" ) } )
 	      .on("mouseout", function () { updateText( "&nbsp;" ) } );
 
 
@@ -1687,7 +1717,12 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // Update the download analysis link.  Currently tied to the currently displayed analysis...
 	  $('#tmcpe_tsd_download_link').html( 'Download spreadsheet for facility analysis ' + json.id );
-	  $('#tmcpe_tsd_download_link').attr( 'href', "${resource(dir:'/',absolute:true)}"+'incidentFacilityImpactAnalysis/show.xls?id='+json.id );
+	  $('#tmcpe_tsd_download_link').attr( 'href', 
+                                              g.createLink({controller:'incidentFacilityImpactAnalysis', 
+			                                    action:'show.xls',
+			                                    params: {id: json.id} 
+			                                   })
+                                            );
 
 
 	  // Update the report problem link
@@ -1795,7 +1830,7 @@ if ( !tmcpe ) var tmcpe = {};
   }
 
   function updateCumFlowStats() {
-     cumflow.tmcDivPct( $("#tmcpct").text() );
+      //cumflow.tmcDivPct( $("#tmcpct").text() );
 
       var unit = $('input[name=delayUnit]:checked').val();
       var vot = $("#valueOfTime")[0];
@@ -1906,6 +1941,15 @@ if ( !tmcpe ) var tmcpe = {};
 
       });
 
+      $(window).bind("tmcpe.tsd.paramsChanged", function( caller, params ) {
+	  tsdView.updateCellStyle();
+	  tsdView.updateCellAugmentation();
+      });
+
+
+      // attach tooltips
+      $('[title]').tooltip({position: "bottom center", tipClass:"tooltip bottom"});
+
       
       // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD
 
@@ -1946,11 +1990,11 @@ if ( !tmcpe ) var tmcpe = {};
 	  "bSort": false,
 	  "bInfo": false,
 	  "aoColumns": [
-	      {"sWidth": "60%", "sType":"string", "sClass":"right" },
-	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
-	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
-	      {"sWidth": "10%", "sType":"number", "sClass":"left" },
-	      {"sWidth": "10%", "sType":"number", "sClass":"left" }
+	      {"sWidth": "20%", "sType":"string", "sClass":"right" },
+	      {"sWidth": "20%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "20%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "20%", "sType":"number", "sClass":"left" },
+	      {"sWidth": "20%", "sType":"number", "sClass":"left" }
 	  ]
       } );
       
@@ -1966,7 +2010,9 @@ if ( !tmcpe ) var tmcpe = {};
 	  //updateLog( data );
 
 	  // update the $$ calc
-	  cumflowView.tmcDivPct( $("#tmcpct").text() );
+          var tt = $("input[name=tmcpctslider]");
+	  //cumflowView.tmcDivPct( tt.value );
+          cumflowView.updateStats();
 
 	  // update the band and max speed sliders
 	  /*

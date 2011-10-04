@@ -52,7 +52,7 @@
     <div id='tmcpeapp'>
       <div class='content'>
 	<div id="tsdParams">
-	  <table style="float:left;">
+	  <table style="float:left;display:none;">
 	    <tr>
 	      <th>Facility:</th>
 	      <td>
@@ -66,18 +66,34 @@
 	      </td>
 	    </tr>
 	  </table>
-	  <table style="float:left">
+	  <table class="parambox">
 	    <tr>
 	      <th>Cell theme:</th>
 	      <td>
-		<select id="theme" name="theme">
-		  <option value="stdspd">Standard Deviation of Speed from Mean</option>
-		  <option selected="true" value="spd">Speed Scaled between max speed and jam speed</option>
+		<select id="theme" name="theme" title="Select whether to display the speed colors based upon standard deviation from the mean or absolute distance from the mean.">
+		  <option value="stdspd" >Std Deviation</option>
+		  <option selected="true" value="spd">Absolute</option>
 		</select>
 	      </th>
 	    </tr>
+	    <tr>
+	      <th>Display delay as:</th>
+	      <td>
+		<form style="display:inline;" title="Choose whether to show delays as vehicle-hours or dollars">
+		  <input type="radio" name="delayUnit" checked="true" value="vehhr">veh-hr</option>
+		  <input type="radio" name="delayUnit" value="usd">USD</option>
+		</form>
+	      </td>
+	    </tr>
+	    <tr>
+	      <th>Value of Time</th>
+	      <td>
+		<input disabled="disabled" type="text" value="13.11" id="valueOfTime" name="valueOfTime" 
+                       title="The factor used to convert minutes of delay into a dollar equivalent" />
+	      </td>
+	    </tr>
 	  </table>
-	  <table style="float:left;border:solid 1px white">
+	  <table class="parambox">
 	    <!--
 		<tr >
 		<th>Align map to:</th>
@@ -93,25 +109,33 @@
 	      <th>TMC Diversion %:</th>
 	      <td>
 		<div id="tmcpctslider">
-		  <input type="range" name="tmcpctslider" min="0" max="100" value="50"/>
+		  <input type="range" name="tmcpctslider" min="0" max="100" value="20"/>
 		</div>
 	      </td>
 	    </tr>
-	    <tr>
-	      <th>Display delay as:</th>
-	      <td>
-		<form style="display:inline;">
-		  <input type="radio" name="delayUnit" checked="true" value="vehhr">veh-hr</option>
-		  <input type="radio" name="delayUnit" value="usd">USD</option>
-		</form>
-	      </td>
-	    </tr>
-	    <tr>
-	      <th>Value of Time</th>
-	      <td>
-		<input disabled="disabled" type="text" value="13.11" id="valueOfTime" name="valueOfTime"/>
-	      </td>
-	    </tr>
+            <tr>
+              <th>
+                Verification Delay without TMC
+              </th>
+              <td>
+		<div id="verdel">
+		  <input type="range" name="verdelslider" min="0" max="60" value="15"/>
+                  minutes
+		</div>
+              </td>
+            </tr>
+              <tr>
+                <th>
+                  Response Delay without TMC
+                </th>
+                <td>
+		  <div id="respdel">
+		    <input type="range" name="respdelslider" min="0" max="60" value="15"/>
+                    minutes
+		  </div>
+                </td>
+                
+            </tr>
 	  </table>
 	</div>
 	
