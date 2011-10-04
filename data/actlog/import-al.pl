@@ -875,9 +875,18 @@ eval {
 	    if ( ! $locdata && ( ! ( $memo =~ /^\s*$/ ) ) && $procopt->{"location_parse"} ) {
 		warn "PARSING MEMO: $memo";
 		$locdata = $lp->get_location( uc($memo), $inc->location_geom );
+
+		# fallback to finding nearest location based on CAD log
+		# try breaking memo into comma delimited sections
+		my @submemo = split( /\s*,\s*/, $memo );
+		while( !$locdata && ( my $sm = pop @submemo ) ) {
+		    $locdata = $lp->get_location( uc( $sm ), $inc->location_geom );
+		}
+
 		if ( !$locdata ) {
 		    warn "FAILED TO PARSE MEMO: $memo";
 		    $loclogfile << $memo."\n";
+
 		} else {
 		    warn "SUCCESS TO PARSE MEMO: $memo: vds=".join( "",
 					    $locdata->id,
@@ -952,7 +961,8 @@ $datecond->{'<='} = $procopt->{date_to}   if $procopt->{date_to};
 
 my $condition;
 
-$condition->{location_vdsid} = { '!=' => undef };   # require a location_vdsid to analyze
+# require a location_vdsid to analyze ( handle this on iteration )
+#$condition->{location_vdsid} = { '!=' => undef };   
 my @include = grep { not /^not-/ } @ARGV;
 my @exclude = grep { /^not-/ } @ARGV;
 $condition->{cad}->{'-in'} = [ @include ] if @include;
@@ -987,6 +997,11 @@ INCDEL: while( my $inc = $incrs->next ) {
     if ( $procopt->{ignore_unprocessed} && ! @existing ) {
 	# Don't compute unless a computation has already been performed
 	warn "SKIPPING DELAY COMPUTATION FOR ".$inc->cad." BECAUSE PARAMETERS SAY TO SKIP UNPROCESSED";
+	next INCDEL;
+    }
+
+    if ( !$inc->location_vdsid ) {
+	warn "SKIPPING DELAY COMPUTATION FOR ".$inc->cad." BECAUSE THE LOCATION CAN'T BE DETERMINED";
 	next INCDEL;
     }
 
