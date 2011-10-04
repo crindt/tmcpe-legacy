@@ -23,6 +23,11 @@
 @rightwidth: @mapwidth;
 @rightheight: @mapheight;
 
+@tsdstroke: #eee;
+@tsddatapoor: #999;
+@incident-boundary-color: #00f;
+@incident-boundary-width: 2;
+
 .content {
     left: 0px;
 }
@@ -100,16 +105,31 @@ body {
 svg {
 //  border: solid 1px #ccc;
   fill: #006;
+  shape-rendering: crispEdges;
+
+
 }
-path.incidentBoundary {
-  stroke: blue;
-  stroke-width: 2px;
-  fill: none;
-}
-.evidence {
-    circle {
-        pointer-events: none; /* Pass click events through */
+
+.tsd {
+    path.incidentBoundary {
+	stroke: @incident-boundary-color;
+	stroke-width: @incident-boundary-width;
+	fill: none;
     }
+    .evidence {
+	circle {
+            pointer-events: none; /* Pass click events through */
+	}
+    }
+
+    rect.tsdcell {
+	stroke-width: 1px;
+
+	&.datapoor {
+	    fill: @tsddatapoor;
+	}
+    }
+    
 }
 
 rect {

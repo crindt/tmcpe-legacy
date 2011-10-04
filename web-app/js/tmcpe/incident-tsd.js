@@ -239,7 +239,7 @@ if ( !tmcpe ) var tmcpe = {};
       tsd.container = function(x) {
 	  if (!arguments.length) return container;
 	  container = x;
-	  container.setAttribute("class", "tsd");
+	  d3.select(container).classed("tsd",true);
 //	  container.appendChild(rect);
 //	  return tsd.resize(); // infer size
 	  return tsd;
@@ -542,6 +542,7 @@ if ( !tmcpe ) var tmcpe = {};
               .attr("width", szt )
               .attr("transform", translateX )
               .attr("height", function (d, i ) { return Math.floor(theight*sections[d.i].seglen/seclensum); })
+	      .attr("class", "tsdcell")
 	      .attr("style", cellStyle)
 	      .on("click", function(d,i) {
 		  // when clicked, create a tmcpe selection event
@@ -1665,23 +1666,26 @@ if ( !tmcpe ) var tmcpe = {};
 
      // return grey if evidence is uncertain (imputed data)
      if ( d.p_j_m > 0 && d.p_j_m < 1 ) {
-        return "fill:#999;stroke:#eee;"
-     } 
+	 d3.select(this).classed('datapoor',true);
+         return "";
+     } else {
+	 d3.select(this).classed('datapoor',false);
+     }
 
      if ( theme == "stdspd" ) {
-        var color = pv.Scale.linear(-scale,
-                  -(scale/2),0 ).range("#ff0000","#ffff00","#00ff00");
-        var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
-        var col = "fill:"+color(vv).color+";stroke:#eee;"
-        return col;
+         var color = pv.Scale.linear(-scale,
+				     -(scale/2),0 ).range("#ff0000","#ffff00","#00ff00");
+         var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
+         var col = "fill:"+color(vv).color+";stroke:#eee;"
+         return col;
      } else if ( theme == "spd" ) {
-        var minspd = 15;
-        var color = pv.Scale.linear(minspd,
-                                    minspd+(maxSpd-minspd)/2,
-                                    maxSpd)
-                      .range("#ff0000","#ffff00","#00ff00");
-        var col = "fill:"+color(d.spd).color+";stroke:#eee;"
-        return col;
+         var minspd = 15;
+         var color = pv.Scale.linear(minspd,
+                                     minspd+(maxSpd-minspd)/2,
+                                     maxSpd)
+             .range("#ff0000","#ffff00","#00ff00");
+         var col = "fill:"+color(d.spd).color+";stroke:#eee;"
+         return col;
      }
   }
 
