@@ -454,7 +454,14 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // draw the labels
 	  var gkeys = _.keys(gr);
-	  var gvals = _.map(gkeys,function(d){return odata[0][gr[d]].group});
+	  var gvals = _.map(gkeys,function(d){
+              // loop to find a valid label because some data is missing
+              // see issue #904
+              for ( var i = 0; i<n; ++i ) {
+                  if( odata[i][gr[d]].group ) return odata[i][gr[d]].group;
+              }
+              throw "Can't find group label for group: "+gr[d];
+          });
 
 	  var labelblock = svg.append("svg:g");
 
