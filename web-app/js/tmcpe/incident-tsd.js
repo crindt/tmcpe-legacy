@@ -1824,6 +1824,22 @@ if ( !tmcpe ) var tmcpe = {};
       updateCumFlowStats();
   }
 
+  function loadLog( id ) {
+      var url = g.createLink({controller:'incident', 
+			      action:'getTmcLog',
+			      params: {id: id} 
+			     });
+      tmcpe.loadData(url,function(e){
+	  if ( e.log == null ) {
+	      // this is an error condition
+	      $('#server_error').overlay({load:true});
+	      return;
+	  }
+	  updateLog( e );
+	  $(window).trigger( "tmcpe.tsd.logLoaded", e );
+      },"TMC Activity Log Data");
+  }
+
   function updateAnalysis( id ) {
       var url = g.createLink({controller:'incidentFacilityImpactAnalysis', 
 			      action:'tsdData',
@@ -1903,6 +1919,9 @@ if ( !tmcpe ) var tmcpe = {};
       //d3.select('#ifia').on("change",function(d){this.options[this.selectedIndex]});
       //d3.select('#theme').on("change",function(d){updateTsd()});
       //d3.select('#valueOfTime').on("change",function(d){updateCumFlowStats()});
+
+      var cad = $('#id');
+      loadLog( cad.attr('name') );
       
 
       $("#databox .tabs").tabs( 'div.panes > div' );
@@ -1944,7 +1963,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  updateStats( data );
 
-	  updateLog( data );
+	  //updateLog( data );
 
 	  // update the $$ calc
 	  cumflowView.tmcDivPct( $("#tmcpct").text() );
@@ -1965,7 +1984,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      cumflowView.resize( );
 	      cumflowView.redraw( );
 	      updateStats( data );
-	      updateLog( data );
+	      //updateLog( data );
 	      //	 doMap( data );
               mapView.data(data).redraw();
 	  });

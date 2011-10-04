@@ -39,6 +39,8 @@
 
   </head>
   <body>
+    <div id='cad' name='${incidentInstance.cad}' />
+    <div id='id' name='${incidentInstance.id}' />
 
     <div id='tmcpeapp'>
       <div class='content'>

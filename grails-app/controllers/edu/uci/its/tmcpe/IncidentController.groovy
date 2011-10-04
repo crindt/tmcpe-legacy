@@ -93,7 +93,7 @@ class IncidentController extends BaseController {
 			    isNull( 'id' )
 			} else if ( params.location_id ) {
 			    'in'( 'id', params.location_id.split(',')*.toInteger() )
-			}
+			} 
 		    }
 		    
 		    if ( params.year ) {
@@ -251,14 +251,14 @@ class IncidentController extends BaseController {
 			eq( 'eventType', et )
 		    }
 
-		    if ( params.located == '1' ) {
+		    if ( params.located != null ) {
 			// limit to incidents that have been located
 			or {
 			    isNotNull( 'locationGeom' )
 			    isNotNull( 'section' )
 			}
 
-		    } else if ( params.located == '0' ) {
+		    } else if ( params.notlocated != null ) {
 			// limit to incidents that have no (known) location
 			and {
 			    isNull( 'locationGeom' )
@@ -421,7 +421,6 @@ class IncidentController extends BaseController {
 	    } else if ( match[0][3] =~ /(?i)unAnalyzed/ ) {
 		return "(id IS NULL)"   // in this query "id" is the id of the ifia			    
 	    } else {
-		System.err.println( "   BOG A LOG" );
 	    }
 	    } ],
 	"^sigalerts": [ pretty: "Sigalerts", filtImpl: { match ->
@@ -466,8 +465,8 @@ class IncidentController extends BaseController {
 	    else if ( match[0][3] =~ /(?i)UNKNOWN/ ) type = "^UNKNOWN.*"
 	    return "$not (event_type ~* '$type')"
 	    } ],
-	"^onlySigalerts": [ pretty: "Only Sigalerts", deflt: "onlySigalerts", filtImpl: { return "(sigalert_begin IS NOT NULL)" } ],
-	"^noSigalerts": [ pretty: "No Sigalerts", deflt: "noSigalerts", filtImpl: { return "(sigalert_begin IS NULL)" } ],
+	"^onlySigalerts": [ pretty: "Only Sigalerts", deflt: "sigalerts=onlySigalerts", filtImpl: { return "(sigalert_begin IS NOT NULL)" } ],
+	"^noSigalerts": [ pretty: "No Sigalerts", deflt: "sigalerts=noSigalerts", filtImpl: { return "(sigalert_begin IS NULL)" } ],
 	facility: [ pretty: "Facility", filtImpl: { match ->
 	    def not = ""
 	    if ( match[0][2] == '<>' ) not = " NOT "
@@ -500,8 +499,8 @@ class IncidentController extends BaseController {
 		return "$not ( location_id = ${match[0][3]} )";
 	    }
 	    }],
-	located: [ pretty: "Incidents with known locations", filtImpl: { return "( location_id IS NOT NULL )"; } ],
-	notLocated: [ pretty: "Incidents with known locations", filtImpl: { return "( location_id IS NULL )"; } ],
+	located: [ pretty: "Incidents with known locations", deflt: "located", filtImpl: { return "( location_id IS NOT NULL )"; } ],
+	notLocated: [ pretty: "Incidents without known locations", deflt: "notlocated", filtImpl: { return "( location_id IS NULL )"; } ],
     ];
 
     def summary = {
@@ -690,6 +689,8 @@ class IncidentController extends BaseController {
 		    def retfilt = [:]
 		    for ( e in filtersraw ) {
 			retfilt[e.key] = [e.value.param,e.value.cmp,e.value.val].grep({it != null}).join("")
+			// for single word parameters
+			if ( retfilt[e.key] == '' ) retfilt[e.key] = e.key
 		    }
 
 		    return [ "groups": retgroups,
@@ -801,6 +802,16 @@ class IncidentController extends BaseController {
 
             render analyses as JSON
         }
+    }
+
+    def getTmcLog = {
+	def ii = ProcessedIncident.get(params.id)
+	if ( ii != null ) {
+	    def json = [ log: ii.getTmcLogEntries() ]
+	    render json  as JSON
+	} else {
+	    return null as JSON
+	}
     }
 
     def edit = {

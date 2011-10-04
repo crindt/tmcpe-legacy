@@ -243,28 +243,46 @@ if ( !tmcpe ) var tmcpe = {};
 	      if ( sgidx <= 0 ) return 0;
 
 	      return ( odata[sgidx-1][gidx] != null 
-		       ? odata[sgidx-1][gidx].x : 0 )
+		       ? odata[sgidx-1][gidx].x.cnt : 0 )
 		  + last_subgroup_data( sgidx-1, gidx );
 	  }
 
-	  // Here we make sure the data is organized properly
+	  // Here we make sure the data is organized properly The data comes as
+	  // statistical aggregates ordered first by group fields and second by
+	  // stackgroup fields.
 	  _.each(data, function(it){
+	      // looping on the data array, we group the group, subgroup, and
+	      // filters as passed with the data and create strings for them.
 	      var sgstr = stringifyMap(it.stackgroups);
 	      var gstr  = stringifyMap(it.groups);
 	      var filtstr = stringifyMap(it.filters);
 	      var sgidx;
 	      var gidx;
+
+	      // Now, see if we've already seen this subgroup, if so, grab its
+	      // index 
 	      if ( (sgidx = sg[sgstr]) == null ) {
-		  // store the index for the given subgroup
+		  // store the index for the given subgroup by incrementing the
+		  // number of subgroups by one.
 		  sgidx = sg[sgstr] = _.keys(sg).length;
 	      }
+
+	      // Similarly, see if we've already seen this subgroup, if so, grab
+	      // the index
 	      if ( (gidx = gr[gstr]) == null ) {
-		  // store the index for the given group
+		  // store the index for the given group by incrementing the
+		  // number of subgroups by one.
 		  gidx = gr[gstr] = _.keys(gr).length;
 	      }
+
+	      // See if we have output data for this subgroup yet.  If not,
+	      // create a new array to store it.
 	      if ( odata[sgidx] == null ) odata[sgidx] = new Array();
+
+	      // Finally, shove the data into the array so the stackgroup logic
+	      // can plot it.
 	      odata[sgidx][gidx] = { y: gidx, 
-				     x: it.stats["cnt"],  // FIXME: hardwire
+				     x: it.stats,  // FIXME: hardwire
 				     group: it.groups,
 				     subgroup: it.stackgroups,
 				     sgidx: sgidx,
@@ -277,7 +295,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  gk = _.keys(gr);
 	  for( i = 0; i < sgk.length; ++i )
 	      for ( j = 0; j < gk.length; ++j )
-		  if ( odata[i][j] == null ) odata[i][j] = {y: j, x:0 };
+		  if ( odata[i][j] == null ) odata[i][j] = {y: j, x:{cnt:0} };
 
 	  // now set the last subgroup data
 	  _.each(odata,function(it,sgidx){
@@ -297,17 +315,17 @@ if ( !tmcpe ) var tmcpe = {};
 	  var my = m,
 	  mx = d3.max(odata, function(d) {
 	      return d3.max(d, function(d) {
-		  return (d != null ? d.x0 + d.x : -Infinity )
+		  return (d != null ? d.x0 + d.x.cnt : -Infinity )
 	      });
 	  }),
 	  mz = d3.max(odata, function(d) {
 	      return d3.max(d, function(d) {
-		  return (d != null ? d.x : -Infinity );
+		  return (d != null ? d.x.cnt : -Infinity );
 	      });
 	  }),
 	  y = function(d,bh) { return d != null ? d.y * (bh==null?barheight:bh) : 0; },
 	  x0 = function(d) { return d.x0 * w / mx; },
-	  x1 = function(d) { return (d.x + d.x0) * w / mx; }
+	  x1 = function(d) { return (d.x.cnt + d.x0) * w / mx; }
 	  ;
 
 	  var chartheight = m*barheight;
@@ -361,14 +379,14 @@ if ( !tmcpe ) var tmcpe = {};
 		  return d.sgidx; })
 	      .attr("width", function(d) { 
 		  return x1(d) - x0(d); })
-	      //.attr("title",function(d){ return ( d == null ? "" : d.x) })
-	      .attr("title",function(d){ d == null ? "" : d.subgroup +":"+d.x })
+	      //.attr("title",function(d){ return ( d == null ? "" : d.x.cnt) })
+	      .attr("title",function(d){ d == null ? "" : d.subgroup +":"+d.x.cnt })
 	      .attr("class","highlightable")
 	      .on("mouseover",function(d){ 
 		  // Update the chart box
                   var dd = {
-		      count: d.x,
-		      plural: d.x == 1 ? "" : "s" ,
+		      count: d.x.cnt,
+		      plural: d.x.cnt == 1 ? "" : "s" ,
                       groups:_.map(d.group,function(v,i){return i+"=" + v }).join(","),
                       subgroups:_.map(d.subgroup,function(v,i){return i+"=" + v }).join(","),
                       filters:_.map(d.filters,function(v,i){return i }).join(",")
