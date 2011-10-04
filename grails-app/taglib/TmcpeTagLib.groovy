@@ -94,15 +94,15 @@ class TmcpeTagLib {
 
 
   def tmcpe_styles = {
-      out << "<link rel='stylesheet' href='${resource( dir:'css',file:'tmcpe.css' )}' />\n"
+      //out << "<link rel='stylesheet' href='${resource( dir:'css',file:'tmcpe.css' )}' />\n"
       //p.css( name: tmcpe );
-      out << "<link rel='stylesheet' href='${resource( dir:'js/openlayers/theme/default',file:'style.css' )}' />\n"
-      tmcpe.dojo_styles_google( '1.5' )
+      //out << "<link rel='stylesheet' href='${resource( dir:'js/openlayers/theme/default',file:'style.css' )}' />\n"
+      //tmcpe.dojo_styles_google( '1.5' )
       //out << tmcpe.dojo_styles()
   }
 
   def tmcpe = {
-      tmcpe.dojo_google( '1.5', true )
+      //tmcpe.dojo_google( '1.5', true )
       //out << tmcpe.dojo( true )
 
   }

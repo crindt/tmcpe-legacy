@@ -217,11 +217,4 @@ uiperformance.bundles = [
      name: 'application-core',
      files: ['application']
     ],
-    [type: 'css',
-     name: 'bundled',
-     files: ['tmcpe',
-	     'main',
-	     'navigation'
-	    ]
-    ]
 ]
