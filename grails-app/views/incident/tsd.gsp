@@ -23,7 +23,6 @@
     <p:javascript src='polymaps' />
     <p:javascript src='d3' />
     <p:javascript src='d3.geom' />
-    <p:javascript src='protovis' />
 
 
     <!-- app code -->

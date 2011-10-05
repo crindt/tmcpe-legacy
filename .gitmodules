@@ -31,9 +31,6 @@
 [submodule "src/js/jquery-format"]
 	path = src/js/jquery-format
 	url = https://github.com/asual/jquery-format.git
-[submodule "src/js/protovis"]
-	path = src/js/protovis
-	url = https://github.com/mbostock/protovis.git
 [submodule "src/js/jquery_pagination"]
 	path = src/js/jquery_pagination
 	url = https://github.com/gbirke/jquery_pagination.git

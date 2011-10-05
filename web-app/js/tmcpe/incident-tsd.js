@@ -9,78 +9,8 @@ if ( !tmcpe ) var tmcpe = {};
   Array.min = function( array ){
       return Math.min.apply( Math, array );
   };
-  
-  tmcpe.util = {};
-
-  tmcpe.util.getGRColor = function( val, min, max,  minval, midval, maxval ) {
-      // summary:
-      //		Computes a color between green and red based upon the given value and limits
-      // description:
-      //		If val >= max, the color is green.  If val <=
-      //		min, the color is red.  If it's in between,
-      //		the color is trends from green->yellow->orange->red
-      var spdfrac = (val-min)/(max-min);
-      if ( spdfrac < 0 )
-      {
-	  return minval;
-      }
-      else if ( spdfrac > 1 )
-      {
-	  return maxval;
-      }
-      var r = 1;
-      var g = 1;
-      var b = 0;
-      if ( spdfrac <= 0.5 )
-      {
-	  r = 1;
-	  g = spdfrac/0.5;
-      }
-      else
-      {
-	  r = ( 1 - (spdfrac-0.5)/0.5 );
-	  g = 1;
-      }
-      //	var ret = [ parseInt( r*255 ), parseInt( g*255 ), parseInt( b*255 ), 1.0 ];
-      //var ret = "#"+[ tmcpe.util.toColorHex( r*255 ), tmcpe.util.toColorHex( g*255 ), tmcpe.util.toColorHex( b*255 ) ].join("");
-
-      var color = pv.Scale.linear(0,0.5,1.0).range(minval,midval,maxval);
-      
-      return color( r ).color;
-  };
-
-  tmcpe.util.toColorHex = function( /* integer */ v ) {
-      // summary:
-      //		helper function to convert a decimal integer to a hexidecimal value
-      var val = parseInt( v ).toString( 16 );
-      if ( val.length < 2 ) val = '0' + val;
-      return val;
-  };
-
-  tmcpe.util.color = function( d, trans, scale ) {
-      // get colors from css
-      var startColor = $('.dummy-tsd-speed-start-color').css('fill') || '#ff0000';
-      var midColor   = $('.dummy-tsd-speed-mid-color').css('fill')   || '#ffff00';
-      var endColor   = $('.dummy-tsd-speed-end-color').css('fill')   || '#00ff00';
-
-      var col = "#ccc";
-      trans = trans ? trans : function( dd ) { return (dd.spd-dd.spd_avg)/dd.spd_std };
-      var themeScale=scale?scale:-1.0;
-      if ( d != null && d.spd != null && d.spd_avg != null && d.spd_std != null 
-	   && ( d.p_j_m == 0 || d.p_j_m == 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
-	   //		 && d.days_in_avg < 30  // fixme: make this a parameter
-	   //		 && d.pct_obs_avg < 30  // fixme: make this a parameter
-	 ) {
-	  col = tmcpe.util.getGRColor( trans( d ), 0, 1, startColor, midColor, endColor );
-      }
-      return col;
-  };
 
   tmcpe.tsd = {};
-
-  tmcpe.plottrajectory = function( d, i ) {
-      
-  }
 
   tmcpe.hh = function() { return $("#tsdbox").height()-2; };
   tmcpe.ww = function() { return $("#tsdbox").width()-2; };
@@ -1688,18 +1618,19 @@ if ( !tmcpe ) var tmcpe = {};
      }
 
      if ( theme == "stdspd" ) {
-         var color = pv.Scale.linear(-scale,
-				     -(scale/2),0 ).range("#ff0000","#ffff00","#00ff00");
+         var color = d3.scale.linear()
+             .domain([-scale,-(scale/2),0] )
+             .range(["#ff0000","#ffff00","#00ff00"]);
+         // bound the stddev value between 0 and -4 stddevs
          var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
-         var col = "fill:"+color(vv).color+";stroke:#eee;"
+         var col = "fill:"+color(vv)+";stroke:#eee;"
          return col;
      } else if ( theme == "spd" ) {
          var minspd = 15;
-         var color = pv.Scale.linear(minspd,
-                                     minspd+(maxSpd-minspd)/2,
-                                     maxSpd)
-             .range("#ff0000","#ffff00","#00ff00");
-         var col = "fill:"+color(d.spd).color+";stroke:#eee;"
+         var color = d3.scale.linear()
+             .domain([minspd,minspd+(maxSpd-minspd)/2,maxSpd])
+             .range(["#ff0000","#ffff00","#00ff00"]);
+         var col = "fill:"+color(d.spd)+";stroke:#eee;"
          return col;
      }
   }

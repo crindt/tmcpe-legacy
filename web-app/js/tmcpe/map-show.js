@@ -3,35 +3,20 @@
  * combining a scrollable table, a polymaps window, and a detail box
  */
 
-// Creates a bounded scale...FIXME: crindt: clarify the implementation here...
-function boundedScale( dom, ran ) {
-    var dommin = dom[0];
-    var dommax = dom[dom.length-1];
-    return function( val ) {
-	var vv = Math.max( Math.min( val, dommax ), dommin );
-	var scale;
-	if ( dom.length == 2 ) {
-	    scale = pv.Scale.linear(dom[0], dom[1] ).range(ran[0], ran[1]);
-	} else if ( dom.length == 3 ) {
-	    scale = pv.Scale.linear(dom[0], dom[1], dom[2] ).range(ran[0], ran[1], ran[2]);
-	} else {
-	    scale = pv.Scale.linear(dom).range(ran);
-	}
-	return scale( val );
-    }
-}
 
-
-// Red to green color range for delay
+// Red to green color range for delay.  The ff factor defines the
+// minimum value for any color channel (0,255).  Setting it above 0
+// will fade the colors  (lighten, make the colors whiter)
 function delayColor( ff ) {
-    var colorPV = boundedScale( [0, 400, 800], [ "#00ff00", "#ffff00", "#ff0000" ] );
+    var color = d3.scale.linear()
+        .domain([0,400,800]) // step from green to yellow to red 
+        .range(["#00ff00", "#ffff00", "#ff0000"]);
+
     return function( v ) {
-	var col = colorPV( v ).color;
-	var rgb = pv.color(col).rgb();
-	var rcol = pv.rgb( rgb.r < ff ? ff : rgb.r,
-			   rgb.g < ff ? ff : rgb.g,
-			   rgb.b < ff ? ff : rgb.b );
-	return rcol.color;
+	var rgb = d3.rgb(color( v ));
+        // cap the max channel
+        $.each(["r","g","b"],function(d,k) { rgb[k] = rgb[k] < ff ? ff : rgb[k]; });
+        return rgb.toString();
     }
 }
 

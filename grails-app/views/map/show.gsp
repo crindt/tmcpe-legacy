@@ -20,7 +20,6 @@
     <p:javascript src='polymaps_cluster' />
     <p:javascript src='d3' />
     <p:javascript src='d3.time' />
-    <p:javascript src='protovis' />
     <p:javascript src='jquery.tools.min'/>
 <!--
     <g:javascript src='jquery.tools.js'/>
