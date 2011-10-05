@@ -158,7 +158,7 @@
 	    <div id="chartcontainer" class="leftbox">
 	      <div id="chartbox"></div>
 	      <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
-	      <div id="cumflowChartTip" class="tooltip right"></div>
+	      <div id="cumflowChartTip" class="tooltip noarrow"></div>
 	    </div>
 	    <div id="databox" class="rightbox">
 	      <ul class="tabs">

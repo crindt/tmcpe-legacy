@@ -1061,6 +1061,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      } )
 	      .on("mouseout", function (d,i) { 
 		  updateText( "&nbsp;" );
+		  $('#cumflowChartTip').html("" );
 	      } );
 	  
 	  chg.append("svg:path")
@@ -1078,6 +1079,7 @@ if ( !tmcpe ) var tmcpe = {};
 			.y1(function(d) { return y(d.y3); }))
 		  .on("mouseover", function( d,i ) { 
 		      updateText( "Expected non-diverted Cumulative Flow (Observed delay)" );
+		      $('#cumflowChartTip').html( "Expected non-diverted Cumulative Flow (Observed delay)");
 		      /*
 			vis.selectAll( "g.area3 path" )
 			.transition()
@@ -1130,7 +1132,10 @@ if ( !tmcpe ) var tmcpe = {};
 		    .x(function(d) { return x(d.x); })
 		    .y0(hh - 1)
 		    .y1(function(d) { return y(d.incflow); }))
-	      .on("mouseover", function() { updateText( "What-if" ) } )
+	      .on("mouseover", function() { 
+		  updateText( "What-if" ) 
+		  $('#cumflowChartTip').html( "Estimated cumulative flow without TMC");
+	      } )
 	      .on("mouseout", function () { updateText( "&nbsp;" ) } );
 
 	  $(chg[0]).tooltip({position:"center right", tip: '#cumflowChartTip'});
@@ -1218,10 +1223,12 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  function avgmouseover(d,i) {
 	      updateText( "Expected Cumulative Flow" );
+	      $('#cumflowChartTip').html( "Expected Cumulative Flow");
 	  }
 
 	  function obsmouseover(d,i) {
 	      updateText( "Observed Cumulative Flow" );
+	      $('#cumflowChartTip').html( "Observed Cumulative Flow");
 	  }
 
 	  function updateText(msg) {
