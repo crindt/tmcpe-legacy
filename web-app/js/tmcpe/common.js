@@ -4,11 +4,33 @@ if ( !tmcpe ) var tmcpe = {};
 
      // A wrapper for loading data that integrates with the UI
      var loadingOverlay;
+     var loadCount=0;
+     var whats = [];
+     var whatul;
+     var whatlis;
      tmcpe.loadData = function( url, callback, what ) {
 	 // show the loading overlay
-	 $(window).trigger("tmcpe.loadingStart");
-	 if ( what != null ) $("#loading").text(what);
+         if ( loadCount++ == 0 ) {
+	     $(window).trigger("tmcpe.loadingStart");
+             // create the ul
+             whatul = d3.select("#loading").append("ul");
+         }
 	 loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
+
+         if ( what == null ) what = "Item "+loadCount;
+
+         whats.push( what );
+
+         // update loads
+         whatlis = whatul.selectAll("li")
+             .data(whats)
+             .text(function(d){return d});
+
+         // create list items for new loads
+         whatlis.enter()
+             .append("li")
+             .text(function(d){return d})
+         ;
 
          try {
 	     d3.json(url,function(e) {
@@ -19,9 +41,25 @@ if ( !tmcpe ) var tmcpe = {};
                  
 	         // run the callback to manage the data
 	         callback(e);
+
+                 // remove list items for completed elements
+                 var idx = whats.indexOf(what);
+                 if ( idx == -1 ) 
+                     throw "Didn't find item loading in what list";
+                 else 
+                     whats.splice(idx,1);  // remove the what
+
+                 // update the data
+                 whatlis = whatul.selectAll("li").data(whats);
+
+                 // remove data
+                 whatlis.exit().remove();
+
 	         
-	         if ( loadingOverlay ) loadingOverlay.close();
-	         $(window).trigger("tmcpe.loadingFinished");
+	         if ( loadingOverlay && !(--loadCount) ) {
+                     loadingOverlay.close();
+	             $(window).trigger("tmcpe.loadingFinished");
+                 }
                  
 	     });
          } catch ( err ) {
