@@ -84,6 +84,15 @@ if ( !tmcpe ) var tmcpe = {};
 		  $(window).trigger("tmcpe.tsd.responseDelayChanged", formAsModel() );
               });
 
+          $('input[name="delayUnit"]').change(function(e,v){
+              d3.select('#valueOfTime').property("disabled",this.value=='usd'?false:true);
+              $(window).trigger("tmcpe.tsd.delayUnitChanged", formAsModel() );
+          });
+
+          $('input[name=valueOfTime]').change(function(e,v){
+              $(window).trigger("tmcpe.tsd.valueOfTimeChanged", formAsModel() );
+          });
+
 	  // connect form elements to change events
 	  $('input[type=radio]')
 	      .change(function(d){
@@ -195,26 +204,17 @@ if ( !tmcpe ) var tmcpe = {};
 	  return tsd;
       };
 
+      // update the data (model)
       tsd.data = function(x) {
 	  if ( !arguments.length ) return json;
 	  json = x;
-
-/*
-	  json.sections = json.sections.sort( function(a,b) {
-	      var diff =  a.pm - b.pm;
-	      if ( a.dir == 'S' || a.dir == 'W' )
-		  return -diff;
-	      else
-		  return diff;
-	  });
-*/
-
 	  tsd.redraw();
 	  return tsd;
       }
 
       tsd.hh = function() { return $(container).height()-2; };
       tsd.ww = function() { return $(container).width()-2; };
+
 
 
       function translateY(d, i) { return "translate(0,"+(i*szs)+")"; };
@@ -323,12 +323,14 @@ if ( !tmcpe ) var tmcpe = {};
 
 
 	  if ( json.analysis.badSolution ) {
+              /*
 	      // catch bad solution and display info
 	      $(container).append('<p style="text-align:right">NO ANALYSIS PERFORMED'+(json.analysis.badSolution 
 							      ? ' BECAUSE: '+json.analysis.badSolution 
 							      : '' )+'</p>');
 	      // nothing to see here.
 	      return tsd;
+              */
 	  }
 
 	  if ( json.data == null || 
@@ -381,64 +383,6 @@ if ( !tmcpe ) var tmcpe = {};
 	      return d.slice( startTime?startTime:0,endTime!=null?endTime:d.length );
 	  }
 
-
-	  function mouseover(d,i) {
-	      updateText( "inc:" + d.inc + ", spd:" + d.spd + ", occ:" + Math.floor(d.occ*100+0.5) + "%, vol:" + d.vol + ", loc: " +sections[d.i].name + ", time: "+json.timesteps[d.j]+", lanes: " + sections[d.i].lanes );
-
-	      // update cross hatch
- 	      var cross = svg.selectAll("#tsdtime")
-		  .data([1])
-		  .attr("x1",(d.j+1)*szt)
-		  .attr("y1",0)
-		  .attr("x2",(d.j+1)*szt)
-		  .attr("y2",theight-1)
-		  .attr("style","stroke:purple;stroke-width:3");
-
-	      // create cross hatch if it doesn't yet exist
-	      cross.enter()
-		  .append("svg:line")
-		  .attr("id","tsdtime" )
-		  .attr("x1",(d.j+1)*szt)
-		  .attr("y1",0)
-		  .attr("x2",(d.j+1)*szt)
-		  .attr("y2",theight-1)
-		  .attr("style","stroke:purple;stroke-width:3");
-
-
-	      // Get all sections at time == j, these give use the colors
-	      var el = $('rect[j^='+d.j+']');
-
-	      // Next, foreach el, find the corresponding segment and update the stroke
-	      el.map( function (ii, e) {
-		  if ( e != null && !isNaN(e.__data__.i) ) {
-		      // update segment colors
-		      var seg = $('path[id^='+sections[e.__data__.i].vdsid+']');
-		      seg.map( function (jj, s) { 
-			  s.style.setProperty("stroke",e.style.getPropertyValue("fill"),"important") } );
-
-		      // update node colors
-		      var nod = $('#ends circle[id^="node:'+sections[e.__data__.i].vdsid+'"]');
-		      nod.map( function (jj, s) { 
-			  s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
-			  s.setAttribute("r", e.__data__.inc ? 4 : 2 );
-		      } );
-
-		      // update arrow colors
-		      var nod = $('#ends path[id^="node:'+sections[e.__data__.i].vdsid+'"]');
-		      nod.map( function (jj, s) { 
-			  s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
-			  s.setAttribute("r", e.__data__.inc ? 4 : 2 );
-		      } );
-
-		  }
-	      });
-
-	      // finally, update the map text
-	      d3.select("#maptext")
-		  .text(json.timesteps[d.j]);
-	  }
-
-
 	  svg = d3.select(container)
               .append("svg:svg")
 	      .attr("id", "tsdsvg" )
@@ -452,7 +396,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  tsd.svg = svg;
 
 	  // now, create the rows of data.
-	  var gg = svg.selectAll("g.sectionrow")
+	  var secrow = svg.selectAll("g.sectionrow")
               .data(data)
               .enter().append("svg:g")
 	      .attr("class","sectionrow")
@@ -468,7 +412,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      });
 
 	  // next, in each row, create the time-space cells
-	  gg.selectAll("rect")
+	  secrow.selectAll("rect")
               .data(function(d) { return timeSlice(d); })
               .enter().append("svg:rect")
 	      .attr("i", function(d){return d.i;} )
@@ -484,21 +428,17 @@ if ( !tmcpe ) var tmcpe = {};
 				    {sectionidx: d.i }
 				   );
 	      })
-	      .text("test")
-/*
-	      .attr("tt", function(d){ 
-		  this.tooltip({ bodyHandler: function() {
-                      return $($(this).attr("href")).html();
-		  }});
-	      })
-*/
-              .on("mouseover", mouseover)
+              .on("mouseover", function(d) {
+                  // broadcast the active cell
+                  $(window).trigger("tmcpe.tsd.activeTsdCell", d);
+
+                  // broadcast the active timestep
+                  $(window).trigger("tmcpe.tsd.activeTimestep", d.j);
+              })
 	  ;
 
-
-
 	  // create ylabels
-	  gg.append("svg:text")
+	  secrow.append("svg:text")
 	      .attr("x", -4 )  // shift 4 px left of axis
 	      .attr("class", "ylabels" )
 	      .attr("dy",function (d,i) { 
@@ -510,9 +450,9 @@ if ( !tmcpe ) var tmcpe = {};
 	      })
 	      .attr("class","ylabels");
 
-      // now, create the rows of data to show evidence as black dots in the
+          // now, create the rows of data to show evidence as black dots in the
 	  // center of cells suspected of being impacted by an incident
-	  var g = svg.selectAll("g.evidence")
+	  var evrow = svg.selectAll("g.evidence")
               .data(data)
               .enter().append("svg:g")
 	      .attr("class","evidence")
@@ -525,7 +465,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      });
 
 	  // next, in each row, create the evidence
-	  g.selectAll("circle")
+	  evrow.selectAll("circle")
               .data(function(d) { return timeSlice(d); })
               .enter().append("svg:circle")
 	  //.attr("class", function(d) { return "d"+d.inc; })
@@ -556,6 +496,39 @@ if ( !tmcpe ) var tmcpe = {};
 
       }
 
+
+      function activeTimestep(j) {
+
+	  // update cross hatch (moving the x position)
+ 	  var cross = svg.selectAll("#tsdtime")
+	      .data([1])
+	      .attr("x1",(j+1)*szt)
+	      .attr("x2",(j+1)*szt)
+              .attr("class","timebar")
+          ;
+
+	  // create cross hatch if it doesn't yet exist
+	  cross.enter()
+	      .append("svg:line")
+	      .attr("id","tsdtime" )
+	      .attr("x1",(j+1)*szt)
+	      .attr("y1",0)
+	      .attr("x2",(j+1)*szt)
+	      .attr("y2",theight-1)
+              .attr("class","timebar")
+          ;
+          
+      }
+
+
+      function activeTsdCell(d,i) {
+	  var sections = json.sections;
+
+	  updateText( "inc:" + d.inc + ", spd:" + d.spd + ", occ:" + Math.floor(d.occ*100+0.5) + "%, vol:" + d.vol + ", loc: " +sections[d.i].name + ", time: "+json.timesteps[d.j]+", lanes: " + sections[d.i].lanes );
+      }
+
+
+
       // some events this view listens to
       $(window).bind("tmcpe.tsd.selectedSection", function( caller, data ) {
 	  // new selection selected, update the time selection in the tsd
@@ -567,6 +540,13 @@ if ( !tmcpe ) var tmcpe = {};
 	  tsd.data( json );
       });
 
+      $(window).bind("tmcpe.tsd.activeTsdCell", function(caller, data ) {
+          activeTsdCell( data );
+      });
+
+      $(window).bind("tmcpe.tsd.activeTimestep", function(caller, data ) {
+          activeTimestep( data );
+      });
 
       return tsd;
   }
@@ -590,9 +570,11 @@ if ( !tmcpe ) var tmcpe = {};
       tmcDivPct = 20,
       startTime = 0,
       endTime,// = 20,
-      verificationDelay = 5, // minutes
-      responseDelay = 5,     // minutes
-
+      params = {
+          verificationDelay: 5,
+          responseDelay: 5,
+          valueOfTime: 13.11
+      },
       
       p = 20
       ;
@@ -676,22 +658,10 @@ if ( !tmcpe ) var tmcpe = {};
 	  return x < 0 ? 0 : x;
       }
 
-
-      $(window).bind("tmcpe.tsd.tmcPctChanged", function(e, params ) {
-          tmcDivPct = params.data.tmcpctslider;
-          cumflow.updateStats();
-      });
-
-      $(window).bind("tmcpe.tsd.verificationDelayChanged", function( e, params ) {
-          verificationDelay = parseInt(params.data.verdelslider);
-          cumflow.redraw();
-      });
-      $(window).bind("tmcpe.tsd.responseDelayChanged", function( e, params ) {
-          responseDelay = parseInt(params.data.respdelslider);
-          cumflow.redraw();
-      });
-
       cumflow.updateStats = function() {
+
+          // FIXME: foreach(facility) do {
+
 	  // compute delay from implied queuing
 	  var delay2 = 0;
 	  var delay3 = 0;
@@ -701,6 +671,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( !data ) return cumflow;
 
 	  if ( json.analysis.badSolution != null ) {
+              // if a bad solution, set all values to n/a
 	      $.each(["netDelay","d12Delay","computedDiversion","computedMaxq","whatIfDelay","tmcSavings"], function (i,v) {
 		  d3.select("#"+v).html( "n/a" );
 	      });
@@ -724,14 +695,45 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  $.each(["netDelay","d12Delay","computedDiversion","computedMaxq","whatIfDelay","tmcSavings"], function (i,v) {
 	      if ( json.analysis[v] != null  && v != 'computedMaxqTime' ) {
-		  d3.select("#"+v).html( zeroOrBetter(json.analysis[v].toFixed(0) ) );
+		  d3.select("#"+v).html( zeroOrBetter( json.analysis[v].toFixed(0) ) );
 	      }
 	  });
 
-	  d3.select("#chartDelay2").html( delay2.toFixed(0) );
-	  d3.select("#chartDelay3").html( delay3.toFixed(0) );
-	  d3.select("#whatIfDelay").html( delay4.toFixed(0) );
-	  d3.select("#tmcSavings").html( tmcSavings.toFixed(0) );
+	  d3.select("#chartDelay2").html( delay2 );
+	  d3.select("#chartDelay3").html( delay3 );
+	  d3.select("#whatIfDelay").html( delay4 );
+	  d3.select("#tmcSavings").html( tmcSavings );
+
+          var unit = params.delayUnit;
+          var unitFactor = 1;
+
+          if ( unit == 'usd' ) {
+
+              var vot = params.valueOfTime;
+
+	      $(".delayValue").each(function() { 
+		  var val = this.innerText*vot.value;
+		  this.innerHTML = val.toFixed();
+	      });
+              d3.selectAll(".delayUnitHolder").text("($)");
+
+              unitFactor = vot;
+
+          } else {
+              d3.selectAll(".delayUnitHolder").text("(veh-h)");
+              unitFactor = 1;
+          }
+
+          // refactor *delays* depending on the unit
+          var sel = d3.selectAll(".delayValue")
+              .each(function() {
+                  var val = this.innerText * unitFactor;
+                  d3.select(this).html( function(d) {
+                      return val.toFixed(0)
+                  });
+                  d3.select(this).style("background","yellow");
+                  d3.select(this).transition().duration(3000).style("background","#8BA9D3");
+              });
 
 //          return cumflow;
       }
@@ -772,23 +774,21 @@ if ( !tmcpe ) var tmcpe = {};
 	  var t3 = new Date( json.t3 ).getTime()/1000;
 
           // what-if
-	  var t1p = new Date( json.t1 ).getTime()/1000 + verificationDelay*60;
-	  var t2p = new Date( json.t2 ).getTime()/1000 + (verificationDelay + responseDelay)*60;
+	  var t1p = new Date( json.t1 ).getTime()/1000 + params.verificationDelay*60;
+	  var t2p = new Date( json.t2 ).getTime()/1000 + (params.verificationDelay + params.responseDelay)*60;
+          // FIXME: t3p will be the point where projected cumulative
+          // capacity equals adjusted expected demand
+          // var t3p = t3;
 
 	  var volscale = 1/1000;
 	  var volscale = 1;
-
-          var tt1 =t1-t0;
-          var tt1p =t1p-t0;
-          var tt2 =t2-t1;
-          var tt2p =t2p-t1;
 
 	  var incidentSectionIndex = json.getSectionIndex(json.sec)-1;
 
 	  d3.select("#chart_location").html(json.sections[section].name);
 
 
-
+          // find the cells associated with each critical time
 	  var t0Cell = json.timesteps.filter( function (e) {
 	      return !t0 || (e.getTime()/1000 < t0);
 	  }).length-1;
@@ -1080,6 +1080,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      { t:t3, n: "t3", l:"Queue dissipated" }, 
 	      { t:t1p, n: "t1p", l:"Verification without TMC (estimated)"},
 	      { t:t2p, n: "t2p", l:"Clearance time without TMC (estimated)"},
+//	      { t:t3p, n: "t3p", l:"Queue dissipated without TMC (estimated)"},
 	  ].filter( function( d ) { return d.t != null; } );
 
 	  var times = vis.selectAll("g.timebar")
@@ -1168,14 +1169,48 @@ if ( !tmcpe ) var tmcpe = {};
 
       }
 
-      // some events this view listens to
-      $(window).bind("tmcpe.tsd.selectedSection", function( caller, data ) {
-	  cumflow.section( data.sectionidx );
-      });
 
+      function updateCumFlowStats() {
+          //cumflow.tmcDivPct( $("#tmcpct").text() );
+      }
+
+
+      /////// some application events this view listens to ///////
+
+      // core data (model) changes
       $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, json) {
 	  // new analysis loaded, update the data
 	  cumflow.data( json );
+      });
+
+      // parameter changes
+      $(window).bind("tmcpe.tsd.tmcPctChanged", function(e, paramsa ) {
+          params.tmcDivPct = parseInt(paramsa.data.tmcpctslider);
+          cumflow.updateStats();
+      });
+      $(window).bind("tmcpe.tsd.verificationDelayChanged", function( e, paramsa ) {
+          params.verificationDelay = parseInt(paramsa.data.verdelslider);
+          // should really have a remodel here, then a redraw
+          cumflow.redraw();
+      });
+      $(window).bind("tmcpe.tsd.responseDelayChanged", function( e, paramsa ) {
+          params.responseDelay = parseInt(paramsa.data.respdelslider);
+          // should really have a remodel here, then a redraw
+          cumflow.redraw();
+      });
+      $(window).bind("tmcpe.tsd.delayUnitChanged", function( e, paramsa ) {
+          params.delayUnit = paramsa.data.delayUnit;
+          cumflow.updateStats();
+      });
+      $(window).bind("tmcpe.tsd.valueOfTimeChanged", function( e, paramsa ) {
+          params.valueOfTime = parseFloat(paramsa.data.valueOfTime);
+          cumflow.updateStats();
+      });
+
+
+      // UI changes
+      $(window).bind("tmcpe.tsd.selectedSection", function( caller, data ) {
+	  cumflow.section( data.sectionidx );
       });
 
       return cumflow;
@@ -1197,10 +1232,6 @@ if ( !tmcpe ) var tmcpe = {};
       ends,
 
       po = org.polymaps;
-
-      tmcpe.svg = function(type) {
-	  return document.createElementNS(tmcpe.ns.svg, type);
-      };
 
       segmap.container = function(x) {
 	  if (!arguments.length) return container;
@@ -1502,20 +1533,6 @@ if ( !tmcpe ) var tmcpe = {};
 			  var c = $(f.element);
 			  var g = c.parent().add("svg:g", c);
 			  g.add(c);
-
-/* Add text
-			  var crdst  = f.data.geometry.coordinates[0];
-			  var crdend = f.data.geometry.coordinates[f.data.geometry.coordinates.length-1];
-			  var aa = screenAngleBetweenGeoJsonPoints( crdst, crdend );
-			  var text = g[0].appendChild(po.svg("text"));
-			  text.setAttribute("x",crdend.x);
-			  text.setAttribute("y",crdst.y);
-			  text.setAttribute("dy",".71em");
-			  var rr = -aa.a;
-			  var rra = rr * 180/Math.PI;
-			  //text.setAttribute("transform","rotate("+(rr)+")");
-			  text.appendChild(document.createTextNode("test"));
-			  */
 		      }
 		      
 		      // Find the incident section
@@ -1557,24 +1574,51 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  map.add(secs);
 
+      }
 
-	  /*
-	  $.map(secs.features(), function(f) {
-	      var c = f.geometry.coordinates;
-	      var tt = $(
-	      var text = tt.appendChild(po.svg("text"));
-	      text.setAttribute("x",c[c.length-1][0]);
-	      text.setAttribute("y",c[c.length-1][1]);
-	      text.setAttribute("dy",".71em");
-	      text.appendChild(document.createTextNode("test"));
+      function activeTimestep( j ) {
+
+          var sections = json.sections;
+
+	  // Get all sections at time == j, these give the colors
+	  var el = $('rect[j^='+j+']');
+
+	  // Next, foreach el, find the corresponding segment and update the stroke
+	  el.map( function (ii, e) {
+	      if ( e != null && !isNaN(e.__data__.i) ) {
+		  // update segment colors
+		  var seg = $('path[id^='+sections[e.__data__.i].vdsid+']');
+		  seg.map( function (jj, s) { 
+		      s.style.setProperty("stroke",e.style.getPropertyValue("fill"),"important") } );
+
+		  // update node colors
+		  var nod = $('#ends circle[id^="node:'+sections[e.__data__.i].vdsid+'"]');
+		  nod.map( function (jj, s) { 
+		      s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
+		      s.setAttribute("r", e.__data__.inc ? 4 : 2 );
+		  } );
+
+		  // update arrow colors
+		  var nod = $('#ends path[id^="node:'+sections[e.__data__.i].vdsid+'"]');
+		  nod.map( function (jj, s) { 
+		      s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
+		      s.setAttribute("r", e.__data__.inc ? 4 : 2 );
+		  } );
+
+	      }
 	  });
-	  */
-	  
 
+	  // finally, update the map text
+	  d3.select("#maptext")
+	      .text(json.timesteps[j]);
       }
 
       $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, adata) {
 	  segmap.data( adata ).redraw();
+      });
+
+      $(window).bind("tmcpe.tsd.activeTimestep", function(caller, adata) {
+          activeTimestep( adata );
       });
 
       return segmap;
@@ -1804,36 +1848,6 @@ if ( !tmcpe ) var tmcpe = {};
      tsd.updateCellAugmentation( ); // update style
   }
 
-  function updateCumFlowStats() {
-      //cumflow.tmcDivPct( $("#tmcpct").text() );
-
-      var unit = $('input[name=delayUnit]:checked').val();
-      var vot = $("#valueOfTime")[0];
-
-      if ( unit == 'usd' ) {
-          $('#valueOfTime').attr("disabled","");
-
-          if ( vot != "" ) {
-	      $(".delayValue").each(function() { 
-		  var val = this.innerText*vot.value;
-		  this.innerHTML = val.toFixed();
-	      });
-              $(".delayUnit").each(function() { 
-		  this.innerHTML = "USD";
-	      });
-          }
-      } else {
-          $('#valueOfTime').attr("disabled","disabled");
-          $(".delayUnit").each(function() { 
-	      this.innerHTML = "veh-hr";
-	  });
-      }
-  }
-
-  function changeUnit(v) {
-      updateCumFlowStats();
-  }
-
   function loadLog( id ) {
       var url = g.createLink({controller:'incident', 
 			      action:'getTmcLog',
@@ -1883,7 +1897,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  
 	  // broadcast the new data
 	  $(window).trigger( "tmcpe.tsd.analysisLoaded", e );
-      });
+      }, "Analysis " + id.value);
       
       $('#generalStats #facility').html(id.children[0].innerHTML);
   }

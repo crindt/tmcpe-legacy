@@ -157,7 +157,7 @@
 	    <div id="chartcontainer" class="leftbox">
 	      <div id="chartbox"></div>
 	      <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
-	      <div id="cumflowChartTip" class="tooltip noarrow"></div>
+	      <div id="cumflowChartTip" class="tooltip noarrow" style="display:none"></div>
 	    </div>
 	    <div id="databox" class="rightbox">
 	      <ul class="tabs">
@@ -170,14 +170,14 @@
                    <thead>
                      <tr>
                        <th class="label">Facility</th>
-                       <th class="numlabel">Delay<35</th>
-                       <th class="numlabel">Delay</th>
+                       <th class="numlabel">Delay<35<br/><span class="delayUnitHolder"></span></th>
+                       <th class="numlabel">Delay<br/><span class="delayUnitHolder"></span></th>
                        <!--
                            <th class="label">&Delta;q</th>
                            <th class="label">max(q)</th>
                        -->
-                       <th class="numlabel">Delay<br/>(no TMC)</th>
-                       <th class="numlabel">TMC Savings</th>
+                       <th class="numlabel">Delay<br/>(no TMC)<br/><span class="delayUnitHolder"></span></th>
+                       <th class="numlabel">TMC Savings<br/><span class="delayUnitHolder"></span></th>
                      </tr>
                    </thead>
                    <tbody>
