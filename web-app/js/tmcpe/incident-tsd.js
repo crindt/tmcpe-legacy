@@ -39,7 +39,8 @@ if ( !tmcpe ) var tmcpe = {};
       tsdParams,   // the tsdParams (model) this view is tied to
       tmcpctslider,
       verdelslider,
-      respdelslider
+      respdelslider,
+      maxspdslider
       ;
 
 
@@ -65,23 +66,33 @@ if ( !tmcpe ) var tmcpe = {};
       function init() {
 
 	  // handle some element styling
-          var tmcpctslider =
-          $('input[name=tmcpctslider]')
+          tmcpctslider =
+              $('input[name=tmcpctslider]')
               .rangeinput()
+	      .tooltip({position: "right", tipClass: "tooltip right"})
               .change(function(e,v){
 		  $(window).trigger("tmcpe.tsd.tmcPctChanged", formAsModel() );
               });
-          var verdelslider =
-          $('input[name=verdelslider]')
+          verdelslider =
+              $('input[name=verdelslider]')
               .rangeinput()
+	      .tooltip({position: "right", tipClass: "tooltip right"})
               .change(function(e,v){
 		  $(window).trigger("tmcpe.tsd.verificationDelayChanged", formAsModel() );
               });
-          var respdelslider =
-          $('input[name=respdelslider]')
+          respdelslider =
+              $('input[name=respdelslider]')
               .rangeinput()
+	      .tooltip({position: "right", tipClass: "tooltip right"})
               .change(function(e,v){
 		  $(window).trigger("tmcpe.tsd.responseDelayChanged", formAsModel() );
+              });
+
+          maxspdslider = 
+              $('input[name=maxspdslider]')
+              .rangeinput({api:true})
+              .change(function(e,v){
+		  $(window).trigger("tmcpe.tsd.maxSpeedChanged", formAsModel() );
               });
 
           $('input[name="delayUnit"]').change(function(e,v){
@@ -108,8 +119,8 @@ if ( !tmcpe ) var tmcpe = {};
 	      });
 
 	  // set up tooltips
-	  $('input[title]').tooltip({position: "bottom center", tipClass: "tooltip bottom"});
-	  $('select[title]').tooltip({position: "bottom center", tipClass: "tooltip bottom"});
+	  $('input[title]').tooltip({position: "center right", tipClass: "tooltip right"});
+	  $('select[title]').tooltip({position: "center right", tipClass: "tooltip right"});
       }
 
       tsdParamsView.container = function(x) {
@@ -143,6 +154,9 @@ if ( !tmcpe ) var tmcpe = {};
 
           var vtime = Math.ceil((t1-t0)/60);
           var rtime = Math.ceil((t2-t0)/60);
+
+          maxspdslider[0].value = json.parameters.maxIncidentSpeed;
+          
 
       });
 
@@ -1634,9 +1648,8 @@ if ( !tmcpe ) var tmcpe = {};
   var themeScale=1.0;
 
   function maxSpeed() {
-      //var maxSpd = $("#maxspdslider").slider("option","value");
-      var maxSpd = [];
-      if ( maxSpd.length == 0 ) maxSpd = 60;
+      var maxSpd = $("input[name=maxspdslider]").value;
+      if ( maxSpd == null ) maxSpd = 40;
       return maxSpd;
   }
 
@@ -1937,7 +1950,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 
       // attach tooltips
-      $('[title]').tooltip({position: "bottom center", tipClass:"tooltip bottom"});
+      //$('[title]').tooltip({position: "bottom center", tipClass:"tooltip bottom"});
 
       
       // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD

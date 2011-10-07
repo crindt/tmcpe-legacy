@@ -91,6 +91,14 @@
                        title="The factor used to convert minutes of delay into a dollar equivalent" />
 	      </td>
 	    </tr>
+            <tr style="display:none"> <!- hide this -->
+	      <th>Max Incident Speed:</th>
+	      <td>
+		<div id="maxspdslider" title="Select the percent of observed diversion attributable to TMC actions">
+		  <input type="range" name="maxspdslider" min="0" max="80" value="50"/>
+		</div>
+	      </td>
+            </tr>
 	  </table>
 	  <table class="parambox">
 	    <!--
@@ -107,7 +115,7 @@
 	    <tr>
 	      <th>TMC Diversion %:</th>
 	      <td>
-		<div id="tmcpctslider">
+		<div id="tmcpctslider" title="Select the percent of observed diversion attributable to TMC actions">
 		  <input type="range" name="tmcpctslider" min="0" max="100" value="20"/>
 		</div>
 	      </td>
@@ -117,7 +125,7 @@
                 Verification Delay without TMC
               </th>
               <td>
-		<div id="verdel">
+		<div id="verdel" title="Select the number of additional minutes expected for verification if the TMC wasn't there">
 		  <input type="range" name="verdelslider" min="0" max="60" value="15"/>
                   minutes
 		</div>
@@ -128,8 +136,8 @@
                   Response Delay without TMC
                 </th>
                 <td>
-		  <div id="respdel">
-		    <input type="range" name="respdelslider" min="0" max="60" value="15" title="Select the number of additional minutes expected for the response to restore capacity"/>
+		  <div id="respdel" title="Select the number of additional minutes expected for the response to restore capacity if the TMC wasn't there">
+		    <input type="range" name="respdelslider" min="0" max="60" value="15"/>
                     minutes
 		  </div>
                 </td>
