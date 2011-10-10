@@ -173,52 +173,7 @@
 		<li><a href="#">Activity Log</a></li>
 	      </ul>
 	      <div class="panes">
-		<div id="generalStatsContainer">
-		  <table id="generalStats">
-                   <thead>
-                     <tr>
-                       <th class="label">Facility</th>
-                       <th class="numlabel">Delay<35<br/><span class="delayUnitHolder"></span></th>
-                       <th class="numlabel">Delay<br/><span class="delayUnitHolder"></span></th>
-                       <!--
-                           <th class="label">&Delta;q</th>
-                           <th class="label">max(q)</th>
-                       -->
-                       <th class="numlabel">Delay<br/>(no TMC)<br/><span class="delayUnitHolder"></span></th>
-                       <th class="numlabel">TMC Savings<br/><span class="delayUnitHolder"></span></th>
-                     </tr>
-                   </thead>
-                   <tbody>
-                     <tr>
-                       <td class="facilityName" id="facility"></td>
-                       <td class="delayValue" id="d12Delay"></td>
-                       <!--              <td class="unit delayUnit" id="d12DelayUnit">veh-hr</td> -->
-
-                       <td class="delayValue" id="netDelay"></td>
-                       <!--              <td class="unit delayUnit" id="netDelayUnit">veh-hr</td> -->
-
-                       <!--              <td class="value" id="computedDiversion"></td> -->
-                       <!--              <td class="unit" id="computedDiversionUnit">veh</td> -->
-
-                       <!--              <td class="value" id="computedMaxq"></td> -->
-                       <!--              <td class="unit" id="computedMaxqUnit">veh</td> -->
-
-                       <td class="delayValue" id="whatIfDelay"></td>
-                       <!--              <td class="unit delayUnit" id="whatIfDelayUnit">veh-hr</td> -->
-
-                       <td class="delayValue" id="tmcSavings"></td>
-                       <!--              <td class="unit delayUnit" id="tmcSavingsUnit">veh-hr</td> -->
-                     </tr>
-                   </tbody>
-                 </table>
-                 <a id="tmcpe_tsd_download_link"></a>
-                 &nbsp;|&nbsp;
-                 <a id="tmcpe_report_analysis_problem_link"></a>
-               </div>
-               <div id="logtableContainer">
-                 <table id="activityLog">
-                 </table>
-               </div>
+              </div>
              </div>
 	  </div>
 	</div>

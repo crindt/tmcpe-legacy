@@ -344,9 +344,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .add(po.interact())
 	      .center({lat: 33.739, lon: -117.830})
 	  ;
-
 	  addMapTileLayer();
-
       }
 
       // update the map with incident data

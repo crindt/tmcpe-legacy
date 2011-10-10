@@ -562,6 +562,12 @@ if ( !tmcpe ) var tmcpe = {};
           activeTimestep( data );
       });
 
+      $(window).bind("tmcpe.tsd.paramsChanged", function( caller, params ) {
+	  tsd.updateCellStyle();
+	  tsd.updateCellAugmentation();
+      });
+
+
       return tsd;
   }
 
@@ -642,16 +648,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( !arguments.length ) return json;
 	  json = x;
 
-/*
-	  json.sections = json.sections.sort( function(a,b) {
-	      var diff =  a.pm - b.pm;
-	      if ( a.dir == 'S' || a.dir == 'W' )
-		  return -diff;
-	      else
-		  return diff;
-	  });
-*/
-
+          cumflow.updateStats();
 
 	  return cumflow;
       }
@@ -1244,6 +1241,7 @@ if ( !tmcpe ) var tmcpe = {};
       secjson,
       segments,
       ends,
+      legend,
 
       po = org.polymaps;
 
@@ -1313,6 +1311,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( container ) $(container).children().remove();
 	  create();
 	  addImageLayer();
+	  renderLegend();
 	  return segmap;
       }
 
@@ -1340,6 +1339,107 @@ if ( !tmcpe ) var tmcpe = {};
 	      .add(po.interact());
 
 	  return segmap;
+      }
+
+      function renderLegend() {
+	  var svg = d3.select('#segmapsvg');
+	  if ( svg == null || svg.length == 0 ) throw "Can't create legend without SVG element";
+
+	  // remove existing
+	  svg.select("g.legend").remove();
+	  
+	  //// create the legend
+	  legend = svg.append("svg:g")
+	      .attr('transform',"translate(30,100)")
+	      .attr('class',"legend")
+	  ;
+
+	  // create the gradient
+	  // from here: http://groups.google.com/group/d3-js/browse_thread/thread/2c96f73276cddef
+	  // and here: http://www.w3schools.com/svg/svg_grad_linear.asp
+	  // FIXME: need to sync with tsd
+          var color = d3.scale.linear()
+              .domain([10,10+(60-10)/2,60])
+              .range(["#ff0000","#ffff00","#00ff00"]);
+
+	  legend.append("svg:linearGradient")
+	      .attr("id","speedGradient")
+	      .attr("opacity", 1 )
+	  // make it a vertical gradient, top to bottom
+	      .attr("x1","0%")
+	      .attr("y1","100%")
+	      .attr("x2","0%")
+	      .attr("y2","0%")
+	      .selectAll("stop")
+	      .data([10,35,60])
+	      .enter()
+	      .append("svg:stop")
+	      .attr("offset",function(d){ return (d-10)/(60-10); })
+	      .attr("stop-color",function(d){ return color(d); })
+	      .attr("stop-opacity", 1 )
+	  ;
+
+	  var legendheight = segmap.hh()
+	      -100  // top margin for compass/zoom
+	      -100  // bottom margin
+	  ;
+	  legend
+	      .append("svg:rect")
+	      .attr('x',0)
+	      .attr('y',0)
+	      .attr('width',10)
+	      .attr('height',legendheight)
+	      .style('fill','url(#speedGradient)')
+	      .style('stroke','#000')
+	  ;
+
+	  var t = color.ticks((60-10)/10+1);
+	  var tickscale = d3.scale.linear()
+	      .domain([t[0],t[t.length-1]])
+	      .range([legendheight,0]);
+	  var ticks = legend.selectAll("g.tick")
+	      .data(color.ticks((60-10)/10+1))
+	      .enter()
+	      .append("svg:g")
+	      .attr('class','tick')
+	      .attr('transform',function(d){ return "translate(0,"+tickscale(d)+")"; });
+	  ticks.append("svg:line")
+	      .attr('x0',0)
+	      .attr('x1',13)
+	  ;
+	  ticks
+	      .append("svg:foreignObject")
+	      .attr("xmlns","http://www.w3.org/1999/xhtml")
+	      .attr('x', 14 )
+	      .attr('y', 0-8 )
+	      .attr('width','20px')
+	      .attr('height','20px')
+	      .append("p")
+	      .text(function(d){
+		  return d;
+	      });
+	  ;
+
+	  /*
+	  legend.append("svg:rect")
+	      .attr('x',(20/2)-50/2)
+	      .attr('y',legendheight+20)
+	      .attr('width',50)
+	      .attr('height',40)
+	  ;
+	  */
+	  
+
+	  legend.append("svg:foreignObject")
+	      .attr("xmlns","http://www.w3.org/1999/xhtml")
+	      .attr('x',(20/2)-50/2)
+	      .attr('y',legendheight+10)
+	      .attr('width',50)
+	      .attr('height',40)
+	      .append('p')
+	      .attr('class','text-center')
+	      .text('Speed (mph)')
+	  ;
       }
       
       function addImageLayer() {
@@ -1639,6 +1739,114 @@ if ( !tmcpe ) var tmcpe = {};
   };
 
 
+  tmcpe.statsView = function() {
+      var statsView = {},
+      container,
+      data
+      ;
+
+      function init() {
+          if ( container == null ) throw "Can't initialize statsView in null container";
+
+          // get the panes we'll fill
+          var panes = d3.select(container).selectAll('.panes');
+
+          // ditch all the children
+          panes.selectAll('div').remove();
+          
+	  // create the children
+          var genstats = panes.append('div').attr('id','generalStatsContainer');
+          var ltc = panes.append('div').attr('id','logtableContainer');
+
+
+          // Create the tabs. These must be created before we execute the
+	  // dataTable() call on the child elements because otherwise the size
+	  // of the container is not determined for the dataTable().
+          $("#databox .tabs").tabs( 'div.panes > div' );
+
+
+          var gst = genstats.append('table')
+              .attr('id','generalStats');
+          var gsthr = gst.append('thead').append('tr');
+          gsthr.selectAll('th')
+              .data([{class:"label",html:"Facility"},
+                     {class:"numlabel",html:'Delay<35<br/><span class="delayUnitHolder"></span>'},
+                     {class:"numlabel",html:'Delay<br/><span class="delayUnitHolder"></span>'},
+                     {class:"numlabel",html:'Delay<br/>(no TMC)<br/><span class="delayUnitHolder"></span>'},
+                     {class:"numlabel",html:'TMC Savings<br/><span class="delayUnitHolder"></span>'},
+                    ])
+              .enter()
+              .append('th')
+              .attr('class',function(d){return d.class;})
+              .html(function(d){return d.html;})
+          ;
+
+          // FIXME: for each ifia
+          var gstbr = gst.append('tbody').append('tr');
+          gstbr.selectAll('td')
+              .data([{class:"facilityName",id:"facility"},
+                     {class:"delayValue",id:"d12Delay"},
+                     {class:"delayValue",id:"netDelay"},
+                     {class:"delayValue",id:"whatIfDelay"},
+                     {class:"delayValue",id:"tmcSavings"},
+                    ])
+              .enter()
+              .append('td')
+              .attr('class',function(d){
+                  return d.class;})
+              .attr('id',function(d){return d.id;})
+          ;
+
+
+          var gs = $("#generalStats");
+          gs.dataTable({
+	      "bPaginate": false,
+	      "sScrollY": gs.parent().height()*.5,
+	      "bLengthChange": false,
+	      "bFilter": false,
+	      "bSort": false,
+	      "bInfo": false,
+	      "aoColumns": [
+	          {"sWidth": "20%", "sType":"string", "sClass":"right" },
+	          {"sWidth": "20%", "sType":"number", "sClass":"left" },
+	          {"sWidth": "20%", "sType":"number", "sClass":"left" },
+	          {"sWidth": "20%", "sType":"number", "sClass":"left" },
+	          {"sWidth": "20%", "sType":"number", "sClass":"left" }
+	      ]
+          } );
+          
+
+
+          
+          genstats.append('a').attr('id','tmcpe_tsd_download_link');
+          genstats.append('a').attr('id','tmcpe_report_analysis_problem_link');
+
+      }
+
+      function update() {
+      }
+
+      statsView.container = function(x) {
+	  if (!arguments.length) return container;
+	  container = x;
+          init();
+	  return cumflow;
+      }
+
+      statsView.data = function(x) {
+	  if ( !arguments.length ) return data;
+	  data = x;
+          update();
+	  return segmap;
+      }
+
+      
+          
+      
+      return statsView;
+  };
+
+
 
   var i = 0;
   var tsd;
@@ -1715,22 +1923,8 @@ if ( !tmcpe ) var tmcpe = {};
      return ev ? "fill:black;" : "fill:none;";
   }
 
-  function syncchart(tsd,cumflow) {
-      return function( d, i ) { 
-	  tsd.selectedTime( d.i );
-
-          // updates the chart's data
-	  cumflow.section( d.i );
-      };
-  };
-
-
   function rotateMap( v ) {
      map.rotate( v.value );
-  }
-
-  function handleFailure( e ) {
-      return "poof";
   }
 
   function updateStats( json ) {
@@ -1771,6 +1965,29 @@ if ( !tmcpe ) var tmcpe = {};
       }
   }
 
+
+  function renderLogTimestamp(obj) {
+      dd = new Date( obj );
+      return $.format.date(dd,'yyyy-MM-dd kk:mm');
+  }
+
+  function renderLogTime(obj) {
+      dd = new Date( obj );
+      return $.format.date(dd,'kk:mm');
+  };
+
+  function raiseLogEntry( d ) {
+      // In SVG, the z-index is the element's index in the dom.  To raise an
+      // element, just detach it from the dom and append it back to its parent
+
+      // FIXME: this should reside in cumflow and be triggered by an event
+      var targets = $("g[logid="+d.id+"]");
+      var target = targets[0];
+      var parent = target.parentNode;
+      targets.detach().appendTo( parent );
+      return 
+  }
+
   function updateLog( json ) {
       // clear existing
       var container = d3.select( '#logtableContainer' );
@@ -1780,38 +1997,26 @@ if ( !tmcpe ) var tmcpe = {};
       // select table element (for d3)
       var tab = container
 	  .append("table")
-	  .attr("id","activityLog");
-
-      function renderLogTimestamp(obj) {
-	  dd = new Date( obj );
-	  return $.format.date(dd,'yyyy-MM-dd kk:mm');
-      };
-
-      var fields = [ {key:"stampDateTime",title:"Time",render:renderLogTimestamp}, 
-		     {key:"activitySubject",title:"Activity"}, 
-		     {key:"memoOnly",title:"Description"}, 
-		   ];
-
+	  .attr("id","activityLog")
+	  .style("width","100%")
+      ;
+      
       var head = tab.append("thead");
 
+      var aoCols = [
+	      {key: "stampDateTime",   "sTitle": "Date", "render": renderLogTimestamp, "sType":"date", "bVisible": false }, // hidden, just used for sorting
+	      {key: "stampDateTime",   "sTitle": "Time", "render": renderLogTime, "sWidth": "20%", "sType":"date" },
+	      {key: "activitySubject", "sTitle": "Activity", "sWidth": "20%", "sType":"string" },
+	      {key: "memoOnly",        "sTitle": "Description", "sWidth": "60%", "sType":"string" }
+      ];
 
-      head.append("tr").selectAll("th").data(fields).enter()
+      head.append("tr").selectAll("th").data(aoCols).enter()
 	  .append("th")
 	  .attr("class",function(d){return d.key ? d.key : d;})
-	  .html(function(d){return d.title ? d.title : d});
-
+	  .html(function(d){return d.sTitle ? d.sTitle : d});
 
       var body = tab.append("tbody");
 
-      function raiseLogEntry( d ) {
-	  // In SVG, the z-index is the element's index in the dom.  To raise an
-	  // element, just detach it from the dom and append it back to its parent
-	  var targets = $("g[logid="+d.id+"]");
-	  var target = targets[0];
-	  var parent = target.parentNode;
-	  targets.detach().appendTo( parent );
-	  return 
-      }
 
       // create log rows
       var rows = body.selectAll("tr")
@@ -1834,26 +2039,21 @@ if ( !tmcpe ) var tmcpe = {};
       rows.selectAll("td")
 	  .data(function(d) {
 	      var props = [];
-	      $.each( fields, function( i, dd ) {
+	      $.each( aoCols, function( i, dd ) {
 		  var item = d[dd.key];
 		  props.push( dd.render ? dd.render( item ) : item );
 	      });
 	      return props;
 	  })
 	  .enter().append("td")
-	  .attr("class", function(d,i) { return fields[i].key } )
+	  .attr("class", function(d,i) { return aoCols[i].key } )
 	  .text( function(dd) { return dd; } );
 
       $("#activityLog").dataTable({ 
 	  bPaginate: false, sScrollY:"200px","bAutoWidth":false,"bFilter": false,
+	  "aoColumns": aoCols 
+      });
 
-	  "aoColumns": [
-	      {"sWidth": "20%", "sType":"date" },
-	      {"sWidth": "20%", "sType":"string" },
-	      {"sWidth": "60%", "sType":"string" }
-	  ]});
-      
-      
   }
 
   function updateTsd() {
@@ -1862,6 +2062,9 @@ if ( !tmcpe ) var tmcpe = {};
   }
 
   function loadLog( id ) {
+      // assert
+      if ( id == null ) throw "Can't load log for null incident";
+
       var url = g.createLink({controller:'incident', 
 			      action:'getTmcLog',
 			      params: {id: id} 
@@ -1915,37 +2118,35 @@ if ( !tmcpe ) var tmcpe = {};
       $('#generalStats #facility').html(id.children[0].innerHTML);
   }
 
+  /************ MAIN APP CODE ************/
   $(document).ready(function() {
-      // create the various views to show the data
+
+      ///// create the various views to show the data /////
+
       var tsdView = tmcpe.tsd()
 	  .container( $("#tsdbox")[0] )
       	  .cellStyle( cellStyle )
 	  .cellAugmentStyle( cellAugmentStyle );
 
-      var cumflowView = tmcpe.cumflow()
-              .container( $("#chartbox")[0] )
+      var cumflowView = tmcpe.cumflow().container( $("#chartbox")[0] )
 
       var mapView = tmcpe.segmap().container( $("#mapbox")[0] );
 
-      var tsdParamsView = tmcpe.tsdParamsView()
-	  .container($('#tsdParams'))
+      var tsdParamsView = tmcpe.tsdParamsView().container($('#tsdParams'));
       ;
+
+      var statsView = tmcpe.statsView().container( $('#databox')[0] );
 
       // put the settings in the true header (from base.gsp)
       var settings = $("#settings").detach();
       settings.appendTo('.header');
       
-      // bind events
+
+      ///// bind events /////
 
       // Event called when a new analysis has been processed from the server
       $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, json) {
 	  updateViews( json );
-
-      });
-
-      $(window).bind("tmcpe.tsd.paramsChanged", function( caller, params ) {
-	  tsdView.updateCellStyle();
-	  tsdView.updateCellAugmentation();
       });
 
 
@@ -1967,10 +2168,9 @@ if ( !tmcpe ) var tmcpe = {};
       //d3.select('#valueOfTime').on("change",function(d){updateCumFlowStats()});
 
       var cad = $('#id');
-      loadLog( cad.attr('name') );
       
+      loadLog( cad.attr('name') );
 
-      $("#databox .tabs").tabs( 'div.panes > div' );
 
 /*
       {
@@ -1983,23 +2183,6 @@ if ( !tmcpe ) var tmcpe = {};
 	  }
       } );
 */
-      var gs = $("#generalStats");
-      gs.dataTable({
-	  "bPaginate": false,
-	  "sScrollY": gs.parent().height()*.5,
-	  "bLengthChange": false,
-	  "bFilter": false,
-	  "bSort": false,
-	  "bInfo": false,
-	  "aoColumns": [
-	      {"sWidth": "20%", "sType":"string", "sClass":"right" },
-	      {"sWidth": "20%", "sType":"number", "sClass":"left" },
-	      {"sWidth": "20%", "sType":"number", "sClass":"left" },
-	      {"sWidth": "20%", "sType":"number", "sClass":"left" },
-	      {"sWidth": "20%", "sType":"number", "sClass":"left" }
-	  ]
-      } );
-      
 
       // Helper function to update views based upon (analysis) data received from the server
       function updateViews( data ) {
@@ -2011,19 +2194,6 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  //updateLog( data );
 
-	  // update the $$ calc
-          var tt = $("input[name=tmcpctslider]");
-	  //cumflowView.tmcDivPct( tt.value );
-          cumflowView.updateStats();
-
-	  // update the band and max speed sliders
-	  /*
-	    $('#maxspdslider').slider('value',json.parameters.maxIncidentSpeed);
-	    $('#maxspd').text(json.parameters.maxIncidentSpeed);
-	  */
-
-	  // create the map
-	  //doMap( json );
 
 	  // if the window is resized, recompute the bounds of all the components.
 	  $(window).resize(function() { 

@@ -153,9 +153,27 @@ svg text {
     font-family: Arial;
 }
 
-#segmapsvg text {
-//    stroke: #00f;
-    fill: #006;
+#segmapsvg {
+    text {
+	//    stroke: #00f;
+       fill: @text-color;
+       font-size: 12px;
+       font-weight: lighter;
+    }
+
+    p {
+	color: @text-color;
+	font-size: 12px;
+	.text-shadow-lighter( #fff, 100% );
+    }
+
+    .legend {
+	.tick {
+	    stroke: @legend-color;
+	    stroke-width: 1px;
+	}
+    }
+    
 }
 
  
