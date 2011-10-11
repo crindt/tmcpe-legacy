@@ -14,16 +14,12 @@
     <!-- formatting -->
     <p:javascript src='jquery.format-1.2.min' />
     <p:javascript src='jquery.dataTables' />
-    <p:javascript src='jquery.tipsy' />
-    <p:javascript src='jquery.svg' />    <!-- plugins for manipulating svg using jquery -->
-    <p:javascript src='jquery.svgdom' /> <!-- plugins for manipulating svg using jquery -->
 
     <!-- visualization toolkits -->
     <p:javascript src='polymaps' />
     <p:javascript src='polymaps_cluster' />
     <p:javascript src='d3' />
     <p:javascript src='d3.time' />
-    <p:javascript src='protovis' />
 
     <!-- app code -->
     <p:javascript src='tmcpe/incident-summary' />

@@ -12,8 +12,6 @@
     <!-- formatting -->
     <p:javascript src='jquery.format-1.2.min' />
     <p:javascript src='jquery.dataTables' />
-    <p:javascript src='jquery.svg' />    <!-- plugins for manipulating svg using jquery -->
-    <p:javascript src='jquery.svgdom' /> <!-- plugins for manipulating svg using jquery -->
 
     <!-- visualization toolkits -->
     <p:javascript src='polymaps' />
