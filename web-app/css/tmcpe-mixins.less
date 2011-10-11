@@ -40,3 +40,7 @@
     -webkit-box-shadow: 2*@scale 2*@scale @scale #888;
     box-shadow: 2*@scale 2*@scale @scale #888;    
 }
+
+.text-shadow-lighter( @base-color, @amount: 50% ) {
+    text-shadow: lighten( @base-color, @amount ) 1px 1px 1px;
+}

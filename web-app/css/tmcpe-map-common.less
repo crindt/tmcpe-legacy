@@ -1,10 +1,57 @@
+@import "tmcpe-colors.less";
 @import 'tmcpe-mixins.less';
 
 svg.map {
     background: #fff;
 
     image { opacity: 0.65; }
+
+    text {
+	//    stroke: #00f;
+       fill: @text-color;
+       font-size: 12px;
+       font-weight: lighter;
+    }
+
+    p {
+	color: @text-color;
+	font-size: 12px;
+	.text-shadow-lighter( #fff, 100% );
+    }
+
+    .legend {
+	.tick {
+	    stroke: @legend-color;
+	    stroke-width: 1px;
+	}
+
+	text {
+	    //    stroke: #00f;
+       fill: @text-color;
+       font-size: 12px;
+       font-weight: lighter;
+	}
+
+	p {
+	    text-align: right;
+	}
+
+    }
+
+    #maptext {
+	border: 1px;
+	background-color: yellow;
+    }
 }
 
 .mapcontainer {
+}
+
+
+.compass .back {
+  fill: #256574;
+}
+
+.compass .fore, .compass .chevron {
+  stroke: #1AA398;
 }

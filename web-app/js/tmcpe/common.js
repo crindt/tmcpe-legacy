@@ -67,6 +67,153 @@ if ( !tmcpe ) var tmcpe = {};
          }
      }
 
+     /**
+      * A general theme object 
+      */
+     tmcpe.legendForLinearScale = function() {
+	 var legendForLinearScale = {},
+	 vertical  = true,
+	 barwidth  = 10,
+	 barlength = 300,
+	 title     = "Property",
+	 legendtickspace = 30,     // amount of space per legend tick
+	 scale
+	 ;
+
+	 legendForLinearScale.scale = function(x) {
+	     if ( !arguments.length ) return scale;
+	     scale = x;
+	     return legendForLinearScale;
+	 }
+	 legendForLinearScale.title = function(x) {
+	     if ( !arguments.length ) return title;
+	     title = x;
+	     return legendForLinearScale;
+	 }
+	 legendForLinearScale.barwidth = function(x) {
+	     if ( !arguments.length ) return barwidth;
+	     barwidth = x;
+	     return legendForLinearScale;
+	 }
+	 legendForLinearScale.barlength = function(x) {
+	     if ( !arguments.length ) return barlength;
+	     barlength = x;
+	     return legendForLinearScale;
+	 }
+	 legendForLinearScale.vertical = function(x) {
+	     if ( !arguments.length ) return vertical;
+	     vertical = x;
+	     return legendForLinearScale;
+	 }
+
+	 legendForLinearScale.styleClass = function(targ,x) {
+	     if ( x.p_j_m > 0 && x.p_j_m < 1 ) {
+		 d3.select(targ).classed('datapoor',true);
+		 return "";
+	     } else {
+		 d3.select(targ).classed('datapoor',false);
+	     }
+	 }
+
+	 // assumes vertical
+	 legendForLinearScale.render = function( container ) {
+	     // assert
+	     if ( container == null ) throw "Can't render legend inside null container";
+	     if ( scale == null )     throw "Can't render legend for a null scale";
+
+	     //// create the legend
+	     var legend = container.append("svg:g");
+
+	     // create the gradient
+	     // from here: http://groups.google.com/group/d3-js/browse_thread/thread/2c96f73276cddef
+	     // and here: http://www.w3schools.com/svg/svg_grad_linear.asp
+
+	     var dom = scale.domain();
+
+	     legend.append("svg:linearGradient")
+		 .attr("id","speedGradient")
+		 .attr("opacity", 1 )
+	     // make it a vertical gradient, top (high speeds) to bottom (low speeds)
+		 .attr("x1","0%")
+		 .attr("y1","100%")
+		 .attr("x2","0%")
+		 .attr("y2","0%")
+		 .selectAll("stop")
+		 .data(dom)
+		 .enter()
+		 .append("svg:stop")
+		 .attr("offset",function(d){ return (d-dom[0])/(dom[dom.length-1]-dom[0]); })
+		 .attr("stop-color",function(d){ return scale(d); })
+		 .attr("stop-opacity", 1 )
+	     ;
+
+	     var legendheight = barlength;
+
+	     legend
+		 .append("svg:rect")
+		 .attr('x',0)
+		 .attr('y',0)
+		 .attr('width',barwidth)
+		 .attr('height',legendheight)
+		 .style('fill','url(#speedGradient)')
+		 .style('stroke','#000')
+	     ;
+
+	     var t = scale.ticks(legendheight/legendtickspace+1);
+	     // create a tickscale ranging from min to max
+	     var tickscale = d3.scale.linear()
+		 .domain([t[0],t[t.length-1]])
+		 .range([legendheight,0]);
+	     var ticks = legend.selectAll("g.tick")
+		 .data(t)
+		 .enter()
+		 .append("svg:g")
+		 .attr('class','tick')
+		 .attr('transform',function(d){ return "translate(0,"+tickscale(d)+")"; });
+	     ticks.append("svg:line")
+		 .attr('x0',0)
+		 .attr('x1',13)
+	     ;
+	     ticks
+		 .append("svg:foreignObject")
+		 .attr("xmlns","http://www.w3.org/1999/xhtml")
+		 .attr('x', 0-20-3 )
+		 .attr('y', 0-8 )
+		 .attr('width','20px')
+		 .attr('height','20px')
+		 .append("p")
+		 .text(function(d){
+		     return d;
+		 });
+	     ;
+
+	     /*
+	       legend.append("svg:rect")
+	       .attr('x',(20/2)-50/2)
+	       .attr('y',legendheight+20)
+	       .attr('width',50)
+	       .attr('height',40)
+	       ;
+	     */
+	     
+
+	     legend.append("svg:foreignObject")
+		 .attr("xmlns","http://www.w3.org/1999/xhtml")
+		 .attr('x',(-20/2)-50/2)
+		 .attr('y',legendheight+10)
+		 .attr('width',50)
+		 .attr('height',40)
+		 .append('p')
+		 .attr('class','text-center')
+		 .text(title)
+	     ;
+
+	     return legend;
+	 }
+
+	 return legendForLinearScale;
+     };
+
      $(document).ready(function() {
      
 	 // Add loading overlay handling
@@ -86,10 +233,12 @@ if ( !tmcpe ) var tmcpe = {};
   	     $('#error_overlay td.errline').text(ee.lineno);
   	     $('#error_overlay td.errmsg').text(ee.message);
 	     
+	     /*
 	     jQuery.each(jQuery.browser, function(i, val) {
 		 $("<div>" + i + " : <span>" + val + "</span>")
-                     .appendTo( document.body );
+                     .appendTo( $('#error_overlay') );
 	     });
+	     */
 	     
 	     var params = {
 		 'issue[tracker_id]': 1,

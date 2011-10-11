@@ -32,9 +32,13 @@
     left: 0px;
 }
 
-#maptext {
-   border: 1px;
-   background-color: yellow;
+.map {
+    path {
+	&.datapoor {
+	    stroke: @tsddatapoor;
+	}
+    }
+
 }
 
 #databox {
@@ -151,11 +155,6 @@ svg text {
     fill: #eee;
 //    letter-spacing: 0.5pt;
     font-family: Arial;
-}
-
-#segmapsvg text {
-//    stroke: #00f;
-    fill: #006;
 }
 
  
@@ -305,14 +304,6 @@ td.unit {
     text-align: left;
 }
 
-.compass .back {
-  fill: #256574;
-}
-
-.compass .fore, .compass .chevron {
-  stroke: #1AA398;
-}
-
 #segments path {
   fill: none;
   stroke-linecap: round;
@@ -326,7 +317,6 @@ td.unit {
 }
 
 #ends path {
-    fill: yellow;
     stroke: black;
     stroke-width: 1px;
 }
