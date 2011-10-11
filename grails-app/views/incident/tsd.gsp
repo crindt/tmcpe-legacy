@@ -99,6 +99,14 @@
 		</div>
 	      </td>
             </tr>
+            <tr style="display:none"> <!- hide this -->
+	      <th>Incident Evidence Scale:</th>
+	      <td>
+		<div id="scaleslider" title="Select the multiple of stddev speed ">
+		  <input type="range" name="scaleslider" min="0" max="5" value="10"/>
+		</div>
+	      </td>
+            </tr>
 	  </table>
 	  <table class="parambox">
 	    <!--

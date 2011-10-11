@@ -8,16 +8,41 @@
 // minimum value for any color channel (0,255).  Setting it above 0
 // will fade the colors  (lighten, make the colors whiter)
 function delayColor( ff ) {
-    var color = d3.scale.linear()
-        .domain([0,400,800]) // step from green to yellow to red 
-        .range(["#00ff00", "#ffff00", "#ff0000"]);
+    var scale = d3.scale.linear();
+    var nodatacolor = "#eee";
 
-    return function( v ) {
-	var rgb = d3.rgb(color( v ));
+    function dcx() {
+	return dc;
+    }
+
+    function dc(x) {
+	if ( x == null ) return nodatacolor;
+
+	var v = scale(x);
+
+	var rgb = d3.rgb(v)
         // cap the max channel
-        $.each(["r","g","b"],function(d,k) { rgb[k] = rgb[k] < ff ? ff : rgb[k]; });
+        $.each(["r","g","b"],function(d,k) { 
+	    rgb[k] = rgb[k] < ff ? ff : rgb[k]; });
+
         return rgb.toString();
     }
+
+    // We have to override these range, domain, and ticks classes to make this work
+    // NOTE: other d3.scale methods are NOT currently exposed
+    dc.range =  function(x) { 
+	if ( !arguments.length == 1 ) return scale.range();
+	scale.range(x);
+	return dc;
+    }
+    dc.domain =  function(x) { 
+	if ( !arguments.length == 1 ) return scale.domain();
+	scale.domain(x);
+	return dc;
+    }
+    dc.ticks =  scale.ticks;
+
+    return dcx();
 }
 
 
@@ -29,7 +54,9 @@ if ( !tmcpe ) var tmcpe = {};
   };
   tmcpe.query = {};
 
-  tmcpe.nodatacolor = "#eeeeee";
+  // set the scales
+  tmcpe.delayColorScale = delayColor(0).domain([0,400,800]).range(["#0f0","#ff0","#f00"]);
+  tmcpe.fadedDelayColorScale = delayColor(160).domain([0,400,800]).range(["#0f0","#ff0","#f00"]);
 
   po = org.polymaps;
 
@@ -166,7 +193,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("class", function(d,i) { return i % 2 ? "even" : "odd"; } )
 	      .style("background-color",function(d){
 		  return ( d.properties.tmcpe_delay != null 
-			   ? delayColor(160)(d.properties.tmcpe_delay)
+			   ? tmcpe.fadedDelayColorScale(d.properties.tmcpe_delay)
 			   : tmcpe.nodatacolor )
 	      } )
 	      .on("click",function(d,e) { 
@@ -318,6 +345,8 @@ if ( !tmcpe ) var tmcpe = {};
       ,container
       ,map   // the polymaps map 
       ,selectedCluster
+      ,svg
+      ,mycolor = tmcpe.delayColorScale
       ;
 
       // create the base map
@@ -329,7 +358,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  // create the tiled map
 	  // create the SVG container to hold the polymap
-	  var svg = container
+	  svg = container
 	      .append("svg:svg")
 	      .attr("id","mapsvg")
 	      .attr("class","map")
@@ -345,6 +374,8 @@ if ( !tmcpe ) var tmcpe = {};
 	      .center({lat: 33.739, lon: -117.830})
 	  ;
 	  addMapTileLayer();
+
+	  renderLegend()
       }
 
       // update the map with incident data
@@ -381,7 +412,7 @@ if ( !tmcpe ) var tmcpe = {};
 			  return d.data.properties.tmcpe_delay;
 		      });
 		      var mm = _.max(arr)
-		      point.setAttribute('fill', mm == -Infinity ? tmcpe.nodatacolor : delayColor(0)(mm));
+		      point.setAttribute('fill', mm == -Infinity ? tmcpe.nodatacolor : mycolor(mm));
 
 		      
                       var more_wider = value.data.properties.elements.length / 3;
@@ -405,6 +436,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      } ))
 	  ;
 	  map.add(incs);
+	  renderLegend();
       }
 
 
@@ -419,6 +451,26 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  return map;
       };
+
+      function renderLegend() {
+	  if ( svg == null || svg.length == 0 ) throw "Can't create legend without SVG element";
+
+	  // remove existing
+	  var mysvg = d3.select(svg);
+	  mysvg.select("g.legend").remove();
+
+	  var h = mysvg.attr('height');
+
+	  legend = tmcpe.legendForLinearScale()
+	      .title("Delay (veh-hr)")
+	      .barlength(h-100-50)  // 100's are margins for top and bottom
+	      .scale(mycolor)
+	      .render(mysvg)
+	      .attr('transform',"translate(30,100)") // place just below compass
+	      .attr('class',"legend")
+	  ;
+
+      }
 
 
       // this resets the map
@@ -680,7 +732,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  // Set the h1 color
 		  var tt = _.clone( d ); 
 		  if ( tt.eventType == null ) tt.eventType = "<unknown>";
-		  tt.color = delayColor(160)(tt.properties.tmcpe_delay); 
+		  tt.color = tmcpe.fadedDelayColorScale(tt.properties.tmcpe_delay); 
 		  return detailTemplate( tt ); 
 	      });
 

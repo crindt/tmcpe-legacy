@@ -95,6 +95,14 @@ if ( !tmcpe ) var tmcpe = {};
 		  $(window).trigger("tmcpe.tsd.maxSpeedChanged", formAsModel() );
               });
 
+          scaleslider = 
+              $('input[name=scaleslider]')
+              .rangeinput({api:true})
+              .change(function(e,v){
+		  $(window).trigger("tmcpe.tsd.scaleChanged", formAsModel() );
+              });
+
+
           $('input[name="delayUnit"]').change(function(e,v){
               d3.select('#valueOfTime').property("disabled",this.value=='usd'?false:true);
               $(window).trigger("tmcpe.tsd.delayUnitChanged", formAsModel() );
@@ -134,30 +142,34 @@ if ( !tmcpe ) var tmcpe = {};
       tsdParamsView.params = function(x) {
 	  if ( x == null ) return tsdParams;
 	  tsdParams = x;
-	  update();
+	  matchFormToModel();
+	  tsdParamsView.touch();
       }
 
       /**
        * Make the form match the tsdParams (model)
        */
-      function update() {
-	  if ( tsdParams ) {
-	  }
+      function matchFormToModel() {
+          maxspdslider[0].value = tsdParams.maxspdslider;
+	  scaleslider[0].value  = tsdParams.scaleslider;
+      }
+
+      /**
+       * Function to simulate update to parameters (for initialization)
+       */
+      tsdParamsView.touch = function() {
+	  $(window).trigger("tmcpe.tsd.paramsChanged",formAsModel());
       }
 
       $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, json) {
-	  // new analysis loaded, update the data
-	  var t0 = new Date( json.t0 ).getTime()/1000;
-	  var t1 = new Date( json.t1 ).getTime()/1000;
-	  var t2 = new Date( json.t2 ).getTime()/1000;
-	  var t3 = new Date( json.t3 ).getTime()/1000;
+	  if ( tsdParams == null ) tsdParams = {};
 
-          var vtime = Math.ceil((t1-t0)/60);
-          var rtime = Math.ceil((t2-t0)/60);
+	  // copy analysis parameters to model
+	  tsdParams.maxspdslider = json.parameters.maxIncidentSpeed;
+	  tsdParams.scaleslider  = json.parameters.band;
 
-          maxspdslider[0].value = json.parameters.maxIncidentSpeed;
-          
-
+	  // reset the model
+	  tsdParamsView.params( tsdParams ); // reset
       });
 
 
@@ -185,6 +197,7 @@ if ( !tmcpe ) var tmcpe = {};
       seclensum,
       startTime = 0,
       endTime,// = 20,
+      params,
       
       p = 20  // padding, in px
       ;
@@ -201,6 +214,14 @@ if ( !tmcpe ) var tmcpe = {};
 //	  return tsd.resize(); // infer size
 	  return tsd;
       }
+
+      tsd.params = function(x) {
+	  if (!arguments.length) return params;
+	  params = x;
+	  paramsChanged();
+	  return tsd;
+      }
+
 
       tsd.resize = function() {
 	  if (!size) {
@@ -223,6 +244,27 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( !arguments.length ) return json;
 	  json = x;
 	  tsd.redraw();
+
+	  // set active timestep
+	  // hackish: scan timesteps until t > t2
+	  // t2 is approximate worst queue
+	  if ( json.t2 != null ) {
+	      var t2 = new Date( json.t2 ).getTime();
+	      var tt = _.map( json.timesteps, function (d) { return new Date(d).getTime(); });
+	      var jj;
+	      for(jj = 0; jj < json.timesteps.length; jj++ ) {
+		  if (t2 < tt[jj]) break;
+	      }
+	      if ( jj > 0 && jj <= json.timesteps.length ) {
+		  jj--;  // set to timestep before the one greater than t2
+		  
+		  $(window).trigger("tmcpe.tsd.activeTimestep", jj);
+		  
+	      } else {
+		  // outside of range
+	      }
+	  }
+	  
 	  return tsd;
       }
 
@@ -249,11 +291,6 @@ if ( !tmcpe ) var tmcpe = {};
 	  d3.select("#msgtxt").html( newText );
       }
 
-      tsd.cellStyle = function(x) {
-	  if (!arguments.length) return cellStyle;
-	  cellStyle = x;
-	  return tsd.updateCellStyle();
-      }
 
       tsd.cellAugmentStyle = function(x) {
 	  if (!arguments.length) return cellAugmentStyle;
@@ -541,6 +578,69 @@ if ( !tmcpe ) var tmcpe = {};
 	  updateText( "inc:" + d.inc + ", spd:" + d.spd + ", occ:" + Math.floor(d.occ*100+0.5) + "%, vol:" + d.vol + ", loc: " +sections[d.i].name + ", time: "+json.timesteps[d.j]+", lanes: " + sections[d.i].lanes );
       }
 
+      function getCellStyle() {
+	  if ( params.theme == "stdspd" ) {
+	      var pscale = params.scale == null ? 1.0 : params.scale;
+	      var stdSpdColor = d3.scale.linear()
+		  .domain([-pscale,-(pscale/2),0] )
+		  .range(["#ff0000","#ffff00","#00ff00"]);
+	      return function(d) {
+		  // return grey if evidence is uncertain (imputed data)
+		  if ( d.p_j_m > 0 && d.p_j_m < 1 ) {
+		      d3.select(this).classed('datapoor',true);
+		      return "";
+		  } else {
+		      d3.select(this).classed('datapoor',false);
+		      // bound the stddev value between 0 and -4 stddevs  (FIXME: hardcode
+		      vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
+		      return "fill:"+stdSpdColor(vv);
+		  }
+	      }
+	  } else {
+	      var minSpd = params.minspdslider == null ? 10 : params.minspdslider;
+	      var maxSpd = params.maxspdslider == null ? 50 : params.maxspdslider;
+	      var spdColor = d3.scale.linear()
+		  .domain([minSpd,minSpd+(maxSpd-minSpd)/2,maxSpd] )
+		  .range(["#ff0000","#ffff00","#00ff00"]);
+	      return function(d) {
+		  // return grey if evidence is uncertain (imputed data)
+		  if ( d.p_j_m > 0 && d.p_j_m < 1 ) {
+		      d3.select(this).classed('datapoor',true);
+		      return "";
+		  } else {
+		      d3.select(this).classed('datapoor',false);
+		      return "fill:"+spdColor( d.spd );
+		  }
+	      }
+	  }
+      }
+
+      function getEvidenceOfIncident() {
+	  return function ( d ) {
+	      var maxSpd = params.maxspdslider == null ? 50 : params.maxspdslider;
+	      var pscale = params.scaleslider == null ? 1.0 : params.scaleslider;
+
+	      var stdlev = (d.spd - d.spd_avg)/d.spd_std;
+	      var tmppjm = 1; // no incident probability is default
+	      if ( d.p_j_m != 0 && d.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
+		  tmppjm = 0.5;
+
+	      else if ( stdlev < 0 && stdlev < -pscale && d.spd < maxSpd )
+		  tmppjm = 0.0;
+
+	      return tmppjm == 0 ? "fill:black;" : "fill:none;";
+	  }
+
+      }
+
+      function paramsChanged() {
+	  // update scales
+	  cellStyle = getCellStyle();
+	  cellAugmentStyle = getEvidenceOfIncident();
+
+	  tsd.updateCellStyle();
+	  tsd.updateCellAugmentation();
+      }
 
 
       // some events this view listens to
@@ -563,8 +663,10 @@ if ( !tmcpe ) var tmcpe = {};
       });
 
       $(window).bind("tmcpe.tsd.paramsChanged", function( caller, params ) {
-	  tsd.updateCellStyle();
-	  tsd.updateCellAugmentation();
+	  // update params model
+
+	  tsd.params(params.data);
+
       });
 
 
@@ -1235,6 +1337,7 @@ if ( !tmcpe ) var tmcpe = {};
       theight,// = $(container).height()-2,
       twidth,// = $(container).height()-2,
       data,
+      json,
       map,
       usearrow = true,
       rotate = "cardinal",  // default = incident
@@ -1242,6 +1345,11 @@ if ( !tmcpe ) var tmcpe = {};
       segments,
       ends,
       legend,
+      //theme = tmcpe.tsdTheme(), /* theme using defaults */
+      color = d3.scale.linear()
+	  .domain([10,10+(60-10)/2,60])
+	  .range(['#f00','#ff0','#0f0']),   /* red to yellow to green */
+      activeTimestep
 
       po = org.polymaps;
 
@@ -1311,7 +1419,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( container ) $(container).children().remove();
 	  create();
 	  addImageLayer();
-	  renderLegend();
+	  renderMaptext();
 	  return segmap;
       }
 
@@ -1341,104 +1449,36 @@ if ( !tmcpe ) var tmcpe = {};
 	  return segmap;
       }
 
+      function renderMaptext() {
+	  var svg = d3.select('#segmapsvg');
+	  if ( svg == null || svg.length == 0 ) throw "Can't create maptext without SVG element";
+
+	  // Add the maptext as a foreign object (for more consistent font handling)
+	  svg.append("svg:foreignObject")
+	      .attr("xmlns","http://www.w3.org/1999/xhtml")
+	      .attr('x',30)
+	      .attr('y',segmap.hh()-20)
+	      .attr('width',250)
+	      .attr('height',40)
+	      .append('p')
+	      .attr('id','maptext')
+	  ;
+      }
+
       function renderLegend() {
 	  var svg = d3.select('#segmapsvg');
 	  if ( svg == null || svg.length == 0 ) throw "Can't create legend without SVG element";
 
 	  // remove existing
 	  svg.select("g.legend").remove();
-	  
-	  //// create the legend
-	  legend = svg.append("svg:g")
-	      .attr('transform',"translate(30,100)")
+
+	  legend = tmcpe.legendForLinearScale()
+	      .title("Speed (mph)")
+	      .barlength(segmap.hh()-100-100)  // 100's are margins for top and bottom
+	      .scale(color)
+	      .render(svg)
+	      .attr('transform',"translate(30,100)") // place just below compass
 	      .attr('class',"legend")
-	  ;
-
-	  // create the gradient
-	  // from here: http://groups.google.com/group/d3-js/browse_thread/thread/2c96f73276cddef
-	  // and here: http://www.w3schools.com/svg/svg_grad_linear.asp
-	  // FIXME: need to sync with tsd
-          var color = d3.scale.linear()
-              .domain([10,10+(60-10)/2,60])
-              .range(["#ff0000","#ffff00","#00ff00"]);
-
-	  legend.append("svg:linearGradient")
-	      .attr("id","speedGradient")
-	      .attr("opacity", 1 )
-	  // make it a vertical gradient, top to bottom
-	      .attr("x1","0%")
-	      .attr("y1","100%")
-	      .attr("x2","0%")
-	      .attr("y2","0%")
-	      .selectAll("stop")
-	      .data([10,35,60])
-	      .enter()
-	      .append("svg:stop")
-	      .attr("offset",function(d){ return (d-10)/(60-10); })
-	      .attr("stop-color",function(d){ return color(d); })
-	      .attr("stop-opacity", 1 )
-	  ;
-
-	  var legendheight = segmap.hh()
-	      -100  // top margin for compass/zoom
-	      -100  // bottom margin
-	  ;
-	  legend
-	      .append("svg:rect")
-	      .attr('x',0)
-	      .attr('y',0)
-	      .attr('width',10)
-	      .attr('height',legendheight)
-	      .style('fill','url(#speedGradient)')
-	      .style('stroke','#000')
-	  ;
-
-	  var t = color.ticks((60-10)/10+1);
-	  var tickscale = d3.scale.linear()
-	      .domain([t[0],t[t.length-1]])
-	      .range([legendheight,0]);
-	  var ticks = legend.selectAll("g.tick")
-	      .data(color.ticks((60-10)/10+1))
-	      .enter()
-	      .append("svg:g")
-	      .attr('class','tick')
-	      .attr('transform',function(d){ return "translate(0,"+tickscale(d)+")"; });
-	  ticks.append("svg:line")
-	      .attr('x0',0)
-	      .attr('x1',13)
-	  ;
-	  ticks
-	      .append("svg:foreignObject")
-	      .attr("xmlns","http://www.w3.org/1999/xhtml")
-	      .attr('x', 14 )
-	      .attr('y', 0-8 )
-	      .attr('width','20px')
-	      .attr('height','20px')
-	      .append("p")
-	      .text(function(d){
-		  return d;
-	      });
-	  ;
-
-	  /*
-	  legend.append("svg:rect")
-	      .attr('x',(20/2)-50/2)
-	      .attr('y',legendheight+20)
-	      .attr('width',50)
-	      .attr('height',40)
-	  ;
-	  */
-	  
-
-	  legend.append("svg:foreignObject")
-	      .attr("xmlns","http://www.w3.org/1999/xhtml")
-	      .attr('x',(20/2)-50/2)
-	      .attr('y',legendheight+10)
-	      .attr('width',50)
-	      .attr('height',40)
-	      .append('p')
-	      .attr('class','text-center')
-	      .text('Speed (mph)')
 	  ;
       }
       
@@ -1560,7 +1600,7 @@ if ( !tmcpe ) var tmcpe = {};
 		    var lev = 2+Math.floor(((zz-1))/17*(8-2));
 		    return Math.min( Math.max( 2, lev ), 8 ) } )
 		  */
-		  .attr("stroke", "yellow" )
+		  .attr("stroke", "black" )
 		  .attr("fill", "blue" )
 		  .title(function(d) { 
 		      return [d.data.id,d.data.name].join(":"); }));
@@ -1617,10 +1657,12 @@ if ( !tmcpe ) var tmcpe = {};
 					   idIn: json.sections.map( function( sec ) {return sec.vdsid;}).join(",")}
 				 });
 
-	  d3.json(url, function(e){
+	  tmcpe.loadData( url, function(e) {
 	      // update the section layer json
 	      segmap.secjson( e );
-	  });
+
+	      $(window).trigger( "tmcpe.tsd.segmentsLoaded", e );
+	  }, "VDS Segment Data");
       }
 
       segmap.getSectionIndex = function( sec, e  ) {
@@ -1678,8 +1720,9 @@ if ( !tmcpe ) var tmcpe = {};
 			  .attr("id", function( d ) { return d.id; } )
 			  .attr("i", function( d ) { return d.i; } )
 			  .attr("stroke", function( d ) {
-			      var el = $('g[vdsid^="'+d.id+'"] rect[j^=11]')[0]; // fixme: j == 11?  this is a hanging hardcode
-			      return el == null ? "black" : el.style.fill; 
+			      //var el = $('g[vdsid^="'+d.id+'"] rect[j^=11]')[0]; // fixme: j == 11?  this is a hanging hardcode
+			      //return el == null ? "black" : el.style.fill; 
+			      return color(60);
 			  } )
 			  .attr("stroke-width", 4 )
 			  .title(function(d) { 
@@ -1688,39 +1731,55 @@ if ( !tmcpe ) var tmcpe = {};
 
 	  map.add(secs);
 
+	  // force color redraw
+	  if ( activeTimestep != null ) setActiveTimestep( activeTimestep );
+
       }
 
-      function activeTimestep( j ) {
+      /**
+       * Update the segment map based upon the given active timestep
+       */
+      function setActiveTimestep( j ) {
+	  activeTimestep = j;
+	  if ( json == null ) return;  // incase we've not received data yet
 
           var sections = json.sections;
 
-	  // Get all sections at time == j, these give the colors
-	  var el = $('rect[j^='+j+']');
-
 	  // Next, foreach el, find the corresponding segment and update the stroke
-	  el.map( function (ii, e) {
-	      if ( e != null && !isNaN(e.__data__.i) ) {
-		  // update segment colors
-		  var seg = $('path[id^='+sections[e.__data__.i].vdsid+']');
-		  seg.map( function (jj, s) { 
-		      s.style.setProperty("stroke",e.style.getPropertyValue("fill"),"important") } );
+	  // FIXME: THIS IS A HACK ATTACK!
+	  d3.select(container).select('#segments')
+	      .selectAll('path[id]')
+	      .style('stroke',function(d) {
+		  var id = d3.select(this).attr('id');
+		  var si = json.getSectionIndex(id);
+		  var x = json.data[si][j];
+		  if ( x.p_j_m > 0 && x.p_j_m < 1 ) {
+		      d3.select(this).classed('datapoor',true);
+		      return "";
+		  } else {
+		      d3.select(this).classed('datapoor',false);
+		      return color(json.data[si][j].spd)
+		  }
+	      });
 
-		  // update node colors
-		  var nod = $('#ends circle[id^="node:'+sections[e.__data__.i].vdsid+'"]');
-		  nod.map( function (jj, s) { 
-		      s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
-		      s.setAttribute("r", e.__data__.inc ? 4 : 2 );
-		  } );
-
-		  // update arrow colors
-		  var nod = $('#ends path[id^="node:'+sections[e.__data__.i].vdsid+'"]');
-		  nod.map( function (jj, s) { 
-		      s.style.setProperty("fill",e.__data__.inc ? "blue" : e.style.getPropertyValue("fill"),"important" )
-		      s.setAttribute("r", e.__data__.inc ? 4 : 2 );
-		  } );
-
-	      }
-	  });
+	  /*
+	  d3.select(container).select('#ends')
+	      .selectAll('circle[id]')
+	      .style('fill',function(d) {
+		  var id = d3.select(this).attr('id');
+		  var nodsec = id.split(":");
+		  var si = json.getSectionIndex(nodsec[1]);
+		  return json.data[si][j].inc ? "blue" : d3.select(this).style('fill');
+	      });
+	      */
+	  d3.select(container).select('#ends')
+	      .selectAll('path[id]')
+	      .style('fill',function(d) {
+		  var id = d3.select(this).attr('id');
+		  var nodsec = id.split(":");
+		  var si = json.getSectionIndex(nodsec[1]);
+		  return json.data[si][j].inc ? "blue" : color(json.data[si][j]);
+	      });
 
 	  // finally, update the map text
 	  d3.select("#maptext")
@@ -1732,8 +1791,15 @@ if ( !tmcpe ) var tmcpe = {};
       });
 
       $(window).bind("tmcpe.tsd.activeTimestep", function(caller, adata) {
-          activeTimestep( adata );
+          setActiveTimestep( adata );
       });
+
+      $(window).bind("tmcpe.tsd.paramsChanged", function( caller, params ) {
+	  // update speed scale
+	  //tsd.updateScale();
+	  renderLegend()
+      });
+
 
       return segmap;
   };
@@ -1852,76 +1918,6 @@ if ( !tmcpe ) var tmcpe = {};
   var tsd;
   var cumflow;
   var map;
-
-  var themeScale=1.0;
-
-  function maxSpeed() {
-      var maxSpd = $("input[name=maxspdslider]").value;
-      if ( maxSpd == null ) maxSpd = 40;
-      return maxSpd;
-  }
-
-  function speedScale() {
-      //var scale  = $("#scaleslider").slider("option","value");
-      var scale = [];
-      if ( scale.length == 0 ) scale = 1.0;
-      return scale;
-  }
-
-  function cellStyle(d) {
-     var themeWid = $("#theme")[0];
-     var theme = themeWid.options[themeWid.selectedIndex].value;
-     var scale  = speedScale();
-     var maxSpd = maxSpeed();
-
-     // return grey if evidence is uncertain (imputed data)
-     if ( d.p_j_m > 0 && d.p_j_m < 1 ) {
-	 d3.select(this).classed('datapoor',true);
-         return "";
-     } else {
-	 d3.select(this).classed('datapoor',false);
-     }
-
-     if ( theme == "stdspd" ) {
-         var color = d3.scale.linear()
-             .domain([-scale,-(scale/2),0] )
-             .range(["#ff0000","#ffff00","#00ff00"]);
-         // bound the stddev value between 0 and -4 stddevs
-         var vv = Math.min(0,Math.max((d.spd-d.spd_avg)/d.spd_std,-4));
-         var col = "fill:"+color(vv)+";stroke:#eee;"
-         return col;
-     } else if ( theme == "spd" ) {
-         var minspd = 15;
-         var color = d3.scale.linear()
-             .domain([minspd,minspd+(maxSpd-minspd)/2,maxSpd])
-             .range(["#ff0000","#ffff00","#00ff00"]);
-         var col = "fill:"+color(d.spd)+";stroke:#eee;"
-         return col;
-     }
-  }
-
-  function evidenceOfIncident( d, scale, maxIncidentSpeed ) {
-      var stdlev = (d.spd - d.spd_avg)/d.spd_std;
-      var tmppjm = 1; // no incident probability is default
-      if ( d.p_j_m != 0 && d.p_j_m != 1 )  // fixme: a proxy to indicate that the historical speed estimate is not tained
-	  tmppjm = 0.5;
-      else if ( stdlev < 0 
-		&& stdlev < -scale
-		&& d.spd < maxIncidentSpeed
-	      )
-      {
-	  tmppjm = 0.0;
-      }
-      return tmppjm == 0.0;
-  }
-
-
-  function cellAugmentStyle(d) {
-     var v1 = speedScale();
-     var v2 = maxSpeed();
-     var ev = evidenceOfIncident( d, v1, v2 );
-     return ev ? "fill:black;" : "fill:none;";
-  }
 
   function rotateMap( v ) {
      map.rotate( v.value );
@@ -2056,11 +2052,6 @@ if ( !tmcpe ) var tmcpe = {};
 
   }
 
-  function updateTsd() {
-     tsd.updateCellStyle( ); // update style
-     tsd.updateCellAugmentation( ); // update style
-  }
-
   function loadLog( id ) {
       // assert
       if ( id == null ) throw "Can't load log for null incident";
@@ -2070,11 +2061,6 @@ if ( !tmcpe ) var tmcpe = {};
 			      params: {id: id} 
 			     });
       tmcpe.loadData(url,function(e){
-	  if ( e.log == null ) {
-	      // this is an error condition
-	      $('#server_error').overlay({load:true});
-	      return;
-	  }
 	  updateLog( e );
 	  $(window).trigger( "tmcpe.tsd.logLoaded", e );
       },"TMC Activity Log Data");
@@ -2124,11 +2110,9 @@ if ( !tmcpe ) var tmcpe = {};
       ///// create the various views to show the data /////
 
       var tsdView = tmcpe.tsd()
-	  .container( $("#tsdbox")[0] )
-      	  .cellStyle( cellStyle )
-	  .cellAugmentStyle( cellAugmentStyle );
+	  .container( $("#tsdbox")[0] );
 
-      var cumflowView = tmcpe.cumflow().container( $("#chartbox")[0] )
+      var cumflowView = tmcpe.cumflow().container( $("#chartbox")[0] );
 
       var mapView = tmcpe.segmap().container( $("#mapbox")[0] );
 
@@ -2140,6 +2124,9 @@ if ( !tmcpe ) var tmcpe = {};
       // put the settings in the true header (from base.gsp)
       var settings = $("#settings").detach();
       settings.appendTo('.header');
+
+      // update the params
+      //tsdParamsView.touch();
       
 
       ///// bind events /////
