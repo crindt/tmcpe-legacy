@@ -3,6 +3,9 @@
       <!-- layouts/bare.gsp head -->
       <title>Caltrans D12 TMC Performance Evaluation (Version <tmcpe:version />) <g:layoutTitle default="" /></title>
 
+      <!-- set the base url to help -->
+      <base href="${createLink(controller:'help')}/index"> 
+
       <!-- less stylesheets -->
       <g:if env="development">
         <less:stylesheet name="tmcpe-base" />
