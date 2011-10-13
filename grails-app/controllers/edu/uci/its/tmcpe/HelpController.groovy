@@ -19,6 +19,21 @@ class HelpController {
 	    redirect( action: 'anonymousUser' )
 	}
     }
+
+    def page = {
+      // Load the mdown page matching the given term
+      def theterm = "index"
+      if ( params.term && params.term != "" ) {
+        theterm = params.term
+      }
+      def f = new File( "web-app/mdown/" + theterm + ".mdown" )
+      if ( f.exists() ) {
+        render(view: "helpRender", model: [content: f.getText()])
+      } else {
+        render(view: "helpMissingPage", model: [page: theterm, f: f.canonicalPath] )
+      }
+      
+     }
 	
     def anonymousUser = {
     }
