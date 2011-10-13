@@ -540,7 +540,7 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( incsum > 0 && json.analysis.badSolution == null ) { 
 	      contour( svg, grid );
 	  } else {
-	      updateText( "NO DELAY SOLUTION AVAILBLE BECAUSE: " + json.analysis.badSolution );
+	      //updateText( "NO DELAY SOLUTION AVAILBLE BECAUSE: " + json.analysis.badSolution );
 	  }
 
 	  return tsd;
@@ -569,13 +569,6 @@ if ( !tmcpe ) var tmcpe = {};
               .attr("class","timebar")
           ;
           
-      }
-
-
-      function activeTsdCell(d,i) {
-	  var sections = json.sections;
-
-	  updateText( "inc:" + d.inc + ", spd:" + d.spd + ", occ:" + Math.floor(d.occ*100+0.5) + "%, vol:" + d.vol + ", loc: " +sections[d.i].name + ", time: "+json.timesteps[d.j]+", lanes: " + sections[d.i].lanes );
       }
 
       function getCellStyle() {
@@ -655,7 +648,6 @@ if ( !tmcpe ) var tmcpe = {};
       });
 
       $(window).bind("tmcpe.tsd.activeTsdCell", function(caller, data ) {
-          activeTsdCell( data );
       });
 
       $(window).bind("tmcpe.tsd.activeTimestep", function(caller, data ) {
@@ -671,6 +663,66 @@ if ( !tmcpe ) var tmcpe = {};
 
 
       return tsd;
+  }
+
+  tmcpe.cellDetailView = function() {
+      _.templateSettings = {
+	  interpolate : /\{\{(.+?)\}\}/g
+      };
+
+      var cellDetail = {},
+      container = d3.select('#cellDetail'),
+      data,
+      secTemplate = _.template("<td>{{(vol?vol:'&nbsp;')}}</td><td>{{(occ?(occ*100).toFixed(0):'&nbsp;')}}</td><td>{{(spd?spd:'&nbsp;')}}<td>{{(spd_avg?spd_avg.toFixed(0):'&nbsp;')}}<td>{{(inc?'Yes':'&nbsp;')}}</td></td></td>"),
+      table
+      ;
+
+      function init() {
+          // assert
+          if ( container == null || container.length == 0 ) 
+              throw "Can't initialize cell detail view in null container";
+
+          table = container.append('table');
+          var tr = table.append("tr");
+          tr.append("th").html("Obs Volume<br/>(veh)");
+          tr.append("th").html("Obs Occ<br/>(%)");
+          tr.append("th").html("Obs Speed<br/>(mph)");
+          tr.append("th").html("Avg Speed<br/>(mph)");
+          tr.append("th").html("Incident");
+          update( [{vol:null,occ:null,spd:null,spd_avg:null,inc:null}] ); // create an empty row
+      }
+
+      function update(data) {
+          if ( table == null ) throw "Can't update null table in cellDetail"; 
+          
+
+          var tr = table.selectAll('tr.data')
+              .data(data)
+              .html(function(d) { return secTemplate( d ) })
+          ;
+
+          tr.enter()
+              .append("tr")
+              .attr("class","data")
+              .html(function(d) { return secTemplate( d ) })
+          ;
+
+          tr.exit().remove();
+      }
+      
+      cellDetail.container = function(x) {
+	  if (!arguments.length) return container;
+	  container = x;
+          init();
+          return cellDetail;
+      }
+
+      $(window).bind("tmcpe.tsd.activeTsdCell", function(caller, adata ) {
+          update( [adata] )
+      });
+
+      return cellDetail;
+      
   }
 
   // view of the cumulative flow past an affected section during the timeframe
@@ -787,8 +839,8 @@ if ( !tmcpe ) var tmcpe = {};
               // if a bad solution, set all values to n/a
 	      $.each(["netDelay","d12Delay","computedDiversion","computedMaxq","whatIfDelay","tmcSavings"], function (i,v) {
 		  d3.select("#"+v).html( "n/a" );
-	      });
-	      return cumflow;
+	      });	
+      return cumflow;
 	  }
 
 
@@ -1099,11 +1151,9 @@ if ( !tmcpe ) var tmcpe = {};
 		    .y1(function(d) { 
 			return y(d.y2); }))
 	      .on("mouseover", function( d,i ) { 
-                  updateText( "Expected Cumulative Flow" );
 		  $('#cumflowChartTip').html("Expected Cumulative Flow" );
 	      } )
 	      .on("mouseout", function (d,i) { 
-		  updateText( "&nbsp;" );
 		  $('#cumflowChartTip').html("" );
 	      } );
 	  
@@ -1121,7 +1171,6 @@ if ( !tmcpe ) var tmcpe = {};
 			.y0(hh - 1)
 			.y1(function(d) { return y(d.y3); }))
 		  .on("mouseover", function( d,i ) { 
-		      updateText( "Expected non-diverted Cumulative Flow (Observed delay)" );
 		      $('#cumflowChartTip').html( "Expected non-diverted Cumulative Flow (Observed delay)");
 		      /*
 			vis.selectAll( "g.area3 path" )
@@ -1130,7 +1179,7 @@ if ( !tmcpe ) var tmcpe = {};
 			*/
 		  } )
 		  .on("mouseout", function (d,i) { 
-		      updateText( "&nbsp;" );
+		      $('#cumflowChartTip').html( "");
 		      /*
 			vis.selectAll( "g.area3 path" )
 			.filter( function (d,j) { 
@@ -1159,7 +1208,7 @@ if ( !tmcpe ) var tmcpe = {};
 		    .y0(hh - 1)
 		    .y1(function(d) { return y(d.y); }))
 	      .on("mouseover", obsmouseover )
-	      .on("mouseout", function () { updateText( "&nbsp;" ) } );
+	      .on("mouseout", function () { } );
 
 	  
 	  vis.append("svg:path")
@@ -1176,10 +1225,9 @@ if ( !tmcpe ) var tmcpe = {};
 		    .y0(hh - 1)
 		    .y1(function(d) { return y(d.incflow); }))
 	      .on("mouseover", function() { 
-		  updateText( "What-if" ) 
 		  $('#cumflowChartTip').html( "Estimated cumulative flow without TMC");
 	      } )
-	      .on("mouseout", function () { updateText( "&nbsp;" ) } );
+	      .on("mouseout", function () {  } );
 
 	  $(chg[0]).tooltip({position:"center right", tip: '#cumflowChartTip'});
 
@@ -1212,14 +1260,13 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("y2", hh - 1 )
 	      .on("mouseover", function(d,i) {
 		  this.style.stroke="red";
-		  updateText( $.format.date( new Date(d.t*1000), "HH:mm" ) + ":: " + d.l );
+		  $('#cumflowTimebarTip').html( $.format.date( new Date(d.t*1000), "HH:mm" ) + ":: " + d.l );
 
 	      })
 	      .on("mouseout", function(d,i) {
 		  this.style.stroke="";
 	      })
 	  ;
-
 
 	  d3.selectAll("g.timebar")
 	      .append("svg:text")
@@ -1255,7 +1302,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("y2", hh - 1 )
 	      .on("mouseover", function(d,i) { 
 		  this.style.stroke="red";
-		  updateText( "Log: " + new Date(d.stampDateTime).toLocaleTimeString() + ": " + d.memoOnly ); 
+		  $('#cumflowTimebarTip').html( "Log: " + new Date(d.stampDateTime).toLocaleTimeString() + ": " + d.memoOnly );
 	      })
 	      .on("mouseout", function(d,i) {
 		  this.style.stroke="";
@@ -1263,15 +1310,17 @@ if ( !tmcpe ) var tmcpe = {};
 	  ;
 
 
+
+	  $('.timebar').tooltip({position:"center right", tip: '#cumflowTimebarTip', offset: [20, 0]});
+
+
 	  cumflow.updateStats();
 
 	  function avgmouseover(d,i) {
-	      updateText( "Expected Cumulative Flow" );
 	      $('#cumflowChartTip').html( "Expected Cumulative Flow");
 	  }
 
 	  function obsmouseover(d,i) {
-	      updateText( "Observed Cumulative Flow" );
 	      $('#cumflowChartTip').html( "Observed Cumulative Flow");
 	  }
 
@@ -2120,6 +2169,8 @@ if ( !tmcpe ) var tmcpe = {};
       ;
 
       var statsView = tmcpe.statsView().container( $('#databox')[0] );
+
+      var cellDetailView = tmcpe.cellDetailView().container( d3.select('#cellDetail') );
 
       // put the settings in the true header (from base.gsp)
       var settings = $("#settings").detach();

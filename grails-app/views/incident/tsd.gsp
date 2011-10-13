@@ -50,6 +50,7 @@
 
     <div id='tmcpeapp'>
       <div class='content'>
+        <h3 style="display:inline;color:yellow;">Incident ${incidentInstance.cad}</h3>
 	<div id="tsdParams">
 	  <table style="float:left;display:none;">
 	    <tr>
@@ -155,7 +156,9 @@
 	</div>
 	
 	<div id="msg" class="fullcontainer">
-	  <p><h3 style="display:inline;color:yellow;">Incident ${incidentInstance.cad}:&nbsp;</h3><span id="msgtxt">&nbsp;</span></p>
+	  <p style="text-align:center">
+            <div id="cellDetail"/>
+          </p>
 	</div>
 	
 	<div id="detail">
@@ -173,7 +176,9 @@
 	    <div id="chartcontainer" class="leftbox">
 	      <div id="chartbox"></div>
 	      <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
+              <span id="msgtxt">&nbsp;</span>
 	      <div id="cumflowChartTip" class="tooltip noarrow" style="display:none"></div>
+	      <div id="cumflowTimebarTip" class="tooltip right" style="display:none"></div>
 	    </div>
 	    <div id="databox" class="rightbox">
 	      <ul class="tabs">
