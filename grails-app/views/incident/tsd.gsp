@@ -45,8 +45,8 @@
 
   </head>
   <body>
-    <div id='cad' name='${incidentInstance.cad}' />
-    <div id='id' name='${incidentInstance.id}' />
+    <div id='cad' name='${incidentInstance.cad}' style="display:none"></div>
+    <div id='id' name='${incidentInstance.id}' style="display:none"></div>
 
     <div id='tmcpeapp'>
       <div class='content'>
