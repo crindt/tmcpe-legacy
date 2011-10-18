@@ -1311,7 +1311,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 
 
-	  $('.timebar').tooltip({position:"center right", tip: '#cumflowTimebarTip', offset: [20, 0]});
+	  $(container).find('.timebar').tooltip({position:"center right", tip: '#cumflowTimebarTip', offset: [20, 0]});
 
 
 	  cumflow.updateStats();
