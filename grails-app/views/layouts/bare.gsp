@@ -51,8 +51,8 @@
 		</span>
 	      </sec:ifNotLoggedIn>
 	    </li>
-	    <li><a target="_blank" href="problem/report" title="Report a problem using the CTMLabs issue tracker">Report Problem</a></li>
-	    <li><a target="_blank" href="help">Help</a></li>
+	    <li><a target="_blank" href="${createLink(controller:'problem',action:'report')}" title="Report a problem using the CTMLabs issue tracker">Report Problem</a></li>
+	    <li><a target="_blank" href="${createLink(controller:'help')}">Help</a></li>
 	  </ul>
 	</div>
       </div>
