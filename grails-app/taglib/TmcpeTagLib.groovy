@@ -109,5 +109,5 @@ class TmcpeTagLib {
 
   def dojo_version = { out << "1.5" }
 
-  def version = { out << "[${ApplicationHolder.application.metadata['app.version']} [${grails.util.Environment.getCurrent()}]" }
+  def version = { out << "[${ApplicationHolder.application.metadata['app.minorversion']} [${grails.util.Environment.getCurrent()}]" }
 }
