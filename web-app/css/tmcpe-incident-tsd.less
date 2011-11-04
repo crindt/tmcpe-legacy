@@ -419,3 +419,18 @@ table.parambox {
     float:left;
     border: solid 1px #fff;
 }
+
+
+table.cellDetail {
+    td,th {
+        min-width:5em;
+        text-align: right;
+        &.incident {
+            text-align:center;
+        }
+    }
+
+    th:first-child {
+        min-width: 10em;
+    }
+}

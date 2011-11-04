@@ -665,6 +665,16 @@ if ( !tmcpe ) var tmcpe = {};
       return tsd;
   }
 
+  function safe_fixed(v,f) {
+      if ( v != null ) return v.toFixed(f);
+  }
+  function safe_date(d,dft) {
+      if ( d != null ) return 
+  }
+
+  // http://stackoverflow.com/questions/2998784/how-to-output-integers-with-leading-zeros-in-javascript
+  function zfill(num, len) {return (Array(len).join("0") + num).slice(-len);}
+
   tmcpe.cellDetailView = function() {
       _.templateSettings = {
 	  interpolate : /\{\{(.+?)\}\}/g
@@ -672,32 +682,39 @@ if ( !tmcpe ) var tmcpe = {};
 
       var cellDetail = {},
       container = d3.select('#cellDetail'),
-      data,
-      secTemplate = _.template("<td>{{(vol?vol:'&nbsp;')}}</td><td>{{(occ?(occ*100).toFixed(0):'&nbsp;')}}</td><td>{{(spd?spd:'&nbsp;')}}<td>{{(spd_avg?spd_avg.toFixed(0):'&nbsp;')}}<td>{{(inc?'Yes':'&nbsp;')}}</td></td></td>"),
+      json,
+      secTemplate = _.template("<th>{{what?what:'&nbsp;'}}</th><td>{{(vol?vol:'&nbsp;')}}</td><td>{{(occ?(occ*100).toFixed(0):'&nbsp;')}}</td><td>{{(spd?spd:'&nbsp;')}}</td><td>{{inc==1?'Yes':'No'}}</td>"),
+//      domtTemplate = _.template("{{(date!=null?['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Nov','Dec'][date.getMonth()]:'&nbsp;')}} {{(date.getDate())}} @ {{(date.getHours())}}:{{(date.getMinutes())}}"),
       table
       ;
 
-      function init() {
-          // assert
-          if ( container == null || container.length == 0 ) 
-              throw "Can't initialize cell detail view in null container";
 
-          table = container.append('table');
-          var tr = table.append("tr");
-          tr.append("th").html("Obs Volume<br/>(veh)");
-          tr.append("th").html("Obs Occ<br/>(%)");
-          tr.append("th").html("Obs Speed<br/>(mph)");
-          tr.append("th").html("Avg Speed<br/>(mph)");
-          tr.append("th").html("Incident");
-          update( [{vol:null,occ:null,spd:null,spd_avg:null,inc:null}] ); // create an empty row
-      }
-
-      function update(data) {
+      function update(dataa) {
           if ( table == null ) throw "Can't update null table in cellDetail"; 
-          
+
+          var d = null;
+          if ( json != null && json.timesteps != null )
+              d = json.timesteps[dataa.j];
+
+          var th = table.selectAll('th.title')
+              .data([d])
+              .html(d!=null?(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Nov','Dec'][d.getMonth()]
+                             + " " + d.getDate() 
+                             + " @ " 
+                             + d.getHours()
+                             + ":"
+                             + zfill(d.getMinutes(),2)):'&nbsp;');
+                    
 
           var tr = table.selectAll('tr.data')
-              .data(data)
+              .data([{what:"Obs:",vol:safe_fixed(dataa.vol),occ:safe_fixed(dataa.occ,2),spd:safe_fixed(dataa.spd),inc:dataa.inc},
+                      {what:"Avg" +(d!=null?(
+                          ' on ' + ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]
+                              + " @ " 
+                              + d.getHours()
+                              + ":"
+                              + zfill(d.getMinutes(),2)):'&nbsp'),
+                       vol:safe_fixed(dataa.vol_avg),occ:safe_fixed(dataa.occ_avg,2),spd:safe_fixed(dataa.spd_avg),inc:dataa.inc_avg}])
               .html(function(d) { return secTemplate( d ) })
           ;
 
@@ -709,6 +726,28 @@ if ( !tmcpe ) var tmcpe = {};
 
           tr.exit().remove();
       }
+
+      function init() {
+          // assert
+          if ( container == null || container.length == 0 ) 
+              throw "Can't initialize cell detail view in null container";
+
+          table = container.append('table').classed('cellDetail',true);
+          
+          var tr = table.append("tr");
+          tr.append("th").classed('title',true).html("&nbsp;");
+          tr.append("th").html("Volume (veh)");
+          tr.append("th").html("Occ (%)");
+          tr.append("th").html("Speed (mph)");
+          tr.append("th").classed('incident',true).html("Incident");
+          update( {vol:null,occ:null,spd:null,spd_avg:null,vol_avg:null,occ_avg:null,inc:null,date:null} ); // create empty data
+      }
+
+      cellDetail.data = function(x) {
+	  if ( !arguments.length ) return json;
+	  json = x;
+          return cellDetail;
+      }
       
       cellDetail.container = function(x) {
 	  if (!arguments.length) return container;
@@ -718,7 +757,11 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
       $(window).bind("tmcpe.tsd.activeTsdCell", function(caller, adata ) {
-          update( [adata] )
+          update( adata )
+      });
+
+      $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, adata) {
+	  cellDetail.data( adata );
       });
 
       return cellDetail;
