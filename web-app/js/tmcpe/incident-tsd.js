@@ -1885,9 +1885,9 @@ if ( !tmcpe ) var tmcpe = {};
           var gsthr = gst.append('thead').append('tr');
           gsthr.selectAll('th')
               .data([{class:"label",html:"Facility"},
-                     {class:"numlabel",html:'Delay<35<br/><span class="delayUnitHolder"></span>'},
-                     {class:"numlabel",html:'Delay<br/><span class="delayUnitHolder"></span>'},
-                     {class:"numlabel",html:'Delay<br/>(no TMC)<br/><span class="delayUnitHolder"></span>'},
+                     {class:"numlabel",html:'Net Delay<35<br/><span class="delayUnitHolder"></span>'},
+                     {class:"numlabel",html:'Net Delay<br/><span class="delayUnitHolder"></span>'},
+                     {class:"numlabel",html:'Net Delay<br/>(no TMC)<br/><span class="delayUnitHolder"></span>'},
                      {class:"numlabel",html:'TMC Savings<br/><span class="delayUnitHolder"></span>'},
                     ])
               .enter()
