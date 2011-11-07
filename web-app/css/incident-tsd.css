@@ -292,3 +292,14 @@ table {
 #activityLog_info {
     text-weight: bold;
 }
+
+table.cellDetail {
+    th {
+        min-width:10em;
+        text-align: right;
+        &.incident {
+            text-align:center;
+        }
+    }
+}
+

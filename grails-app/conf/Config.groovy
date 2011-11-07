@@ -190,6 +190,8 @@ environments {
 		html.compress = true
 		html.debug = true
 	    }
+            // Disable resource caching in development.  Useful for editing help files
+            grails.resources.debug=true
 	}
 }
 uiperformance.html.includePathPatterns = [".*\\.geojson"]
@@ -220,6 +222,7 @@ uiperformance.exclusions = [
     "**/lesscss*/**",
     "**/prototype/**",
     "**/plugins/**",
+    "**/datatables/**",
 ]
 
 uiperformance.bundles = [

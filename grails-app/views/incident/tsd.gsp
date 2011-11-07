@@ -45,11 +45,12 @@
 
   </head>
   <body>
-    <div id='cad' name='${incidentInstance.cad}' />
-    <div id='id' name='${incidentInstance.id}' />
+    <div id='cad' name='${incidentInstance.cad}' style="display:none"></div>
+    <div id='id' name='${incidentInstance.id}' style="display:none"></div>
 
     <div id='tmcpeapp'>
       <div class='content'>
+        <h3 style="display:inline;color:yellow;">Incident ${incidentInstance.cad}</h3>
 	<div id="tsdParams">
 	  <table style="float:left;display:none;">
 	    <tr>
@@ -91,6 +92,22 @@
                        title="The factor used to convert minutes of delay into a dollar equivalent" />
 	      </td>
 	    </tr>
+            <tr style="display:none"> <!- hide this -->
+	      <th>Max Incident Speed:</th>
+	      <td>
+		<div id="maxspdslider" title="Select the percent of observed diversion attributable to TMC actions">
+		  <input type="range" name="maxspdslider" min="0" max="80" value="50"/>
+		</div>
+	      </td>
+            </tr>
+            <tr style="display:none"> <!- hide this -->
+	      <th>Incident Evidence Scale:</th>
+	      <td>
+		<div id="scaleslider" title="Select the multiple of stddev speed ">
+		  <input type="range" name="scaleslider" min="0" max="5" value="10"/>
+		</div>
+	      </td>
+            </tr>
 	  </table>
 	  <table class="parambox">
 	    <!--
@@ -107,7 +124,7 @@
 	    <tr>
 	      <th>TMC Diversion %:</th>
 	      <td>
-		<div id="tmcpctslider">
+		<div id="tmcpctslider" title="Select the percent of observed diversion attributable to TMC actions">
 		  <input type="range" name="tmcpctslider" min="0" max="100" value="20"/>
 		</div>
 	      </td>
@@ -117,7 +134,7 @@
                 Verification Delay without TMC
               </th>
               <td>
-		<div id="verdel">
+		<div id="verdel" title="Select the number of additional minutes expected for verification if the TMC wasn't there">
 		  <input type="range" name="verdelslider" min="0" max="60" value="15"/>
                   minutes
 		</div>
@@ -128,8 +145,8 @@
                   Response Delay without TMC
                 </th>
                 <td>
-		  <div id="respdel">
-		    <input type="range" name="respdelslider" min="0" max="60" value="15" title="Select the number of additional minutes expected for the response to restore capacity"/>
+		  <div id="respdel" title="Select the number of additional minutes expected for the response to restore capacity if the TMC wasn't there">
+		    <input type="range" name="respdelslider" min="0" max="60" value="15"/>
                     minutes
 		  </div>
                 </td>
@@ -139,7 +156,9 @@
 	</div>
 	
 	<div id="msg" class="fullcontainer">
-	  <p><h3 style="display:inline;color:yellow;">Incident ${incidentInstance.cad}:&nbsp;</h3><span id="msgtxt">&nbsp;</span></p>
+	  <p style="text-align:center">
+            <div id="cellDetail"/>
+          </p>
 	</div>
 	
 	<div id="detail">
@@ -157,7 +176,9 @@
 	    <div id="chartcontainer" class="leftbox">
 	      <div id="chartbox"></div>
 	      <h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
+              <span id="msgtxt">&nbsp;</span>
 	      <div id="cumflowChartTip" class="tooltip noarrow" style="display:none"></div>
+	      <div id="cumflowTimebarTip" class="tooltip right" style="display:none"></div>
 	    </div>
 	    <div id="databox" class="rightbox">
 	      <ul class="tabs">
@@ -165,52 +186,7 @@
 		<li><a href="#">Activity Log</a></li>
 	      </ul>
 	      <div class="panes">
-		<div id="generalStatsContainer">
-		  <table id="generalStats">
-                   <thead>
-                     <tr>
-                       <th class="label">Facility</th>
-                       <th class="numlabel">Delay<35<br/><span class="delayUnitHolder"></span></th>
-                       <th class="numlabel">Delay<br/><span class="delayUnitHolder"></span></th>
-                       <!--
-                           <th class="label">&Delta;q</th>
-                           <th class="label">max(q)</th>
-                       -->
-                       <th class="numlabel">Delay<br/>(no TMC)<br/><span class="delayUnitHolder"></span></th>
-                       <th class="numlabel">TMC Savings<br/><span class="delayUnitHolder"></span></th>
-                     </tr>
-                   </thead>
-                   <tbody>
-                     <tr>
-                       <td class="facilityName" id="facility"></td>
-                       <td class="delayValue" id="d12Delay"></td>
-                       <!--              <td class="unit delayUnit" id="d12DelayUnit">veh-hr</td> -->
-
-                       <td class="delayValue" id="netDelay"></td>
-                       <!--              <td class="unit delayUnit" id="netDelayUnit">veh-hr</td> -->
-
-                       <!--              <td class="value" id="computedDiversion"></td> -->
-                       <!--              <td class="unit" id="computedDiversionUnit">veh</td> -->
-
-                       <!--              <td class="value" id="computedMaxq"></td> -->
-                       <!--              <td class="unit" id="computedMaxqUnit">veh</td> -->
-
-                       <td class="delayValue" id="whatIfDelay"></td>
-                       <!--              <td class="unit delayUnit" id="whatIfDelayUnit">veh-hr</td> -->
-
-                       <td class="delayValue" id="tmcSavings"></td>
-                       <!--              <td class="unit delayUnit" id="tmcSavingsUnit">veh-hr</td> -->
-                     </tr>
-                   </tbody>
-                 </table>
-                 <a id="tmcpe_tsd_download_link"></a>
-                 &nbsp;|&nbsp;
-                 <a id="tmcpe_report_analysis_problem_link"></a>
-               </div>
-               <div id="logtableContainer">
-                 <table id="activityLog">
-                 </table>
-               </div>
+              </div>
              </div>
 	  </div>
 	</div>
