@@ -178,49 +178,89 @@ svg text {
   stroke: #000;
 }
  
- 
-.line, circle.area {
-  fill: none;
-  stroke: cyan;
-  stroke-width: 1.5px;
-}
 
 
  
 @area-expected-flow-fill: #0f0;    /* green */
 @area-observed-flow-fill: #4682B4; /* steelblue */
 @area-divavg-flow-fill:   #f00;    /* red */
-@area-whatif-flow-fill:   #ff0;    /* yellow */
+@area-adjdivavg-flow-fill:   #ff0;    /* yellow */
+@area-whatif-flow-fill:   #333;    /* transparent */
 
 g.areas {
 
-    path.area {
-	fill: @area-observed-flow-fill;
-	&:hover {
-            fill: lighten( @area-observed-flow-fill, 30% );
-	}
-    }
-
-    path.area2 { 
-        fill: @area-expected-flow-fill;
+    path.line {
+        fill: none;
+        stroke-width: 2px;
         &:hover {
-            fill: lighten( @area-expected-flow-fill, 30% );
+            stroke: #ff0; /* highlight line color */
         }
     }
 
+    path.observed {
+        &.area {
+	    fill: @area-observed-flow-fill;
+	    &:hover {
+                fill: lighten( @area-observed-flow-fill, 30% );
+	    }
+        }
+        &.line {
+            stroke: lighten( @area-observed-flow-fill, 30% );
+            &:hover {
+                stroke: #ff0; /* highlight line color */
+            }
+        }
+    }
+
+    path.expectedflow { 
+        &.area {
+            fill: @area-expected-flow-fill;
+            &:hover {
+                fill: lighten( @area-expected-flow-fill, 30% );
+            }
+        }
+        &.line {
+            stroke: lighten( @area-expected-flow-fill, 30% );
+        }
+    }
+
+    path.adjexpectedflowafterdiv {
+
+        &.area {
+	    fill: @area-adjdivavg-flow-fill;
+	    &:hover {
+                fill: lighten( @area-adjdivavg-flow-fill, 30% );
+	    }
+        }
+        &.line {
+            stroke: lighten( @area-adjdivavg-flow-fill, 30% );
+        }
+    }
  
-    path.area3 {
-	fill: @area-divavg-flow-fill;
-	&:hover {
-            fill: lighten( @area-divavg-flow-fill, 30% );
-	}
+    path.expectedflowafterdiv {
+
+        &.area {
+	    fill: @area-divavg-flow-fill;
+	    &:hover {
+                fill: lighten( @area-divavg-flow-fill, 30% );
+	    }
+        }
+        &.line {
+            stroke: lighten( @area-divavg-flow-fill, 30% );
+        }
     }
 
     path.whatif {
-	fill: @area-whatif-flow-fill;
-	&:hover {
-            fill: lighten( @area-whatif-flow-fill, 30% );
-	}
+
+        &.area {
+	    fill: none;
+	    &:hover {
+                fill: none;
+	    }
+        }
+        &.line {
+            stroke: lighten( @area-whatif-flow-fill, 30% );
+        }
     }
 }
 
@@ -257,7 +297,7 @@ g.areas {
 .line2, circle.area2 {
   fill: none;
   stroke: yellow;
-  stroke-width: 1.5px;
+  stroke-width: 2px;
 }
  
 circle.area {

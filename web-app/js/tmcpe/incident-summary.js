@@ -702,7 +702,7 @@ if ( !tmcpe ) var tmcpe = {};
 
       // Now, fire things up by setting a default query
       //aggquery.url("incident/listGroups.json?groups=year&stackgroups=eventType")
-      queryView.query( { groups: [ "year" ], stackgroups: ["eventType"], filters: ["analyzed=onlyAnalyzed"] } );
+      queryView.query( { groups: [ "year" ], stackgroups: ["month"], filters: ["analyzed=onlyAnalyzed"] } );
 
 
       // set up the overlays
