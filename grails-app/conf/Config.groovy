@@ -222,6 +222,7 @@ uiperformance.exclusions = [
     "**/lesscss*/**",
     "**/prototype/**",
     "**/plugins/**",
+    "**/datatables/**",
 ]
 
 uiperformance.bundles = [
