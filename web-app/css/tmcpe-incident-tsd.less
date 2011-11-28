@@ -94,8 +94,16 @@ body {
 }
 
 #generalStatsContainer {
-    th {
-        vertical-align: bottom;
+    table { 
+        th {
+            vertical-align: bottom;
+        }
+        td.delayValue {
+            &:hover {
+	            background-color: black;
+	            color: yellow;
+            }
+        }
     }
 }
 
@@ -181,11 +189,12 @@ svg text {
 
 
  
-@area-expected-flow-fill: #0f0;    /* green */
-@area-observed-flow-fill: #4682B4; /* steelblue */
+@area-expected-flow-fill: #4682B4; /* steelblue */
+@area-observed-flow-fill: #0f0;    /* green */
 @area-divavg-flow-fill:   #f00;    /* red */
-@area-adjdivavg-flow-fill:   #ff0;    /* yellow */
+@area-adjdivavg-flow-fill:   #0f0;    /* green */
 @area-whatif-flow-fill:   #333;    /* transparent */
+@highlight: cyan;
 
 g.areas {
 
@@ -199,16 +208,27 @@ g.areas {
 
     path.observed {
         &.area {
-	    fill: @area-observed-flow-fill;
-	    &:hover {
+	        fill: @area-observed-flow-fill;
+	        &:hover {
                 fill: lighten( @area-observed-flow-fill, 30% );
-	    }
+	        }
+
+            &.highlight {
+                stroke: highlight;
+                fill: @highlight;
+            }
         }
         &.line {
             stroke: lighten( @area-observed-flow-fill, 30% );
             &:hover {
                 stroke: #ff0; /* highlight line color */
             }
+
+            &.highlight {
+                stroke: highlight;
+                fill: @highlight;
+            }
+
         }
     }
 
@@ -218,45 +238,71 @@ g.areas {
             &:hover {
                 fill: lighten( @area-expected-flow-fill, 30% );
             }
+            &.highlight {
+                stroke: highlight;
+                fill: @highlight;
+            }
         }
         &.line {
             stroke: lighten( @area-expected-flow-fill, 30% );
+            &.highlight {
+                stroke: highlight;
+                fill: @highlight;
+            }
         }
     }
 
     path.adjexpectedflowafterdiv {
 
         &.area {
-	    fill: @area-adjdivavg-flow-fill;
-	    &:hover {
+	        fill: @area-adjdivavg-flow-fill;
+	        &:hover {
                 fill: lighten( @area-adjdivavg-flow-fill, 30% );
-	    }
+	        }
+            &.highlight {
+                stroke: highlight;
+                fill: @highlight;
+            }
         }
         &.line {
-            stroke: lighten( @area-adjdivavg-flow-fill, 30% );
+            //stroke: lighten( @area-adjdivavg-flow-fill, 30% );
+            stroke: @area-adjdivavg-flow-fill;
+            &.highlight {
+                stroke: highlight;
+                fill: @highlight;
+            }
         }
     }
  
     path.expectedflowafterdiv {
 
         &.area {
-	    fill: @area-divavg-flow-fill;
-	    &:hover {
+	        fill: @area-divavg-flow-fill;
+	        &:hover {
                 fill: lighten( @area-divavg-flow-fill, 30% );
-	    }
+	        }
+            &.highlight {
+                stroke: highlight;
+                fill: @highlight;
+            }
         }
         &.line {
-            stroke: lighten( @area-divavg-flow-fill, 30% );
+            //stroke: lighten( @area-divavg-flow-fill, 30% );
+            stroke: @area-divavg-flow-fill;
+            &.highlight {
+                stroke: highlight;
+                fill: @highlight;
+            }
         }
     }
 
     path.whatif {
 
         &.area {
-	    fill: none;
-	    &:hover {
+	        fill: none;
+	        &:hover {
                 fill: none;
-	    }
+	        }
         }
         &.line {
             stroke: lighten( @area-whatif-flow-fill, 30% );
