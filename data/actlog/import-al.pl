@@ -778,6 +778,7 @@ eval {
 					     2875
 				       ),
 				       ')' )
+
 				 ,4326 ),
 			   ')' );
 	    $inc->location_geom( \$txt );
@@ -799,15 +800,15 @@ eval {
 	    $_ = $log->activitysubject;
 	    if ( /SIGALERT\s+(\w+)/ ) 
 	    {
-		$inc->sigalert_begin( $log ) if $1 eq 'BEGIN';
-		$inc->sigalert_end( $log ) if $1 eq 'END';
+            $inc->sigalert_begin( $log ) if $1 eq 'BEGIN';
+            $inc->sigalert_end( $log ) if $1 eq 'END';
 	    } elsif ( /OPEN INCIDENT/ ) {
-		$openinc = $log;
-
-	    # this is a hack to determine the proxy verification
+            $openinc = $log;
+            
+            # this is a hack to determine the proxy verification
 	    } 
 	    if ( ( /INFO/ || /SIGALERT BEGIN/ ) && !$proxyver) { 
-		$proxyver = $log;
+            $proxyver = $log;
 	    }
 
 	    # first, delete existing performance measures, we'll recompute
@@ -914,14 +915,16 @@ eval {
 
 	    # fallback to finding clearance
 	    if ( !$inc->lanes_clear( ) ) {
-		$_ = $memo;
-		if ( /SIGALERT END/ || /LANES CLEAR/ || /LANES CLR/ || /ROADWAY CLEAR/ || /RDWY CLR/ 
-		     || /RDWY CLEAR/ || /ROADWAY IS CLEAR/ || /RDWY IS CLEAR/ || /LANES OPEN/ || /LNS ARE OPEN/
-		     || /LNS OPEN/ || /ALL LANES ARE CLEAR/) {
-		    $inc->lanes_clear( $log );
-		}
+            $_ = $memo;
+            if ( /SIGALERT END/ || /LANES CLEAR/ || /LANES CLR/ || /ROADWAY CLEAR/ || /RDWY CLR/ 
+                 || /RDWY CLEAR/ || /ROADWAY IS CLEAR/ || /RDWY IS CLEAR/ || /LANES OPEN/ || /LNS ARE OPEN/
+                 || /LNS OPEN/ || /ALL LANES ARE CLEAR/) {
+                $inc->lanes_clear( $log );
+            }
 	    }
 	}
+
+    # now, parse the icad log to pull any additional data
 	    
 	# now set the locdata if we found it...
 	if ( $locdata ) {

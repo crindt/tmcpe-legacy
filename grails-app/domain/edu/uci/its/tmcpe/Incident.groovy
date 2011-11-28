@@ -39,7 +39,7 @@ class Incident {
     TmcLogEntry firstCall        // equivalent to t0
     TmcLogEntry verification     // equivalent to t1
     TmcLogEntry lanesClear       // equivalent to t2
-    TmcLogEntry incidentClear // equivalent to t3
+    TmcLogEntry incidentClear    // equivalent to t3
     
     
     // The estimated freeway section where the incident occurred (the
@@ -94,10 +94,7 @@ class Incident {
     List getTmcLogEntries()
     {
         return TmcLogEntry.findAllByCad( cad );
-    }
-
-    
-    
+    }  
 
     public Period computeTimeToVerify()
     {
@@ -105,21 +102,21 @@ class Incident {
         def start = entries.first().getStampDateTime()
         def startj = new DateTime( start )
         def verif = entries.find() { it.activitysubject == 'VERIFICATION' }
-	def verifj = null
-	if ( verif )
-	    verifj = new DateTime(verif.getStampDateTime())
-	def verif2 = entries.find() { it.memo =~ /VERIFIED BY CCTV/ }
-	if ( verif2 != null ) {
-	    def verifj2 = new DateTime(verif2.getStampDateTime())
-	    if ( verifj == null || verifj2.compareTo(verifj) < 0 ) {
-		verif = verif2
-		verifj = verifj2
-	    }
-	}
+        def verifj = null
+        if ( verif )
+          verifj = new DateTime(verif.getStampDateTime())
+        def verif2 = entries.find() { it.memo =~ /VERIFIED BY CCTV/ }
+        if ( verif2 != null ) {
+          def verifj2 = new DateTime(verif2.getStampDateTime())
+          if ( verifj == null || verifj2.compareTo(verifj) < 0 ) {
+            verif = verif2
+            verifj = verifj2
+          }
+        }
 	    
-	verif2 = entries.find() { it.memo =~ /PER CCTV/ }
-	if ( verif2 != null ) {
-	    def verifj2 = new DateTime(verif2.getStampDateTime())
+        verif2 = entries.find() { it.memo =~ /PER CCTV/ }
+        if ( verif2 != null ) {
+          def verifj2 = new DateTime(verif2.getStampDateTime())
 	    if ( verifj == null || ( verifj2 && verifj2.compareTo(verifj) < 0 ) ) {
 		verif = verif2
 		verifj = verifj2
@@ -171,13 +168,11 @@ class Incident {
     }
     
     def verifyDurationString() {
-        log.info( "TTTTTTTTTTTTTTTTTTTTTTTTT" )
         def ttv = computeTimeToVerify();
         if ( ttv == null ) { 
             log.info( "UNKNOWN" )
             return( "<UNKNOWN>" )
         }
-        log.info( "TTTTTTTTTTTTTTTTTTTTTTTTT" + ttv )
         org.joda.time.format.PeriodFormatter fmt = 
             new org.joda.time.format.PeriodFormatterBuilder().
             printZeroAlways().
@@ -226,41 +221,6 @@ class Incident {
         return cal.getTime();
     }
     
-    def toKml( radius = 0.01 ) {
-        if ( ! bestGeom ) return
-        
-        if ( radius == 0 ) {
-            return [ "<Point><coordinates>",
-                bestGeom.getX()+","+bestGeom.getY(),
-                "</coordinates></Point>"
-            ].join("\n")
-            
-        } else {
-            // We want a circle
-            String coords = ""
-            Point p = bestGeom
-            Float x = p.getX()
-            Float y = p.getY()
-            for ( i in 0..20 )
-            {
-                Float ff = i
-                Float ang = ff*(2*3.14159)/20.0
-                Float xx = (x+Math.cos(ang)*radius)
-                Float yy = (y+Math.sin(ang)*radius)
-                coords = coords + " " +  xx + "," + yy
-            }
-            
-            
-            return [ "<Polygon><outerBoundaryIs><LinearRing><coordinates>",
-                coords,
-                "</coordinates></LinearRing></outerBoundaryIs></Polygon>",
-                "<Point>",
-                p.getX()+","+p.getY(),
-                "</Point>"
-            ].join("\n")
-        }
-    }
-    
     def toJSON( json ) {
 	if ( !section )
 	    log.warn( "WARNING: emitting JSON incident cad:$cad [$id] without a section" );
@@ -284,7 +244,7 @@ class Incident {
             d12_delay( analyses.size() > 0 ? analyses?.first().d12Delay() : null )
             tmcpe_delay( analyses.size() > 0 ? analyses?.first().netDelay() : null )
             savings( 0 ) // FIXME: update this.
-	    samplePercent( analyses.size() > 0 ? analyses?.first().samplePercent() : null )
+            samplePercent( analyses.size() > 0 ? analyses?.first().samplePercent() : null )
             analysesCount( analyses?.size() )
         }
     }

@@ -263,6 +263,7 @@ class IncidentFacilityImpactAnalysisController {
                     def cnt = timesteps ? timesteps.size() : 0;
                     System.err.println( "A total of " + ifia.analyzedSections.size() + " analyzed sections!\n" )
 		    def i = 0;
+            def chp = ifia.incidentImpactAnalysis.incident.computeFirstChpOnScene();
 		    def json = [ 
 			id : ifia.id,
 			cad : ifia.incidentImpactAnalysis.incident.cad,
@@ -284,6 +285,7 @@ class IncidentFacilityImpactAnalysisController {
 			t1: ifia.verification,
 			t2: ifia.lanesClear,
 			t3: ifia.computedIncidentClearTime,
+            onScene: chp == null ? null : chp.stamp,
 			parameters: [
 			  maxIncidentSpeed: ifia.maxIncidentSpeed,
 			  band: ifia.band
