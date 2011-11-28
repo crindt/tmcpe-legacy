@@ -922,6 +922,13 @@ eval {
                 $inc->lanes_clear( $log );
             }
 	    }
+        if ( !$inc->lanes_clear() ) {
+            $_ = $log->activitysubject;
+            if ( /CLOSE INCIDENT/ ) {
+                print STDERR "$_ == 'CLOSE INCIDENT' @ ".$log->stamp."\n";
+                $inc->lanes_clear( $log );
+            }
+        }
 	}
 
     # now, parse the icad log to pull any additional data
