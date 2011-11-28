@@ -1729,17 +1729,17 @@ sub compute_delay {
     my @avds = $self->get_affected_vds( $self->facil, $self->dir, $self->pm );
     
     if ( $self->reprocess_existing && 0 ) {
-	# read old data from the gams program
-	$self->get_gams_data( @avds );
+        # read old data from the gams program
+        $self->get_gams_data( @avds );
 
     } else {
-	$self->get_pems_data( @avds );
+        $self->get_pems_data( @avds );
     }
 	
     if ( !$self->reprocess_existing ) {
-	$self->write_gams_program( );
+        $self->write_gams_program( );
 	
-	$self->solve_program( );
+        $self->solve_program( );
     }
 
     # reset conditions
@@ -1843,21 +1843,22 @@ sub compute_incident_clear() {
     my ( $mm, $jj );
   TIMELOOP:
     foreach my $m ( reverse 0..($M-1) ) {
-	foreach my $j ( 0..($J-1) ) {
-	    my $dat = $self->rawdata->[$j][$m];
-	    if ( $dat->{incident_flag} ) {
-		( $mm, $jj ) = ( $m, $j );
-		last TIMELOOP;
-	    }
-	    $j++;
-	}
+        foreach my $j ( 0..($J-1) ) {
+            my $dat = $self->rawdata->[$j][$m];
+            if ( $dat->{incident_flag} ) {
+                ( $mm, $jj ) = ( $m, $j );
+                last TIMELOOP;
+            }
+            $j++;
+        }
     }
+    print STDERR "LATEST($mm),FURTHEST($jj)\n";
 
     $self->computed_max_extent_time( $self->time_string_from_index( $mm ) );
     $self->computed_max_extent_location( $jj );
     1;
 
-    # At this point, ($mm, $jj) is the time, space index of the atest and
+    # At this point, ($mm, $jj) is the time, space index of the latest and
     # furthest upstream disturbance.  Now we want to model how fast the last
     # impacted vehicle moving through this cell will reach the site of the
     # incident.  First, we assume this vehicle touches the upstream latest edge
@@ -1870,43 +1871,44 @@ sub compute_incident_clear() {
 
     # now we compute how much of the 5 minute time step it takes for this
     # vehicle to cross the section of interest
-    while( $j <= $self->computed_start_location && $m < $M ) {
-	my $dat = $self->rawdata->[$j][ $m ];
-	my $spd = $dat->{spd}; #mph
-
-	if ( $spd == 0 ) {$spd = 60;};  # default, assume free flow
-	my $time_used = $spaceres/$spd*60.0/5.0;  # frac of 5 minutes used
-
-	if ( $time_used > $timeres ) {
-	    # if time_used is > timeres, it means that the vehicle didn't traverse the
-	    # whole section in the time step, compute how far and set space res
-	    my $dtrav = ($spd/60.0)*(5.0*$timeres);
-	    $spaceres -= $dtrav;
-	    croak "BAD DISTANCE" if ( $spaceres < 0 );
-	    $m++;
-
-	} else {
-	    # traversed to end during timestep, compute how much is left
-	    $timeres -= $time_used;
-	    $j++;
-	    $spaceres = $self->stationdata->[$j]->{seglen};
-	}
+    while( $j < $self->computed_start_location && $m < $M ) {
+        my $dat = $self->rawdata->[$j][ $m ];
+        my $spd = $dat->{spd}; #mph
+        
+        if ( $spd == 0 ) {$spd = 60;};  # default, assume free flow
+        my $time_used = $spaceres/$spd*60.0/5.0;  # frac of 5 minutes used
+        
+        if ( $time_used > $timeres ) {
+            # if time_used is > timeres, it means that the vehicle didn't traverse the
+            # whole section in the time step, compute how far and set space res
+            my $dtrav = ($spd/60.0)*(5.0*$timeres);
+            $spaceres -= $dtrav;
+            croak "BAD DISTANCE" if ( $spaceres < 0 );
+            $m++;
+            
+        } else {
+            # traversed to end during timestep, compute how much is left
+            $timeres -= $time_used;
+            $j++;
+            $spaceres = $self->stationdata->[$j]->{seglen};
+        }
+        print STDERR "TIME($m),SECTION($j),CSL(".$self->computed_start_location.")\n";
     }
     # at this point, (j-1,m) should be the cell where the vehicle reaches the
     # incident location
     # OR: if $m == $M, then the congestion plume is bounded
     if ( $m == $M ) {
-	# bounded plume, just assume $M-1 for now
-	warn "CONGESTION PLUME IS BOUNDED, CANNOT COMPUTE incident clear time";
-	$self->ifa->computed_incident_clear_time( $self->time_string_from_index( $M-1 ) );
-	$self->computed_incident_clear_time( $M-1 );
-	$self->computed_incident_clear_location( $self->computed_start_location );
+        # bounded plume, just assume $M-1 for now
+        warn "CONGESTION PLUME IS BOUNDED, CANNOT COMPUTE incident clear time";
+        $self->ifa->computed_incident_clear_time( $self->time_string_from_index( $M-1 ) );
+        $self->computed_incident_clear_time( $M-1 );
+        $self->computed_incident_clear_location( $self->computed_start_location );
     } else {
-	$self->ifa->computed_incident_clear_time( $self->time_string_from_index( $m ) );
-	$self->computed_incident_clear_time( $m );
-	$self->computed_incident_clear_location( $self->stationdata->[$j-1] );
+        $self->ifa->computed_incident_clear_time( $self->time_string_from_index( $m ) );
+        $self->computed_incident_clear_time( $m );
+        $self->computed_incident_clear_location( $self->stationdata->[$j-1] );
     }
-
+    
 
     $self->ifa->update();
 }
