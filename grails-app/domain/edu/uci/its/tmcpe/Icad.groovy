@@ -24,4 +24,12 @@ class Icad {
         id column: 'keyfield'
         version false
     }
+
+    int compareTo( obj ) {
+      int ret = 0
+      if ( ( ret = id.compareTo( obj.id ) ) != 0 ) return ret
+
+      return ret
+    }
+
 }

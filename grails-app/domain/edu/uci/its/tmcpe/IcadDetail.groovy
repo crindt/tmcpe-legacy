@@ -17,7 +17,7 @@ class IcadDetail implements Comparable {
     }
 
     int compareTo( obj ) {
-        int ret
+        int ret = 0
         if ( ( ret = icad.compareTo( obj.icad ) ) != 0 ) return ret
         if ( ( ret = stamp.compareTo( obj.stamp ) ) != 0 ) return ret
         // more?
