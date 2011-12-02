@@ -10,7 +10,7 @@ package edu.uci.its.tmcpe
 
 class FacilityPerformance {
 	String id 
-	List sections            // as vdsids
+	List sections            // as [vdsid,seclen] pairs
 	List<Date> times         // as 5-minute timesteps
 
 	String badSolution       // report 

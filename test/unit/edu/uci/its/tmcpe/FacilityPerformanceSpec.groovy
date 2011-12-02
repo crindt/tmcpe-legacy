@@ -85,7 +85,7 @@ class FacilityPerformanceSpec extends UnitSpec {
         ;
 
 	  where:
-		secs    | times                   | td | ad | d35d | tmcd | valid
+		secs    | times             | td | ad | d35d | tmcd | valid
 		[1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | true
 		[1,2,3] | ['00:05','00:10'] | -1 |  1 |    1 |    1 | false
 		[1,2,3] | ['00:05','00:10'] |  1 | -1 |    1 |    1 | false
