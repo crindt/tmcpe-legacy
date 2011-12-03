@@ -11,11 +11,10 @@
 
 package edu.uci.its.tmcpe
 
-import grails.plugin.spock.*
 import grails.datastore.test.DatastoreUnitTestMixin
 
 @Mixin(DatastoreUnitTestMixin)
-class FacilityPerformanceSpec extends UnitSpec {
+class FacilityPerformanceSpec extends TmcpeUnitSpec {
 
 
     def "Test that FacilityPerformance can be persisted"() {
@@ -46,17 +45,21 @@ class FacilityPerformanceSpec extends UnitSpec {
         ;
 
       when: "we set the data"
-		def fp = new FacilityPerformance(totalDelay:td,avgDelay:ad,d35NetDelay:d35d,tmcpeNetDelay: tmcd)
+		def fp = validFacilityPerformance()
+		fp.totalDelay = td
+		fp.avgDelay = ad
+		fp.d35NetDelay = d35d
+		fp.tmcpeNetDelay = tmcd
 		fp.sections = secs
 		fp.times    = times
 		;
 		
       then: "we should get the expected validation result"
-		fp.validate() == valid
+		validationStatusMatches( fp, expected )
 		;
 		
 	  where: 
-		secs    | times             | td | ad | d35d | tmcd | valid
+		secs    | times             | td | ad | d35d | tmcd | expected
 		[1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | true
 		[     ] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | false
 		[1,2,3] | [               ] |  1 |  1 |    1 |    1 | false
@@ -75,22 +78,28 @@ class FacilityPerformanceSpec extends UnitSpec {
         ;
 
       when: "we set the data"
-		def fp = new FacilityPerformance(totalDelay:td,avgDelay:ad,d35NetDelay:d35d,tmcpeNetDelay: tmcd)
+		def fp = validFacilityPerformance()
+		fp.totalDelay = td
+		fp.avgDelay = ad
+		fp.d35NetDelay = d35d
+		fp.tmcpeNetDelay = tmcd
+		fp.direction = dir
 		fp.sections = secs
 		fp.times    = times
         ;
 
       then: "we should get the expected validation result"
-		fp.validate() == valid
+		validationStatusMatches( fp, expected )
         ;
 
 	  where:
-		secs    | times             | td | ad | d35d | tmcd | valid
-		[1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | true
-		[1,2,3] | ['00:05','00:10'] | -1 |  1 |    1 |    1 | false
-		[1,2,3] | ['00:05','00:10'] |  1 | -1 |    1 |    1 | false
-		[1,2,3] | ['00:05','00:10'] |  1 |  1 |   -1 |    1 | false
-		[1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |   -1 | false
+		dir | secs    | times             | td | ad | d35d | tmcd | expected
+		'N' | [1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | true
+		'N' | [1,2,3] | ['00:05','00:10'] | -1 |  1 |    1 |    1 | false
+		'N' | [1,2,3] | ['00:05','00:10'] |  1 | -1 |    1 |    1 | false
+		'N' | [1,2,3] | ['00:05','00:10'] |  1 |  1 |   -1 |    1 | false
+		'N' | [1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |   -1 | false
+		'H' | [1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | false
     }
 
 
@@ -102,7 +111,7 @@ class FacilityPerformanceSpec extends UnitSpec {
 		;
 		
 	  when:
-		def fp = new FacilityPerformance()
+		def fp = validFacilityPerformance()
 		fp.times = [ d('00:05'), d('00:10')]
 		;
 
@@ -177,5 +186,12 @@ class FacilityPerformanceSpec extends UnitSpec {
 
 	def d(s) { 
 		Date.parse('yyyy-MM-dd HH:mm','2011-01-01 '+s)
+	}
+
+	def validFacilityPerformance() { 
+		new FacilityPerformance(
+			facility:5,direction:'N',
+			totalDelay:0f,avgDelay:0f,d35NetDelay:0f,
+			tmcpeNetDelay: 0f)
 	}
 }

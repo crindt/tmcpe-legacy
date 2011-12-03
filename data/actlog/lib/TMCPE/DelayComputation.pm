@@ -964,7 +964,12 @@ sub write_gams_program {
     $LIMROW = join( " = ", "OPTIONS LIMROW", $self->gams_limrow ) if $self->gams_limrow;
     
     my $cmdline = $self->cmdline;
+	my $cad = $self->cad
+	my $facil = $self->facil
+	my $dir = $self->dir
     $of < qq{
+*** CAD: $self->cad
+*** FACILITY: $facil-$dir
 *** COMMAND LINE [$cmdline]
 \$ONUELLIST
 OPTIONS ITERLIM = 500000000

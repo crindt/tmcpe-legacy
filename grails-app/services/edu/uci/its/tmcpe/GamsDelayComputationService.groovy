@@ -1,15 +1,13 @@
 package edu.uci.its.tmcpe
 
 import org.apache.commons.logging.LogFactory
+import groovy.text.GStringTemplateEngine
 
 class GamsDelayComputationService {
 
 	private static final log = LogFactory.getLog(this)
 
     static transactional = true
-
-    class GamsFileParseException extends Exception { }
-    class ListFileParseException extends Exception { }
 
     public IncidentFacilityPerformanceAnalysis parseGamsResults(File gms, File lst) { 
         def ifpa = new IncidentFacilityPerformanceAnalysis()
@@ -18,32 +16,25 @@ class GamsDelayComputationService {
         return ifpa
     }
 
-    def getMatch(lines, re, i=-1, j=-1) { 
-        def match = null
-        def line = null
-		log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
-        while( lines.size > 0 && 
-               !(match = ( ( line = lines.remove(0) ) =~ re ))
-             ) { 
-			log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
-        }
-        if ( i == -1 || j == -1 ) return match
-        
-        if ( match.size() > i && match[i].size() > j ) { 
-            return match[i][j]
-        } else {
-            throw new GamsFileParseException()
-        }
-    }
 
-	def getMatchAndContinue(lines, re) {
-		def m = getMatch( lines, re )
-		if ( m.size() == 1 )
-			return m
-		else
-			// didn't find what we were expecting
-			throw new GamsFileParseException()
+	/**
+	 * Generate a GAMS input file
+	 */
+	def createGamsData( IncidentFacilityPerformanceAnalysis ifpa, File gms ) { 
+		// use ifpa to specify conditions
+		def f = new File('test/data/tst.gms.template')
+		def engine = new GStringTemplateEngine()
+		//assert ( ifpa.validate() )
+		println ifpa.properties
+		def template = engine.createTemplate(f).make(ifpa.properties)
+
+		// the newWriter call destroys the existing gms file
+		def w = gms.newWriter() 
+		w << template.toString()
+		w.close()
 	}
+
+
 
     def parseGamsData( File gms, IncidentFacilityPerformanceAnalysis ifpa ) { 
         
@@ -51,6 +42,12 @@ class GamsDelayComputationService {
 
 		// parse CAD
 		ifpa.cad = getMatch(lines, /^\*\*\* CAD:\s*([^\s]+)\s*$/, 0, 1 )
+
+		// parse Facility
+		def facdir = getMatch(lines, /^\*\*\* FACILITY:\s*(\d+-[^\s]+)\s*$/, 0, 1)
+		facdir = facdir.split('-')
+		ifpa.facility = facdir[0]
+		ifpa.direction = facdir[1]
 
         // read command line
 		ifpa.modelConfig = [:]
@@ -78,6 +75,13 @@ class GamsDelayComputationService {
             throw new GamsFileParseException()
         }
 
+		// read the times
+		ifpa.times = []
+		for ( j in timerange[0]..(timerange[1]-1)) { 
+			ifpa.times[j] = Date.parse("yyyy-MM-dd HH:mm:ss",
+									   getMatch(lines, /^\*\s+(.*?)\s*$/, 0, 1))
+		}
+
         
         // read postmiles (and vdsids)
         getMatchAndContinue(lines, /^\s*PM.*section postmile/)  // pm head
@@ -103,7 +107,8 @@ class GamsDelayComputationService {
         for( i in secrange[0]..secrange[1]) { 
             def sechead = getMatch(lines,/^\s*\*\s*S\d+\s+=\s+(\d+)\s+(.*?)\s*$/)
             if ( sechead.size() == 1 ) { 
-                assert ifpa.sections[i].vdsid == sechead[0][1]
+                if ( ifpa.sections[i].vdsid != sechead[0][1] )
+					throw new MismatchedIndicesException()
             } else { 
                 throw new GamsFileParseException()
             }
@@ -289,7 +294,7 @@ class GamsDelayComputationService {
 					def ti = Integer.parseInt(match[0][2])
 					// make sure the section and time 
 					// indices for this data match what we expect
-					assert ( si == i  &&  ti == j )
+					if ( si != i  ||  ti != j ) throw new MismatchedIndicesException()
 					ifpa.modConditions[i][j] = [inc:(int)parseGamsLevelLine(match[0][3])]
 				} else {
 					throw new GamsFileParseException()
@@ -299,6 +304,44 @@ class GamsDelayComputationService {
 		println ifpa.modelStats
     }
 
+	// Some helper method for parsing
+
+	/**
+	 * Scans lines until the re is found and returns the indexed group
+	 */
+    def getMatch(lines, re, i=-1, j=-1) { 
+        def match = null
+        def line = null
+		log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
+        while( lines.size > 0 && 
+               !(match = ( ( line = lines.remove(0) ) =~ re ))
+             ) { 
+			log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
+        }
+        if ( i == -1 || j == -1 ) return match
+        
+        if ( match.size() > i && match[i].size() > j ) { 
+            return match[i][j]
+        } else {
+            throw new GamsFileParseException()
+        }
+    }
+
+	/**
+	 * Scans lines until the re is found
+	 */
+	def getMatchAndContinue(lines, re) {
+		def m = getMatch( lines, re )
+		if ( m.size() == 1 )
+			return m
+		else
+			// didn't find what we were expecting
+			throw new GamsFileParseException()
+	}
+
+	/**
+	 * Parses a GAMS line containing a variable value from a solution
+	 */
 	def parseGamsLevelLine(str) {
 		def dataarray = str.split(/\s+/)
 		def level = dataarray[1]
@@ -308,4 +351,12 @@ class GamsDelayComputationService {
 			level = Float.parseFloat( level )
 		return level
 	}
+
+
+	// Some exceptions
+
+    public class GamsFileParseException extends Exception { }
+    public class LstFileParseException extends Exception { }
+	public class MismatchedIndicesException extends LstFileParseException { }
+
 }

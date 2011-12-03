@@ -11,7 +11,7 @@ package edu.uci.its.tmcpe
 import grails.plugin.spock.*
 import grails.datastore.test.DatastoreUnitTestMixin
 
-class GamsDelayComputationServiceSpec extends UnitSpec {
+class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
 
 	def "Test that the getMatch method works as expected"() {
       given: "a GamsDelayComputationService"
@@ -97,19 +97,97 @@ class GamsDelayComputationServiceSpec extends UnitSpec {
 		1       |  'NORMAL COMPLETION' | 'OPTIMAL' | 2.8624f | 8.562f   | 0
     }
 
+	def "Test that a LST file missing various features will fail to parse"() { 
+      given: "a GamsDelayComputationService"
+		def gamsService = new GamsDelayComputationService()
+		;
+		
+	  when: "we define flawed input files"
+		def gms = new File("test/data/1.gms")
+		def lst = new File("test/data/${file}.lst")
+		;
+		
+	  and: "parse them"
+		def ifpa = gamsService.parseGamsResults(gms, lst)
+		;
+		
+	  then: "the parse should fail with the proper exception"
+		thrown(except)
+		;
+		
+	  where:
+		file                 | except
+		'1-no-sections'      | GamsDelayComputationService.GamsFileParseException
+		'1-no-timesteps'     | GamsDelayComputationService.GamsFileParseException
+		'1-no-solver-status' | GamsDelayComputationService.GamsFileParseException
+		'1-no-model-status'  | GamsDelayComputationService.GamsFileParseException
+		'1-no-objective'     | GamsDelayComputationService.GamsFileParseException
+		'1-no-cputime'       | GamsDelayComputationService.GamsFileParseException
+		'1-no-totdelay'      | GamsDelayComputationService.GamsFileParseException
+		'1-no-avgdelay'      | GamsDelayComputationService.GamsFileParseException
+		'1-no-netdelay'      | GamsDelayComputationService.GamsFileParseException
+	}
+
 	def "Test that a LST file with improper indices will fail"() {
 	  given: "A GamsDelayCompuationService parsing a GamsFile"
 		;
 	  when: "the lst file D indices don't match what's expected"
+		def gms = new File("test/data/1.gms")
+		def lst = new File(lstf)
 		;
- 	  then: "the read should fail"
+
+	  and:
+		def ifpa = gamsService.parseGamsResults(gms, lst)
+		;
+		
+ 	  then: "the read should fail with the proper exception"
+		GamsDelayComputationService.MismatchedIndicesException e = thrown()
 		//gamsService.parseGamsResults( gms, lst )
 		;
 
-	  and: "but this hasn't been defined"
+	  when: "create need to create more tests"
+
+	  and: "they havn't been defined so"
 		;
 	  then: "it must fail"
-		false
+		false  // FIXME: crindt: define this condition
 		;
+
+	  where: "the lst files are"
+		lstf << ["test/data/1-bad-indices-1.lst",
+				 "test/data/1-bad-indices-2.lst"]
+		
 	}
+
+	def "Test that we can create a valid GAMS input file"() { 
+
+      given: "A GamsDelayComputationService and an existing GMS file"
+		def gamsService = new GamsDelayComputationService()
+		def gms = new File('test/data/1.gms')
+		def lst = new File('test/data/1.lst')
+        ;
+
+      when: "we parse the existing GMS file to create an ifpa"
+		def ifpa = gamsService.parseGamsResults(gms, lst)
+        ;
+
+	  then:
+		//validationStatusMatches( ifpa, true )
+		true
+		;
+		
+	  when: "we use that ifpa to generate a new GMS file"
+		def gms2 = new File('test/data/1-created.gms')
+		gamsService.createGamsData( ifpa, gms2 )
+		;
+		
+	  and: "we parse the new GMS file"
+		def ifpa2 = gamsService.parseGamsResults(gms2, lst)
+		;
+
+      then: "the new ifpa2 should match the old ifpa exactly"
+		//validationStatusMatches( ifpa2, true )
+		ifpa == ifpa2
+        ;
+    }
 }

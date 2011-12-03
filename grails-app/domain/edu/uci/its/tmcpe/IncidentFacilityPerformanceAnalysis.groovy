@@ -31,21 +31,21 @@ class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
 				val != null               && 
 				val.size == sections.size &&
 				// make sure each row is the same size
-				val.findAll{ row -> row.size == times.size }.size==val.size
+				val.findAll{ row -> row.size() == times.size() }.size()==sections.size()
 					  })
 		avgConditions(
 			validate: { val, obj ->
 				val != null               && 
 				val.size == sections.size &&
 				// make sure each row is the same size
-				val.findAll{ row -> row.size == times.size }.size==val.size 
+				val.findAll{ row -> row.size() == times.size() }.size()==sections.size()
 					  })
 		modConditions(
 			validate: { val, obj ->
 				val == null               ||
 				( val.size == sections.size &&
 				  // make sure each row is the same size
-				  val.findAll{ row -> row.size == times.size }.size==val.size 
+				  val.findAll{ row -> row.size() == times.size() }.size()==sections.size()
 				) })
 	}
 
@@ -64,22 +64,37 @@ class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
 	}
 
 	def modelIsInfeasible() {
-		if ( !ifpa ||
-			 !ifpa.modelStats ) return false
-		if ( ifpa.modelStats.model_status == 'INFEASIBLE' )
+		if ( modelStats == null ) return false
+		if ( modelStats.model_status == 'INFEASIBLE' )
 			return true
 		else
 			return false
 	}
 
 	def modelIsOptimal() {
-		if ( !ifpa ||
-			 !ifpa.modelStats ) return false
-		if ( ifpa.modelStats.model_status == 'OPTIMAL' )
+		if ( modelStats == null ) return false
+		if ( modelStats.model_status == 'OPTIMAL' )
 			return true
 		else
 			return false
 	}
+
+	public String toString() { 
+		return super.toString()+
+		  "[cad:${cad},modelConfig:${modelConfig},modelStats:${modelStats}]"
+	}
+
+	public Boolean equals( IncidentFacilityPerformanceAnalysis other ) { 
+		return (
+			super.equals( other ) &&
+			cad.equals(other.cad) &&
+			obsConditions.equals(other.obsConditions) &&
+			avgConditions.equals(other.avgConditions) &&
+			modelConfig.equals(other.modelConfig) &&
+			modelStats.equals(other.modelStats) &&
+			modConditions.equals(other.modConditions)
+		) 
+		
+		
+	}
 }
-
-

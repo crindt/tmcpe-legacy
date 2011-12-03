@@ -1,19 +1,19 @@
 package edu.uci.its.tmcpe
 
-import grails.plugin.spock.*
 import grails.datastore.test.DatastoreUnitTestMixin
 
 @Mixin(DatastoreUnitTestMixin)
-class IncidentFacilityPerformanceAnalysisSpec extends UnitSpec {
+class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 
 	def "Test that IncidentFacilityPerformanceAnalysis can be persisted"() {
 
       given: "a new IncidentFacilityPerformanceAnalysis object"
 		mockDomain(IncidentFacilityPerformanceAnalysis)
+		def ifpa
         ;
 
 	  when: "we create an ifpa but don't save it"
-		def ifpa = new IncidentFacilityPerformanceAnalysis(cad:'123-123',totalDelay:0f,avgDelay:0f,d35NetDelay:0f,tmcpeNetDelay: 0f)
+		ifpa = validIncidentFacilityPerformanceAnalysis()
 		ifpa.sections = [1,2]
 		ifpa.times = [1,2]
 		ifpa.obsConditions = [[[spd:11f,flow:11,inc:1],[spd:12f,flow:12,inc:1]],
@@ -57,25 +57,20 @@ class IncidentFacilityPerformanceAnalysisSpec extends UnitSpec {
 
       given: "a IncidentFacilityPerformanceAnalysis"
 		mockForConstraintsTests(IncidentFacilityPerformanceAnalysis)
+		def ifpa
 		//mockDomain(IncidentFacilityPerformanceAnalysis)
         ;
 
       when: "we set the data"
-		def ifpa = new IncidentFacilityPerformanceAnalysis(cad:'123-123',totalDelay:0f,avgDelay:0f,d35NetDelay:0f,tmcpeNetDelay: 0f)
+		ifpa = validIncidentFacilityPerformanceAnalysis()
 		ifpa.sections = [1,2]
 		ifpa.times = [1,2]
 		ifpa.obsConditions = obs
 		ifpa.avgConditions = avg
-		if ( ifpa.validate() != valid ) { 
-			println ifpa.obsConditions
-			println ifpa.obsConditions.size+", "+ifpa.sections.size
-			println ifpa.obsConditions[0].size+", "+ifpa.times.size
-			println ifpa.obsConditions.findAll{ row -> row.size == ifpa.obsConditions[0].size }.size+", "+ifpa.obsConditions.size
-		}
 		;
 		
       then: "we should get the expected validation result"
-		ifpa.validate() == valid
+		validationStatusMatches( ifpa, expected )
 		;
 		
 	  where:
@@ -95,21 +90,23 @@ class IncidentFacilityPerformanceAnalysisSpec extends UnitSpec {
 			 [[spd:21f,flow:21],[spd:22f,flow:22]]
 			],
 		]
-		valid << [true,false]
+		expected << [true,false]
     }
 
 	def "Test that tmcpeNetDelay is computed properly"() { 
 
 	  given: "an IncidentFacilityPerformanceAnalysis"
 		mockDomain(IncidentFacilityPerformanceAnalysis)
+		def ifpa
 		;
 		
 	  when: "we have particular data and compute"
-		def ifpa = new IncidentFacilityPerformanceAnalysis(cad:'123-123',totalDelay:0f,avgDelay:0f,d35NetDelay:0f,tmcpeNetDelay: 0f)
+		ifpa = validIncidentFacilityPerformanceAnalysis()
 		ifpa.sections = [[id:1,len:0.5f],[id:2,len:0.75f]]
 		ifpa.times    = [1,2]
 		ifpa.obsConditions = obs
 		ifpa.avgConditions = avg
+		ifpa.modConditions = mod
 		ifpa.computeNetDelays()
 		;
 
@@ -177,11 +174,19 @@ class IncidentFacilityPerformanceAnalysisSpec extends UnitSpec {
 
 	  where:
 		ms << [[:],
-			   [dog:cat],  // it has a modelStats, but not model_status
-			   [model_status:INFEASIBLE],
-			   [model_status:OPTIMAL]
+			   [dog:'cat'],  // it has a modelStats, but not model_status
+			   [model_status:'INFEASIBLE'],
+			   [model_status:'OPTIMAL']
 			  ]
 		expected_optimal    << [false,false,false,true]
 		expected_infeasible << [false,false,true,false]
+	}
+
+	def validIncidentFacilityPerformanceAnalysis() { 
+		return new IncidentFacilityPerformanceAnalysis(
+			cad:'123-123',
+			facility: 5,direction: 'N',
+			totalDelay:0f,avgDelay:0f,d35NetDelay:0f,tmcpeNetDelay: 0f)
+
 	}
 }
