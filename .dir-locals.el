@@ -1,0 +1,8 @@
+;(groovy-mode . ((grails-mode . 1)))
+;(java-mode . ((grails-mode . 1)))
+;(html-mode . ((grails-mode . 1)))
+((nil . ((grails-mode . 1)
+         (indent-tabs-mode . t)
+         (tab-width . 4)
+         (fill-column . 80)
+         )))
