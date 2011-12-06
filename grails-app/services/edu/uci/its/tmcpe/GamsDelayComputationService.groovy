@@ -25,6 +25,9 @@ class GamsDelayComputationService {
 		def f = new File('test/data/tst.gms.template')
 		def engine = new GStringTemplateEngine()
 		//assert ( ifpa.validate() )
+
+		generateModelParams(ifpa)
+
 		println ifpa.properties
 		def template = engine.createTemplate(f).make(ifpa.properties)
 
@@ -34,7 +37,36 @@ class GamsDelayComputationService {
 		w.close()
 	}
 
+	def generateModelParams(IncidentFacilityPerformanceAnalysis ifpa) { 
 
+		// reset
+		ifpa.modelParams = [:]
+
+		ifpa.modelParams.MAX_LOAD_SHOCK_DIST = (
+			ifpa.modelConfig.opts.limit_loading_shockwave/12.0
+		)
+		
+		ifpa.modelParams.MAX_CLEAR_SHOCK_DIST = (
+			ifpa.modelConfig.opts.limit_clearing_shockwave/12.0
+		)
+
+		def shockdir = 1;
+		if ( ifpa.direction =~ /S/ ||
+			 ifpa.direction =~ /W/ ) { 
+			shockdir=-1;
+		}
+
+		ifpa.modelParams.incstart_index = ifpa.modelParams.opts.prewindow/5
+		
+		ifpa.modelParams.weight_for_length = "L( J1 )"
+		if ( !ifpa.modelConfig.opts.weight_for_length )
+			ifpa.modelParams.weight_for_length = "1"
+
+		ifpa.modelParams.weight_for_distance = "1"
+		if ( ifpa.modelConfig.opts.weight_for_distance ) { 
+			ifpa.modelParams.weight_for_distance = "1.0/power(1 + sqrt(sqr(5*(ORD(M1)-${ifpa.modelParams.incstart_index})/60.0)+sqr(PM(J1)-${ifpa.modelParams.incpm})),${ifpa.modelParams.weight_for_distance})"
+		}
+	}
 
     def parseGamsData( File gms, IncidentFacilityPerformanceAnalysis ifpa ) { 
         
@@ -54,7 +86,14 @@ class GamsDelayComputationService {
         ifpa.modelConfig.cmd = getMatch(lines, /^\*\*\* COMMAND LINE \[(.*)\]\s*$/, 0, 1 )
 
         // read options
-        ifpa.modelConfig.opts = [:]
+        ifpa.modelConfig.opts = [
+			weight_for_length:1,
+			height_for_distance:3,
+			limit_loading_shockwave:20,    // mi/hr
+			limit_clearing_shockwave:60,   // mi/hr
+			prewindow:10,   // minutes
+			postwindow:120  // minutes
+		]
         ifpa.modelConfig.opts.reslim = getMatch(lines, /\s*OPTIONS RESLIM = (\d+)/, 0, 1)
 
         // read SETS

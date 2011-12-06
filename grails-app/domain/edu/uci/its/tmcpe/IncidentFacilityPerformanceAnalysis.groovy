@@ -21,6 +21,7 @@ class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
 	// model
 	Map modelConfig
 	Map modelStats
+	Map modelParams
 	List modConditions  // modeled conditions
 
 	static mapWith = "mongo"
