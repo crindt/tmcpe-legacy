@@ -612,10 +612,10 @@ if ( !tmcpe ) var tmcpe = {};
 	  interpolate : /\{\{(.+?)\}\}/g
       };
 
-      var tsdurl = g.createLink({controller:'incident',
-				 action:'tsd',
-				 //params: {cad:'{{cad}}'}  // a param for the template
-				});
+      var tsdurl = tmcpe.createFormattedLink({controller:'incident',
+				              action:'tsd',
+				              //params: {cad:'{{cad}}'}  // a param for the template
+				             });
       tsdurl += "?cad={{cad}}";  // can't use createLink because it encodes {{}}
 
       var detailView = {}
@@ -907,11 +907,10 @@ if ( !tmcpe ) var tmcpe = {};
 	       }), function (key) { 
 		   qparm[key] = map_show_params[key]; 
 	       });
-      var url = g.createLink({controller: 'incident',
-			                  action: 'list',
-			                  params: qparm 
-			                 });
-      url = url.replace(/\/list/,"/list.geojson");
+      var url = tmcpe.createFormattedLink({controller: 'incident',
+			                   action: 'list.geojson',
+			                   params: qparm 
+			                  });
       var query = tmcpe
 	      .query()
 	      .url(url);
@@ -919,36 +918,34 @@ if ( !tmcpe ) var tmcpe = {};
 
       // read query box
       $('#new-incident').keypress(function(e){
-	      url = g.createLink({controller: 'incident',
-			                  action: 'list',
-			                  param: {
-				                  max:1000,
-				                  Analyzed: 'onlyAnalyzed',
-				                  solution: 'good'
-			                  }
-			                 });
-          url = url.replace(/\/list/,"/list.geojson");
-	      url = url + "&" + this.value;
+	  url = tmcpe.createFormattedLink({controller: 'incident',
+			                   action: 'list.geojson',
+			                   param: {
+				               max:1000,
+				               Analyzed: 'onlyAnalyzed',
+				               solution: 'good'
+			                   }
+			                  });
+	  url = url + "&" + this.value;
           
-	      if(e.which == 13){
-	          query.url(url);
-	      }
+	  if(e.which == 13){
+	      query.url(url);
+	  }
       });
 
       $('#year').change(function(){
-	      var year = this.value;
-	      var url = g.createLink({controller: 'incident',
-			                      action: 'list',
-			                      param: {
-				                      max:1000,
-				                      Analyzed: 'onlyAnalyzed',
-				                      solution: 'good',
-				                      startDate: year+"-01-01",
-				                      endDate: year+"-01-01"
-			                      }
-			                     });
-          url = url.replace(/\/list/,"/list.geojson");
-	      query.url(url);
+	  var year = this.value;
+	  var url = g.createFormattedLink({controller: 'incident',
+			                   action: 'list.geojson',
+			                   param: {
+				               max:1000,
+				               Analyzed: 'onlyAnalyzed',
+				               solution: 'good',
+				               startDate: year+"-01-01",
+				               endDate: year+"-01-01"
+			                   }
+			                  });
+	  query.url(url);
       });
 
       // Add tooltips to any titled elements at this point

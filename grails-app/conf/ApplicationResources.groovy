@@ -20,12 +20,15 @@ modules = {
     dthree { 
         resource url:"js/d3.js"
         resource url:"js/d3.time.js"
+        resource url:"js/d3.geom.js"
     }
     
     stdui { 
         dependsOn "jquery-tools, dthree"
         resource url:"js/underscore.js"
         resource url:"js/mustache.js"
+        resource url:"less/tabs-no-images.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_stdui'
+        resource url:"less/range-input.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_stdui'
     }
 
     polymaps { 
@@ -43,13 +46,18 @@ modules = {
         dependsOn "dthree"
         resource url:"js/tmcpe/incident-summary.js"
         resource url:"less/tmcpe-incident-summary.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_style'
-        resource url:"less/tabs-no-images.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_tmcpe-incident-summary'
     }
 
     'tmcpe-map-show' { 
-        dependsOn "dthree,polymaps"
+        dependsOn "stdui,datatables,dthree,polymaps"
         resource url:"js/tmcpe/map-show.js"
         resource url:"less/tmcpe-map-show.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_tmcpe-map-show'
+    }
+
+    'tmcpe-incident-tsd' {
+        dependsOn "stdui,datatables,dthree,polymaps"
+        resource url:"js/tmcpe/incident-tsd.js"
+        resource url:"less/tmcpe-incident-tsd.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_tmcpe-incident-tsd'
     }
     
 }

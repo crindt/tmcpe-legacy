@@ -1880,11 +1880,11 @@ if ( !tmcpe ) var tmcpe = {};
 	  // assertions
 	  if ( json == undefined || json.sections == undefined ) throw "Missing TSD analysis data";
 	  
-	  var url = g.createLink({controller:'vds', 
-				  action:'list.geojson',
-				  params: {freewayDir: json.sections[0].dir,
-					   idIn: json.sections.map( function( sec ) {return sec.vdsid;}).join(",")}
-				 });
+	  var url = tmcpe.createFormattedLink({controller:'vds', 
+				               action:'list.geojson',
+				               params: {freewayDir: json.sections[0].dir,
+					                idIn: json.sections.map( function( sec ) {return sec.vdsid;}).join(",")}
+				              });
 
 	  tmcpe.loadData( url, function(e) {
 	      // update the section layer json
@@ -2291,10 +2291,10 @@ if ( !tmcpe ) var tmcpe = {};
       // assert
       if ( id == null ) throw "Can't load log for null incident";
 
-      var url = g.createLink({controller:'incident', 
-			      action:'getTmcLog',
-			      params: {id: id} 
-			     });
+      var url = tmcpe.createFormattedLink({controller:'incident', 
+			                   action:'getTmcLog',
+			                   params: {id: id} 
+			                  });
       tmcpe.loadData(url,function(e){
 	  updateLog( e );
 	  $(window).trigger( "tmcpe.tsd.logLoaded", e );
@@ -2302,11 +2302,11 @@ if ( !tmcpe ) var tmcpe = {};
   }
 
   function updateAnalysis( id ) {
-      var url = g.createLink({controller:'incidentFacilityImpactAnalysis', 
-			      action:'tsdData',
-			      params: {id: id.value} 
-			     });
-
+      var url = tmcpe.createFormattedLink({controller:'incidentFacilityImpactAnalysis', 
+			                   action:'tsdData',
+			                   params: {id: id.value} 
+			                  });
+      
       tmcpe.loadData(url,function(e){
 	  if ( e == null || e.timesteps == null ) {
 	      // this is an error condition

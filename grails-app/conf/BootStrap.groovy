@@ -51,7 +51,7 @@ class BootStrap {
 	grails.converters.JSON.registerObjectMarshaller( com.vividsolutions.jts.geom.LineString, cc++ ) { 
 	    ls, json ->
 		def ptlist = []
-		ls?.getPoints()?.each() { ptlist.add( [ it?.x, it?.y ] ) }
+		ls?.getCoordinates()?.each() { ptlist.add( [ it?.x, it?.y ] ) }
 		json.build{
 		    "type(LineString)"
 		    type("LineString")

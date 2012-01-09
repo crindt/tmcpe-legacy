@@ -5,43 +5,8 @@
     <meta name="layout" content="bare" />
     <title>Incident ${incidentInstance.cad} Detail</title>
 
-    <!-- frameworks -->
-    <p:javascript src='jquery-1.6.1.min' />
-    <p:javascript src='underscore-min' />
-    <p:javascript src='mustache' />
-
-    <!-- formatting -->
-    <p:javascript src='jquery-1.6.1.min' />
-    <p:javascript src='jquery.tools.min' />
-<!--
-    <p:javascript src='jquery-ui-1.8.13.custom.min' />
--->
-    <p:javascript src='jquery.format-1.2.min' />
-    <p:javascript src='jquery.dataTables' />
-    
-    <!-- visualization toolkits -->
-    <p:javascript src='polymaps' />
-    <p:javascript src='d3' />
-    <p:javascript src='d3.geom' />
-
-
-    <!-- app code -->
-    <p:javascript src='tmcpe/incident-tsd' />
-
-
-    <!-- supporting css -->
-
-    <!-- less stylesheets -->
-    <g:if env="development">
-      <less:stylesheet name="tmcpe-incident-tsd" />
-      <less:stylesheet name="tabs-no-images" />
-      <less:stylesheet name="range-input" />
-    </g:if>
-    <g:if env="production">
-      <p:css name="tmcpe-incident-tsd" />
-      <p:css name="tabs-no-images" />
-      <p:css name="range-input" />
-    </g:if>
+    <!-- app code and stylesheets -->
+    <r:require module="tmcpe-incident-tsd" />
 
   </head>
   <body>

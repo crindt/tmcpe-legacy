@@ -43,15 +43,14 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( model.groups == null ) throw "Undefined model.groups in tmcpe.aggquery";
 	  if ( model.stackgroups == null ) throw "Undefined model.stackgroups in tmcpe.aggquery";
 
-	  var url = g.createLink( { controller: 'incident',
-					            action: 'listGroups',
-                                format: 'json',
-					            params: {
-					                groups: model.groups,
-					                stackgroups: model.stackgroups,
-					                filters: model.filters
-					            }
-				              });
+	  var url = tmcpe.createFormattedLink( { controller: 'incident',
+				             action: 'listGroups.json',
+				             params: {
+					         groups: model.groups,
+					         stackgroups: model.stackgroups,
+					         filters: model.filters
+				             }
+				           });
 	  return url;
       }
 
@@ -691,9 +690,9 @@ if ( !tmcpe ) var tmcpe = {};
       // update if the querybox changes
       $("#advancedqueryinput").keypress(function(e){
 	  if(e.which == 13){
-	      var url = g.createLink( { controller: 'incident',
-					action: 'listGroups.json'
-				      } ) + "?"+this.value;
+	      var url = tmcpe.createFormattedLink( { controller: 'incident',
+					             action: 'listGroups.json'
+				                   } ) + "?"+this.value;
 	      aggquery.url(url);
 	  }
 
