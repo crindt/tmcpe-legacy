@@ -6,39 +6,15 @@
     <title>Incident List</title>
 
     <!-- frameworks -->
-    <p:javascript src='jquery-1.6.1' />
-    <p:javascript src="jquery.tools.min" />
-    <p:javascript src='underscore' />
-    <p:javascript src='mustache' />
-
-    <!-- formatting -->
-    <p:javascript src='jquery.format-1.2.min' />
-    <p:javascript src='jquery.dataTables' />
+    <r:require module="stdui" />
+    <r:require module="datatables" />
 
     <!-- visualization toolkits -->
-    <p:javascript src='polymaps' />
-    <p:javascript src='polymaps_cluster' />
-    <p:javascript src='d3' />
-    <p:javascript src='d3.time' />
+    <r:require module="polymaps" />
+    <r:require module="dthree" />
 
-    <!-- app code -->
-    <p:javascript src='tmcpe/incident-summary' />
-
-    <!-- supporting css -->
-
-    <!-- less stylesheets -->
-    <g:if env="development">
-      <less:stylesheet name="tmcpe-incident-summary" />
-      <less:stylesheet name="tabs-no-images" />
-    </g:if>
-    <g:if env="production">
-      <p:css name="tmcpe-incident-summary" />
-      <p:css name="tabs-no-images" />
-    </g:if>
-      
-
-   <!-- note: less:scripts loaded by base.gsp -->
-
+    <!-- app code and stylesheets -->
+    <r:require module="tmcpe-incident-summary" />
   </head>
   <body>
     <!-- Main body of TMCPE Summary/Index -->

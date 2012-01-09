@@ -1,10 +1,8 @@
 package edu.uci.its.tmcpe
 
-import org.postgis.hibernate.GeometryType
-
-import org.postgis.Geometry
-import org.postgis.LineString
-import org.postgis.Point
+import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.LineString
+import com.vividsolutions.jts.geom.Point
 
 
 class TestbedLine {
@@ -18,8 +16,6 @@ class TestbedLine {
         id column:'id'
         columns {
         }
-//        geom column:'linestring'
-        geom type:GeometryType
         version false
     }
 

@@ -21,20 +21,20 @@ if ( !tmcpe ) var tmcpe = {};
       ;
 
       function executeQuery() {
-	  if ( url == null ) throw "undefined URL in tmcpe.aggquery.executeQuery()";
-	  
-	  $(window).trigger( "tmcpe.aggregatesRequested", query );
-	  
-	  tmcpe.loadData( url, function(e) {
-		       // Catch network errors
-		       if ( e == null ) throw "Error retreiving query data from server.";
-		       
-		       // hold the json response here
-		       data = e;
-		       
-		       // broadcast the newly loaded data
-		       $(window).trigger( "tmcpe.aggregatesLoaded", data );
-	  }, "Loading aggregate data" );
+	      if ( url == null ) throw "undefined URL in tmcpe.aggquery.executeQuery()";
+	      
+	      $(window).trigger( "tmcpe.aggregatesRequested", query );
+	      
+	      tmcpe.loadData( url, function(e) {
+		      // Catch network errors
+		      if ( e == null ) throw "Error retreiving query data from server.";
+		      
+		      // hold the json response here
+		      data = e;
+		      
+		      // broadcast the newly loaded data
+		      $(window).trigger( "tmcpe.aggregatesLoaded", data );
+	      }, "Loading aggregate data" );
       }
 
       function modelToUrl() {
@@ -44,13 +44,14 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( model.stackgroups == null ) throw "Undefined model.stackgroups in tmcpe.aggquery";
 
 	  var url = g.createLink( { controller: 'incident',
-					 action: 'listGroups.json',
-					 params: {
-					     groups: model.groups,
-					     stackgroups: model.stackgroups,
-					     filters: model.filters
-					 }
-				       });
+					            action: 'listGroups',
+                                format: 'json',
+					            params: {
+					                groups: model.groups,
+					                stackgroups: model.stackgroups,
+					                filters: model.filters
+					            }
+				              });
 	  return url;
       }
 

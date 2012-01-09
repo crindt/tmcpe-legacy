@@ -1,11 +1,8 @@
 package edu.uci.its.testbed
 
-import org.postgis.Geometry
-import org.postgis.Point
-import org.postgis.LineString
-import org.postgis.hibernate.GeometryType
-
-
+import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.LineString
 
 class Vds {
 
@@ -80,12 +77,10 @@ class Vds {
         district column: 'district'
 
         geom column: 'geom'
-        geom type:GeometryType
 
         relation column: 'rel'
 
         segGeom column: 'seg_geom'
-        segGeom type:GeometryType
     }
 
     public String toKml()  {

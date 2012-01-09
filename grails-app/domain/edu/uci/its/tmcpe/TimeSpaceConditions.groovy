@@ -14,7 +14,7 @@ public class TimeSpaceConditions {
 	List occs
 	List incidents   // incident flag for each time-space cell
 
-	static mapWith = 'mongo'
+        //static mapWith = 'mongo'
 	static embedded = ['spds','flows','occs']
 	static constraints = { 
 		spds(validator: { val, obj -> 

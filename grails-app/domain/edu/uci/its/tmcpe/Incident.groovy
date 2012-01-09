@@ -1,10 +1,12 @@
 package edu.uci.its.tmcpe
 
-import org.postgis.Point
+/* FIXME: JODA
 import org.joda.time.DateTime
 import org.joda.time.Period
-import org.postgis.Geometry
-import org.postgis.hibernate.GeometryType
+*/
+import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.GeometryFactory
+
 /*
 import java.sql.Time
 import grails.converters.JSON
@@ -48,9 +50,8 @@ class Incident {
 
     Integer verificationTimeInSeconds
 
-    
-    Point locationGeom = new Point( x: 0, y: 0 )
-    Point bestGeom     = new Point( x: 0, y: 0 )
+    Point locationGeom
+    Point bestGeom
     
     String eventType
 
@@ -74,9 +75,7 @@ class Incident {
         sigalertBegin column: 'sigalert_begin'
         sigalertEnd column: 'sigalert_end'
         locationGeom column: 'location_geom'
-        locationGeom type:GeometryType 
         bestGeom column: 'best_geom'
-        bestGeom type:GeometryType 
         section column: 'location_vdsid'
         eventType column: 'event_type'
 
@@ -96,6 +95,7 @@ class Incident {
         return TmcLogEntry.findAllByCad( cad );
     }  
 
+    /* FIXME: JODA
     public Period computeTimeToVerify()
     {
         List entries = getTmcLogEntries()
@@ -166,8 +166,10 @@ class Incident {
             return null
         }
     }
+    */
     
     def verifyDurationString() {
+        /* FIXME: JODA
         def ttv = computeTimeToVerify();
         if ( ttv == null ) { 
             log.info( "UNKNOWN" )
@@ -182,9 +184,12 @@ class Incident {
             minimumPrintedDigits( 2 ).
             appendMinutes().toFormatter()
         return fmt.print( ttv )
+        */
+        return "N/A"
     }
 
     public String cadDurationString() {
+        /* FIXME: JODA
         org.joda.time.format.PeriodFormatter fmt = 
             new org.joda.time.format.PeriodFormatterBuilder().
             printZeroAlways().
@@ -194,10 +199,13 @@ class Incident {
             minimumPrintedDigits( 2 ).
             appendMinutes().toFormatter()
         return fmt.print( computeCadDuration() )
+        */
+        return "N/A"
     }
 
     
     public String sigalertDurationString() {
+        /* FIXME: JODA
         org.joda.time.format.PeriodFormatter fmt = 
             new org.joda.time.format.PeriodFormatterBuilder().
             printZeroAlways().
@@ -207,6 +215,8 @@ class Incident {
             minimumPrintedDigits( 2 ).
             appendMinutes().toFormatter()
         return fmt.print( computeSigalertDuration() )
+        */
+        return "N/A"
     }
     
     def stampDateTime = {

@@ -2,7 +2,7 @@ package edu.uci.its.tmcpe
 
 class TmcFacilityImpactAnalysis {
 
-    static mapWith = "mongo"
+    //static mapWith = "mongo"
 
     String id
     String cad

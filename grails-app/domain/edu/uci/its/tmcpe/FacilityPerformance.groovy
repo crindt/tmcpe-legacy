@@ -21,7 +21,7 @@ class FacilityPerformance {
 	Float d35NetDelay   = 0f // delay per spd < 35
 	Float tmcpeNetDelay = 0f // delay per spd < avg speed (total delay - avg delay)
 	
-	static mapWith = "mongo"
+	//static mapWith = "mongo"
 	static embedded = ['sections', 'times']
 	static constraints = { 
 		facility(nullable:false)

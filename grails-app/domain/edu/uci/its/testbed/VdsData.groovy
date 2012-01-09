@@ -25,8 +25,9 @@ class VdsData implements Serializable {
     }
 
     static mapping = {
-       table name:   'pems_5min_mini'
-       id composite: [ 'vdsid', 'stamp' ]
-       version false
+        datasource 'vds'
+        table name:   'pems_5min_mini'
+        id composite: [ 'vdsid', 'stamp' ]
+        version false
     }
 }

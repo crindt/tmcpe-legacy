@@ -908,44 +908,47 @@ if ( !tmcpe ) var tmcpe = {};
 		   qparm[key] = map_show_params[key]; 
 	       });
       var url = g.createLink({controller: 'incident',
-			      action: 'list.geojson',
-			      params: qparm 
-			     });
+			                  action: 'list',
+			                  params: qparm 
+			                 });
+      url = url.replace(/\/list/,"/list.geojson");
       var query = tmcpe
-	  .query()
-	  .url(url);
-
+	      .query()
+	      .url(url);
+      
 
       // read query box
       $('#new-incident').keypress(function(e){
-	  url = g.createLink({controller: 'incident',
-			      action: 'list.geojson',
-			      param: {
-				  max:1000,
-				  Analyzed: 'onlyAnalyzed',
-				  solution: 'good'
-			      }
-			     });
-	  url = url + "&" + this.value;
-
-	  if(e.which == 13){
-	      query.url(url);
-	  }
+	      url = g.createLink({controller: 'incident',
+			                  action: 'list',
+			                  param: {
+				                  max:1000,
+				                  Analyzed: 'onlyAnalyzed',
+				                  solution: 'good'
+			                  }
+			                 });
+          url = url.replace(/\/list/,"/list.geojson");
+	      url = url + "&" + this.value;
+          
+	      if(e.which == 13){
+	          query.url(url);
+	      }
       });
 
       $('#year').change(function(){
-	  var year = this.value;
-	  var url = g.createLink({controller: 'incident',
-			      action: 'list.geojson',
-			      param: {
-				  max:1000,
-				  Analyzed: 'onlyAnalyzed',
-				  solution: 'good',
-				  startDate: year+"-01-01",
-				  endDate: year+"-01-01"
-			      }
-			     });
-	  query.url(url);
+	      var year = this.value;
+	      var url = g.createLink({controller: 'incident',
+			                      action: 'list',
+			                      param: {
+				                      max:1000,
+				                      Analyzed: 'onlyAnalyzed',
+				                      solution: 'good',
+				                      startDate: year+"-01-01",
+				                      endDate: year+"-01-01"
+			                      }
+			                     });
+          url = url.replace(/\/list/,"/list.geojson");
+	      query.url(url);
       });
 
       // Add tooltips to any titled elements at this point

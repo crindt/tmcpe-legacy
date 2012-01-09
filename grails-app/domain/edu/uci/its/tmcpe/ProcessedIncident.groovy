@@ -1,10 +1,10 @@
 package edu.uci.its.tmcpe
 
-import org.postgis.Point
+/* FIXME:JODA
 import org.joda.time.DateTime
 import org.joda.time.Period
-import org.postgis.Geometry
-import org.postgis.hibernate.GeometryType
+*/
+import com.vividsolutions.jts.geom.Point
 /*
   import java.sql.Time
   import grails.converters.JSON
@@ -44,9 +44,7 @@ class ProcessedIncident {
   // location of the capacity reduction)
   FacilitySection section
 
-    
-  Point locationGeom = new Point( x: 0, y: 0 )
-
+  Point locationGeom
     
   String eventType
 
@@ -63,25 +61,24 @@ class ProcessedIncident {
   }
     
   static mapping = {
-    //table 'sigalert_locations_grails'
-    table name: 'actlog.incidents' //, schema: 'actlog'
-    id column: 'id'
-    cad column: 'cad'
-    startTime column: 'start_time'
-    firstCall column: 'first_call'
-    sigalertBegin column: 'sigalert_begin'
-    sigalertEnd column: 'sigalert_end'
-    locationGeom column: 'location_geom'
-    locationGeom type:GeometryType 
-    section column: 'location_vdsid'
-    eventType column: 'event_type'
+      //table 'sigalert_locations_grails'
+      table name: 'actlog.incidents' //, schema: 'actlog'
+      id column: 'id'
+      cad column: 'cad'
+      startTime column: 'start_time'
+      firstCall column: 'first_call'
+      sigalertBegin column: 'sigalert_begin'
+      sigalertEnd column: 'sigalert_end'
+      locationGeom column: 'location_geom'
+      section column: 'location_vdsid'
+      eventType column: 'event_type'
 
-	verification  column: 'verification'
-	lanesClear    column: 'lanes_clear'    // equivalent to t2
-	incidentClear column: 'incident_clear' // equivalent to t3
+      verification  column: 'verification'
+      lanesClear    column: 'lanes_clear'    // equivalent to t2
+      incidentClear column: 'incident_clear' // equivalent to t3
 
     // turn off optimistic locking, i.e., versioning.  This class is mapped to an externally generated table
-    version false
+      version false
     //        cache usage:'read-only' 
   }
     
@@ -118,6 +115,7 @@ class ProcessedIncident {
     
     
 
+    /* FIXME:JODA
   public Period computeTimeToVerify()
   {
     List entries = getTmcLogEntries()
@@ -188,8 +186,10 @@ class ProcessedIncident {
       return null
     }
   }
+    */
     
   def verifyDurationString() {
+    /* FIXME:JODA
     log.info( "TTTTTTTTTTTTTTTTTTTTTTTTT" )
     def ttv = computeTimeToVerify();
     if ( ttv == null ) { 
@@ -206,9 +206,12 @@ class ProcessedIncident {
     minimumPrintedDigits( 2 ).
     appendMinutes().toFormatter()
     return fmt.print( ttv )
+      */
+      return "N/A"
   }
 
   public String cadDurationString() {
+      /* FIXME:JODA
     org.joda.time.format.PeriodFormatter fmt = 
     new org.joda.time.format.PeriodFormatterBuilder().
     printZeroAlways().
@@ -218,10 +221,13 @@ class ProcessedIncident {
     minimumPrintedDigits( 2 ).
     appendMinutes().toFormatter()
     return fmt.print( computeCadDuration() )
+      */
+      return "N/A"
   }
 
     
   public String sigalertDurationString() {
+      /* FIXME:JODA
     org.joda.time.format.PeriodFormatter fmt = 
     new org.joda.time.format.PeriodFormatterBuilder().
     printZeroAlways().
@@ -231,6 +237,8 @@ class ProcessedIncident {
     minimumPrintedDigits( 2 ).
     appendMinutes().toFormatter()
     return fmt.print( computeSigalertDuration() )
+      */
+      return "N/A"
   }
     
   def stampDateTime = {
@@ -287,6 +295,7 @@ class ProcessedIncident {
   def toJSON( json ) {
 	if ( !section )
       log.warn( "WARNING: emitting JSON incident cad:$cad [$id] without a section" );
+        log.warn( "EMITTING PROCESSED INCIDENT $cad WITH LOCATION ${locationGeom.toString()}"  )
     return json.build{
       "class(Incident)"
       id(id)

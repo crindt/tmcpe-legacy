@@ -16,6 +16,17 @@ class BootStrap {
 	// Here, we register a bunch of converters to emit json for various objects
 	def cc = 1  // the object marshallers must have a distinct index, we
 		    // just create a variable and increment it
+		
+        // Marshallers for custom postgis hibernate legacy implementation DEPRECATED
+	grails.converters.JSON.registerObjectMarshaller( org.postgis.Point, cc++ ) { 
+	    p, json ->
+		json.build{
+		    "type(Point)"
+		    type("Point")
+		    coordinates( [ p?.x, p?.y ] )
+		}
+	}
+
 	grails.converters.JSON.registerObjectMarshaller( org.postgis.LineString, cc++ ) { 
 	    ls, json ->
 		def ptlist = []
@@ -27,13 +38,25 @@ class BootStrap {
 		}	
 	}
 		
-	grails.converters.JSON.registerObjectMarshaller( org.postgis.Point, cc++ ) { 
+        // Marshallers for JTS postgis hibernate implementation
+	grails.converters.JSON.registerObjectMarshaller( com.vividsolutions.jts.geom.Point, cc++ ) { 
 	    p, json ->
 		json.build{
 		    "type(Point)"
 		    type("Point")
 		    coordinates( [ p?.x, p?.y ] )
 		}
+	}
+
+	grails.converters.JSON.registerObjectMarshaller( com.vividsolutions.jts.geom.LineString, cc++ ) { 
+	    ls, json ->
+		def ptlist = []
+		ls?.getPoints()?.each() { ptlist.add( [ it?.x, it?.y ] ) }
+		json.build{
+		    "type(LineString)"
+		    type("LineString")
+		    coordinates( ptlist )
+		}	
 	}
     
 	grails.converters.JSON.registerObjectMarshaller( edu.uci.its.tmcpe.FacilitySection, cc++ ) { 

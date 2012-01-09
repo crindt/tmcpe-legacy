@@ -1,10 +1,7 @@
 package edu.uci.its.tmcpe
 
-import org.postgis.Geometry
-import org.postgis.Point
-import org.postgis.LineString
-import org.postgis.hibernate.GeometryType
-
+import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.LineString
 
 
 // This needs to map into spatialvds
@@ -48,9 +45,7 @@ class FacilitySection {
         vdsType column: 'vdstype'
         absPostmile column: 'abs_pm'
         geom column: 'geom'
-        geom type:GeometryType 
         segGeom column: 'seg_geom'
-        segGeom type:GeometryType 
 
         version false
     }

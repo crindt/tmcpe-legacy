@@ -27,4 +27,9 @@ class TmcpeUnitSpec extends UnitSpec {
 			return false
 		}
 	}
+
+    def reportExceptionWithTrue(e) { 
+        println "RECEIVED EXCEPTION: "+e.getMessage()
+        return true
+    }
 }

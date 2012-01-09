@@ -1,8 +1,10 @@
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.propertyeditors.CustomNumberEditor
 import org.codehaus.groovy.grails.web.binding.GrailsDataBinder
-import org.postgis.Geometry
-import org.postgis.Point
+//import org.postgis.Geometry
+//import org.postgis.Point
+import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.Point
 import org.apache.log4j.*
 
 class GlobalPropertyEditorConfig { 

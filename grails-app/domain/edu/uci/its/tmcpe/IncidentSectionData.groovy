@@ -29,7 +29,7 @@ class IncidentSectionData implements Comparable {
     }
 
     static mapping = {
-        table name: 'incident_section_data', schema: 'tmcpe'
+        table name: 'tmcpe.incident_section_data'//, schema: 'tmcpe'
         version false
     }
 
