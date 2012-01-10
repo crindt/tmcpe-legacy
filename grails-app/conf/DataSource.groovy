@@ -64,7 +64,7 @@ environments {
     }
     production {
         dataSource {
-            url = 'jdbc:postgresql://localhost:5433/tmcpe_v0_9_7'
+            url = 'jdbc:postgresql://localhost:5433/tmcpe_v1_0_0'
             dbCreate = "update"
             username = 'postgres'
             password = ''
