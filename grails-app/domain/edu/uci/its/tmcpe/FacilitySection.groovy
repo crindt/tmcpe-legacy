@@ -32,10 +32,11 @@ class FacilitySection {
     }
 
     static mapping = {
-//        table 'temp_vds_data'
+        //        table 'temp_vds_data'
         table name: 'vds_view', schema: 'tbmap'
 
-        id column: 'id'
+        // FIXME: mongodb doesn't like it with id's have a different name
+        //id column: 'id'
         name column: 'name'
         lanes column: 'lanes'
         segmentLength column: 'length'

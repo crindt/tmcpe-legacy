@@ -2,7 +2,7 @@ package edu.uci.its.tmcpe
 
 class TmcFacilityImpactAnalysis {
 
-    //static mapWith = "mongo"
+    static mapWith = "mongo"
 
     String id
     String cad
@@ -11,8 +11,8 @@ class TmcFacilityImpactAnalysis {
     List sections
     List obsvol
 
-    //static embedded = ['timesteps', 'sections', 'obsvol']
-    static embedded = ['sections']
+    static embedded = ['timesteps', 'sections', 'obsvol']
+    //static embedded = ['sections']
     static constraints = {
     }
 }

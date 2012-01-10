@@ -11,8 +11,10 @@ class IcadDetail implements Comparable {
     }
 
     static mapping = {
-        table name: 'icad_detail', schema: 'actlog'
-        id column: 'keyfield'
+        // FIXME: mongodb doesn't like it with id's have a different name
+        //table name: 'icad_detail', schema: 'actlog'
+        table name: 'icad_detail_with_id', schema: 'actlog'
+        //id column: 'keyfield'
         version false
     }
 

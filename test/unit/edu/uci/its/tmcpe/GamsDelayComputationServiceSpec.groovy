@@ -195,77 +195,6 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
     }
 
 
-
-    def "Test that the we can run the GAMS solver"() {
-      given: "a GamsDelayComputationService remote executor and a Gams input file"
-        File gms = new File('test/data/1-send.gms')
-
-        // push a method on to create a scoped inner class
-        def remexec = new GamsDelayComputationService.RemoteExecutor( infile:gms, destroyExisting:true )
-        ;
-
-      when:  "we sync the file to the GAMS server"
-        remexec.syncGmsFile()
-        ;
-
-      then: "we don't get an rsync exception"
-        notThrown GamsDelayComputationService.RemoteExecutor.RsyncFailedException
-        ;
-        
-      and: "we don't get any other exception"
-        notThrown Exception
-        ;
-
-
-      when: "we tell GAMS to run"
-        remexec.execGams()
-        ;
-
-      then: "it completes successfully"
-        notThrown GamsDelayComputationService.RemoteExecutor.GamsFailedException
-        ;
-        
-      and: "we don't get any other exception"
-        notThrown Exception
-        ;
-
-
-      when:  "we sync the LST result file from the GAMS server"
-	remexec.syncLstFile()
-        ;
-
-      then: "we don't get an rsync exception"
-        notThrown GamsDelayComputationService.RemoteExecutor.RsyncFailedException
-        ;
-        
-      and: "we don't get any other exception"
-        notThrown Exception
-        ;
-
-
-      when: "we read the result"
-        ;
-
-      then: "we get equivalence with the original data"
-        ;
-
-
-      when: "The target exists and we haven't set destroyExisting"
-        // make sure the LST file already exists
-
-        def ff = new File('test/data/1-send.lst')
-        ff.withWriter('UTF-8') { it.writeLine 'this file exists' }
-        ;
-
-      and: "We try to set up a remoteexecutor"
-        remexec = new GamsDelayComputationService.RemoteExecutor( infile:gms, destroyExisting:false )
-        ;
-        
-      then: "The remote executor won't run"
-        GamsDelayComputationService.RemoteExecutor.LstFileExistsException e = thrown()
-        ;
-    }
-
     def "Test that the main API works properly"() {
 
       given: "An existing scenario that we read an IFPA from and clear the results" 
@@ -281,7 +210,7 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
         )
         ;
 
-      then:
+      then: 
         notThrown( Exception )
         ifpa.modelIsOptimal()
         ;

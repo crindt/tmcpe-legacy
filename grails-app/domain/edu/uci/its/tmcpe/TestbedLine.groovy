@@ -13,7 +13,8 @@ class TestbedLine {
 
     static mapping = {
         table 'testbed_lines'
-        id column:'id'
+        // FIXME: mongodb doesn't like it with id's have a different name
+        //id column:'id'
         columns {
         }
         version false

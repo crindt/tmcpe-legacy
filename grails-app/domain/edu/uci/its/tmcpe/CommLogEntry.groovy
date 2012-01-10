@@ -30,8 +30,10 @@ class CommLogEntry implements Comparable {
 
     static mapping = {
 //        table 'ct_al_backup_2007'
-        table name: 'd12_comm_log_censored', schema: 'actlog'
-        id column: 'keyfield'
+        // FIXME: mongodb doesn't like it with id's have a different name
+        table name: 'd12_comm_log_censored_with_id', schema: 'actlog'
+        //table name: 'd12_comm_log_censored', schema: 'actlog'
+        //id column: 'keyfield'
 //        cache usage:'read-only'
         // turn off optimistic locking, i.e., versioning
         version false

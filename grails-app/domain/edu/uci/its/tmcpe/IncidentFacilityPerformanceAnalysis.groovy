@@ -24,8 +24,9 @@ class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
     Map modelParams
     List modConditions  // modeled conditions
 
-    //static mapWith = "mongo"
-    static embedded = ['obsConditions','avgConditions']
+    static mapWith = "mongo"
+    // FIXME: making the lists embedded seems to prevent persistence
+    //static embedded = ['obsConditions','avgConditions']
     static constraints = {
         obsConditions(
             validate: { val, obj ->

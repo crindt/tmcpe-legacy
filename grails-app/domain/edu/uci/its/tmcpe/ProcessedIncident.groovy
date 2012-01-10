@@ -63,7 +63,8 @@ class ProcessedIncident {
   static mapping = {
       //table 'sigalert_locations_grails'
       table name: 'actlog.incidents' //, schema: 'actlog'
-      id column: 'id'
+      // FIXME: mongodb doesn't like it with id's have a different name
+      //id column: 'id'
       cad column: 'cad'
       startTime column: 'start_time'
       firstCall column: 'first_call'

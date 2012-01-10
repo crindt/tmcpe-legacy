@@ -3,6 +3,8 @@ package edu.uci.its.tmcpe
 import org.apache.commons.logging.LogFactory
 import groovy.text.GStringTemplateEngine
 
+import java.security.MessageDigest // for md5sum
+
 class GamsDelayComputationService {
 
     private static final log = LogFactory.getLog(this)
@@ -323,8 +325,27 @@ class GamsDelayComputationService {
 
         return ifpa
     }
+ 
+    // from: http://snipplr.com/view/8308/
+    def generateMD5(final file) {
+        MessageDigest digest = MessageDigest.getInstance("MD5")
+        file.withInputStream(){is->
+            byte[] buffer = new byte[8192]
+            int read = 0
+            while( (read = is.read(buffer)) > 0) {
+                digest.update(buffer, 0, read);
+            }
+        }
+        byte[] md5sum = digest.digest()
+        BigInteger bigInt = new BigInteger(1, md5sum)
+        return bigInt.toString(16)
+    }
 
     def parseLstData( File lst, IncidentFacilityPerformanceAnalysis ifpa ) { 
+
+        // update the id to match the md5sum of the file
+        //ifpa.id = generateMD5(lst)
+
         def lines = lst.readLines()
 
         // read SETS
@@ -476,7 +497,9 @@ class GamsDelayComputationService {
         
         public RemoteExecutor(Map map) { 
             // Simulate Groovy's 'map constructor'
-            map.each { k,v -> if (this.hasProperty(k)) { this."$k" = v} }
+            map.each { k,v -> 
+                if (this.hasProperty(k)) { this[k] = v }
+            }
 
             // Now we can do our initialization.
             init()
@@ -492,71 +515,57 @@ class GamsDelayComputationService {
         }
 
         def syncGmsFile() { 
-            def out = new StringBuilder()
-            def err = new StringBuilder()
             def procstr = "rsync -avz ${infile.canonicalPath.toString()} ${gamsUser}@${gamsHost}:tmcpe/work"
             println "EXECUTING: ${procstr}"
             def proc = procstr.execute()
 
-            proc.waitForProcessOutput(out,err)
+            proc.waitFor()
             if ( proc.exitValue() ) { 
                 System.err << "RSYNC EXIT VALUE IS: ${proc.exitValue()}"
-                if ( out ) System.out << out << "\n"
-                if ( err ) System.err << err << "\n"
+                if ( out ) proc.in.text << "\n"
+                if ( err ) proc.err.text << err << "\n"
                 throw new RsyncFailedException( )
             } else { 
-                println proc.text
+                println proc.in.text
             }
         }
 
         def execGams() { 
-            def out = new StringBuilder()
-            def err = new StringBuilder()
             def procstr = "ssh ${gamsUser}@${gamsHost} cd tmcpe/work \\&\\& /cygdrive/c/Progra~1/GAMS22.2/gams.exe ${infile.name}"
             
             println "EXECUTING: ${procstr}"
 
             def proc = procstr.execute()
 
-            proc.waitForProcessOutput(out,err)
+            proc.waitFor()
             if ( proc.exitValue() ) { 
-                if ( out ) System.out << out << "\n"
-                if ( err ) System.out << err << "\n"
+                System.err << "RSYNC EXIT VALUE IS: ${proc.exitValue()}"
+                if ( out ) proc.in.text << "\n"
+                if ( err ) proc.err.text << err << "\n"
                 throw new GamsFailedException( )
             } else { 
-                println proc.text
+                println proc.in.text
             }
-
         }
 
         def syncLstFile() { 
-            def out = new StringBuilder()
-            def err = new StringBuilder()
-            def proc = "rsync -avz ${gamsUser}@${gamsHost}:tmcpe/work/${outfile.name} .".execute()
-            proc.waitForProcessOutput(out,err)
+            def procstr = "rsync -avz ${gamsUser}@${gamsHost}:tmcpe/work/${outfile.name} ${infile.parent}" 
+            println "EXECUTING: ${procstr}"
+            def proc = procstr.execute()
+
+            proc.waitFor()
             if ( proc.exitValue() ) { 
-                if ( out ) System.out << out << "\n"
-                if ( err ) System.out << err << "\n"
+                System.err << "RSYNC EXIT VALUE IS: ${proc.exitValue()}"
+                if ( out ) proc.in.text << "\n"
+                if ( err ) proc.err.text << err << "\n"
                 throw new RsyncFailedException( )
             } else { 
-                println proc.text
+                println proc.in.text
             }
-
         }
 
-        // exceptions
-        public static class VerboseException extends Exception { 
-            def error;
-            
-            public VerboseException() { }  // allow map constructor
-            public VerboseException(Object error) { 
-                this.error = error
-            }
-            
-        }
-
-        public static class RsyncFailedException   extends VerboseException { }
-        public static class GamsFailedException    extends VerboseException { }
-        public static class LstFileExistsException extends VerboseException { }
+        public static class RsyncFailedException   extends Exception { }
+        public static class GamsFailedException    extends Exception { }
+        public static class LstFileExistsException extends Exception { }
     }
 }

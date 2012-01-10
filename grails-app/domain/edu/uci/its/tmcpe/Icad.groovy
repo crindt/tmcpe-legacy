@@ -20,8 +20,10 @@ class Icad {
     }
 
     static mapping = {
-        table name: 'icad', schema: 'actlog'
-        id column: 'keyfield'
+        // FIXME: mongodb doesn't like it with id's have a different name
+        //table name: 'icad', schema: 'actlog'
+        table name:'icad_with_id', schema: 'actlog'
+        //id column: 'keyfield'
         version false
     }
 

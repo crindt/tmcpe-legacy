@@ -64,7 +64,8 @@ class Vds {
         // this is a read-only table
         version false
 
-        id column: 'id'
+        // FIXME: mongodb doesn't like it with id's have a different name
+        //id column: 'id'
         name column: 'name'
         calPostmile column: 'cal_pm'
         absPostmile column: 'abs_pm'

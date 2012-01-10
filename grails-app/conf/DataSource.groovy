@@ -13,6 +13,32 @@ hibernate {
 environments {
     development {
         dataSource {
+            url = 'jdbc:postgresql://192.168.0.2:5432/tmcpe_devel'
+            dbCreate = "update"
+            username = "postgres"
+            password = ''
+            loggingSql = false
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+        dataSource_vds { 
+            url = 'jdbc:postgresql://localhost:5432/spatialvds'
+            username = 'VDSUSER'
+            password = 'VDSPASSWORD'
+            readOnly = true
+            dbCreate = 'update'
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+
+        grails { 
+            mongo { 
+                databaseName = "tmcpe_analyses_devel"
+            }
+        }
+    }
+    test {
+        dataSource {
             url = 'jdbc:postgresql://192.168.0.2:5432/tmcpe_test'
             dbCreate = "update"
             username = "postgres"
@@ -30,11 +56,10 @@ environments {
             driverClassName = "org.postgresql.Driver"
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
-    }
-    test {
-        dataSource {
-            dbCreate = "update"
-            url = "jdbc:h2:mem:testDb"
+        grails { 
+            mongo { 
+                databaseName = "tmcpe_analyses_test"
+            }
         }
     }
     production {
@@ -55,6 +80,11 @@ environments {
             dbCreate = 'update'
             driverClassName = "org.postgresql.Driver"
             dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+        grails { 
+            mongo { 
+                databaseName = "tmcpe_analyses"
+            }
         }
     }
 }
