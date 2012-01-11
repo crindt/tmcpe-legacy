@@ -13,7 +13,7 @@ hibernate {
 environments {
     development {
         dataSource {
-            url = 'jdbc:postgresql://192.168.0.2:5432/tmcpe_devel'
+            url = 'jdbc:postgresql://192.168.0.2:5432/tmcpe_devel_v1_0_0'
             dbCreate = "update"
             username = "postgres"
             password = ''
