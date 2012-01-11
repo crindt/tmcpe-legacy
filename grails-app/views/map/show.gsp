@@ -6,37 +6,15 @@
     <title>Incident List</title>
 
     <!-- frameworks -->
-    <p:javascript src='jquery-1.6.1.min' />
-    <p:javascript src='underscore' />
-
-    <!-- formatting -->
-    <p:javascript src='jquery.format-1.2.min' />
-    <p:javascript src='jquery.dataTables' />
+    <r:require module="stdui" />
+    <r:require module="datatables" />
 
     <!-- visualization toolkits -->
-    <p:javascript src='polymaps' />
-    <p:javascript src='polymaps_cluster' />
-    <p:javascript src='d3' />
-    <p:javascript src='d3.time' />
-    <p:javascript src='jquery.tools.min'/>
-<!--
-    <g:javascript src='jquery.tools.js'/>
-    <p:javascript src='jquery.tools'/>
-    <script type="text/javascript" src="http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js" />
--->
+    <r:require module="polymaps" />
+    <r:require module="dthree" />
 
-    <!-- supporting stylesheets -->
-    <g:if env="development">
-      <less:stylesheet name="tmcpe-map-show" />
-    </g:if>
-    <g:if env="production">
-      <p:css name="tmcpe-map-show" />
-    </g:if>
-
-
-
-    <!-- app code -->
-    <p:javascript src='tmcpe/map-show' />
+    <!-- app js and stylesheets -->
+    <r:require module="tmcpe-map-show" />
 
     <script type="text/javascript">
       var map_show_params = ${tparams};

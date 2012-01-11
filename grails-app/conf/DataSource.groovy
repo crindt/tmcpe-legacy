@@ -1,6 +1,6 @@
 dataSource {
     pooled = true
-    driverClassName = "org.hsqldb.jdbcDriver"
+//     driverClassName = "org.h2.Driver"
     username = "sa"
     password = ""
 }
@@ -13,29 +13,84 @@ hibernate {
 environments {
     development {
         dataSource {
-            //dbCreate = "create-drop" // one of 'create', 'create-drop','update'
-            //url = "jdbc:hsqldb:mem:devDB"
-	    driverClassName = 'org.postgis.DriverWrapper'
-	    username = "postgres"
-	    dbCreate = "update"
-	    url = 'jdbc:postgresql://192.168.0.2:5432/tmcpe_test'
+            url = 'jdbc:postgresql://192.168.0.2:5432/tmcpe_devel'
+            dbCreate = "update"
+            username = "postgres"
+            password = ''
+            loggingSql = false
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+        dataSource_vds { 
+            url = 'jdbc:postgresql://localhost:5432/spatialvds'
+            username = 'VDSUSER'
+            password = 'VDSPASSWORD'
+            readOnly = true
+            dbCreate = 'update'
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+
+        grails { 
+            mongo { 
+                databaseName = "tmcpe_analyses_devel"
+            }
         }
     }
     test {
         dataSource {
+            url = 'jdbc:postgresql://192.168.0.2:5432/tmcpe_test'
             dbCreate = "update"
-            url = "jdbc:hsqldb:mem:testDb"
+            username = "postgres"
+            password = ''
+            loggingSql = false
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+        dataSource_vds { 
+            url = 'jdbc:postgresql://localhost:5432/spatialvds'
+            username = 'VDSUSER'
+            password = 'VDSPASSWORD'
+            readOnly = true
+            dbCreate = 'update'
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+        grails { 
+            mongo { 
+                databaseName = "tmcpe_analyses_test"
+            }
         }
     }
     production {
         dataSource {
-            //dbCreate = "update"
-            //url = "jdbc:hsqldb:file:prodDb;shutdown=true"
-
-	    driverClassName = 'org.postgis.DriverWrapper'
-	    dbCreate = "update"
-	    url = 'jdbc:postgresql://localhost:5433/tmcpe'
-	    username = 'postgres'
+            url = 'jdbc:postgresql://localhost:5433/tmcpe_v1_0_0'
+            dbCreate = "update"
+            username = 'postgres'
+            password = ''
+            loggingSql = false
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+        dataSource_vds { 
+            url = 'jdbc:postgresql://localhost:5432/spatialvds'
+            username = 'VDSUSER'
+            password = 'VDSPASSWORD'
+            readOnly = true
+            dbCreate = 'update'
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernatespatial.postgis.PostgisDialect
+        }
+        grails { 
+            mongo { 
+                databaseName = "tmcpe_analyses"
+            }
         }
     }
+}
+
+/* Added by the Hibernate Spatial Plugin. */
+dataSource {
+   driverClassName = "org.postgresql.Driver"
+   dialect = org.hibernatespatial.postgis.PostgisDialect
 }

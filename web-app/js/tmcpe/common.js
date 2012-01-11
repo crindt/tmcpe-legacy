@@ -212,7 +212,18 @@ if ( !tmcpe ) var tmcpe = {};
 	 }
 
 	 return legendForLinearScale;
-     };
+     }
+     
+     // solve the format problem
+     tmcpe.createFormattedLink = function(data) {
+         actarr = data.action.split(/\./);
+         if ( actarr.length > 1 )
+             data.action = actarr.slice(0,actarr.length-1).join(".");
+         var url = g.createLink( data );
+         if ( actarr.length > 1 )
+             url = url.replace('/'+data.action,'/'+data.action+"."+actarr[actarr.length-1]);
+         return url;
+     }
 
      $(document).ready(function() {
      

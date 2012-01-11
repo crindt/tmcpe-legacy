@@ -1,0 +1,107 @@
+@import 'tmcpe-colors.less';
+
+/* mixin for highlighting chart element */
+.highlight-svg( @base-el-color: @chart-stroke ) {
+    fill-opacity: 0.6;
+    stroke: lighten( @base-el-color, 30% );
+}
+.highlight-text() {
+    fill: @chart-font-highlight;
+}
+
+#aggchart {
+
+    background: @chart-background;
+    stroke: @chart-stroke;
+    fill: @chart-fill;
+    shape-rendering: crispEdges;
+    padding: 20px;
+
+    /* highlight bars and text on hover in the chart and the legend */
+    .chart,.legend {
+
+	rect {
+	    stroke: @chart-stroke;
+	    shape-rendering: crispEdges;
+	    fill-opacity: 1.0;
+	    
+	    &.highlight { 
+		.highlight-svg;
+            }
+
+	    &.highlightable &:hover {
+		.highlight-svg;
+	    }
+	}
+
+	g {
+	    &.highlight {
+		> rect {
+		    .highlight-svg;
+		}
+		> text { 
+		    .highlight-text;
+		}
+	    }
+	}
+    }
+
+    text.label {
+	stroke-width: 0px;
+	text-align: right;
+	font: sans-serif;
+	font-size: 10px;
+	fill: @chart-font-color;
+
+	&.title {
+	    font-size: 15px;
+	}
+    }
+
+    
+
+    g.legend-item {
+
+        text.label {
+            font-size: 15px;
+        }
+
+        rect {
+            stroke: lighten( @chart-stroke, 30%);
+        }
+    }
+    
+    .rule {
+	stroke: @chart-stroke;
+	stroke-opacity: 0.3;
+	shape-rendering: crispEdges;
+	pointer-events: none;  /* Make sure the rules don't get in the way */
+    }
+
+    .dummy-chart-start-color {
+	fill: @chart-range-start;
+    }
+    .dummy-chart-end-color {
+	fill: @chart-range-end;
+    }
+}
+
+.queryPane {
+    table th {
+	font-weight: normal;
+	font-size: 10pt;
+	text-align: left;
+    }
+}
+
+g.legend {
+    stroke: @chart-stroke;
+    shape-rendering: crispEdges;
+}
+
+g.legenditem {
+    &.highlight {
+	text.label{ fill: yellow; }
+    }
+}
+
