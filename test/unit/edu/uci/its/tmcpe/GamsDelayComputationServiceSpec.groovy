@@ -13,6 +13,14 @@ import grails.datastore.test.DatastoreUnitTestMixin
 
 class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
 
+	def "Test that GMS file versioning is working"() {
+	when: "we set it up"
+		;
+	then: "it shouldn't fail"
+		false
+		;
+	}
+
     def "Test that the getMatch method works as expected"() {
       given: "a GamsDelayComputationService"
         def gamsService = new GamsDelayComputationService()
@@ -58,12 +66,12 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
     def "Test that the GamsDelayComputationService can parse GAMS LST files"() {
 
       given: "a GamsDelayComputationService"
-	mockDomain(IncidentFacilityPerformanceAnalysis)
-	def gamsService = new GamsDelayComputationService()
+		mockDomain(IncidentFacilityPerformanceAnalysis)
+		def gamsService = new GamsDelayComputationService()
         ;
-
-      and:   "a properly formatted GAMS LST file"
-	def gms = new File("test/data/${test}.gms")
+		
+ 	  and:   "a properly formatted GAMS LST file"
+		def gms = new File("test/data/${test}.gms")
         def lst = new File("test/data/${test}.lst")
         ;
 		
@@ -88,13 +96,15 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
         ifpa.modelStats.solver_status   == sstat
         ifpa.modelStats.model_status    == mstat
         ifpa.modelStats.objective_value == obj
+		ifpa.modelStats.netdelay        == netdelay
         ifpa.modelStats.cputime         == cputime
         ifpa.modConditions[5][5].inc    == inc55
         ;
 
       where:
-        test    |  sstat               | mstat     | obj     | cputime  | inc55
-        1       |  'NORMAL COMPLETION' | 'OPTIMAL' | 2.8624f | 8.562f   | 0
+        test               | sstat               | mstat     | obj     | cputime | netdelay  | inc55
+        1                  | 'NORMAL COMPLETION' | 'OPTIMAL' | 2.8624f | 8.562f  | 454.8622f | 0
+		'498-07072011-5=N' | 'NORMAL COMPLETION' | 'OPTIMAL' | 1.6730f | 2.781f  | 653.6398f | 0
     }
 
     def "Test that a LST file missing various features will fail to parse"() { 
@@ -214,6 +224,5 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
         notThrown( Exception )
         ifpa.modelIsOptimal()
         ;
-
     }
 }

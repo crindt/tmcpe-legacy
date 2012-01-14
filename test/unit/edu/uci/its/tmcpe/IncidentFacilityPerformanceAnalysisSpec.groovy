@@ -15,7 +15,7 @@ class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 	  when: "we create an ifpa but don't save it"
 		ifpa = validIncidentFacilityPerformanceAnalysis()
 		ifpa.sections = [1,2]
-		ifpa.times = [1,2]
+		ifpa.timesteps = [1,2]
 		ifpa.obsConditions = [[[spd:11f,flow:11,inc:1],[spd:12f,flow:12,inc:1]],
 							  [[spd:21f,flow:21,inc:1],[spd:22f,flow:22,inc:1]]
 							 ]
@@ -64,7 +64,7 @@ class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
       when: "we set the data"
 		ifpa = validIncidentFacilityPerformanceAnalysis()
 		ifpa.sections = [1,2]
-		ifpa.times = [1,2]
+		ifpa.timesteps = [1,2]
 		ifpa.obsConditions = obs
 		ifpa.avgConditions = avg
 		;
@@ -103,7 +103,7 @@ class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 	  when: "we have particular data and compute"
 		ifpa = validIncidentFacilityPerformanceAnalysis()
 		ifpa.sections = [[id:1,len:0.5f],[id:2,len:0.75f]]
-		ifpa.times    = [1,2]
+		ifpa.timesteps = [1,2]
 		ifpa.obsConditions = obs
 		ifpa.avgConditions = avg
 		ifpa.modConditions = mod

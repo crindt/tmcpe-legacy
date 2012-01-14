@@ -1,3 +1,4 @@
+*** FILEVERSION: 1
 *** CAD: ${cad}
 *** FACILITY: ${facility}-${direction}
 *** COMMAND LINE [${modelConfig.cmd}]
@@ -10,8 +11,8 @@ OPTION MIP = CPLEX;
 
 SETS
 	J1	Sections	/S0*S${sections.size()-1}/
-	M1	Time Steps	/0*${times.size()}/
-<% for ( t in times ) { out << '*               ' + t.format('yyyy-MM-dd HH:mm:ss') + "\n" } %>
+	M1	Time Steps	/0*${timesteps.size()}/
+<% for ( t in timesteps ) { out << '*               ' + t.format('yyyy-MM-dd HH:mm:ss') + "\n" } %>
 
 ALIAS ( J1, K1 )
 ALIAS ( M1, R1 )
@@ -34,25 +35,25 @@ PARAMETERS
 
 	    /
     TABLE P(J1,M1) Evidence
-     <% for ( j in 0..(times.size())) { out << sprintf( " %5d", j ) } %>
+     <% for ( j in 0..(timesteps.size())) { out << sprintf( " %5d", j ) } %>
 <% for ( i in 0..(sections.size()-1) ) { %>
-   S${i}<% for ( j in 0..(times.size())) { out << sprintf( " %5.1f", obsConditions[i][j].p ) } } %>
+   S${i}<% for ( j in 0..(timesteps.size())) { out << sprintf( " %5.1f", obsConditions[i][j].p ) } } %>
 	TABLE V( J1, M1 ) 
-     <% for ( j in 0..(times.size())) { out << sprintf( " %5d", j ) } %>
+     <% for ( j in 0..(timesteps.size())) { out << sprintf( " %5d", j ) } %>
 <% for ( i in 0..(sections.size()-1)) { %>
-   S${i}<% for ( j in 0..(times.size())) { out << sprintf( " %5.1f", obsConditions[i][j].spd ) } } %>
+   S${i}<% for ( j in 0..(timesteps.size())) { out << sprintf( " %5.1f", obsConditions[i][j].spd ) } } %>
 	TABLE AV( J1, M1 )
-     <% for ( j in 0..(times.size())) { out << sprintf( " %5d", j ) } %>
+     <% for ( j in 0..(timesteps.size())) { out << sprintf( " %5d", j ) } %>
 <% for ( i in 0..(sections.size()-1)) { %>
-   S${i}<% for ( j in 0..(times.size())) { out << sprintf( " %5.1f", avgConditions[i][j].spd ) } } %>
+   S${i}<% for ( j in 0..(timesteps.size())) { out << sprintf( " %5.1f", avgConditions[i][j].spd ) } } %>
 	TABLE F( J1, M1 )
-     <% for ( j in 0..(times.size())) { out << sprintf( " %5d", j ) } %>
+     <% for ( j in 0..(timesteps.size())) { out << sprintf( " %5d", j ) } %>
 <% for ( i in 0..(sections.size()-1)) { %>
-   S${i}<% for ( j in 0..(times.size())) { out << sprintf( " %5d", (int)obsConditions[i][j].flow ) } } %>
+   S${i}<% for ( j in 0..(timesteps.size())) { out << sprintf( " %5d", (int)obsConditions[i][j].flow ) } } %>
 	TABLE AF( J1, M1 )
-     <% for ( j in 0..(times.size())) { out << sprintf( " %5d", j ) } %>
+     <% for ( j in 0..(timesteps.size())) { out << sprintf( " %5d", j ) } %>
 <% for ( i in 0..(sections.size()-1)) { %>
-   S${i}<% for ( j in 0..(times.size())) { out << sprintf( " %5d", (int)avgConditions[i][j].flow ) } } %>
+   S${i}<% for ( j in 0..(timesteps.size())) { out << sprintf( " %5d", (int)avgConditions[i][j].flow ) } } %>
 
 VARIABLES
 	Z		objective

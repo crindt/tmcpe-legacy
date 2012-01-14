@@ -51,7 +51,7 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
 		fp.d35NetDelay = d35d
 		fp.tmcpeNetDelay = tmcd
 		fp.sections = secs
-		fp.times    = times
+		fp.timesteps    = timesteps
 		;
 		
       then: "we should get the expected validation result"
@@ -59,7 +59,7 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
 		;
 		
 	  where: 
-		secs    | times             | td | ad | d35d | tmcd | expected
+		secs    | timesteps             | td | ad | d35d | tmcd | expected
 		[1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | true
 		[     ] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | false
 		[1,2,3] | [               ] |  1 |  1 |    1 |    1 | false
@@ -85,7 +85,7 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
 		fp.tmcpeNetDelay = tmcd
 		fp.direction = dir
 		fp.sections = secs
-		fp.times    = times
+		fp.timesteps    = timesteps
         ;
 
       then: "we should get the expected validation result"
@@ -93,7 +93,7 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
         ;
 
 	  where:
-		dir | secs    | times             | td | ad | d35d | tmcd | expected
+		dir | secs    | timesteps         | td | ad | d35d | tmcd | expected
 		'N' | [1,2,3] | ['00:05','00:10'] |  1 |  1 |    1 |    1 | true
 		'N' | [1,2,3] | ['00:05','00:10'] | -1 |  1 |    1 |    1 | false
 		'N' | [1,2,3] | ['00:05','00:10'] |  1 | -1 |    1 |    1 | false
@@ -104,7 +104,7 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
 
 
 
-	def "Test that times are correctly parsed into dates"() { 
+	def "Test that timesteps are correctly parsed into dates"() { 
 
 	  given:
 		mockDomain(FacilityPerformance)
@@ -112,11 +112,11 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
 		
 	  when:
 		def fp = validFacilityPerformance()
-		fp.times = [ d('00:05'), d('00:10')]
+		fp.timesteps = [ d('00:05'), d('00:10')]
 		;
 
 	  then:
-		fp.times[0] instanceof Date
+		fp.timesteps[0] instanceof Date
 		
 	}
 
@@ -130,10 +130,10 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
 	  when: "we have two FacilityPerformance objects with the same time-space domain"
 		def fp1 = new FacilityPerformance()
 		fp1.sections = s1
-		fp1.times    = t1
+		fp1.timesteps    = t1
 		def fp2 = new FacilityPerformance()
 		fp2.sections = s2
-		fp2.times    = t2
+		fp2.timesteps    = t2
 		;
 		
 	  then: "we correctly capture whether the time-space domain matches"
@@ -182,6 +182,71 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
 		1000f   | 1500f  | 500f
 		1500f   | 1000f  | 0f      // savings must be >= zero
 		1000f   | 1000f  | 0f
+	}
+
+	def "Test that timestampIndex() works properly "() {
+	given: "A Facility Performance with some timesteps"
+		mockDomain(FacilityPerformance)
+		def fp = new FacilityPerformance()
+		def now = new Date(0) // start at epoch
+		use ( [groovy.time.TimeCategory] ) {
+			fp.timesteps = (0..9).collect{ now + (it * 5).minutes }
+		}
+
+
+	when: "we give timestamps in the range of the timesteps"
+		def range = (0..fp.timesteps.size()-1)
+		;
+
+	then: "it converts timestamps to timestep indices propertly"
+		use ( [groovy.time.TimeCategory] ) {
+			range.each{ step -> 
+				(0..4).each{ instep ->
+					fp.timestampIndex( now + (instep).minute + (step * 5).minutes ) == step
+				}
+				fp.timestampIndex( now + (4.minutes + 59.seconds + 999.milliseconds) + (step * 5).minutes ) == step
+			}
+		}
+		;
+
+
+	when: "the timestamp is before the timesteps range"
+		use ( [groovy.time.TimeCategory] ) {
+			fp.timestampIndex( now - 1.minute )
+		}
+		;
+		
+	then: "we should get a bounds exception"
+		java.lang.IndexOutOfBoundsException eminus = thrown()
+		;
+
+
+	when: "the timestep is after the timesteps range"
+		use ( [groovy.time.TimeCategory] ) {
+			fp.timestampIndex( now + (fp.timesteps.size()*5).minutes )
+		}
+		;
+		
+	then: "we should get a bounds exception"
+		java.lang.IndexOutOfBoundsException eplus = thrown()
+		;
+
+
+	when: "the timestamp to index is a simple date"
+		def idx = fp.timestampIndex( date )
+		;
+
+	then: "it should still work"
+		idx == index
+		;
+
+	where:
+		date                 | index
+		new Date(0)          | 0
+		new Date(5*60*1000)  | 1
+		new Date(10*60*1000) | 2
+		new Date(10*60*1000) | 3
+		;
 	}
 
 	def d(s) { 

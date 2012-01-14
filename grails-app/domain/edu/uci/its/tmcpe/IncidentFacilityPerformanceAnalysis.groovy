@@ -33,21 +33,21 @@ class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
                 val != null               && 
                 val.size == sections.size &&
                 // make sure each row is the same size
-                val.findAll{ row -> row.size() == times.size() }.size()==sections.size()
+                val.findAll{ row -> row.size() == timesteps.size() }.size()==sections.size()
                       })
         avgConditions(
             validate: { val, obj ->
                 val != null               && 
                 val.size == sections.size &&
                 // make sure each row is the same size
-                val.findAll{ row -> row.size() == times.size() }.size()==sections.size()
+                val.findAll{ row -> row.size() == timesteps.size() }.size()==sections.size()
                       })
         modConditions(
             validate: { val, obj ->
                 val == null               ||
                 ( val.size == sections.size &&
                   // make sure each row is the same size
-                  val.findAll{ row -> row.size() == times.size() }.size()==sections.size()
+                  val.findAll{ row -> row.size() == timesteps.size() }.size()==sections.size()
                 ) })
     }
 
@@ -60,7 +60,7 @@ class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
     public Float computeNetDelays() { 
         tmcpeNetDelay = 0f
         for ( i in 0..(sections.size-1)) { 
-            for ( j in 0..(times.size-1)) { 
+            for ( j in 0..(timesteps.size-1)) { 
                 def obs = obsConditions[i][j]
                 def avg = avgConditions[i][j]
                 def mod = modConditions[i][j]

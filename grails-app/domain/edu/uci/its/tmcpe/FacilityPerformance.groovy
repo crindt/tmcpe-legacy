@@ -13,7 +13,7 @@ class FacilityPerformance {
 	String facility          // 
 	String direction         // NSEW
 	List sections            // as [vdsid,seclen] pairs
-	List<Date> times         // as 5-minute timesteps
+	List<Date> timesteps         // as 5-minute timesteps
 
 	String badSolution       // report 
 	Float totalDelay    = 0f // total veh-hrs spent on facilities during obs period
@@ -22,12 +22,12 @@ class FacilityPerformance {
 	Float tmcpeNetDelay = 0f // delay per spd < avg speed (total delay - avg delay)
 	
 	//static mapWith = "mongo"
-	static embedded = ['sections', 'times']
+	static embedded = ['sections', 'timesteps']
 	static constraints = { 
 		facility(nullable:false)
 		direction(nullable:false,inList:['N','S','E','W'])
 		sections(minSize:1)
-		times(minSize:1)
+		timesteps(minSize:1)
 
 		badSolution(nullable:true)
 
@@ -38,7 +38,7 @@ class FacilityPerformance {
 	}
 
 	Boolean matchesTimeSpaceDomainOf( FacilityPerformance other ) { 
-		return sections == other.sections && times == other.times
+		return sections == other.sections && timesteps == other.timesteps
 	}
 
 	Float savingsVersus( FacilityPerformance other ) { 
@@ -50,12 +50,29 @@ class FacilityPerformance {
 		return "[id:${id},facility:${facility},direction:${direction},totalDelay:${totalDelay},avgDelay:${avgDelay},d35NetDelay:${d35NetDelay},tmcpeNetDelay:${tmcpeNetDelay}]"
 	}
 
+	static int fiveMinAsMillis = 5*60*1000
+
+	def timestampIndex(Date stamp) {
+		assert timesteps != null && timesteps.size() >= 0
+		assert timesteps[0] instanceof Date
+		assert stamp instanceof Date
+		// jumping through hoops because a 0 TimeDuration isn't allowed
+		if ( stamp.equals(timesteps[0]) ) return 0
+		groovy.time.TimeDuration d = stamp-timesteps[0]
+		int idx = Math.floor(d.toMilliseconds()/fiveMinAsMillis)
+		
+		if ( idx < 0 || 
+			 idx >= timesteps.size() ) throw new java.lang.IndexOutOfBoundsException()
+		
+		return idx
+	}
+
 	public Boolean equals(FacilityPerformance other) {
 		return (
 			facility.equals(other.facility) &&
 			direction.equals(other.direction) &&
 			sections.equals(other.sections) &&
-			times.equals(other.times) &&
+			timesteps.equals(other.timesteps) &&
 			badSolution.equals(other.badSolution) &&
 			totalDelay.equals(other.totalDelay) &&
 			avgDelay.equals(other.avgDelay) &&

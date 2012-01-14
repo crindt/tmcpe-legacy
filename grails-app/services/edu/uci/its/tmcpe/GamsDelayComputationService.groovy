@@ -125,14 +125,33 @@ class GamsDelayComputationService {
         
         def lines = gms.readLines()
 
+		def version = 0
+		try {
+			version = getMatch(lines, /^\*\*\* FILEVERSION:\s*(\d+)\s*$/, 0, 1 )
+			println "FILEVERSION: $version"
+		} catch ( GamsFileParseException e ) {
+			// no version header, leave at zero and reread
+			e.printStackTrace()
+			println "BAD VERSION, ASSUMING 0 AND RE-READING"
+			lines = gms.readLines()
+		}
+
         // parse CAD
-        ifpa.cad = getMatch(lines, /^\*\*\* CAD:\s*([^\s]+)\s*$/, 0, 1 )
+		if ( version >= 1 )
+			ifpa.cad = getMatch(lines, /^\*\*\* CAD:\s*([^\s]+)\s*$/, 0, 1 )
+		else
+			ifpa.cad = "UNKNOWN"
 
         // parse Facility
-        def facdir = getMatch(lines, /^\*\*\* FACILITY:\s*(\d+-[^\s]+)\s*$/, 0, 1)
-        facdir = facdir.split('-')
-        ifpa.facility = facdir[0]
-        ifpa.direction = facdir[1]
+		if ( version >= 1 ) {
+			def facdir = getMatch(lines, /^\*\*\* FACILITY:\s*(\d+-[^\s]+)\s*$/, 0, 1)
+			facdir = facdir.split('-')
+			ifpa.facility = facdir[0]
+			ifpa.direction = facdir[1]
+		} else {
+			ifpa.facility = "UNKNOWN"
+			ifpa.direction = "UNKNOWN"
+		}
 
         // read command line
         ifpa.modelConfig = [:]
@@ -167,12 +186,14 @@ class GamsDelayComputationService {
             throw new GamsFileParseException()
         }
 
-        // read the times
-        ifpa.times = []
-        for ( j in timerange[0]..(timerange[1]-1)) { 
-            ifpa.times[j] = Date.parse("yyyy-MM-dd HH:mm:ss",
-                                       getMatch(lines, /^\*\s+(.*?)\s*$/, 0, 1))
-        }
+        // read the timesteps
+        ifpa.timesteps = []
+		if ( version >= 1 ) {
+			for ( j in timerange[0]..(timerange[1]-1)) { 
+				ifpa.timesteps[j] = Date.parse("yyyy-MM-dd HH:mm:ss",
+											   getMatch(lines, /^\*\s+(.*?)\s*$/, 0, 1))
+			}
+		}
 
         
         // read postmiles (and vdsids)
@@ -283,7 +304,7 @@ class GamsDelayComputationService {
             }
         }
 
-        // read observed flows
+        // read observed vols
         getMatchAndContinue(lines, /^\s*TABLE F\(/ )  // pm head
         tr = timerange[1]+1
         patt = "^(\\s+\\d+){${tr}}\$"
@@ -295,7 +316,7 @@ class GamsDelayComputationService {
             if (evrow.size() == 1) { 
                 def rowdat = evrow[0][1].trim().split(/\s+/)
                 for ( j in timerange[0]..timerange[1]) { 
-                    ifpa.obsConditions[i][j].flow =  Float.parseFloat(rowdat[j]) 
+                    ifpa.obsConditions[i][j].vol =  Float.parseFloat(rowdat[j]) 
                 }
 				
             } else { 
@@ -303,7 +324,7 @@ class GamsDelayComputationService {
             }
         }
 
-        // read avg flows
+        // read avg vols
         getMatch(lines, /^\s*TABLE AF\(/ )  // pm head
         tr = timerange[1]+1
         patt = "^(\\s+\\d+){${tr}}\$"
@@ -315,7 +336,7 @@ class GamsDelayComputationService {
             if (evrow.size() == 1) { 
                 def rowdat = evrow[0][1].trim().split(/\s+/)
                 for ( j in timerange[0]..timerange[1]) { 
-                    ifpa.avgConditions[i][j].flow =  Float.parseFloat(rowdat[j]) 
+                    ifpa.avgConditions[i][j].vol =  Float.parseFloat(rowdat[j]) 
                 }
 				
             } else { 
@@ -380,17 +401,6 @@ class GamsDelayComputationService {
         ifpa.modelStats.cputime = Float.parseFloat( cputime )
 
 
-        // read the computed delays
-        for ( val in ['TOTDELAY','AVGDELAY','NETDELAY'] ) {
-            def str = "^---- EQU ${val}\\s+(.*?)\\s*\$"
-            def match = getMatch( lines, /$str/ )
-            if ( match.size() > 0 )
-                ifpa.modelStats[val.toLowerCase()] = parseGamsLevelLine(match[0][1])
-            else
-                throw new GamsFileParseException()
-        }
-
-
         // read computed incident state
         def dataarray
         def level
@@ -414,6 +424,21 @@ class GamsDelayComputationService {
                 }
             }
         }
+
+
+        // read the computed delays
+		['Y':'totdelay','A':'avgdelay','N':'netdelay',
+		 'STB':'solutionTimeBounded','SSB':'solutionSpaceBounded'].each{ var, name ->
+            def str = "^---- VAR ${var}\\s+(.*?)\\s*\$"
+            def match = getMatch( lines, /$str/ )
+            if ( match.size() > 0 )
+                ifpa.modelStats[name] = parseGamsLevelLine(match[0][1])
+            else
+                throw new GamsFileParseException()
+        }
+
+
+
         //println ifpa.modelStats
     }
 
