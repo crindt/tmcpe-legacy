@@ -14,9 +14,9 @@ import grails.datastore.test.DatastoreUnitTestMixin
 class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
 
 	def "Test that GMS file versioning is working"() {
-	when: "we set it up"
+	  when: "we set it up"
 		;
-	then: "it shouldn't fail"
+	  then: "it shouldn't fail"
 		false
 		;
 	}
@@ -86,16 +86,16 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
 
       then:  "it reads it successfully"
         ifpa != null
-        ;
+		  ;
 
       and:   "creates a valid IncidentFacilityPerformanceAnalysis"
         ifpa.validate() == true
         ;
 
       and: "and the data read is correct"
-		ifpa.cad                        == '498-07072011'
-		ifpa.facility                   == '5'
-		ifpa.direction                  == 'N'
+		ifpa.cad                        == cad
+		ifpa.facility                   == fac
+		ifpa.direction                  == dir
         ifpa.modelStats.solver_status   == sstat
         ifpa.modelStats.model_status    == mstat
         ifpa.modelStats.objective_value == obj
@@ -105,10 +105,29 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
         ;
 
       where:
-        test               | sstat               | mstat     | obj     | cputime | netdelay  | inc55
-        1                  | 'NORMAL COMPLETION' | 'OPTIMAL' | 2.8624f | 8.562f  | 454.8622f | 0
-		'498-07072011-5=N' | 'NORMAL COMPLETION' | 'OPTIMAL' | 1.6730f | 2.781f  | 653.6398f | 0
+        test               | cad                 | fac | dir | sstat               | mstat     | obj     | cputime | netdelay  | inc55
+        1                  | '123-20110102'      | '5' | 'N' | 'NORMAL COMPLETION' | 'OPTIMAL' | 2.8624f | 8.562f  | 454.8622f | 0
+		'498-07072011-5=N' | '498-07072011'      | '5' | 'N' | 'NORMAL COMPLETION' | 'OPTIMAL' | 1.6730f | 2.781f  | 653.6398f | 0
     }
+
+	def "Test that we can read a legacy GMS file (pre version 1) even if it doesn't validate"() { 
+      given: "a GamsDelayComputationService"
+		mockDomain(IncidentFacilityPerformanceAnalysis)
+		def gamsService = new GamsDelayComputationService()
+        ;
+
+	  and: "a version 0 GAMS file"
+		def gms0 = new File('test/data/565-01222011-405=N.gms')
+		;
+		
+	  when: "we parse it"
+		def ifpa = gamsService.parseGamsData( gms0 )
+		;
+		
+	  then: "we don't crash, but it doesn't validate"
+		ifpa.validate() == false
+		ifpa.timesteps == null || ifpa.timesteps.size() == 0
+	}
 
     def "Test that a LST file missing various features will fail to parse"() { 
       given: "a GamsDelayComputationService"
@@ -204,16 +223,16 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
       then: "the new ifpa2 should match the old ifpa exactly"
         //validationStatusMatches( ifpa2, true )
         ifpa == ifpa2
-        ;
+		  ;
     }
 
 
     def "Test that the main API works properly"() {
 
       given: "An existing scenario that we read an IFPA from and clear the results" 
-	mockDomain(IncidentFacilityPerformanceAnalysis)
-	def gamsService = new GamsDelayComputationService()
-	def gms = new File("test/data/1-created.gms")
+		mockDomain(IncidentFacilityPerformanceAnalysis)
+		def gamsService = new GamsDelayComputationService()
+		def gms = new File("test/data/1-created.gms")
         def ifpa = gamsService.parseGamsData(gms)
         ;
 
@@ -228,4 +247,26 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
         ifpa.modelIsOptimal()
         ;
     }
+
+	def "Test that we can parse a gams file name for incident and facility"() { 
+	  given: "A Gams service and A GAMS filename"
+		def gamsService = new GamsDelayComputationService()
+		File gms = new File( filename )
+		;
+
+	  when: "we parse it"
+		def res = gamsService.parseFileName( gms )
+		;
+		
+	  then: "we get the proper cad, facility, and direction"
+		res == ( cad == null ? null : [cad:cad, fac:facility,dir:direction] )
+		;
+
+	  where:
+		filename                 | cad            | facility | direction
+		"422-052609-57=S.gms"    | "422-052609"   | "57"     | "S"
+		"242-03212011-405=S.gms" | "242-03212011" | "405"    | "S"
+		"sdjfalksdf-.gms"        | null           | null     | null
+		;
+	}
 }

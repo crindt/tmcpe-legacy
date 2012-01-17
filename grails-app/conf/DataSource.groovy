@@ -83,6 +83,7 @@ environments {
         }
         grails { 
             mongo { 
+				host = "localhost"
                 databaseName = "tmcpe_analyses"
             }
         }

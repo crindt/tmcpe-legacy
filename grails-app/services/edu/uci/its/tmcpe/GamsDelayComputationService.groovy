@@ -57,6 +57,9 @@ class GamsDelayComputationService {
 
     public IncidentFacilityPerformanceAnalysis parseGamsResults(File gms, File lst, Object ifpa = new IncidentFacilityPerformanceAnalysis() ) { 
         parseGamsData(gms,ifpa)
+		if ( !ifpa.validate() ) { 
+			backfillLegacyData( gms, ifpa )
+		}
         parseLstData(lst,ifpa)
         return ifpa
     }
@@ -121,6 +124,10 @@ class GamsDelayComputationService {
         }
     }
 
+	def parseGamsFile( File gms ) { 
+		return backfillLegacyData( gms )
+	}
+
     def parseGamsData( File gms, IncidentFacilityPerformanceAnalysis ifpa = new IncidentFacilityPerformanceAnalysis() ) { 
         
         def lines = gms.readLines()
@@ -131,7 +138,7 @@ class GamsDelayComputationService {
 			println "FILEVERSION: $version"
 		} catch ( GamsFileParseException e ) {
 			// no version header, leave at zero and reread
-			e.printStackTrace()
+			//e.printStackTrace()
 			println "BAD VERSION, ASSUMING 0 AND RE-READING"
 			lines = gms.readLines()
 		}
@@ -450,11 +457,11 @@ class GamsDelayComputationService {
     def getMatch(lines, re, i=-1, j=-1) { 
         def match = null
         def line = null
-        log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
+        //log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
         while( lines.size > 0 && 
                !(match = ( ( line = lines.remove(0) ) =~ re ))
              ) { 
-            log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
+            //log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
         }
         if ( i == -1 || j == -1 ) return match
         
@@ -490,7 +497,64 @@ class GamsDelayComputationService {
         return level
     }
 
+	def parseFileName( File gms ) { 
+		def m = gms.name =~ /(.*)-(\d+)=([NSEW]).gms/
+		
+		if ( m ) { 
+			return [cad:m[0][1],fac:m[0][2],dir:m[0][3]]
+		} else { 
+			return null
+		}
+	}
 
+	def backfillLegacyData( File gms, IncidentFacilityPerformanceAnalysis ifpa = parseGamsData( gms ) ) { 
+		// pull in CAD, facility, and direction from the file name
+		def cfd = parseFileName( gms )
+
+		cfd.cad != null
+		cfd.fac != null
+		cfd.dir != null
+		
+		// if cad is not defined pull it from the file name
+		if ( ifpa.cad == null || ifpa.cad == 'UNKNOWN' )     ifpa.cad = cfd.cad
+		else if ( ifpa.cad != cfd.cad ) throw new RuntimeException( "Mismatched CADs: ${ifpa.cad} != ${cfd.cad}")
+
+		if ( ifpa.facility == null || ifpa.facility == 'UNKNOWN' )  ifpa.facility = cfd.fac
+		else if ( ifpa.facility != cfd.fac ) throw new RuntimeException( "Mismatched facilities")
+
+		if ( ifpa.direction == null || ifpa.direction == 'UNKNOWN' ) ifpa.direction = cfd.dir
+		else if ( ifpa.direction != cfd.dir ) throw new RuntimeException( "Mismatched directions")
+		
+		
+		// if timesteps are undefined, pull them from the ifia
+		if ( ifpa.timesteps == null || ifpa.timesteps.size() < 1) { 
+			println "NO TIMESTEPS, BACKFILLING"
+			//println "PROCESSED INCIDENTS...${ProcessedIncident.list().size()}"
+			ProcessedIncident pi = ProcessedIncident.findByCad( ifpa.cad )
+			//if ( pi == null ) throw new RuntimeException("NO PROCESSED INCIDENT FOR ${ifpa.cad}")
+
+			def iia = pi.getActiveAnalysis()
+			//if ( iia == null ) throw new RuntimeException("NO ACTIVE ANALYSIS FOR ${ifpa.cad}")
+
+			def ifia = iia?.analysisForFacility( ifpa.facility, ifpa.direction ) 
+			//if ( ifia == null ) throw new RuntimeException("NO ANALYSIS FOR FACILITY ${ifpa.cad}: ${ifpa.facility} ${ifpa.direction}")
+
+			def asec = ifia.analyzedSections.asList().first()
+			//if ( asec == null ) throw new RuntimeException("NO ANALYZED SECTION")
+
+			ifpa.timesteps = asec.analyzedTimestep.collect{ it.fivemin } 
+		}
+
+		return ifpa
+	}
+
+
+	def backfillLegacyFile( File gms ) { 
+		def ifpa = parseGamsData( gms )
+		
+	}
+
+	
     // Some exceptions
 
     public class GamsFileParseException extends Exception { }

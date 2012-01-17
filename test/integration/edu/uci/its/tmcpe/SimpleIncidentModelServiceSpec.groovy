@@ -17,15 +17,15 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 	def gamsDelayComputationService
 
 	def "Test that we can determine the critical events by reading from the database"() {
-	given: "A baseline ifpa"
+	  given: "A baseline ifpa"
 		IncidentFacilityPerformanceAnalysis ifpa = new IncidentFacilityPerformanceAnalysis( cad: '498-07072011' )
 		;
-	when: "we try to read the critical events"
+	  when: "we try to read the critical events"
 		def ce = simpleIncidentModelService.determineCriticalEvents( ifpa )
 		println "CE: ${ce}"
 		;
 
-	then:
+	  then:
 		ce == [dstr("2011-07-07 18:01:00"),
 			   dstr("2011-07-07 18:11:00"),
 			   dstr("2011-07-07 18:48:00"),	
@@ -34,23 +34,23 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 	}
 
 	def "test that we can model this incident correctly"() {
-	given: "an ifpa that we read from the gams files"
+	  given: "an ifpa that we read from the gams files"
 		//IncidentFacilityPerformanceAnalysis ifpa = new IncidentFacilityPerformanceAnalysis( cad: '498-07072011' )
 		def ifpa = gamsDelayComputationService.parseGamsResults(
 			new File( "test/data/498-07072011-5=N.gms" ),
 			new File( "test/data/498-07072011-5=N.lst" ) )
 		;
 
-	expect: "it should validate"
+	  expect: "it should validate"
 
 		assert ifpa.validate() == true
 		;
 
-	when: "we try to determine the critical events"
+	  when: "we try to determine the critical events"
 		def ce = simpleIncidentModelService.determineCriticalEvents( ifpa )
 		;
 
-	then: "that should work too"
+	  then: "that should work too"
 		ce == [
 			dstr("2011-07-07 18:01:00"),
 			dstr("2011-07-07 18:11:00"),
@@ -59,29 +59,131 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 		]
 		;
 
-	when: "we model it"
+	  when: "we model it"
 		def sim = simpleIncidentModelService.modelIncident( ifpa )
 		;
 
-	then: "we get the correct results"
+	  then: "we get the correct results"
 		Math.round(sim.tmcSavings) == 519f
 		;
 
-	when: "we save it"
+	  when: "we save it"
 		sim.save(flush:true)
 		def id = sim.id
 		println "SIM ID: ${sim.id}"
 		;
 
-	and: "we try to retreive it"
+	  and: "we try to retreive it"
 		def sim2 = SimpleIncidentModel.get(id)
 		;
 
-	then: "it should be in the database"
+	  then: "it should be in the database"
 		sim2 != null
 		sim2.id == id
 		;
 		
+	}
+
+	def "test that we can model a version 0 incident"() { 
+	  given: "an ifpa that we read from the gams files"
+		def ifpa = gamsDelayComputationService.parseGamsResults(
+			new File( "test/data/${cad}-${fac}=${dir}.gms" ),
+			new File( "test/data/${cad}-${fac}=${dir}.lst" ) )
+		;
+
+	  expect: "it should validate"
+		assert ifpa.validate() == true
+		;
+		
+	  when: "we try to determine the critical events"
+		def ce = simpleIncidentModelService.determineCriticalEvents( ifpa )
+		;
+
+	  then: "that should work"
+		ce[0] != null
+		ce[1] != null
+		ce[2] != null
+		ce[3] != null
+		;
+		
+	  when: "we model it"
+		def sim = simpleIncidentModelService.modelIncident(ifpa)
+		;
+		
+	  then: "we get the correct results"
+		sim.tmcSavings > 0
+		;
+		
+	  when: "we save it"
+		sim.save(flush:true)
+		def id = sim.id
+		println "SIM ID: ${sim.id}"
+		;
+		
+	  and: "we try to retreive it"
+		def sim2 = SimpleIncidentModel.get(id)
+		;
+		
+	  then: "it should be in the database"
+		sim2 != null
+		sim2.id == id
+		;
+		
+
+	  where:
+		//		'565-01222011' | 405 | 'N'
+		cad            | fac | dir
+		'409-04012011' | 57  | 'S'
+	}
+
+	def "test that we can compute a bunch of savings"() { 
+	  given: "a list of incidents"
+
+		def list = ProcessedIncident.withCriteria{ 
+			def now = new Date()
+			between('startTime',dstr('2011-01-01 00:00:00'),dstr('2012-01-01 00:00:00'))
+			
+		}.grep { 
+			def bs = it.getActiveAnalysis()?.analysisForPrimaryFacility()?.badSolution;
+			return bs == null || bs == "" 
+		}
+		log.info( "PROCESSING ${list.size()} INCIDENTS" )
+		list.grep{ it.section != null }.each{ pi ->
+			log.debug( "PROCESSING ${pi}" )
+			try { 
+
+				def ifpa = gamsDelayComputationService.parseGamsResults(
+					new File( "data/actlog/gamsdata/${pi.cad}-${pi.section.freewayId}=${pi.section.freewayDir}.gms" ),
+					new File( "data/actlog/gamsdata/${pi.cad}-${pi.section.freewayId}=${pi.section.freewayDir}.lst" ) 
+				);
+
+				assert ifpa.validate() == true
+
+				def ce = simpleIncidentModelService.determineCriticalEvents( ifpa )
+
+				def sim = simpleIncidentModelService.modelIncident(ifpa)
+
+				sim.save(flush:true)
+				def id = sim.id
+				println "SIM ID: ${sim.id}"
+			} catch ( SimpleIncidentModelService.NoIncidentRegionIdentifiedException e ) { 
+				// OK, just let it go
+				log.warn "${pi.cad} HAS NO INCIDENT REGION IDENTIFIED"
+			} catch ( GamsDelayComputationService.GamsFileParseException e ) { 
+				log.warn "${pi.cad} HAS A GAMS FILE PARSE EXCEPTION"
+			} catch ( Exception e ) { 
+				log.warn "CAUGHT UNKNOWN EXCEPTION ${e}"
+				e.printStackTrace()
+			}
+			
+
+		}
+		
+
+	  expect:
+		true
+
+
 	}
 
 	Date dstr(String s) { 

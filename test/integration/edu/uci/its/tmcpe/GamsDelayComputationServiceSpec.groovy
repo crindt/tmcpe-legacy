@@ -13,7 +13,35 @@ import grails.datastore.test.DatastoreUnitTestMixin
 
 class GamsDelayComputationServiceSpec extends IntegrationSpec {
 
+	def gamsDelayComputationService
 
+	def "Test that we can parse a legacy datafile using IFPA data"() { 
+	  given: "A GAMS file"
+		def gms = new File(file)
+		;
+		
+	  when: "we migrate the file"
+		def ifpa = gamsDelayComputationService.backfillLegacyData(gms)
+		println "CAD: ${ifpa.cad}"
+		def isvalid = ifpa.validate()
+        if ( isvalid != true ) {
+            ifpa.errors.allErrors.each {
+                println it
+            }
+        }
+		;
+
+	  then: "the data should validate"
+		file && ( isvalid == valid )
+		;
+
+	  where:
+		file                               | valid
+		'test/data/498-07072011-5=N.gms'   | true
+		'test/data/565-01222011-405=N.gms' | true
+		;
+		
+	}
 
     def "Test that the we can run the GAMS solver"() {
       given: "a GamsDelayComputationService remote executor and a Gams input file"
@@ -89,7 +117,7 @@ class GamsDelayComputationServiceSpec extends IntegrationSpec {
       then: "The remote executor won't run"
         GamsDelayComputationService.RemoteExecutor.LstFileExistsException e = thrown()
         ;
-    }
+		}
 
     def "Test that we can save an ifpa into the test mongo db"() {
       given: "A gamsComputationService and particular LST file"

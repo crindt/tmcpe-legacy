@@ -13,9 +13,16 @@ class SimpleIncidentModel {
 	Float modeledDelay 
 	Float tmcSavings
 
+	String cad
+	String facility
+	String direction
+
 	Map stats
+
+	Map params
 
 	static mapWith = 'mongo'
     static constraints = {
+		cad index:true, indexAttributes: [unique:true, dropDups:true]
     }
 }

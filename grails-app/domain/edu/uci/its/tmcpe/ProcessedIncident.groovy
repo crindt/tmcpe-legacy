@@ -113,6 +113,16 @@ class ProcessedIncident {
   {
     return analyses.size() > 0 ? analyses.first() : null;
   }
+
+	SimpleIncidentModel pullModel()
+	{ 
+		def model = SimpleIncidentModel.withCriteria{ eq 'cad', cad} //SimpleIncidentModel.findByCad(cad)
+		log.info("GOT MODEL ${model} for ${cad}")
+		if (model && model.size() > 0)
+			return model?.first()
+		else
+			return null
+	}
     
     
 
@@ -316,7 +326,7 @@ class ProcessedIncident {
       //geometry( section?.segGeom )
       d12_delay( activeAnalysis?.d12Delay() )
       tmcpe_delay( activeAnalysis?.netDelay() )
-      savings( 0 ) // FIXME: update this.
+      savings( pullModel()?.tmcSavings ) // FIXME: update this.
       samplePercent( activeAnalysis?.samplePercent() )
       analysesCount( analyses?.size() )
     }

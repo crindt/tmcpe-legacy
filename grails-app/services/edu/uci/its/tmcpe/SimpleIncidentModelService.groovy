@@ -34,12 +34,16 @@ class SimpleIncidentModelService {
 		]
 	) {
 		def ce      = determineCriticalEvents( ifpa )  // measured critical events
-		ce.each { assert it != null }
+		if ( ce.grep { it != null }.size() < 4 )
+			throw new RuntimeException( "CAN'T DETERMINE CRITICAL EVENTS ")
 
 		def section = computeIncidentSection( ifpa )
-		assert section != null
+		if ( section == null )
+			throw new RuntimeException( "CAN'T DETERMINE INCIDENT SECTION")
 
 		SimpleIncidentModel sim = doCumulativeFlowProjections( ifpa, section, ce, params )
+
+		sim.params = params.clone()
 
 		log.debug( "GOT SIM: ${sim.cumulativeFlows}" )
 
@@ -85,6 +89,13 @@ class SimpleIncidentModelService {
 			ce[2] = ce[2] ?: ifia.lanesClear
 			ce[3] = null
 		}
+
+		/*
+		use ( [groovy.time.TimeCategory]) {
+			if ( ce[1] < ce[0] ) ce[1] = ce[0] + 5.minutes
+			if ( ce[2] < ce[1] ) ce[2] = ce[1] + 5.minutes
+		}
+		*/
 
 		if ( pi == null )
 			throw new RuntimeException( "Processed Incident not found for ${ifpa.cad}")
@@ -135,12 +146,17 @@ class SimpleIncidentModelService {
 			def t2Cell     = ifpa.timestampIndex( ce[2] + 0.minutes )
 			def finishCell = ifpa.timestampIndex( ce[3] + 0.minutes )
 
-			assert finishCell > startCell
+			if ( !(finishCell > startCell) )
+				throw new RuntimeException("FINISH CELL [${finishCell}] <= START CELL [${startCell}] IN ${ifpa.cad}")
 
-			assert ( t0Cell >= 0 && t0Cell < ifpa.timesteps.size() )
-			assert ( startCell >= 0 && startCell < ifpa.timesteps.size() )
-			assert ( t2Cell >= 0 && t2Cell < ifpa.timesteps.size() )
-			assert ( finishCell >= 0 && finishCell < ifpa.timesteps.size() )
+			if ( !(t0Cell >= 0 && t0Cell < ifpa.timesteps.size()) )
+				throw new RuntimeException("t0Cell BOGUS [${t0Cell}] IN ${ifpa.cad}")				
+			if ( !(startCell >= 0 && startCell < ifpa.timesteps.size()) )
+				throw new RuntimeException("startCell BOGUS [${startCell}] IN ${ifpa.cad}")				
+			if ( !(t2Cell >= 0 && t2Cell < ifpa.timesteps.size()) )
+				throw new RuntimeException("t2Cell BOGUS [${t2Cell}] IN ${ifpa.cad}")				
+			if ( !( finishCell >= 0 && finishCell < ifpa.timesteps.size() ) )
+				throw new RuntimeException("finishCell BOGUS [${finishCell}] IN ${ifpa.cad}")				
 
 			// define the summing function for cumulative flow since the start
 			// of the incident
@@ -171,6 +187,10 @@ class SimpleIncidentModelService {
 			def sim = new SimpleIncidentModel()
 
 			sim.criticalEvents = ce
+
+			sim.cad = ifpa.cad
+			sim.facility = ifpa.facility
+			sim.direction = ifpa.direction
 
 			sim.stats = [
 				t0Cell: t0Cell,
@@ -418,7 +438,7 @@ class SimpleIncidentModelService {
 				// don't allow modeled cumflow to be greater than estimated
 				// demand Also, the first time modeled cumflow exceeds demand,
 				// call this t3'
-				if ( d.incflow > d.adjdivavg ) {
+				if ( d.incflow > d.adjdivavg && m > startCell ) {
 					if ( cep[3] == null ) {
 						cep[3] = ifpa.timesteps[m]
 						cumflow[m].ce += " t3p"

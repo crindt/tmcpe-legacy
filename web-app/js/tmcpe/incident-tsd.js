@@ -1003,9 +1003,12 @@ if ( !tmcpe ) var tmcpe = {};
 	      var t2 = new Date( json.t2 ).getTime()/1000;
 	      var t3 = new Date( json.t3 ).getTime()/1000;
 
+		  //if ( t1 < t0 ) t1 = t0 + 300
+		  //if ( t2 < t1 ) t2 = t1 + 300
+
           // what-if
-	      var t1p = new Date( json.t1 ).getTime()/1000 + params.verificationDelay*60;
-	      var t2p = new Date( json.t2 ).getTime()/1000 + (params.verificationDelay + params.responseDelay)*60;
+	      var t1p = t1 + params.verificationDelay*60;
+	      var t2p = t2 + (params.verificationDelay + params.responseDelay)*60;
 
           // FIXME: t3p will be the point where projected cumulative
           // capacity equals adjusted expected demand
@@ -1111,7 +1114,7 @@ if ( !tmcpe ) var tmcpe = {};
 			  */
 
 	          // don't allow projection to be greater than avg.
-	          if ( d.incflow > d.adjdivavg ) {
+	          if ( d.incflow > d.adjdivavg && j > startCell ) {
                   if ( t3p == null ) {
                       t3p = json.timesteps[j].getTime()/1000;
                   }
