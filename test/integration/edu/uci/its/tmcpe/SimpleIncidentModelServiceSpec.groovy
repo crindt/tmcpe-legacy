@@ -13,63 +13,79 @@ import grails.datastore.test.DatastoreUnitTestMixin
 
 class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 
+	def simpleIncidentModelService
+	def gamsDelayComputationService
 
-	def "Test that we can model a real dataset"() {
-
-	given: "a GamsDelayComputationservice and SimpleIncidentModelService"
-		mockDomain(IncidentFacilityPerformanceAnalysis)
-		def gamsService = new GamsDelayComputationService()
-		def simpleService = new SimpleIncidentModelService()
+	def "Test that we can determine the critical events by reading from the database"() {
+	given: "A baseline ifpa"
+		IncidentFacilityPerformanceAnalysis ifpa = new IncidentFacilityPerformanceAnalysis( cad: '498-07072011' )
+		;
+	when: "we try to read the critical events"
+		def ce = simpleIncidentModelService.determineCriticalEvents( ifpa )
+		println "CE: ${ce}"
 		;
 
-	and: "a properly formatted set of GAMS files" 
-		def gms = new File("test/data/498-07072011-5=N.gms")
-		def lst = new File("test/data/498-07072011-5=N.lst")
+	then:
+		ce == [dstr("2011-07-07 18:01:00"),
+			   dstr("2011-07-07 18:11:00"),
+			   dstr("2011-07-07 18:48:00"),	
+			   null ]
 		;
-
-	when: "we process a real file"
-        def ifpa = gamsService.parseGamsResults(gms, lst)
-        if ( ifpa.validate() != true ) {
-            ifpa.errors.allErrors.each {
-                println it
-            }
-        }
-		;
-
-	and: "we compute the incident section"
-		def section = simpleService.computeIncidentSection(ifpa)
-		;
-
-	then: "we get the expected result"
-		section == 16
-		;
-
-	when: "we compute the incident start time"
-		def startTime = simpleService.computeStartTime(ifpa)
-		;
-		
-	then: "we get the expected result"
-		startTime == Date.parse("yyyy-MM-dd HH:mm:ss","2011-07-07 18:00:00")
-		;
-
-	when: "we compute the incident clear time"
-		def restorationTime = simpleService.computeRestorationTime(ifpa)
-		;
-
-	then: "we get the expected result"
-		restorationTime == Date.parse("yyyy-MM-dd HH:mm:ss","2011-07-07 20:00:00")
-		;
-
-	and: "we use that ifpa to model the service with appropriate parameters"
-		/*
-		ifpa.modelParams = [ tmcDivPct: 20 ]
-		def criticalEvents = //?
-
-		def data = simpleService.doCumulativeFlowProjections
-		*/
-		
-	then: "we should get results consistent with the javascript version"
-		;
-
 	}
+
+	def "test that we can model this incident correctly"() {
+	given: "an ifpa that we read from the gams files"
+		//IncidentFacilityPerformanceAnalysis ifpa = new IncidentFacilityPerformanceAnalysis( cad: '498-07072011' )
+		def ifpa = gamsDelayComputationService.parseGamsResults(
+			new File( "test/data/498-07072011-5=N.gms" ),
+			new File( "test/data/498-07072011-5=N.lst" ) )
+		;
+
+	expect: "it should validate"
+
+		assert ifpa.validate() == true
+		;
+
+	when: "we try to determine the critical events"
+		def ce = simpleIncidentModelService.determineCriticalEvents( ifpa )
+		;
+
+	then: "that should work too"
+		ce == [
+			dstr("2011-07-07 18:01:00"),
+			dstr("2011-07-07 18:11:00"),
+			dstr("2011-07-07 18:48:00"),
+			dstr("2011-07-07 20:00:00")
+		]
+		;
+
+	when: "we model it"
+		def sim = simpleIncidentModelService.modelIncident( ifpa )
+		;
+
+	then: "we get the correct results"
+		Math.round(sim.tmcSavings) == 519f
+		;
+
+	when: "we save it"
+		sim.save(flush:true)
+		def id = sim.id
+		println "SIM ID: ${sim.id}"
+		;
+
+	and: "we try to retreive it"
+		def sim2 = SimpleIncidentModel.get(id)
+		;
+
+	then: "it should be in the database"
+		sim2 != null
+		sim2.id == id
+		;
+		
+	}
+
+	Date dstr(String s) { 
+		return Date.parse("yyyy-MM-dd HH:mm:ss", s)
+	}
+
 }

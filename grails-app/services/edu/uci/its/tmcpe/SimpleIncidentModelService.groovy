@@ -25,6 +25,86 @@ class SimpleIncidentModelService {
 
 	// parameters (e.g., tmcdivpct)
 
+	def modelIncident(
+		IncidentFacilityPerformanceAnalysis ifpa,
+		Map params = [
+			tmcDivPct: 20,
+			verificationDelay: 15,
+			responseDelay: 15
+		]
+	) {
+		def ce      = determineCriticalEvents( ifpa )  // measured critical events
+		ce.each { assert it != null }
+
+		def section = computeIncidentSection( ifpa )
+		assert section != null
+
+		SimpleIncidentModel sim = doCumulativeFlowProjections( ifpa, section, ce, params )
+
+		log.debug( "GOT SIM: ${sim.cumulativeFlows}" )
+
+		def cep = ce.clone()
+
+		use ( [groovy.time.TimeCategory] ) {
+			cep[1] = cep[1] + (params.verificationDelay).minutes
+			cep[2] = cep[2] + (params.verificationDelay).minutes + (params.responseDelay).minutes
+		}
+
+		return doDelayProjections(ifpa,section,cep,ifpa.modelStats.netdelay, sim )
+	}
+
+	def determineCriticalEvents( IncidentFacilityPerformanceAnalysis ifpa ) {
+		// pull these from the import-al database right now
+		assert ifpa.cad != null && ifpa.cad != ''
+		def ce = []
+
+		log.debug( "Looking for processed incident: ${ifpa.cad}" )
+		ProcessedIncident pi = ProcessedIncident.findByCad( ifpa.cad )
+
+		log.debug( "GOT ${pi}")
+
+		// get the ifia (for critical events), using the first
+		def iia = pi.analyses.asList().first()
+		def ifia
+		if ( iia ) {
+			/* // reallly should search for correct ifia
+			List ifia_list = iia.incidentFacilityImpactAnalyses.asList().grep{ 
+				log.debug( "${it.location?.freewayId}-${it.location?.freewayDir} =?= ${ifpa.facility}-${ifpa.direction}" )
+				"${it.location?.freewayId}" == "[${ifpa.facility}]" &&
+				"${it.location?.freewayDir}" == "[${ifpa.direction}]"
+			}
+			*/
+			ifia = iia.incidentFacilityImpactAnalyses.asList()
+			ifia = ifia.first()
+		}
+
+		if ( ifia ) {
+			log.debug( "USING IFIA: ${ifia}" )
+			ce[0] = ce[0] ?: ifia.firstCall
+			ce[1] = ce[1] ?: ifia.verification
+			ce[2] = ce[2] ?: ifia.lanesClear
+			ce[3] = null
+		}
+
+		if ( pi == null )
+			throw new RuntimeException( "Processed Incident not found for ${ifpa.cad}")
+		else {
+			// fill in with PI
+			log.debug( "USING PI: ${pi}" )
+			ce[0] = ce[0] ?: pi.firstCall?.stampDateTime
+			ce[1] = ce[1] ?: pi.verification?.stampDateTime
+			ce[2] = ce[2] ?: pi.lanesClear?.stampDateTime
+			ce[3] = ce[3] ?: pi.incidentClear?.stampDateTime
+		}
+
+		// fallback to using projection
+		if ( ce[3] == null && ifpa.modConditions != null ) {
+			ce[3] = computeRestorationTime(ifpa)
+		}
+
+		return ce
+	}
+
 
 	/**
 	 * For the given ifpa, section, and critical events compute the observed
@@ -35,7 +115,8 @@ class SimpleIncidentModelService {
 	def doCumulativeFlowProjections( 
 		IncidentFacilityPerformanceAnalysis ifpa,
 		Integer section,
-		List ce  // critical events t0,t1,t2,t3
+		List ce,  // critical events t0,t1,t2,t3
+		Map params
 	) { 
 		// assertions
 		assert ifpa != null
@@ -64,8 +145,9 @@ class SimpleIncidentModelService {
 			// define the summing function for cumulative flow since the start
 			// of the incident
 			def sfunc = { what,sumto,prop ->
-				if ( sumto < startCell ) return 0
-				def var = what[section][startCell..sumto].collect{ it."$prop" ?: 0 }.sum()
+				def sumFrom = 0  // startCell
+				if ( sumto < sumFrom ) return 0
+				def var = what[section][sumFrom..sumto].collect{ it."$prop" ?: 0 }.sum()
 				return var
 			}
 		
@@ -76,18 +158,21 @@ class SimpleIncidentModelService {
 			assert avg != null
 
 			// compute the diversion as the difference between avg and obs
-			// cumulative vols as the finishCell
+			// cumulative vols at the finishCell
 			def avgCumflow = sfunc( avg, finishCell, "vol" )
 			def obsCumflow = sfunc( obs, finishCell, "vol" )
 			def totalDiversion = avgCumflow - obsCumflow
 
 			// split the diversion into the portion divered by the TMC and the
 			// portion that just diverted
-			def tmcDiversion   = ifpa.modelParams.tmcDivPct/100.0*totalDiversion
+			def tmcDiversion   = params.tmcDivPct/100.0*totalDiversion
 			def nonTmcDiversion = totalDiversion-tmcDiversion
 
-			
-			def data = [
+			def sim = new SimpleIncidentModel()
+
+			sim.criticalEvents = ce
+
+			sim.stats = [
 				t0Cell: t0Cell,
 				startCell: startCell,
 				t2Cell: t2Cell,
@@ -95,9 +180,9 @@ class SimpleIncidentModelService {
 			]
 
 			// compute the observed and average cumulative flows for each cell
-			def cumflow = (0..ifpa.timesteps.size()-1).collect{ j ->
-				[obs:    sfunc(obs,j,"vol"),   // observed
-				 avg:    sfunc(avg,j,"vol")    // average (expected), a.k.a demand
+			def cumflow = (0..ifpa.timesteps.size()-1).collect{ m ->
+				[obs:    sfunc(obs,m,"vol"),   // observed
+				 avg:    sfunc(avg,m,"vol")    // average (expected), a.k.a demand
 				]
 			}
 		
@@ -106,36 +191,55 @@ class SimpleIncidentModelService {
 			// cumulative flow as compared to average conditions
 			// * compute the average adjusted for diversion
 			// * and the average adjusted for TMC diversion only
-			(0..ifpa.timesteps.size()-1).each{ j ->
+			(0..ifpa.timesteps.size()-1).each{ m ->
 
 				// average cumflow (demand) adjusted for diversion using linear
 				// interpolation
-				cumflow[j].divavg = 
-				( j < startCell ? cumflow[j].avg 
-				  : ( j > finishCell ? cumflow[j].obs
-					  : ( cumflow[j].avg - 
-						  totalDiversion*(j-startCell)/(finishCell-startCell))))
+				cumflow[m].divavg = 
+				( m < startCell 
+				  ? cumflow[m].avg 
+				  : ( m > finishCell 
+					  ? cumflow[m].obs
+					  : ( cumflow[m].avg - totalDiversion*(m-startCell)/(finishCell-startCell))))
+				/*
+				if ( m < startCell )
+					log.debug( "DIVAVG($m)[${cumflow[m].divavg}] = avg[${cumflow[m].avg}]" )
+				else 
+					if ( m > finishCell ) 
+						log.debug( "DIVAVG($m)[${cumflow[m].divavg}] = obs[${cumflow[m].obs}]" )
+					else
+						log.debug( "DIVAVG($m)[${cumflow[m].divavg}] = avg[${cumflow[m].avg}] - totalDiversion[${totalDiversion}]*(m[$m]-startCell[$startCell])/(finishCell[$finishCell]-startCell[$startCell])" )
+				*/
 
 				// average cumflow (demand) adjusted for non-TMC diversion using
 				// linear interpolation.  non-TMC diversion is diversion that would
 				// occur whether or not the TMC managed the disruption.
 				// This is the demand in the non-TMC case
-				cumflow[j].adjdivavg = 
-				( j < startCell ? cumflow[j].avg
-				  : ( j > finishCell ? cumflow[j].obs + tmcDiversion
-					  : ( cumflow[j].avg -
-						  nonTmcDiversion*(j-startCell)/(finishCell-startCell)
+				cumflow[m].adjdivavg = 
+				( m < startCell 
+				  ? cumflow[m].avg
+				  : ( m > finishCell ? cumflow[m].obs + tmcDiversion
+					  : ( cumflow[m].avg -
+						  nonTmcDiversion*(m-startCell)/(finishCell-startCell)
 						) ) )
-				//println "ADJDIVAVG: $j, ${startCell}, $finishCell, ${cumflow[j].avg}, ${cumflow[j].divavg}, ${cumflow[j].adjdivavg}"
+				/*
+				if ( m < startCell )
+					log.debug( "ADJDIVAVG($m)[${cumflow[m].adjdivavg}] = avg[${cumflow[m].avg}]" )
+				else 
+					if ( m > finishCell ) 
+						log.debug( "ADJDIVAVG($m)[${cumflow[m].adjdivavg}] = obs[${cumflow[m].obs}] + tmcDiversion[$tmcDiversion]" )
+					else
+						log.debug( "ADJDIVAVG($m)[${cumflow[m].adjdivavg}] = avg[${cumflow[m].avg}] - nonTmcDiversion[${nonTmcDiversion}]*(m[$m]-startCell[$startCell])/(finishCell[$finishCell]-startCell[$startCell])" )
+				*/
 			}
 
 			// at this point, cumflow should be array of cumulative volumes
 			// associated with the incident section over time.  We'll store it
 			// along with the diversion numbers and return them
-			data.cumflow = cumflow
-			data.totalDiversion = totalDiversion
-			data.tmcDiversion   = tmcDiversion
-			return data
+			sim.cumulativeFlows = cumflow
+			sim.totalDiversion = totalDiversion
+			sim.tmcDiversion   = tmcDiversion
+			return sim
 		}
 	}
 
@@ -238,21 +342,30 @@ class SimpleIncidentModelService {
 		int section,
 		List cep,  // alternative critical events
 		Double netDelayTarget,  // calibration factor
-		Map data   // cumulative flow data (observed demand/capacity)
+		SimpleIncidentModel sim   // cumulative flow data (observed demand/capacity)
 	) {
 		use ( [groovy.time.TimeCategory] ) { // we do time calcs
 
 			// shorthand
-			def cumflow = data.cumflow
-			def t0Cell = data.t0Cell
-			def startCell = data.startCell
-			def t2Cell = data.t2Cell
-			def finishCell = data.finishCell
+			def cumflow = sim.cumulativeFlows
+			def t0Cell = sim.stats.t0Cell
+			def startCell = sim.stats.startCell
+			def t2Cell = sim.stats.t2Cell
+			def finishCell = sim.stats.finishCell
+
+			cumflow[t0Cell].ce = "t0"
+			cumflow[startCell].ce = "t1"
+			cumflow[t2Cell].ce = "t2"
+			cumflow[finishCell].ce = "t3"
 
 			// FIXME:REPORT-BUG: timestampIndex won't work unless the date 
 			// is converted by adding a (zero) duration to it
 			def t1pCell     = ifpa.timestampIndex( cep[1] + 0.minutes)
 			def t2pCell     = ifpa.timestampIndex( cep[2] + 0.minutes )
+
+			cumflow[t1pCell].ce += " t1p"
+			cumflow[t2pCell].ce += " t2p"
+
 
 			// estimate the service rate while capacity disruptions persist.
 			// Here we just average the observed volume between the start of the
@@ -277,56 +390,80 @@ class SimpleIncidentModelService {
 			// reset t3p
 			cep[3] = null
 
+			//log.debug( "INCFLOWCALCS: ${t0Cell}:${cumflow[t0Cell].obs},${t2Cell}:${cumflow[t2Cell].obs},${t2pCell}:${cumflow[t2pCell]} == ${incflowrate}" )
+
 			// Now, loop over each timestep and compute the projected cumflow for the event
 			// using the alternative critical events (incident response)
-			(0..cumflow.size()-1).each{ j ->
-				def d = cumflow[j]
-				if ( j < t2Cell ) {
+			(0..cumflow.size()-1).each{ m ->
+				def d = cumflow[m]
+				if ( m < t2Cell ) {
 					// before t2 (clearance), projected cumflow is equivalent to measured
-					d.incflow = cumflow[j].obs // sfunc(obs,j,"vol")
-				} else if ( j < t2pCell ) {
+					d.incflow = cumflow[m].obs // sfunc(obs,m,"vol")
+				} else if ( m < t2pCell ) {
 					// between t2 and t2p, projected cumflow is the base value plus the extrapolated incident flow rate
-					d.incflow = base + incflowrate*(j-t2Cell)*60*5
+					d.incflow = base + incflowrate*(m-t2Cell)*60*5
 				} else {
 					// beyond t2p 
-					d.incflow = base + incflowrate*(t2pCell-t2Cell)*60*5 + clearflowrate*(j-t2pCell)*60*5
+					d.incflow = base + incflowrate*(t2pCell-t2Cell)*60*5 + clearflowrate*(m-t2pCell)*60*5
 				}
+
+				// don't allow modeled cumflow to be greater than observed
+				// FIXME:
+				/*
 				if ( d.incflow > d.obs ) {
+					d.incflow = d.obs
+				}
+				*/
+
+				// don't allow modeled cumflow to be greater than estimated
+				// demand Also, the first time modeled cumflow exceeds demand,
+				// call this t3'
+				if ( d.incflow > d.adjdivavg ) {
 					if ( cep[3] == null ) {
-						cep[3] = ifpa.timesteps[j]
+						cep[3] = ifpa.timesteps[m]
+						cumflow[m].ce += " t3p"
 					}
-					d.incflow = d.obs;
+					d.incflow = d.adjdivavg;
 				}
 			}
 
+
+
 			// at this point, we have incident cumflows projected, update the delays
 
-			def delay2 = 0;
+			def cumflowObservedDelay = 0;
 			def delay3 = 0;
 			def delay4 = 0;
 			def tmcSavings = 0;
 
+			def jj = 0
 			cumflow.each{ d ->
-				delay2 += (d.divavg-d.obs)*5/60   // avg cumflow less diversion per timestep - obs * 5/60th hr = total delay
-				delay3 += (d.avg-d.obs)*5/60      // avg cumflow - obs * 5/60th hr = total delay if there hadn't been TMC diversion
-				delay4 += (d.avg-d.incflow)*5/60; // avg cumflow less projected flow per timestep * 5/60th hr = projected delay
+				cumflowObservedDelay += (d.divavg-d.obs)*5/60   // avg cumflow less diversion per timestep - obs * 5/60th hr = total delay
+				delay3 += (d.adjdivavg-d.obs)*5/60      // avg cumflow - obs * 5/60th hr = total delay if there hadn't been TMC diversion
+				//log.debug( "d3tmp[${jj++}] = ${(d.avg-d.obs)*5/60} == ${delay3}" )
+				delay4 += (d.adjdivavg-d.incflow)*5/60; // avg cumflow less projected flow per timestep * 5/60th hr = projected delay
 			}
 
 			// scale to convert div adj avg to netdelay
-			def factor = netDelayTarget/(delay2+(delay3-delay2)*(1-ifpa.modelParams.tmcDivPct/100.0))
+			def factor = netDelayTarget/(cumflowObservedDelay) // +(delay3-cumflowObservedDelay)*(1-params.tmcDivPct/100.0))
+
+			def holddelay4 = delay4
 
 			delay4 *= factor
 			delay4 = zeroOrBetter( delay4 )
 		
 			tmcSavings = zeroOrBetter( delay4 - zeroOrBetter( netDelayTarget ) )
 
-			println "CUMFLOW: ${cumflow}"
-			println "DELAYS: ${factor},${netDelayTarget},${delay2},${delay3},${delay4},${tmcSavings}"
+			/*
+			log.debug( "CUMFLOW: ${cumflow}" )
+			log.debug( "RATES: ${incflowrate}, ${clearflowrate}" )
+			log.debug( "DELAYS: ${factor},${netDelayTarget},${cumflowObservedDelay},${delay3},${holddelay4},${delay4},${tmcSavings}" )
+			*/
 
-			data.modeledDelay = delay4
-			data.tmcSavings = tmcSavings
+			sim.modeledDelay = delay4
+			sim.tmcSavings = tmcSavings
 
-			return data
+			return sim
 		}
 	}
 }

@@ -93,6 +93,9 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
         ;
 
       and: "and the data read is correct"
+		ifpa.cad                        == '498-07072011'
+		ifpa.facility                   == '5'
+		ifpa.direction                  == 'N'
         ifpa.modelStats.solver_status   == sstat
         ifpa.modelStats.model_status    == mstat
         ifpa.modelStats.objective_value == obj

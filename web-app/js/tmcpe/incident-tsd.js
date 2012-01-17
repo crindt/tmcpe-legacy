@@ -906,14 +906,18 @@ if ( !tmcpe ) var tmcpe = {};
 	      }
 
 
+		  var d3tmp = []
+		  d3tmpsum = []
 	      $.each( data, function(i, d) {
 	          delay2 += (d.divavg-d.obs)*5/60;       // div adj avg - obs
-	          delay3 += (d.avg-d.obs)*5/60;       // avg - obs
-	          delay4 += (d.avg-d.incflow)*5/60; // avg - inc projected
+			  d3tmp[i] = (d.adjdivavg-d.obs)*5/60
+	          delay3 += (d.adjdivavg-d.obs)*5/60;       // avg - obs
+			  d3tmpsum[i] = delay3
+	          delay4 += (d.adjdivavg-d.incflow)*5/60; // avg - inc projected
 	      });
 
 	      // scale to convert div adj avg to netdelay
-	      var factor = json.analysis.netDelay/(delay2+(delay3-delay2)*(1-params.tmcDivPct/100.0));
+	      var factor = json.analysis.netDelay/(delay2)//+(delay3-delay2)*(1-params.tmcDivPct/100.0));
 
 	      delay4 *= factor;
 	      delay4 = zeroOrBetter( delay4 );
@@ -1014,28 +1018,21 @@ if ( !tmcpe ) var tmcpe = {};
 
 	      d3.select("#chart_location").html(json.sections[section].name);
 
+		  var timestampIndex = function( d ) {
+			  var base = json.timesteps[0].getTime()/1000;
+			  var idx = Math.floor( (d-base) / (60*5.0) );
+
+			  if ( idx < 0 || 
+				   idx >= json.timesteps.length ) console.log ( "Bad timestep" )
+			  return idx;
+		  }
 
           // find the cells associated with each critical time
-	      var t0Cell = json.timesteps.filter( function (e) {
-	          return !t0 || (e.getTime()/1000 < t0);
-	      }).length-1;
-
-	      var startCell = json.timesteps.filter( function (e) {
-	          return !t1 || (e.getTime()/1000 < t1);
-	      }).length-1;
-
-
-	      var t2Cell = json.timesteps.filter( function (e) {
-	          return !t2 || (e.getTime()/1000 < t2);
-	      }).length-1;
-
-	      var t2pCell = json.timesteps.filter( function (e) {
-	          return !t2p || (e.getTime()/1000 < t2p);
-	      }).length-1;
-
-	      var finishCell = json.timesteps.filter( function (e) {
-	          return !t3 || (e.getTime()/1000 < t3);
-	      }).length;
+		  var t0Cell = timestampIndex( t0 );
+		  var startCell = timestampIndex( t1 );
+		  var t2Cell = timestampIndex( t2 );
+		  var t2pCell = timestampIndex( t2p );
+	      var finishCell = timestampIndex( t3 );
 
 	      if ( finishCell >= json.timesteps.length ) {
 	          finishCell = json.timesteps.length-1;
@@ -1052,53 +1049,73 @@ if ( !tmcpe ) var tmcpe = {};
 
 	      // fixme: crindt: we really want to use the incident section by default, not the downstream section.
 	      var diversion = sfunc(incidentSectionIndex,finishCell,function(v){
-	          return v == null || v.vol_avg == null ? 0 : v.vol_avg/volscale;
+	          return v == null || v.vol_avg == null ? 0 : Math.round(v.vol_avg)/volscale;
 	      }) - sfunc(incidentSectionIndex,finishCell,function(v){
 	          return v == null || v.vol == null ? 0 : v.vol/volscale;
 	      });
 
-	      data = d3.range( json.timesteps.length ).map(function(j) {
-	          return {x:json.timesteps[j].getTime()/1000+300,
-		              obs: sfunc(section,j,function(v){return v.vol/volscale}), 
-		              avg: sfunc(section,j,function(v){return v.vol_avg/volscale}),
-		              divavg: ( j < startCell
-			                    ?  sfunc(section,j,function(v){return v.vol_avg/volscale})
-			                    : ( j > finishCell
-				                    ? sfunc(section,j,function(v){return v.vol/volscale})
-				                    : sfunc(section,j,function(v){return v.vol_avg/volscale}) - diversion*(j-startCell)/(finishCell-startCell) ) ),
-                      adjdivavg: ( j < startCell
-			                       ?  sfunc(section,j,function(v){return v.vol_avg/volscale})
-			                       : ( j > finishCell
-				                       ? sfunc(section,j,function(v){return v.vol/volscale}) + (params.tmcDivPct/100)*diversion
-				                       : sfunc(section,j,function(v){return v.vol_avg/volscale}) - (1-params.tmcDivPct/100)*diversion*(j-startCell)/(finishCell-startCell) ) ),
-		             }
-	      });
+	      data = d3.range( json.timesteps.length ).map(function(m) {
+	          return {x:json.timesteps[m].getTime()/1000+300,
+		              obs: sfunc(section,m,function(v){return v.vol/volscale}), 
+		              avg: sfunc(section,m,function(v){return Math.round(v.vol_avg)/volscale}), // crindt: FIXME: floor to match GAMS precision
+					 }
+		  } )
+		  
+		  $.each( data, function( m, d ) {
+			  d.divavg = ( m < startCell
+			               ?  d.avg
+			               : ( m > finishCell
+				               ? d.obs
+				               : d.avg - diversion*(m-startCell)/(finishCell-startCell) ) );
+			  d.adjdivavg = ( m < startCell
+			                  ? d.avg
+			                  : ( m > finishCell
+				                  ? d.obs + (params.tmcDivPct/100)*diversion
+				                  : ( d.avg - 
+									  (1-params.tmcDivPct/100)*diversion // nonTmcDiversion
+									  *(m-startCell)/(finishCell-startCell) ) ) );
+			  //console.log( "" + m + ": [" + [startCell,finishCell,d.obs,d.avg,diversion].join(",")+ "] = "+ d.divavg + "," + d.adjdivavg )
+	      })
 
 	      var incflowrate = (data[t2Cell].obs - data[t0Cell].obs)/(5*60*(t2Cell-t0Cell)) ;
 	      var clearflowrate = (data[finishCell].obs - data[t2Cell].obs)/(5*60*(finishCell-t2Cell)) ;
           // clearflow rate is max obs flow rate
-          //clearflowrate = Array.max(d3.range( 1, json.timesteps.length ).map(function(j){return (data[j].obs-data[j-1].obs)/(5*60)}));
+          var maxclearflowrate = Array.max(d3.range( 1, json.timesteps.length ).map(function(j){
+			  return (data[j].obs-data[j-1].obs)/(5*60)}));
+		  if ( clearflowrate < maxclearflowrate )
+			  // take the max (FIXME: this is stupid, maxclearflowrate is
+			  // always >= clearflowrate so we should just use the former
+			  clearflowrate = maxclearflowrate
+
+		  // hold the obs cum flow at the point the road was cleared
+		  var base = data[t2Cell].obs
 
 	      // compute what-if flow rate
           var t3p = null;
 	      $.each(data,function(j,d){
 	          if ( j < t2Cell ) {
 		          // before t2 (clearance), what-if flow is equivalent to measured
-		          d.incflow = sfunc(section,j,function(v){return v.vol/volscale})
+		          d.incflow = d.obs //sfunc(section,j,function(v){return v.vol/volscale})
 	          } else if ( j < t2pCell ) {
 		          // between t2 and t2p, what-if flow is the base vvalue 
-		          var base = sfunc(section,t2Cell,function(v){return v.vol/volscale});
-		          d.incflow =  base + incflowrate*(j-t2Cell)*60*5;
+		          d.incflow = base + incflowrate*(j-t2Cell)*60*5;
 	          } else {
-		          var base = sfunc(section,t2Cell,function(v){return v.vol/volscale});
 		          d.incflow = base + incflowrate*(t2pCell-t2Cell)*60*5 + clearflowrate*(j-t2pCell)*60*5;
 	          }
+
+			  // don't allow projection to be greater than observed
+			  /*
+			  if ( d.incflow > d.obs ) {
+				  d.incflow = d.obs;
+			  }
+			  */
+
 	          // don't allow projection to be greater than avg.
-	          if ( d.incflow > d.obs ) {
+	          if ( d.incflow > d.adjdivavg ) {
                   if ( t3p == null ) {
                       t3p = json.timesteps[j].getTime()/1000;
                   }
-                  d.incflow = d.obs;
+                  d.incflow = d.adjdivavg;
               }
 
 	      });
@@ -1113,7 +1130,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      // Compute the maximum cumulative flow across all sections (to set the max scale)
 	      var maxflow = Array.max( json.data.map( function( r ) { 
 	          return Array.max( [ sfunc( r[0].i,r.length-1, function(v){return v.vol/volscale}), 
-				                  sfunc( r[0].i,r.length-1, function(v){return v.vol_avg/volscale}) ] );
+				                  sfunc( r[0].i,r.length-1, function(v){return Math.round(v.vol_avg)/volscale}) ] );
 	      } ) );
 
 
@@ -1350,9 +1367,9 @@ if ( !tmcpe ) var tmcpe = {};
 	          { t:t1, n: "t1", l:"Verification" }, 
 	          { t:t2, n: "t2", l:"Roadway clear" }, 
 	          { t:t3, n: "t3", l:"Queue dissipated" }, 
-	          { t:t1p, n: "t1p", l:"Verification without TMC (estimated)"},
-	          { t:t2p, n: "t2p", l:"Clearance time without TMC (estimated)"},
-              { t:t3p, n: "t3p", l:"Queue dissipated without TMC (estimated)"},
+	          { t:t1p, n: "t1p", l:"Verification without TMC (estimated)", adjtop: 12},
+	          { t:t2p, n: "t2p", l:"Clearance time without TMC (estimated)", adjtop: 12},
+              { t:t3p, n: "t3p", l:"Queue dissipated without TMC (estimated)", adjtop: 12},
 	      ].filter( function( d ) { return d.t != null; } );
 
 	      var times = vis.selectAll("g.timebar")
@@ -1367,7 +1384,7 @@ if ( !tmcpe ) var tmcpe = {};
 		          return x(d.t) } )
 	          .attr("x2", function (d) { 
 		          return x(d.t) } )
-	          .attr("y1", 0 )
+	          .attr("y1", function(d) { return  0 - ( d.adjtop ? d.adjtop : 0 ) } )
 	          .attr("y2", hh - 1 )
 	          .on("mouseover", function(d,i) {
 		          this.style.stroke="red";
@@ -1384,7 +1401,9 @@ if ( !tmcpe ) var tmcpe = {};
 	          .attr("class","critical-time")
 	          .attr("x", function (d) { 
 		          return x(d.t) } )
-	          .attr("y", 0 )
+	          .attr("y", function (d) {
+				  return d.adjtop ? - d.adjtop : 0
+			  })
 	          .attr("text-anchor", "start")
 	          .text( function(d) { 
 		          return d.n; } )
@@ -1749,7 +1768,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	          var rra = rr * 180 / Math.PI;
 
-	          console.log( "Angle,rra:"+aa+","+rra );
+	          //console.log( "Angle,rra:"+aa+","+rra );
 
 	          map.angle( rr )
               //	      map.angle( 90*Math.PI/180.0 );
