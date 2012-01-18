@@ -141,8 +141,9 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 
 		def list = ProcessedIncident.withCriteria{ 
 			def now = new Date()
-			between('startTime',dstr('2011-01-01 00:00:00'),dstr('2012-01-01 00:00:00'))
-			
+			between('startTime',dstr('2011-03-09 00:00:00'),dstr('2012-01-01 00:00:00'))
+			eq('eventType','INCIDENT')
+			order('startTime','asc')
 		}.grep { 
 			def bs = it.getActiveAnalysis()?.analysisForPrimaryFacility()?.badSolution;
 			return bs == null || bs == "" 
@@ -166,15 +167,36 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 				sim.save(flush:true)
 				def id = sim.id
 				println "SIM ID: ${sim.id}"
+			} catch ( FileNotFoundException e ) { 
+				log.warn "${pi.cad} HAS MISSING INPUT FILES: "
+				log.warn stackTraceAsString(e)
+
 			} catch ( SimpleIncidentModelService.NoIncidentRegionIdentifiedException e ) { 
 				// OK, just let it go
-				log.warn "${pi.cad} HAS NO INCIDENT REGION IDENTIFIED"
+				log.warn "${pi.cad} HAS NO INCIDENT REGION IDENTIFIED...SKIPPING"
+
 			} catch ( GamsDelayComputationService.GamsFileParseException e ) { 
-				log.warn "${pi.cad} HAS A GAMS FILE PARSE EXCEPTION"
-			} catch ( Exception e ) { 
-				log.warn "CAUGHT UNKNOWN EXCEPTION ${e}"
-				e.printStackTrace()
+				log.warn "${pi.cad} HAS A GAMS FILE PARSE EXCEPTION...SKIPPING"
+
+			} catch ( SimpleIncidentModelService.IncidentRegionNotBoundedInTimeException e ) { 
+				log.warn "${pi.cad}-${pi.section.freewayId}-${pi.section.freewayDir} IS UNBOUNDED IN TIME...SKIPPING"
+
+			} catch ( SimpleIncidentModelService.IncidentRegionNotBoundedInSpaceException e ) { 
+				log.warn "${pi.cad}-${pi.section.freewayId}-${pi.section.freewayDir} IS UNBOUNDED IN SPACE...SKIPPING"
+
+			} catch ( SimpleIncidentModelService.UndeterminedCriticalEventsException e ) {
+				log.warn "${pi.cad}-${pi.section.freewayId}-${pi.section.freewayDir} HAS UNDETERMINED CRITICAL EVENTS"
+
+			} catch ( SimpleIncidentModelService.InconsistentCriticalEventCellsException e ) {
+				log.warn "${pi.cad}-${pi.section.freewayId}-${pi.section.freewayDir} HAS INCONSISTENT CRITICAL EVENTS: ${e}"
 			}
+		
+			
+			/*
+			catch ( Exception e ) { 
+				log.warn "CAUGHT UNKNOWN EXCEPTION ${e}: ${stackTraceAsString( e ) }"
+
+				}*/
 			
 
 		}
@@ -184,6 +206,13 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 		true
 
 
+	}
+
+	def stackTraceAsString(Throwable t) { 
+		StringWriter sw = new StringWriter()
+		PrintWriter pw = new PrintWriter(sw)
+		org.codehaus.groovy.runtime.StackTraceUtils.printSanitizedStackTrace(t,pw)
+		return sw.toString()
 	}
 
 	Date dstr(String s) { 

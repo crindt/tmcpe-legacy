@@ -1,8 +1,5 @@
 //import org.codehaus.groovy.grails.plugins.starksecurity.PasswordEncoder
 
-import edu.uci.its.auth.Role
-import edu.uci.its.auth.User
-
 import javax.servlet.http.HttpServletRequest
 
 class BootStrap {

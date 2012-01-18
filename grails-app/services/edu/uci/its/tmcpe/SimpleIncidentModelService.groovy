@@ -12,6 +12,23 @@ class SimpleIncidentModelService {
 	static class IncidentRegionNotBoundedInTimeException extends java.lang.RuntimeException {}
 	static class IncidentRegionNotBoundedInSpaceException extends java.lang.RuntimeException {}
 	static class NoIncidentRegionIdentifiedException extends java.lang.RuntimeException {}
+	static class UndeterminedCriticalEventsException extends java.lang.RuntimeException {
+		public UndeterminedCriticalEventsException( String s = "") { 
+			super(s)
+		}
+		
+	}
+	static class UndeterminedIncidentSectionException extends java.lang.RuntimeException {
+		public UndeterminedIncidentSectionException( String s = "") { 
+			super(s)
+		}
+	}
+
+	static class InconsistentCriticalEventCellsException extends java.lang.RuntimeException {
+		public InconsistentCriticalEventCellsException( String s = "") { 
+			super(s)
+		}
+	}
 
     // we need
 
@@ -35,11 +52,11 @@ class SimpleIncidentModelService {
 	) {
 		def ce      = determineCriticalEvents( ifpa )  // measured critical events
 		if ( ce.grep { it != null }.size() < 4 )
-			throw new RuntimeException( "CAN'T DETERMINE CRITICAL EVENTS ")
+			throw new UndeterminedCriticalEventsException( "CAN'T DETERMINE CRITICAL EVENTS for ${ifpa.incFacDirAsString()}")
 
 		def section = computeIncidentSection( ifpa )
 		if ( section == null )
-			throw new RuntimeException( "CAN'T DETERMINE INCIDENT SECTION")
+			throw new UndeterminedIncidentSectionException( "CAN'T DETERMINE INCIDENT SECTION ${ifpa.incFacDirAsString()}")
 
 		SimpleIncidentModel sim = doCumulativeFlowProjections( ifpa, section, ce, params )
 
@@ -98,7 +115,7 @@ class SimpleIncidentModelService {
 		*/
 
 		if ( pi == null )
-			throw new RuntimeException( "Processed Incident not found for ${ifpa.cad}")
+			throw new RuntimeException( "CAN'T FIND PROCESSED INCIDENT FOR ${ifpa.incFacDirAsString()}")
 		else {
 			// fill in with PI
 			log.debug( "USING PI: ${pi}" )
@@ -137,26 +154,35 @@ class SimpleIncidentModelService {
 
 		use ( [groovy.time.TimeCategory] ) { // we do time calcs
 
-			// determine the critical event cells
+			def t0Cell    
+			def startCell 
+			def t2Cell    
+			def finishCell
 
-			// FIXME:REPORT-BUG: timestampIndex won't work unless the date 
-			// is converted by adding a (zero) duration to it
-			def t0Cell     = ifpa.timestampIndex( ce[0] + 0.minutes )
-			def startCell  = ifpa.timestampIndex( ce[1] + 0.minutes )
-			def t2Cell     = ifpa.timestampIndex( ce[2] + 0.minutes )
-			def finishCell = ifpa.timestampIndex( ce[3] + 0.minutes )
+			try { 
+				// determine the critical event cells
+				
+				// FIXME:REPORT-BUG: timestampIndex won't work unless the date 
+				// is converted by adding a (zero) duration to it
+				t0Cell     = ifpa.timestampIndex( ce[0] + 0.minutes )
+				startCell  = ifpa.timestampIndex( ce[1] + 0.minutes )
+				t2Cell     = ifpa.timestampIndex( ce[2] + 0.minutes )
+				finishCell = ifpa.timestampIndex( ce[3] + 0.minutes )
+			} catch( IndexOutOfBoundsException e ) { 
+				throw new InconsistentCriticalEventCellsException("FAILED INDEXING CRITICAL EVENT TIMESTAMPS ${ce.join(',')}")
+			}
 
 			if ( !(finishCell > startCell) )
-				throw new RuntimeException("FINISH CELL [${finishCell}] <= START CELL [${startCell}] IN ${ifpa.cad}")
+				throw new InconsistentCriticalEventCellsException("FINISH CELL [${finishCell}] <= START CELL [${startCell}] IN ${ifpa.cad}")
 
 			if ( !(t0Cell >= 0 && t0Cell < ifpa.timesteps.size()) )
-				throw new RuntimeException("t0Cell BOGUS [${t0Cell}] IN ${ifpa.cad}")				
+				throw new InconsistentCriticalEventCellsException("t0Cell BOGUS [${t0Cell}] IN ${ifpa.cad}")				
 			if ( !(startCell >= 0 && startCell < ifpa.timesteps.size()) )
-				throw new RuntimeException("startCell BOGUS [${startCell}] IN ${ifpa.cad}")				
+				throw new InconsistentCriticalEventCellsException("startCell BOGUS [${startCell}] IN ${ifpa.cad}")				
 			if ( !(t2Cell >= 0 && t2Cell < ifpa.timesteps.size()) )
-				throw new RuntimeException("t2Cell BOGUS [${t2Cell}] IN ${ifpa.cad}")				
+				throw new InconsistentCriticalEventCellsException("t2Cell BOGUS [${t2Cell}] IN ${ifpa.cad}")				
 			if ( !( finishCell >= 0 && finishCell < ifpa.timesteps.size() ) )
-				throw new RuntimeException("finishCell BOGUS [${finishCell}] IN ${ifpa.cad}")				
+				throw new InconsistentCriticalEventCellsException("finishCell BOGUS [${finishCell}] IN ${ifpa.cad}")				
 
 			// define the summing function for cumulative flow since the start
 			// of the incident
@@ -380,11 +406,17 @@ class SimpleIncidentModelService {
 
 			// FIXME:REPORT-BUG: timestampIndex won't work unless the date 
 			// is converted by adding a (zero) duration to it
-			def t1pCell     = ifpa.timestampIndex( cep[1] + 0.minutes)
-			def t2pCell     = ifpa.timestampIndex( cep[2] + 0.minutes )
+			def t1pCell
+			def t2pCell
+			try { 
+				t1pCell     = ifpa.timestampIndex( cep[1] + 0.minutes)
+				t2pCell     = ifpa.timestampIndex( cep[2] + 0.minutes )
+			} catch( IndexOutOfBoundsException e ) { 
+				throw new InconsistentCriticalEventCellsException("FAILED INDEXING CRITICAL PRIME EVENT TIMESTAMPS ${cep.join(',')}")
+			}
 
-			cumflow[t1pCell].ce += " t1p"
-			cumflow[t2pCell].ce += " t2p"
+			cumflow[t1pCell].ce = [cumflow[t1pCell].ce,"t1p"].grep{ it }.join(" ")
+			cumflow[t2pCell].ce = [cumflow[t2pCell].ce,"t2p"].grep{ it }.join(" ")
 
 
 			// estimate the service rate while capacity disruptions persist.
@@ -441,7 +473,7 @@ class SimpleIncidentModelService {
 				if ( d.incflow > d.adjdivavg && m > startCell ) {
 					if ( cep[3] == null ) {
 						cep[3] = ifpa.timesteps[m]
-						cumflow[m].ce += " t3p"
+						cumflow[m].ce = [cumflow[m].ce,"t3p"].grep{ it }.join(" ")
 					}
 					d.incflow = d.adjdivavg;
 				}

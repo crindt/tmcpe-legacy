@@ -87,6 +87,10 @@ class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
             return false
     }
 
+	public String incFacDirAsString() { 
+		return "${cad} @ ${facility}-${direction}"
+	}
+
     public String toString() { 
         return super.toString()+
             "[cad:${cad},modelConfig:${modelConfig},modelStats:${modelStats}]"
