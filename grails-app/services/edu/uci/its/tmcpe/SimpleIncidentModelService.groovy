@@ -512,6 +512,7 @@ class SimpleIncidentModelService {
 			log.debug( "DELAYS: ${factor},${netDelayTarget},${cumflowObservedDelay},${delay3},${holddelay4},${delay4},${tmcSavings}" )
 			*/
 
+            sim.conversionFactor = factor
 			sim.modeledDelay = delay4
 			sim.tmcSavings = tmcSavings
 
