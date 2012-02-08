@@ -141,16 +141,18 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 
 		def list = ProcessedIncident.withCriteria{ 
 			def now = new Date()
-			between('startTime',dstr('2011-03-09 00:00:00'),dstr('2012-01-01 00:00:00'))
+			between('startTime',dstr('2010-11-01 00:00:00'),dstr('2011-01-01 00:00:00'))
 			eq('eventType','INCIDENT')
 			order('startTime','asc')
 		}.grep { 
+			assert it != null
 			def bs = it.getActiveAnalysis()?.analysisForPrimaryFacility()?.badSolution;
 			return bs == null || bs == "" 
 		}
-		log.info( "PROCESSING ${list.size()} INCIDENTS" )
-		list.grep{ it.section != null }.each{ pi ->
-			log.debug( "PROCESSING ${pi}" )
+		def locatedList = list.grep{ it.section != null }
+		log.info( "PROCESSING ${locatedList.size()} of ${list.size()} INCIDENTS" )
+		locatedList.each{ pi ->
+			log.info( "PROCESSING ${pi}" )
 			try { 
 
 				def ifpa = gamsDelayComputationService.parseGamsResults(
@@ -158,15 +160,23 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 					new File( "data/actlog/gamsdata/${pi.cad}-${pi.section.freewayId}=${pi.section.freewayDir}.lst" ) 
 				);
 
-				assert ifpa.validate() == true
+				if ( ! ifpa.validate() ) { 
+					log.warn "COULD NOT VALIDATE IFPA FOR ${pi.cad} : "
+					ifpa.errors.allErrors.each {
+						log.warn( it )
+					}
+					log.warn "...SKIPPING ${pi.cad} : "
+				} else { 
 
-				def ce = simpleIncidentModelService.determineCriticalEvents( ifpa )
+					def ce = simpleIncidentModelService.determineCriticalEvents( ifpa )
 
-				def sim = simpleIncidentModelService.modelIncident(ifpa)
+					def sim = simpleIncidentModelService.modelIncident(ifpa)
 
-				sim.save(flush:true)
-				def id = sim.id
-				println "SIM ID: ${sim.id}"
+					sim.save(flush:true)
+					def id = sim.id
+					log.info "SIM ID: ${sim.id}"
+				}
+				
 			} catch ( FileNotFoundException e ) { 
 				log.warn "${pi.cad} HAS MISSING INPUT FILES: "
 				log.warn stackTraceAsString(e)
@@ -176,7 +186,7 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 				log.warn "${pi.cad} HAS NO INCIDENT REGION IDENTIFIED...SKIPPING"
 
 			} catch ( GamsDelayComputationService.GamsFileParseException e ) { 
-				log.warn "${pi.cad} HAS A GAMS FILE PARSE EXCEPTION...SKIPPING"
+				log.warn "${pi.cad} HAS A GAMS FILE PARSE EXCEPTION...SKIPPING: ${e.message}"
 
 			} catch ( SimpleIncidentModelService.IncidentRegionNotBoundedInTimeException e ) { 
 				log.warn "${pi.cad}-${pi.section.freewayId}-${pi.section.freewayDir} IS UNBOUNDED IN TIME...SKIPPING"
@@ -189,8 +199,9 @@ class SimpleIncidentModelServiceSpec extends IntegrationSpec {
 
 			} catch ( SimpleIncidentModelService.InconsistentCriticalEventCellsException e ) {
 				log.warn "${pi.cad}-${pi.section.freewayId}-${pi.section.freewayDir} HAS INCONSISTENT CRITICAL EVENTS: ${e}"
+			} catch ( GamsDelayComputationService.IncompleteDataException e ) { 
+				log.warn "INCOMPLETE DATA FOR ${pi?.cad}: ${e.message}"
 			}
-		
 			
 			/*
 			catch ( Exception e ) { 

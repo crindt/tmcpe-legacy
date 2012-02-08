@@ -9,7 +9,7 @@ package edu.uci.its.tmcpe
 
 import grails.plugin.spock.*
 
-class TmcpeUnitSpec extends UnitSpec {
+class TmcpeIntegrationSpec extends IntegrationSpec {
 
 	/**
 	 * This method is a wrapper for spock validation tests that prints out

@@ -8,8 +8,10 @@
 package edu.uci.its.tmcpe
 
 import groovy.transform.InheritConstructors
+import grails.validation.Validateable
 
 @InheritConstructors
+@Validateable
 class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
     String id
     String cad
@@ -19,37 +21,54 @@ class IncidentFacilityPerformanceAnalysis extends FacilityPerformance {
     List avgConditions
 
     // model
-    Map modelConfig
+    GamsModelConfig modelConfig
+
     Map modelStats
     Map modelParams
     List modConditions  // modeled conditions
 
+	public IncidentFacilityPerformanceAnalysis() { 
+		super()
+		modelConfig = new GamsModelConfig()
+	}
+
+	public IncidentFacilityPerformanceAnalysis( GamsModelConfig modelConfigA ) { 
+		super()
+		modelConfig = modelConfigA
+	}
+
     static mapWith = "mongo"
     // FIXME: making the lists embedded seems to prevent persistence
     //static embedded = ['obsConditions','avgConditions']
+	static embedded = ['modelConfig']
+
     static constraints = {
-        obsConditions(
-            validate: { val, obj ->
-                val != null               && 
-                val.size == sections.size &&
-                // make sure each row is the same size
-                val.findAll{ row -> row.size() == timesteps.size() }.size()==sections.size()
-                      })
-        avgConditions(
-            validate: { val, obj ->
-                val != null               && 
-                val.size == sections.size &&
-                // make sure each row is the same size
-                val.findAll{ row -> row.size() == timesteps.size() }.size()==sections.size()
-                      })
-        modConditions(
-            validate: { val, obj ->
-                val == null               ||
-                ( val.size == sections.size &&
-                  // make sure each row is the same size
-                  val.findAll{ row -> row.size() == timesteps.size() }.size()==sections.size()
-                ) })
+        obsConditions( validator: { val, obj -> obj.conditionsSizeValidator( val, "obsConditions" ) } )
+        avgConditions( validator: { val, obj -> obj.conditionsSizeValidator( val, "avgConditions" ) } )
+		modConditions( validator: { val, obj -> val == null || obj.conditionsSizeValidator( val, "modConditions" ) } )
+		modelConfig  ( validator: { val, obj -> if ( ! val.validate() ) return [ 'invalid.model.config', val.errors ] } )
     }
+
+	def conditionsSizeValidator(val, name = "<unknown>") {
+		if ( val == null ) {
+			log.error( "${name} cannot be null" )
+			return ['invalid.null']
+		}
+		if ( val.size() != sections.size() ) {
+			log.error( "Number of sections in ${name} [${val.size()}] differs from number of sections in model [${sections.size()}]" )
+			return ['invalid.sections']
+		}
+		// make sure each row is the same size
+		def badlist = val.findAll{ row -> row.size() != timesteps.size() }
+		if ( badlist.size() > 0 ) {
+			log.error( "BADLIST" )
+			log.error( "${timesteps.size} != ?")
+			return [ 'invalid.timesteps.per.section', name, this.class, 
+					 badlist.collect{ row -> "${row.size()} != ${timesteps.size()}"}
+				   ]
+		}
+		return true
+	}
 
     def clearModelResults() {
         modelStats = [:]

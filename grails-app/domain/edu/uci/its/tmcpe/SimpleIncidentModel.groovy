@@ -8,6 +8,8 @@ class SimpleIncidentModel {
 
 	List cumulativeFlows
 
+	Float conversionFactor
+
 	Float totalDiversion
 	Float tmcDiversion
 	Float modeledDelay 

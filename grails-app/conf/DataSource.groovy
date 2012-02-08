@@ -31,6 +31,15 @@ environments {
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
 
+		dataSource_vds_partitioned {
+			url = 'jdbc:postgresql://localhost:5433/vds'
+			username = 'postgres'
+			readOnly = true
+			dbCreate = 'update'
+			driverClassName = "org.postgresql.Driver"
+			dialect = org.hibernatespatial.postgis.PostgisDialect
+		}
+
         grails { 
             mongo { 
                 databaseName = "tmcpe_analyses_devel"
@@ -56,6 +65,16 @@ environments {
             driverClassName = "org.postgresql.Driver"
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
+
+		dataSource_vds_partitioned {
+			url = 'jdbc:postgresql://localhost:5433/vds'
+			username = 'postgres'
+			readOnly = true
+			dbCreate = 'update'
+			driverClassName = "org.postgresql.Driver"
+			dialect = org.hibernatespatial.postgis.PostgisDialect
+		}
+
         grails { 
             mongo { 
                 databaseName = "tmcpe_analyses_test"
@@ -81,6 +100,14 @@ environments {
             driverClassName = "org.postgresql.Driver"
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
+		dataSource_vds_partitioned {
+			url = 'jdbc:postgresql://localhost:5433/vds'
+			username = 'postgres'
+			readOnly = true
+			dbCreate = 'update'
+			driverClassName = "org.postgresql.Driver"
+			dialect = org.hibernatespatial.postgis.PostgisDialect
+		}
         grails { 
             mongo { 
 				host = "localhost"

@@ -2,52 +2,191 @@ package edu.uci.its.tmcpe
 
 import org.apache.commons.logging.LogFactory
 import groovy.text.GStringTemplateEngine
+import groovy.sql.Sql
+import java.sql.SQLException;
+import grails.converters.JSON
 
 import java.security.MessageDigest // for md5sum
 
 class GamsDelayComputationService {
 
+	static datasource = 'vds_partitioned'
+	static dataSource_vds_partitioned
+
     private static final log = LogFactory.getLog(this)
 
     static transactional = true
+
+	def toFivemin(Date da) { 
+		def cal = new GregorianCalendar()
+		cal.time = da
+		cal.set(Calendar.MINUTE, (int)Math.floor(cal.get(Calendar.MINUTE)/5)*5)
+		cal.set(Calendar.SECOND, 0 )
+		return cal.time
+	}
+
+	/**
+	 * Create an IFPA object for a given section
+	 *
+	 * This should contain all necessary configuration parameters and data to run an analysis
+	 */
+	public IncidentFacilityPerformanceAnalysis generateAnalysis( 
+		ProcessedIncident pi,
+		GamsModelConfig config = new GamsModelConfig()
+	) {
+		def ifpa = new IncidentFacilityPerformanceAnalysis( config )
+		// generate the input data
+
+		assert pi != null
+		assert ifpa.modelConfig != null
+
+		ifpa.cad = pi.cad
+		ifpa.modelConfig.section = pi.section
+		ifpa.modelConfig.sectionId = pi.section.id
+		ifpa.facility = pi.section.freewayId
+		ifpa.direction = pi.section.freewayDir
+
+		// override existing and defaults with passed config
+		/*
+		config.each{ key, value ->
+			if ( ifpa.modelConfig.metaClass.hasProperty( ifpa, key ) ) {
+				ifpa.modelConfig[ key ] = value
+				log.info( "OVERRIDING modelConfig[${key}] = ${value}" )
+			}
+		}
+		*/
+
+		// grab sections adjacent and upstream from the target (possibly
+		// based upon params
+		// ifpa.sections[i] = { vdsid: , name: , pm: }
+		
+		// FIXME: should order 0->n downstream to upstream
+
+		// pm on NB and EB facilities increase downstream, so 
+		// we want to query between [incloc - (maxdist) ] and incloc
+		def low
+		def high
+		if ( pi.section.freewayDir =~ /[NE]/ ) {
+			low = pi.section.absPostmile  - 10 // look 10 mi US
+			high = pi.section.absPostmile + 0.5 // look 0.5 mi DS
+		} else {
+			low = pi.section.absPostmile - 0.5 // look 0.5 mi DS
+			high = pi.section.absPostmile + 10 // look 10 mi US
+		}
+		
+		def sections = FacilitySection.withCriteria {
+			eq('freewayId', pi.section.freewayId)
+			eq('freewayDir', pi.section.freewayDir)
+			eq('vdsType', 'ML')
+			between('absPostmile',low,high)
+		}
+		
+		// FIXME: make sure they're ordered correctly...
+		ifpa.sections = sections.toList().collect { 
+			[ vdsid: it.id, name: it.name, pm: it.absPostmile, len:it.segmentLength]
+		}
+
+		use ([groovy.time.TimeCategory]) {
+			// determine the timesteps based upon params
+			def startTimestamp = toFivemin(pi.startTime ?: new Date() /* default to now */ )
+			def fromTime = startTimestamp - (ifpa.modelConfig.preWindow).minutes
+			Integer timestepCount = ((ifpa.modelConfig.preWindow+ifpa.modelConfig.postWindow)/5)
+			def toTime   = fromTime + (5*timestepCount).minutes
+			ifpa.timesteps = (0..timestepCount).collect{ tsi ->
+				fromTime + (tsi*5).minutes
+			}
+			
+			// read the observed and average conditions from the database
+			ifpa.obsConditions = []
+			ifpa.avgConditions = []
+			def sql = new Sql( dataSource_vds_partitioned )
+			sections.eachWithIndex { sec, j ->
+				// pull data from the database for the time range
+				log.info("READING DATA FOR ${sec}")
+				def m = 0
+				ifpa.obsConditions[j] = []
+				ifpa.avgConditions[j] = []
+				sql.eachRow( 
+					"select * from query_5min_obs_avg( ${sec.id}, CAST(${fromTime.format('yyyy-MM-dd HH:mm:ss')} AS timestamp), CAST(${toTime.format('yyyy-MM-dd HH:mm:ss')} AS timestamp), 50 )") {
+					//log.info( "${it.vds_id} ($j), ${it.ts} ($m), ${it.obs_cnt_all}" )
+					def pjm = 0.5  // unknown
+					if ( it.avg_n >= ifpa.modelConfig.minAvgDays && it.pct_obs_all >= ifpa.modelConfig.minObsPct) { 
+						if ( it.obs_spd_all != null ) { 
+							if ( it.obs_spd_all < ( it.avg_spd_all - ifpa.modelConfig.band * it.std_spd_all )
+
+								 // we won't flag speeds over some maximum as incidents,
+								 // regardless of their relationship to averages
+								 && ( it.obs_spd_all <= ifpa.modelConfig.maxIncidentSpeed ) 
+							   ) { 
+								pjm = 0.0
+							} else { 
+								pjm = 1.0
+							}
+						}
+					}
+								 
+					ifpa.obsConditions[j][m] = [vol: it.obs_cnt_all, occ: it.obs_occ_all, spd: it.obs_spd_all, p:pjm]
+					ifpa.avgConditions[j][m] = [vol: it.avg_cnt_all, occ: it.avg_occ_all, spd: it.avg_spd_all]
+					m++
+				}
+			}
+		}
+
+		log.info( "IFPA.modelConfig: ${ifpa.modelConfig}" )
+
+		return ifpa
+	}
+
 
     /**
      * The main interface to the service
      *
      * GIVEN: 
+	 *    * A facility section where the disruption is believed to have occured
+	 *    * A startTime when the disruption is believed to have begun
+	 *    * Any configuration parameters on the model
+	 *
+	 * THEN:
+	 *    * Generate necessary input files
+	 *    * Sync the files to the remote server
+	 *    * Run the remote GAMS service to compute the incident boundary and delay, 
+	 *    * Parse the results
      */
-    public IncidentFacilityPerformanceAnalysis computeIncidentFacilityPerformance( Map config ) {
-        def ifpa
-        if ( !config.hasProperty( 'ifpa' ) ) {
-            ifpa = new IncidentFacilityPerformanceAnalysis(config)
-        } else {
-            ifpa = map.ifpa
-        }
+	public IncidentFacilityPerformanceAnalysis computeIncidentFacilityPerformance(
+		ProcessedIncident pi,
+		GamsModelConfig config = new GamsModelConfig()
+	) {
+		return computeIncidentFacilityPerformance( generateAnalysis( pi, config ) )
+	}
+
+    public IncidentFacilityPerformanceAnalysis computeIncidentFacilityPerformance( 
+		IncidentFacilityPerformanceAnalysis ifpa
+	) {
+		assert ifpa != null
 
         // At this point, we need to iterate until termination conditions are met
-        while( !ifpa.modelIsOptimal() /* && terminationCriteriaAreNotMet */ ) {
-
-            // generate the input data
-            if ( ifpa.obsConditions == null ) {
-                // FIXME: DOIT
-                assert false
-            }
+        while( !ifpa.modelIsOptimal() /* && terminationCriteriaAreNotMet */ ) {			
 
             // generate the model params
-            if ( ifpa.modParams == null ) {
+            if ( ifpa.modelParams == null ) {
                 generateModelParams( ifpa )
-            }
+            } else {
+				// if we have results, determine failure reason and update params as necessary
+			}			
 
             // create datafile
             def gms = createGamsData(ifpa)
 
             // execute
+			Map serverConfig = [:]
             serverConfig.infile = gms
+			serverConfig.destroyExisting = true
             def re = new RemoteExecutor(serverConfig)
             re.execute()
 
             // parse the results
-            ifpa = parseGamsResults( re.infile, re.outfile, ifpa )
+			parseLstData( re.outfile, ifpa )
+            //ifpa = parseGamsResults( re.infile, re.outfile, ifpa )
 
             // validate
         }
@@ -72,18 +211,32 @@ class GamsDelayComputationService {
         IncidentFacilityPerformanceAnalysis ifpa,
 
         // FIXME: crindt: select an appropriate directory for this
-        File gms = new File('test/data/${ifpa.cad}_${ifpa.facility}-${ifpa.direction}.gms' )
+        File gms = null
     ) { 
+
+		// make sure that cad, facility, and direction are set
+		if ( ifpa.facility == null && ifpa.modelConfig?.section != null ) {
+			// see if we can set it from section
+			ifpa.facility = ifpa.modelConfig.section.freewayId
+		}
+		if ( ifpa.direction == null && ifpa.modelConfig?.section != null ) {
+			ifpa.direction = ifpa.modelConfig.section.freewayDir
+		}
+
+		if ( gms == null ) gms = new File("data/newcomp/${ifpa.cad}-${ifpa.facility}=${ifpa.direction}.gms" )
+
+        if ( !ifpa.validate() ) {
+			throw new RuntimeException("IFPA not valid because [\n"+ifpa.errors.allErrors.join("\n")+"\n]")
+		}
+
         // use ifpa to specify conditions
         def f = new File('test/data/tst.gms.template')  // FIXME: crindt: this template should reside elsewhere (e.g., webapp/templates)
         def engine = new GStringTemplateEngine()
-        //assert ( ifpa.validate() )
-
-        // convert the ifpa.modelConfig into ifpa.modelParams
-        generateModelParams(ifpa)
 
         //println ifpa.properties
-        def template = engine.createTemplate(f).make(ifpa.properties)
+		def jsonstr = new JSON( target: ifpa.modelConfig ).toString()
+		log.info("JSON:${jsonstr}")
+        def template = engine.createTemplate(f).make([ifpa:ifpa.properties,modelConfigStr: jsonstr,incstartIndex:ifpa.modelConfig.preWindow/5])
 
         // the newWriter call destroys the existing gms file
         def w = gms.newWriter() 
@@ -94,32 +247,36 @@ class GamsDelayComputationService {
     }
 
     def generateModelParams(IncidentFacilityPerformanceAnalysis ifpa) { 
+		assert ifpa.modelConfig != null
 
         // reset
         ifpa.modelParams = [:]
 
+		log.info( "MODELCONFIG: [${ifpa.modelConfig}]" )
+
         ifpa.modelParams.MAX_LOAD_SHOCK_DIST = (
-            ifpa.modelConfig.opts.limit_loading_shockwave/12.0
+            ifpa.modelConfig.limitLoadingShockwave/12.0
         )
 		
         ifpa.modelParams.MAX_CLEAR_SHOCK_DIST = (
-            ifpa.modelConfig.opts.limit_clearing_shockwave/12.0
+            ifpa.modelConfig.limitClearingShockwave/12.0
         )
 
-        def shockdir = 1;
+        ifpa.modelParams.shockdir = 1;
         if ( ifpa.direction =~ /S/ ||
              ifpa.direction =~ /W/ ) { 
-            shockdir=-1;
+            ifpa.modelParams.shockdir=-1;
         }
 
-        ifpa.modelParams.incstart_index = ifpa.modelConfig.opts.prewindow/5
+        ifpa.modelParams.incstart_index = (int)Math.floor(ifpa.modelConfig.preWindow/5)
+		ifpa.modelParams.incpm = ifpa.modelConfig.section.absPostmile
 		
         ifpa.modelParams.weight_for_length = "L( J1 )"
-        if ( !ifpa.modelConfig.opts.weight_for_length )
+        if ( !ifpa.modelConfig.weightForLength )
             ifpa.modelParams.weight_for_length = "1"
 
         ifpa.modelParams.weight_for_distance = "1"
-        if ( ifpa.modelConfig.opts.weight_for_distance ) { 
+        if ( ifpa.modelConfig.weightForDistance ) { 
             ifpa.modelParams.weight_for_distance = "1.0/power(1 + sqrt(sqr(5*(ORD(M1)-${ifpa.modelParams.incstart_index})/60.0)+sqr(PM(J1)-${ifpa.modelParams.incpm})),${ifpa.modelParams.weight_for_distance})"
         }
     }
@@ -130,16 +287,23 @@ class GamsDelayComputationService {
 
     def parseGamsData( File gms, IncidentFacilityPerformanceAnalysis ifpa = new IncidentFacilityPerformanceAnalysis() ) { 
         
-        def lines = gms.readLines()
+		def lines
+
+		try { 
+			lines = gms.readLines()
+		} catch( FileNotFoundException e) { 
+			throw new GamsFileParseException( "Gams file [${gms.name}] does not exist" )
+		}
+		 
 
 		def version = 0
 		try {
 			version = getMatch(lines, /^\*\*\* FILEVERSION:\s*(\d+)\s*$/, 0, 1 )
-			println "FILEVERSION: $version"
+			log.info "FILEVERSION: $version"
 		} catch ( GamsFileParseException e ) {
 			// no version header, leave at zero and reread
 			//e.printStackTrace()
-			println "BAD VERSION, ASSUMING 0 AND RE-READING"
+			log.info "BAD VERSION, ASSUMING 0 AND RE-READING"
 			lines = gms.readLines()
 		}
 
@@ -160,20 +324,18 @@ class GamsDelayComputationService {
 			ifpa.direction = "UNKNOWN"
 		}
 
-        // read command line
-        ifpa.modelConfig = [:]
-        ifpa.modelConfig.cmd = getMatch(lines, /^\*\*\* COMMAND LINE \[(.*)\]\s*$/, 0, 1 )
+        // read config
+        ifpa.modelConfig = new GamsModelConfig()
+		if ( version >= 1 ) { 
+			def cmd = getMatch(lines, /^\*\*\* COMMAND LINE \[(.*)\]\s*$/, 0, 1 )
+			def json = JSON.parse(cmd)
+			json.each{ key, value ->
+				ifpa.modelConfig[key] = value
+			}
+		}
+		
 
-        // read options
-        ifpa.modelConfig.opts = [ // DEFAULTS
-            weight_for_length:1,
-            height_for_distance:3,
-            limit_loading_shockwave:20,    // mi/hr
-            limit_clearing_shockwave:60,   // mi/hr
-            prewindow:10,                  // minutes
-            postwindow:120                 // minutes
-        ]
-        ifpa.modelConfig.opts.reslim = getMatch(lines, /\s*OPTIONS RESLIM = (\d+)/, 0, 1)
+        ifpa.modelConfig.resourceLimit = Integer.parseInt( getMatch(lines, /\s*OPTIONS RESLIM = (\d+)/, 0, 1) )
 
         // read SETS
         def secrange = getMatch(lines, /J1\s*Sections\s*\/S(\d+)\*S(\d+)\// )
@@ -181,7 +343,7 @@ class GamsDelayComputationService {
             secrange = [ Integer.parseInt(secrange[0][1]), 
                          Integer.parseInt(secrange[0][2])]
         } else { 
-            throw new GamsFileParseException()
+            throw new GamsFileParseException("UNABLE TO PARSE SECTION INDICES")
         }
 
         
@@ -190,13 +352,13 @@ class GamsDelayComputationService {
             timerange = [ Integer.parseInt(timerange[0][1]), 
                           Integer.parseInt(timerange[0][2])]
         } else { 
-            throw new GamsFileParseException()
+            throw new GamsFileParseException("UNABLE TO PARSE TIMESTAMP INDICES")
         }
 
         // read the timesteps
         ifpa.timesteps = []
 		if ( version >= 1 ) {
-			for ( j in timerange[0]..(timerange[1]-1)) { 
+			for ( j in timerange[0]..(timerange[1])) { 
 				ifpa.timesteps[j] = Date.parse("yyyy-MM-dd HH:mm:ss",
 											   getMatch(lines, /^\*\s+(.*?)\s*$/, 0, 1))
 			}
@@ -213,7 +375,7 @@ class GamsDelayComputationService {
             if ( sechead.size() == 1 ) { 
                 ifpa.sections[i] = [vdsid:sechead[0][1],name:sechead[0][2]]
             } else { 
-                throw new GamsFileParseException()
+                throw new GamsFileParseException("UNABLE TO PARSE POSTMILE FOR SECTION ${i}")
             }
             def secpm = getMatch(lines,/^\s*S\d+\s+([^\s]+)\s*$/)
             if ( secpm.size() == 1 ) { 
@@ -230,7 +392,7 @@ class GamsDelayComputationService {
                 if ( ifpa.sections[i].vdsid != sechead[0][1] )
                     throw new MismatchedIndicesException()
             } else { 
-                throw new GamsFileParseException()
+                throw new GamsFileParseException("UNABLE TO PARSE SECTION LENGTH FOR SECTION ${i}")
             }
             def seclen = getMatch(lines,/^\s*S\d+\s+([^\s]+)\s*$/)
             if ( seclen.size() == 1 ) { 
@@ -267,7 +429,7 @@ class GamsDelayComputationService {
                 }
 				
             } else { 
-                throw new GamsFileParseException()
+                throw new GamsFileParseException("UNABLE TO PARSE EVIDENCE FOR SECTION ${i} BECAUSE ROW REGEXP FAILED")
             }
         }
 
@@ -287,7 +449,7 @@ class GamsDelayComputationService {
                 }
 				
             } else { 
-                throw new GamsFileParseException()
+                throw new GamsFileParseException("UNABLE TO PARSE OBS SPEEDS FOR SECTION ${i} BECAUSE ROW REGEXP FAILED")
             }
         }
 
@@ -307,7 +469,7 @@ class GamsDelayComputationService {
                 }
 				
             } else { 
-                throw new GamsFileParseException()
+                throw new GamsFileParseException("UNABLE TO PARSE AVG SPEEDS FOR SECTION ${i} BECAUSE ROW REGEXP FAILED")
             }
         }
 
@@ -327,7 +489,7 @@ class GamsDelayComputationService {
                 }
 				
             } else { 
-                throw new GamsFileParseException()
+                throw new GamsFileParseException("UNABLE TO PARSE OBS VOLS FOR SECTION ${i} BECAUSE ROW REGEXP FAILED")
             }
         }
 
@@ -347,7 +509,7 @@ class GamsDelayComputationService {
                 }
 				
             } else { 
-                throw new GamsFileParseException()
+                throw new GamsFileParseException("UNABLE TO PARSE AVG VOLS FOR SECTION ${i} BECAUSE ROW REGEXP FAILED")
             }
         }
 
@@ -382,7 +544,7 @@ class GamsDelayComputationService {
             secrange = [ Integer.parseInt(secrange[0][1]), 
                          Integer.parseInt(secrange[0][2])]
         } else { 
-            throw new GamsFileParseException()
+            throw new LstFileParseException("UNABLE TO PARSE SECTION INDICES FROM LST DATA")
         }
 
         
@@ -391,7 +553,7 @@ class GamsDelayComputationService {
             timerange = [ Integer.parseInt(timerange[0][1]), 
                           Integer.parseInt(timerange[0][2])]
         } else { 
-            throw new GamsFileParseException()
+            throw new LstFileParseException("UNABLE TO PARSE TIMESTEP INDICES FROM LST DATA FOR ${ifpa.cad}")
         }
 
         // skip to relevant section
@@ -427,7 +589,7 @@ class GamsDelayComputationService {
                     if ( si != i  ||  ti != j ) throw new MismatchedIndicesException()
                     ifpa.modConditions[i][j] = [inc:(int)parseGamsLevelLine(match[0][3])]
                 } else {
-                    throw new GamsFileParseException()
+                    throw new LstFileParseException("UNABLE TO PARSE modConditions FROM LST FILE FOR ${ifpa.cad} BECAUSE TIME ROW DOESN'T MATCH")
                 }
             }
         }
@@ -438,10 +600,13 @@ class GamsDelayComputationService {
 		 'STB':'solutionTimeBounded','SSB':'solutionSpaceBounded'].each{ var, name ->
             def str = "^---- VAR ${var}\\s+(.*?)\\s*\$"
             def match = getMatch( lines, /$str/ )
-            if ( match.size() > 0 )
+            if ( match != null && match.size() > 0 )
                 ifpa.modelStats[name] = parseGamsLevelLine(match[0][1])
-            else
-                throw new GamsFileParseException()
+            else { 
+				//throw new LstFileParseException("UNABLE TO PARSE modStats FOR ${var} FROM LST FILE BECAUSE TIME EXPRESSION DOESN'T MATCH")
+				log.warn("UNABLE TO PARSE modStats FOR ${var} FROM LST FILE FOR ${ifpa.cad} BECAUSE MATCH FAILED")
+			}
+			
         }
 
 
@@ -458,7 +623,7 @@ class GamsDelayComputationService {
         def match = null
         def line = null
         //log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
-        while( lines.size > 0 && 
+        while( lines && lines.size > 0 && 
                !(match = ( ( line = lines.remove(0) ) =~ re ))
              ) { 
             //log.debug( "TRYING ${re} ON LINE: [${lines[0]}]" )
@@ -468,7 +633,7 @@ class GamsDelayComputationService {
         if ( match.size() > i && match[i].size() > j ) { 
             return match[i][j]
         } else {
-            throw new GamsFileParseException()
+            throw new GamsFileParseException("REACHED END OF FILE BEFORE FINDING MATCH FOR RE ${re}")
         }
     }
 
@@ -481,7 +646,7 @@ class GamsDelayComputationService {
             return m
         else
             // didn't find what we were expecting
-            throw new GamsFileParseException()
+            throw new GamsFileParseException("REACHED END OF FILE BEFORE FINDING MATCH FOR RE ${re}")
     }
 
     /**
@@ -503,46 +668,66 @@ class GamsDelayComputationService {
 		if ( m ) { 
 			return [cad:m[0][1],fac:m[0][2],dir:m[0][3]]
 		} else { 
-			return null
+			throw new RuntimeException( "Invalid filename [${gms.name}] for parsing CAD, facility, and direction" )
 		}
 	}
 
 	def backfillLegacyData( File gms, IncidentFacilityPerformanceAnalysis ifpa = parseGamsData( gms ) ) { 
 		// pull in CAD, facility, and direction from the file name
-		def cfd = parseFileName( gms )
+		if ( ifpa.cad == null || ifpa.cad == "UNKNOWN"
+			 || ifpa.facility == null || ifpa.facility == "UNKNOWN"
+			 || ifpa.direction == null || ifpa.direction == "UNKNOWN" ) {
+			log.info "NO CAD/FACILITY/DIR, BACKFILLING"
 
-		cfd.cad != null
-		cfd.fac != null
-		cfd.dir != null
-		
-		// if cad is not defined pull it from the file name
-		if ( ifpa.cad == null || ifpa.cad == 'UNKNOWN' )     ifpa.cad = cfd.cad
-		else if ( ifpa.cad != cfd.cad ) throw new RuntimeException( "Mismatched CADs: ${ifpa.cad} != ${cfd.cad}")
-
-		if ( ifpa.facility == null || ifpa.facility == 'UNKNOWN' )  ifpa.facility = cfd.fac
-		else if ( ifpa.facility != cfd.fac ) throw new RuntimeException( "Mismatched facilities")
-
-		if ( ifpa.direction == null || ifpa.direction == 'UNKNOWN' ) ifpa.direction = cfd.dir
-		else if ( ifpa.direction != cfd.dir ) throw new RuntimeException( "Mismatched directions")
+			def cfd = parseFileName( gms )
+			
+			cfd.cad != null
+			cfd.fac != null
+			cfd.dir != null
+			
+			// if cad is not defined pull it from the file name
+			if ( ifpa.cad == null || ifpa.cad == 'UNKNOWN' )     ifpa.cad = cfd.cad
+			else if ( ifpa.cad != cfd.cad ) throw new RuntimeException( "Mismatched CADs: ${ifpa.cad} != ${cfd.cad}")
+			
+			if ( ifpa.facility == null || ifpa.facility == 'UNKNOWN' )  ifpa.facility = cfd.fac
+			else if ( ifpa.facility != cfd.fac ) throw new RuntimeException( "Mismatched facilities")
+			
+			if ( ifpa.direction == null || ifpa.direction == 'UNKNOWN' ) ifpa.direction = cfd.dir
+			else if ( ifpa.direction != cfd.dir ) throw new RuntimeException( "Mismatched directions")
+		}
 		
 		
 		// if timesteps are undefined, pull them from the ifia
 		if ( ifpa.timesteps == null || ifpa.timesteps.size() < 1) { 
-			println "NO TIMESTEPS, BACKFILLING"
-			//println "PROCESSED INCIDENTS...${ProcessedIncident.list().size()}"
+			log.info "NO TIMESTEPS, BACKFILLING"
+			//log.info "PROCESSED INCIDENTS...${ProcessedIncident.list().size()}"
 			ProcessedIncident pi = ProcessedIncident.findByCad( ifpa.cad )
-			//if ( pi == null ) throw new RuntimeException("NO PROCESSED INCIDENT FOR ${ifpa.cad}")
+			if ( pi == null ) throw new IncompleteDataException("NO PROCESSED INCIDENT FOR ${ifpa.cad}")
 
 			def iia = pi.getActiveAnalysis()
-			//if ( iia == null ) throw new RuntimeException("NO ACTIVE ANALYSIS FOR ${ifpa.cad}")
+			if ( iia == null ) throw new IncompleteDataException("NO ACTIVE ANALYSIS FOR ${ifpa.cad}")
 
 			def ifia = iia?.analysisForFacility( ifpa.facility, ifpa.direction ) 
-			//if ( ifia == null ) throw new RuntimeException("NO ANALYSIS FOR FACILITY ${ifpa.cad}: ${ifpa.facility} ${ifpa.direction}")
+			if ( ifia == null ) throw new IncompleteDataException("NO ANALYSIS FOR FACILITY ${ifpa.cad}: ${ifpa.facility} ${ifpa.direction}")
 
 			def asec = ifia.analyzedSections.asList().first()
-			//if ( asec == null ) throw new RuntimeException("NO ANALYZED SECTION")
+			if ( asec == null ) throw new IncompleteDataException("NO ANALYZED SECTION")
 
 			ifpa.timesteps = asec.analyzedTimestep.collect{ it.fivemin } 
+		}
+
+		// if section is undefined, pull it from the ifia
+		if ( ifpa.modelConfig?.section == null || ifpa.modelConfig.sectionId == null ) {
+			log.info "NO SECTION, BACKFILLING"
+			//log.info "PROCESSED INCIDENTS...${ProcessedIncident.list().size()}"
+			ProcessedIncident pi = ProcessedIncident.findByCad( ifpa.cad )
+
+			assert ifpa.modelConfig != null
+
+			if ( pi != null ) { 
+				ifpa.modelConfig.section = pi.section
+				ifpa.modelConfig.sectionId = pi.section.id
+			}
 		}
 
 		return ifpa
@@ -557,9 +742,19 @@ class GamsDelayComputationService {
 	
     // Some exceptions
 
-    public class GamsFileParseException extends Exception { }
-    public class LstFileParseException extends Exception { }
+    public class GamsFileParseException extends RuntimeException { 
+		public GamsFileParseException() { super() }
+		public GamsFileParseException( String s ) { super(s) }
+	}
+    public class LstFileParseException extends RuntimeException { 
+		public LstFileParseException( ) { super() }
+		public LstFileParseException( String s ) { super(s) }
+	}
     public class MismatchedIndicesException extends LstFileParseException { }
+	public class IncompleteDataException extends RuntimeException { 
+		public IncompleteDataException() {super()}
+		public IncompleteDataException( String s ) {super(s)}
+	}
 
 
     // wrapper class for running GAMS 
@@ -605,51 +800,52 @@ class GamsDelayComputationService {
 
         def syncGmsFile() { 
             def procstr = "rsync -avz ${infile.canonicalPath.toString()} ${gamsUser}@${gamsHost}:tmcpe/work"
-            println "EXECUTING: ${procstr}"
+
+			log.info( "SYNCING GAMS FILE USING: ${procstr}" )
             def proc = procstr.execute()
 
             proc.waitFor()
             if ( proc.exitValue() ) { 
-                System.err << "RSYNC EXIT VALUE IS: ${proc.exitValue()}"
-                if ( out ) proc.in.text << "\n"
-                if ( err ) proc.err.text << err << "\n"
+                log.error( "RSYNC EXIT VALUE IS: ${proc.exitValue()}" )
+                //if ( proc.out ) proc.in.text << "\n"
+                //if ( proc.err ) proc.err.text << err << "\n"
                 throw new RsyncFailedException( )
             } else { 
-                println proc.in.text
+                log.info proc.in.text
             }
         }
 
         def execGams() { 
             def procstr = "ssh ${gamsUser}@${gamsHost} cd tmcpe/work \\&\\& /cygdrive/c/Progra~1/GAMS22.2/gams.exe ${infile.name}"
             
-            println "EXECUTING: ${procstr}"
+			log.info( "EXECUTING GAMS USING: ${procstr}" )
 
             def proc = procstr.execute()
 
             proc.waitFor()
             if ( proc.exitValue() ) { 
-                System.err << "RSYNC EXIT VALUE IS: ${proc.exitValue()}"
-                if ( out ) proc.in.text << "\n"
-                if ( err ) proc.err.text << err << "\n"
+                log.error( "RSYNC EXIT VALUE IS: ${proc.exitValue()}" )
+                //if ( out ) proc.in.text << "\n"
+                //if ( err ) proc.err.text << err << "\n"
                 throw new GamsFailedException( )
             } else { 
-                println proc.in.text
+                log.info proc.in.text
             }
         }
 
         def syncLstFile() { 
             def procstr = "rsync -avz ${gamsUser}@${gamsHost}:tmcpe/work/${outfile.name} ${infile.parent}" 
-            println "EXECUTING: ${procstr}"
+			log.info( "SYNCING LST FILE USING: ${procstr}" )
             def proc = procstr.execute()
 
             proc.waitFor()
             if ( proc.exitValue() ) { 
-                System.err << "RSYNC EXIT VALUE IS: ${proc.exitValue()}"
-                if ( out ) proc.in.text << "\n"
-                if ( err ) proc.err.text << err << "\n"
+				log.error( "RSYNC EXIT VALUE IS: ${proc.exitValue()}" )
+                //if ( out ) proc.in.text << "\n"
+                //if ( err ) proc.err.text << err << "\n"
                 throw new RsyncFailedException( )
             } else { 
-                println proc.in.text
+                log.info proc.in.text
             }
         }
 

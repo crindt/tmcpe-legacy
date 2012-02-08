@@ -8,6 +8,9 @@
  */
 package edu.uci.its.tmcpe
 
+import grails.validation.Validateable
+
+@Validateable
 class FacilityPerformance {
 	String id 
 	String facility          // 
@@ -52,19 +55,33 @@ class FacilityPerformance {
 
 	static int fiveMinAsMillis = 5*60*1000
 
+	def sectionIndex(FacilitySection sec) {
+		println "LOOKING FOR $sec IN SECTIONS LIST OF LENGTH ${sections.size()}"
+		for ( int j = 0; j < sections.size(); j++ ) {
+			if ( sections[j].vdsid == sec.id ) return j
+		}
+		throw new IndexOutOfBoundsException("$sec IS NOT IN THE SECTIONS LIST OF THE FACILITY PERFORMANCE")
+	}
+
 	def timestampIndex(Date stamp) {
-		assert timesteps != null && timesteps.size() >= 0
-		assert timesteps[0] instanceof Date
-		assert stamp instanceof Date
-		// jumping through hoops because a 0 TimeDuration isn't allowed
-		if ( stamp.equals(timesteps[0]) ) return 0
-		groovy.time.TimeDuration d = stamp-timesteps[0]
-		int idx = Math.floor(d.toMilliseconds()/fiveMinAsMillis)
+		int idx = 0
+		use ( groovy.time.TimeCategory ) {
+			assert timesteps != null && timesteps.size() >= 0
+			assert timesteps[0] instanceof Date
+			assert stamp instanceof Date
+			// jumping through hoops because a 0 TimeDuration isn't allowed
+			if ( stamp.equals(timesteps[0]) ) return 0
+			if ( stamp < timesteps[0] ) 
+				throw new IndexOutOfBoundsException("${stamp.format('yyyy-MM-dd HH:mm')} DOESN'T FALL IN THE EXISTING TIME RANGE OF THE FACILITY PERFORMANCE")
+
+			def d = stamp - timesteps[0]
+			idx = Math.floor(d.toMilliseconds()/fiveMinAsMillis)
 		
-		if ( idx < 0 || 
-			 idx >= timesteps.size() ) throw new java.lang.IndexOutOfBoundsException()
-		
+			if ( idx < 0 || idx >= timesteps.size() ) 
+				throw new IndexOutOfBoundsException("${stamp.format('yyyy-MM-dd HH:mm')} DOESN'T FALL IN THE EXISTING TIME RANGE OF THE FACILITY PERFORMANCE")
+		}
 		return idx
+			
 	}
 
 	public Boolean equals(FacilityPerformance other) {

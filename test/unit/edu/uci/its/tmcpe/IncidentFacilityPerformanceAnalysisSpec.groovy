@@ -5,30 +5,32 @@ import grails.datastore.test.DatastoreUnitTestMixin
 @Mixin(DatastoreUnitTestMixin)
 class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 
+	def "Test our 'valid' IFPA is actually valid"() {
+	  given:
+		mockForConstraintsTests(IncidentFacilityPerformanceAnalysis )
+		def ifpa = validIncidentFacilityPerformanceAnalysis()
+		;
+
+	  expect:
+		validationStatusMatches( ifpa, true )
+		;
+	}
+
 	def "Test that IncidentFacilityPerformanceAnalysis can be persisted"() {
 
-      given: "a new IncidentFacilityPerformanceAnalysis object"
+      given: "a new (valid) IncidentFacilityPerformanceAnalysis object"
 		mockDomain(IncidentFacilityPerformanceAnalysis)
-		def ifpa
+		def ifpa = validIncidentFacilityPerformanceAnalysis()
         ;
 
 	  when: "we create an ifpa but don't save it"
-		ifpa = validIncidentFacilityPerformanceAnalysis()
-		ifpa.sections = [1,2]
-		ifpa.timesteps = [1,2]
-		ifpa.obsConditions = [[[spd:11f,flow:11,inc:1],[spd:12f,flow:12,inc:1]],
-							  [[spd:21f,flow:21,inc:1],[spd:22f,flow:22,inc:1]]
-							 ]
-		ifpa.avgConditions = [[[spd:11f,flow:11,inc:1],[spd:12f,flow:12,inc:1]],
-							  [[spd:21f,flow:21,inc:1],[spd:22f,flow:22,inc:1]]
-							 ]
 		;
 
 	  then: "It shouldn't be in the database"
 		IncidentFacilityPerformanceAnalysis.get(ifpa.id) == null
 
       when: "we save it"
-		ifpa.save(flush:true)
+		ifpa.save()
         ;
 
       then: "it should be a valid object in the database"
@@ -42,29 +44,24 @@ class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 
 	  when: "we change it"
 		ifpa.tmcpeNetDelay = 1f
-		ifpa.save(flush:true)
+		ifpa.save()
 		def ifpa2 = IncidentFacilityPerformanceAnalysis.get(ifpa.id)
 		;
 		
 	  then: "that should be reflected in the database too"
 		ifpa2.tmcpeNetDelay == 1f
-		
     }
 
 
 
 	def "Test that IncidentFacilityPerformanceAnalysis must have minimum fields defined"() {
 
-      given: "a IncidentFacilityPerformanceAnalysis"
+      given: "a valid IncidentFacilityPerformanceAnalysis"
 		mockForConstraintsTests(IncidentFacilityPerformanceAnalysis)
-		def ifpa
-		//mockDomain(IncidentFacilityPerformanceAnalysis)
+		def ifpa = validIncidentFacilityPerformanceAnalysis()
         ;
 
-      when: "we set the data"
-		ifpa = validIncidentFacilityPerformanceAnalysis()
-		ifpa.sections = [1,2]
-		ifpa.timesteps = [1,2]
+      when: "we tweak the data"
 		ifpa.obsConditions = obs
 		ifpa.avgConditions = avg
 		;
@@ -78,6 +75,7 @@ class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 			[[[spd:11f,flow:11],[spd:12f,flow:12]],
 			 [[spd:21f,flow:21],[spd:22f,flow:22]]
 			],
+			// missing data for one section (should fail)
 			[[[spd:11f,flow:11]],
 			 [[spd:21f,flow:21],[spd:22f,flow:22]]
 			]
@@ -93,20 +91,59 @@ class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 		expected << [true,false]
     }
 
+
+	def "Test that modConditions is validated property"() {
+  	  given: "an IncidentFacilityPerformanceAnalysis"
+		mockForConstraintsTests(IncidentFacilityPerformanceAnalysis)
+		def ifpa = validIncidentFacilityPerformanceAnalysis()
+		;
+
+	  when: "we set the data with modConditions from an analysis"
+		ifpa.modConditions = mod
+		;
+
+	then: "validation should match expected"
+		validationStatusMatches( ifpa, expected )
+		;
+
+	where: 
+		mod << [
+			// nothing (succeed)
+			null,
+
+			// same dimensions (succeed)
+			[[[inc:1],[inc:1]],
+			 [[inc:1],[inc:1]]
+			],
+			// different dimensions (fail)
+			[[[inc:1]],
+			 [[inc:1],[inc:1]]
+			]
+			]
+		expected << [ true, true, false ]
+		;
+
+	}
+
+
 	def "Test that tmcpeNetDelay is computed properly"() { 
 
 	  given: "an IncidentFacilityPerformanceAnalysis"
-		mockDomain(IncidentFacilityPerformanceAnalysis)
-		def ifpa
+		//mockDomain(IncidentFacilityPerformanceAnalysis)  /* FIXME: Seems like we can only call "mockdomain" once in a test class */
+		def ifpa = validIncidentFacilityPerformanceAnalysis()
 		;
-		
-	  when: "we have particular data and compute"
-		ifpa = validIncidentFacilityPerformanceAnalysis()
+
+	  when: "we have particular data"
 		ifpa.sections = [[id:1,len:0.5f],[id:2,len:0.75f]]
 		ifpa.timesteps = [1,2]
 		ifpa.obsConditions = obs
 		ifpa.avgConditions = avg
 		ifpa.modConditions = mod
+
+	  then: "it should be valid"
+		validationStatusMatches( ifpa, true )
+
+	  when: "we compute net delay"
 		ifpa.computeNetDelays()
 		;
 
@@ -132,33 +169,11 @@ class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 		result << [(float)(0.5f*(1f/35f-1/45f)*100+0.5*(1f/25f-1f/50f)*300+0.75f*(1f/40f-1f/50f)*300)]
 	}
 
-	def "Test that modConditions is validated property"() {
-  	  given: "an IncidentFacilityPerformanceAnalysis"
-		mockDomain(IncidentFacilityPerformanceAnalysis)
-		;
-
-	  when: "we set the data with modConditions from an analysis"
-		;
-
-  	  and: "those modConditions have different dimensions than obs/avgConditions"
-		;
-
-	  then: "validation should fail"
-		false  // FIXME: WRITE THIS CONDITION
-		;
-
-	  when: "those modConditions have the same dimensions as obs/avgConditions"
-		;
-
-  	  then: "validation should succeed"
-		false  // FIXME: WRITE THIS CONDITION
-		;
-	}
 
 	def "Test if model characterizations are correctly evaluated"() {
 	  given:
-		mockDomain(IncidentFacilityPerformanceAnalysis)
-		def ifpa = new IncidentFacilityPerformanceAnalysis()
+		//mockDomain(IncidentFacilityPerformanceAnalysis)  /* FIXME: Seems like we can only call "mockdomain" once in a test class */
+		def ifpa = validIncidentFacilityPerformanceAnalysis()
 		;
 
   	  when: "an ifpa has various model_status values"
@@ -183,10 +198,20 @@ class IncidentFacilityPerformanceAnalysisSpec extends TmcpeUnitSpec {
 	}
 
 	def validIncidentFacilityPerformanceAnalysis() { 
-		return new IncidentFacilityPerformanceAnalysis(
+		def ifpa = new IncidentFacilityPerformanceAnalysis(
 			cad:'123-123',
 			facility: 5,direction: 'N',
 			totalDelay:0f,avgDelay:0f,d35NetDelay:0f,tmcpeNetDelay: 0f)
-
+		ifpa.sections = [1,2]
+		ifpa.timesteps = [1,2]
+		ifpa.obsConditions = [
+			[[spd:11f,flow:11,inc:1],[spd:12f,flow:12,inc:1]],
+			[[spd:21f,flow:21,inc:1],[spd:22f,flow:22,inc:1]]
+		]
+		ifpa.avgConditions = [
+			[[spd:11f,flow:11,inc:1],[spd:12f,flow:12,inc:1]],
+			[[spd:21f,flow:21,inc:1],[spd:22f,flow:22,inc:1]]
+		]
+		return ifpa
 	}
 }

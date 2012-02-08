@@ -249,6 +249,15 @@ class FacilityPerformanceSpec extends TmcpeUnitSpec {
 		;
 	}
 
+	def "Test that sectionIndex works properly"() {
+	given: ""
+		;
+		
+	expect: ""
+		false
+		;
+	}
+
 	def d(s) { 
 		Date.parse('yyyy-MM-dd HH:mm','2011-01-01 '+s)
 	}

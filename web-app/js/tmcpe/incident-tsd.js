@@ -930,11 +930,21 @@ if ( !tmcpe ) var tmcpe = {};
 	          }
 	      });
 
+	      d3.select("#chartDelay2").html( delay2 );
+	      d3.select("#chartDelay3").html( delay3 );
+	      d3.select("#whatIfDelay").html( delay4 );
+	      d3.select("#tmcSavings").html( tmcSavings );
+
+		  cumflow.updateStatsUnit();
+
+          //          return cumflow;
+      }
+
+	  cumflow.updateStatsUnit = function() {
 
           var unit = params.delayUnit;
           var unitFactor = 1;
           if ( unit == 'usd' ) {
-
               var vot = params.valueOfTime;
 
               unitFactor = vot;
@@ -945,11 +955,6 @@ if ( !tmcpe ) var tmcpe = {};
               unitFactor = 1;
           }
 
-	      d3.select("#chartDelay2").html( delay2 );
-	      d3.select("#chartDelay3").html( delay3 );
-	      d3.select("#whatIfDelay").html( delay4 );
-	      d3.select("#tmcSavings").html( tmcSavings );
-
 
           // refactor *delays* depending on the unit
           var sel = d3.selectAll(".delayValue")
@@ -958,12 +963,14 @@ if ( !tmcpe ) var tmcpe = {};
                   d3.select(this).html( function(d) {
                       return val.toFixed(0)
                   });
+				  // FIXME: hardcoded colors
                   d3.select(this).style("background","yellow");
                   d3.select(this).transition().duration(3000).style("background","#8BA9D3");
               });
 
-          //          return cumflow;
-      }
+		  return cumflow;
+		  
+	  }
 
       function timeSlice( d ) {
 	      return d.slice( startTime?startTime:0,endTime!=null?endTime:d.length );
@@ -1275,7 +1282,7 @@ if ( !tmcpe ) var tmcpe = {};
 			            .y0(function(d) { return y(d.obs);})    /* subtract from obs */
 			            .y1(function(d) { return y(d.adjdivavg); }))
 		          .on("mouseover", function( d,i ) { 
-		              $('#cumflowChartTip').html( "Observed delay");
+		              $('#cumflowChartTip').html( "TMC Savings due to diversion");
 		          } )
 		          .on("mouseout", function (d,i) { 
 		              $('#cumflowChartTip').html( "");
@@ -1300,7 +1307,7 @@ if ( !tmcpe ) var tmcpe = {};
 			            .y0(function(d) { return y(d.obs);})    // subtract from obs
 			            .y1(function(d) { return y(d.divavg); }))
 		          .on("mouseover", function( d,i ) { 
-		              $('#cumflowChartTip').html( "Observed delay");
+		              $('#cumflowChartTip').html( "TMC Savings due to diversion");
 		          } )
 		          .on("mouseout", function (d,i) { 
 		              $('#cumflowChartTip').html( "");
@@ -1454,7 +1461,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      }
 
 	      function obsmouseover(d,i) {
-	          $('#cumflowChartTip').html( "TMC Savings");
+	          $('#cumflowChartTip').html( "TMC Savings due to restoration");
 	      }
 
 	      function updateText(msg) {
@@ -1501,11 +1508,11 @@ if ( !tmcpe ) var tmcpe = {};
       });
       $(window).bind("tmcpe.tsd.delayUnitChanged", function( e, paramsa ) {
           params.delayUnit = paramsa.data.delayUnit;
-          cumflow.updateStats();
+          cumflow.updateStatsUnit();
       });
       $(window).bind("tmcpe.tsd.valueOfTimeChanged", function( e, paramsa ) {
           params.valueOfTime = parseFloat(paramsa.data.valueOfTime);
-          cumflow.updateStats();
+          cumflow.updateStatsUnit();
       });
 
       $(window).bind("tmcpe.tsd.d12DelayHover", function( caller, paramsa ) {
@@ -1566,7 +1573,8 @@ if ( !tmcpe ) var tmcpe = {};
               tmcDivPct: parseInt(paramsa.data.tmcpctslider),
               verificationDelay: parseInt(paramsa.data.verdelslider),
               responseDelay: parseInt(paramsa.data.respdelslider),
-              valueOfTime: parseFloat(paramsa.data.valueOfTime)
+              valueOfTime: parseFloat(paramsa.data.valueOfTime),
+			  delayUnit: paramsa.data.delayUnit
           });
 
       });

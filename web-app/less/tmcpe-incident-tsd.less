@@ -189,11 +189,11 @@ svg text {
 
 
  
-@area-expected-flow-fill: #4682B4; /* steelblue */
-@area-observed-flow-fill: #0f0;    /* green */
-@area-divavg-flow-fill:   #f00;    /* red */
-@area-adjdivavg-flow-fill:   #0f0;    /* green */
-@area-whatif-flow-fill:   #333;    /* transparent */
+@area-expected-flow-fill:  #4682B4; /* steelblue */
+@area-observed-flow-fill:  #008a00;    /* green */
+@area-divavg-flow-fill:    #f00;    /* red */
+@area-adjdivavg-flow-fill: #0f0;    /* green */
+@area-whatif-flow-fill:    #333;    /* transparent */
 @highlight: cyan;
 
 g.areas {
@@ -209,22 +209,25 @@ g.areas {
     path.observed {
         &.area {
 	        fill: @area-observed-flow-fill;
+			/*
 	        &:hover {
                 fill: lighten( @area-observed-flow-fill, 30% );
-	        }
+	        }*/
 
-            &.highlight {
+            &.highlight, &:hover {
                 stroke: highlight;
                 fill: @highlight;
             }
         }
         &.line {
             stroke: lighten( @area-observed-flow-fill, 30% );
+			/*
             &:hover {
-                stroke: #ff0; /* highlight line color */
+                stroke: #ff0;
             }
+			*/
 
-            &.highlight {
+            &.highlight, &:hover {
                 stroke: highlight;
                 fill: @highlight;
             }
@@ -235,10 +238,12 @@ g.areas {
     path.expectedflow { 
         &.area {
             fill: @area-expected-flow-fill;
+			/*
             &:hover {
                 fill: lighten( @area-expected-flow-fill, 30% );
             }
-            &.highlight {
+			*/
+            &.highlight, &:hover {
                 stroke: highlight;
                 fill: @highlight;
             }
@@ -256,10 +261,12 @@ g.areas {
 
         &.area {
 	        fill: @area-adjdivavg-flow-fill;
+			/*
 	        &:hover {
                 fill: lighten( @area-adjdivavg-flow-fill, 30% );
 	        }
-            &.highlight {
+			*/
+            &.highlight, &:hover {
                 stroke: highlight;
                 fill: @highlight;
             }
@@ -278,10 +285,12 @@ g.areas {
 
         &.area {
 	        fill: @area-divavg-flow-fill;
+			/*
 	        &:hover {
                 fill: lighten( @area-divavg-flow-fill, 30% );
 	        }
-            &.highlight {
+			*/
+            &.highlight, &:hover {
                 stroke: highlight;
                 fill: @highlight;
             }

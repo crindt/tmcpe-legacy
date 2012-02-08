@@ -13,6 +13,28 @@ import grails.datastore.test.DatastoreUnitTestMixin
 
 class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
 
+	def "Test that we can parse a gams file name for incident and facility"() { 
+	  given: "A Gams service and A GAMS filename"
+		def gamsService = new GamsDelayComputationService()
+		File gms = new File( filename )
+		;
+
+	  when: "we parse it"
+		def res = gamsService.parseFileName( gms )
+		;
+		
+	  then: "we get the proper cad, facility, and direction"
+		res == ( cad == null ? null : [cad:cad, fac:facility,dir:direction] )
+		;
+
+	  where:
+		filename                 | cad            | facility | direction
+		"422-052609-57=S.gms"    | "422-052609"   | "57"     | "S"
+		"242-03212011-405=S.gms" | "242-03212011" | "405"    | "S"
+		"sdjfalksdf-.gms"        | null           | null     | null
+		;
+	}
+
 	def "Test that GMS file versioning is working"() {
 	  when: "we set it up"
 		;
@@ -247,26 +269,4 @@ class GamsDelayComputationServiceSpec extends TmcpeUnitSpec {
         ifpa.modelIsOptimal()
         ;
     }
-
-	def "Test that we can parse a gams file name for incident and facility"() { 
-	  given: "A Gams service and A GAMS filename"
-		def gamsService = new GamsDelayComputationService()
-		File gms = new File( filename )
-		;
-
-	  when: "we parse it"
-		def res = gamsService.parseFileName( gms )
-		;
-		
-	  then: "we get the proper cad, facility, and direction"
-		res == ( cad == null ? null : [cad:cad, fac:facility,dir:direction] )
-		;
-
-	  where:
-		filename                 | cad            | facility | direction
-		"422-052609-57=S.gms"    | "422-052609"   | "57"     | "S"
-		"242-03212011-405=S.gms" | "242-03212011" | "405"    | "S"
-		"sdjfalksdf-.gms"        | null           | null     | null
-		;
-	}
 }

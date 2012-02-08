@@ -28,7 +28,7 @@ class FacilitySection {
     }
 
     String toString() {
-        return [ freewayId, freewayDir, "@", absPostmile, "[" + name + "]" ].join( " " )
+		return "$freewayId $freewayDir @ $absPostmile ($id) [$vdsType:$name]"
     }
 
     static mapping = {
