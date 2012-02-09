@@ -11,8 +11,18 @@
     <!-- require the common resources bundle -->
     <r:require module="common"/>
 
+	<!-- require the resources for the ctmlabs bar -->
+	<r:require module="ctmlabs-bar"/>
+
     <!-- common javascript -->
     <g:urlMappings /> <!-- custom grails js to emit controller/action urls -->
+
+	<g:javascript>
+	  var testservice = 'http://anne.its.uci.edu/banner';
+      var loginlink='https://cas.ctmlabs.net/cas/login?service=https://localhost:8443/tmcpe';
+      var logoutlink='https://cas.ctmlabs.net/cas/logout';
+	  jQuery = $;
+	</g:javascript>
 
     <r:layoutResources />
   </head>
@@ -20,39 +30,59 @@
   <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
 
     <!-- ================ common banner ================= -->
-    <div id="menu">
-	  <!-- Link block -->
-	  <ul>
-	    <li><a href="${resource(dir:'/',absolute:true)}">Home</a></li>
-	    <li><a href="http://www.ctmlabs.net/">CTMLabs</a></li>
-	  </ul>
-
-	  <!-- account block -->
-	  <div id="account">
-	    <ul>
-	      <li id='loginLink'>
-	        <sec:ifLoggedIn>
-		      <span title="Logged in via CTMLabs">
-		        Logged in as <sec:username/> (<g:link controller='logout'>Logout</g:link>)
-		      </span>
-	        </sec:ifLoggedIn>
-	        <sec:ifNotLoggedIn>
-		      <span title="Logged in using CTMLabs CAS server">
-		        <g:link controller='login'>Login</g:link>
-		      </span>
-	        </sec:ifNotLoggedIn>
-	      </li>
-	      <li><a target="_blank" href="${createLink(controller:'problem',action:'report')}" title="Report a problem using the CTMLabs issue tracker">Report Problem</a></li>
-	      <li><a target="_blank" href="${createLink(controller:'help')}">Help</a></li>
-	    </ul>
+	<div id="ctmlabsbanner">
+	  <nav class="ctmlabs" id="menu">
+		<ul>
+		  <li>
+			<a class="home" href="http://www.ctmlabs.net" title="CTMLabs home">&nbsp;</a></li>
+		  <li>
+			<a href="/projects">Project Websites</a>
+			<ul>
+			  <li>
+				<a href="https://tmcpe.ctmlabs.net/tmcpe-1.1">TMC Performance Evaulation</a></li>
+			  <li>
+				<a href="http://128.200.36.104:8080/SATMSWeb">Ramp Meter Evaluation Platform</a></li>
+			  <li>
+				<a href="http://moon.its.uci.edu/inside">INSIDE Laboratory</a></li>
+			  <li>
+				<a href="https://safety.ctmlabs.net/">Safety</a></li>
+			</ul>
+		  </li>
+		</ul>
+	  </nav>
+	  <div id="title">
+		<span>TMC Performance Evaluation</span>
 	  </div>
-    </div>
-
-    <div class="header">
-	  <a href="http://www.ctmlabs.net">
-	    <h1>TMCPE</h1>
-	  </a>
-    </div>
+	  <nav class="account" id="account">
+		<ul>
+		  <sec:ifLoggedIn>
+			<li><span><sec:username/></span>
+			  <ul>
+				<!--
+					<li id="loginLink"></li>
+				<li id="logoutLink"></li>
+				-->
+				<li><g:link controller='logout'>Logout</g:link></li>
+			  </ul>
+			</li>
+		  </sec:ifLoggedIn>
+		  <sec:ifNotLoggedIn>
+			<li>
+              <span title="Logged in using CTMLabs CAS server">
+                <g:link controller='login'>Login</g:link>
+              </span>
+			</li>
+		  </sec:ifNotLoggedIn>
+		  <li><span>Help</span>
+			<ul>
+			  <li>
+				<a href="http://tracker.ctmlabs.net/projects/tb/issues/new" title="Report a problem with this website">Report Problem</a></li>
+			  <li>
+				<a href="http://www.ctmlabs.net/about" title="About CTMLabs">About</a></li>
+			</ul>
+		  </li>
+	  </nav>
+	</div>
 
 
     <!-- ================ target BODY ============== -->

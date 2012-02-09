@@ -173,7 +173,7 @@ if ( !tmcpe ) var tmcpe = {};
       });
 
       $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, adata) {
-          if ( adata.t0 && adata.t1 && adata.onScene ) {
+          if ( adata.t0 && adata.t1 && adata.onScene && false /* FIXME: Broken */) {
               var t1 = new Date( adata.t1 ).getTime();
               var os = new Date( adata.onScene ).getTime();
               // We have an CHP onscene marker, use that as 

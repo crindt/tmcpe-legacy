@@ -111,7 +111,7 @@ environments {
         grails { 
             mongo { 
 				host = "localhost"
-                databaseName = "tmcpe_analyses"
+                databaseName = "tmcpe_analyses_v1_2"
             }
         }
     }

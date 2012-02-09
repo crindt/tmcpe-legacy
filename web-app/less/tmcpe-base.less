@@ -1,14 +1,11 @@
+@import "bootstrap.less";
 @import "tmcpe-colors.less";
 @import "tmcpe-mixins.less";
-
-@banner-height: 21px;
-
 
 body {
     background-color: @background;
     color: @color;
     font-size: @font-size;
-    padding-top: @banner-height;
     margin:0px;
     min-width: 960px;
 }
@@ -16,32 +13,47 @@ body {
 
 .header {
     a {
-	float: left;
-	h1 {
-	    color: @color;
-	    background-image: url(../images/logo_jem_060.png);
-	    background-repeat: no-repeat;
-	    margin-top: @banner-height;
-	    height: 60px;
-	    padding-left: 160px;
-	    text-decoration: none;
-	    vertical-align: text-bottom;
-	    padding-top: 25px;
-	    font-size: 30px;
-	}
+		float: left;
+		h1 {
+			color: @color;
+			background-image: url(../images/logo_jem_060.png);
+			background-repeat: no-repeat;
+			height: 60px;
+			padding-left: 160px;
+			text-decoration: none;
+			vertical-align: text-bottom;
+			padding-top: 25px;
+			font-size: 30px;
+		}
     }
 
     ul.menu {
-	float:right;
-	display:inline;
+		float:right;
+		display:inline;
 
-	li {
-	    display:inline;
-	    border: @menu-border;
-	    //    padding: 5px;
-	}
+		li {
+			display:inline;
+			border: @menu-border;
+			//    padding: 5px;
+		}
 
     }
+}
+
+#menu { background-color: none; }
+
+#title {
+	width: 100%;
+	text-align:center;
+	position:fixed; 
+	top:0;
+	z-index:1010;
+	pointer-events: none;
+	span {
+		font-size: 1.16em;
+		font-weight: bold;
+		pointer-events: none;
+	}
 }
 
 #leftbox { 
@@ -49,7 +61,7 @@ body {
     position:absolute;
     left: 0px;
     top:101px;
-    z-index: 100;  /* Put this on top of #content */
+    z-index: 10;  /* Put this on top of #content */
     background-color: @background;
     padding-right:10px;
     height:100%;
@@ -69,7 +81,7 @@ body {
     padding-left: 5px;
     padding-right: 5px;
     font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
-    z-index: 50;
+    z-index: 5;
 
 }
 
@@ -88,51 +100,6 @@ body {
 #info {
     position:relative;
 }
-
-#menu {
-    height: @banner-height;
-    background-color: @menu-background;
-    color: @menu-color;
-    position: fixed;
-    width: 100%;
-    padding: 0;
-    margin: 0px;
-    top: 0px;
-    z-index: 100;
-
-
-    ul {
-	padding: 0 @banner-height;
-	display: inline;
-
-	li {
-	    line-height: @banner-height;
-	    margin-right: 4px;
-	    float: left;
-	    list-style-type: none;
-	    margin: 0px;
-	    padding: 0px;
-	    white-space: nowrap;
-
-	    a {
-		padding: 4px 5px;
-		margin-right: 8px;
-		text-decoration: none;
-		color: @menu-color;
-		&:hover { 
-                    background-color: desaturate(@menu-background, 20%); /* was: yellow */ 
-                    border-bottom: 3px #f00;
-                }
-	    }
-
-	}
-    }
-}
-
-.title {
-    margin-top: @banner-height;
-}
-
 
 
 #account {
@@ -170,16 +137,16 @@ body {
 
 	    table {
 
-		td {
-		    background-color: darken( @alert-background, 10% );
-		    color: saturate( @alert-color, 30% );
-		    text-weight: bold;
-		    font-size: @font-size * 1.2;
-		    padding: 5px;
-		    text-shadow: darken( @alert-background, 20% ) 1px 1px;
+			td {
+				background-color: darken( @alert-background, 10% );
+				color: saturate( @alert-color, 30% );
+				text-weight: bold;
+				font-size: @font-size * 1.2;
+				padding: 5px;
+				text-shadow: darken( @alert-background, 20% ) 1px 1px;
 
-		    &.label { text-align: right }
-		}
+				&.label { text-align: right }
+			}
 	    }
 	}
 

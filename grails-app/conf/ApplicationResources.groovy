@@ -59,5 +59,18 @@ modules = {
         resource url:"js/tmcpe/incident-tsd.js"
         resource url:"less/tmcpe-incident-tsd.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_tmcpe-incident-tsd'
     }
+
+	'ctmlabs-bar-remote' { 
+		dependsOn 'jquery'
+		resource url: 'http://anne.its.uci.edu/css/ctmlbanner.css'
+		resource url: 'http://anne.its.uci.edu/loggedout/banner.js'
+		resource url: 'http://anne.its.uci.edu/js/ctmlbanner.js'
+	}
+
+	'ctmlabs-bar' { 
+		//dependsOn 'ctmlabs-bar-remote'
+		resource url: "css/ctmlbanner.css"
+        resource url: "less/ctmlabs-menu.less", attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_ctmlabs-bar'
+	}
     
 }
