@@ -2,13 +2,13 @@
 @import "tmcpe-map-common.less";
 
 @mainwidth: 960px;
-@mainheight: 764px;
+@mainheight: 650px;
 @fmargin: 50px;
 @margin: @fmargin - 10px;
 
 
 
-@mapwidth: (@mainwidth - @margin)/2;
+@mapwidth: 100%;/*(@mainwidth - @margin)/2*/
 @tsdwidth: @mapwidth;
 @chartwidth: @mapwidth;
 @databoxwidth: @mapwidth;
@@ -34,21 +34,22 @@
 
 .map {
     path {
-	&.datapoor {
-	    stroke: @tsddatapoor;
-	}
+		&.datapoor {
+			stroke: @tsddatapoor;
+		}
     }
 
 }
 
 #databox {
-    width: @databoxwidth;
-    height: @databoxheight;
-    float:right;
+    //width: @databoxwidth;
+    //height: @databoxheight;
+    //float:right;
 
     table {
-		color: lighten(spin(@content-background, 8), 25%);
+		//color: lighten(spin(@content-background, 8), 25%);
 		margin-top:1em;
+		font-size: 8pt;
     }
 }
 
@@ -65,20 +66,20 @@
 #activityLog {
     background-color: @content-background;
     tr {
-	&.odd td {
-	    background-color: darken( @content-background, 20% );
-	    color: @content-color;
-	}
-	&.even td {
-	    background-color: @content-background;
-	    color: spin( lighten(@content-background,20%), -10);
-	}
+		&.odd td {
+			background-color: darken( @content-background, 20% );
+			color: @content-color;
+		}
+		&.even td {
+			background-color: @content-background;
+			color: spin( lighten(@content-background,20%), -10);
+		}
     }
 }
 
 body {
-    min-width: 960px;
-    min-height: 764px;
+	min-width: 1024px;
+	min-height: 768px;
 }
 
 .dataTables_scrollHead, .dataTables_scrollBody, .dataTables_scrollFoot {
@@ -122,74 +123,74 @@ body {
 }
 
 svg {
-//  border: solid 1px #ccc;
+	//  border: solid 1px #ccc;
   fill: #006;
 }
 
 .tsd {
     path.incidentBoundary {
-	stroke: @incident-boundary-color;
-	stroke-width: @incident-boundary-width;
-	fill: none;
+		stroke: @incident-boundary-color;
+		stroke-width: @incident-boundary-width;
+		fill: none;
     }
     .evidence {
-	circle {
+		circle {
             pointer-events: none; /* Pass click events through */
-	}
+		}
     }
 
     rect.tsdcell {
-	stroke-width: 1px;
+		stroke-width: 1px;
 
-	&.datapoor {
-	    fill: @tsddatapoor;
-	}
+		&.datapoor {
+			fill: @tsddatapoor;
+		}
     }
     
 }
 
 rect {
-  fill: lightsteelblue;
-  stroke: #eee;
-  stroke-width: 1px;
+	fill: lightsteelblue;
+	stroke: #eee;
+	stroke-width: 1px;
 }
 rect.d1 {
-  fill: steelblue;
+	fill: steelblue;
 }
 rect.d2 {
-  fill: darkblue;
+	fill: darkblue;
 }
 
 svg text {
     fill: #eee;
-//    letter-spacing: 0.5pt;
+	//    letter-spacing: 0.5pt;
     font-family: Arial;
 }
 
- 
+
 .rule line {
-  stroke: #ddd;
-//  stroke-width: 1px;
-//  shape-rendering: crispEdges;
+	stroke: #ddd;
+	//  stroke-width: 1px;
+	//  shape-rendering: crispEdges;
 }
- 
+
 .rule2 line {
-  stroke: #ddd;
-//  stroke-width: 1px;
-//  shape-rendering: crispEdges;
+	stroke: #ddd;
+	//  stroke-width: 1px;
+	//  shape-rendering: crispEdges;
 }
- 
+
 .rule line.axis {
-  stroke: #000;
+	stroke: #000;
 }
- 
+
 .rule2 line.axis {
-  stroke: #000;
+	stroke: #000;
 }
- 
 
 
- 
+
+
 @area-expected-flow-fill:  #4682B4; /* steelblue */
 @area-observed-flow-fill:  #008a00;    /* green */
 @area-divavg-flow-fill:    #f00;    /* red */
@@ -211,9 +212,9 @@ g.areas {
         &.area {
 	        fill: @area-observed-flow-fill;
 			/*
-	        &:hover {
-                fill: lighten( @area-observed-flow-fill, 30% );
-	        }*/
+	          &:hover {
+              fill: lighten( @area-observed-flow-fill, 30% );
+	          }*/
 
             &.highlight, &:hover {
                 stroke: highlight;
@@ -223,10 +224,10 @@ g.areas {
         &.line {
             stroke: lighten( @area-observed-flow-fill, 30% );
 			/*
-            &:hover {
-                stroke: #ff0;
-            }
-			*/
+              &:hover {
+              stroke: #ff0;
+              }
+			  */
 
             &.highlight, &:hover {
                 stroke: highlight;
@@ -240,10 +241,10 @@ g.areas {
         &.area {
             fill: @area-expected-flow-fill;
 			/*
-            &:hover {
-                fill: lighten( @area-expected-flow-fill, 30% );
-            }
-			*/
+              &:hover {
+              fill: lighten( @area-expected-flow-fill, 30% );
+              }
+			  */
             &.highlight, &:hover {
                 stroke: highlight;
                 fill: @highlight;
@@ -263,10 +264,10 @@ g.areas {
         &.area {
 	        fill: @area-adjdivavg-flow-fill;
 			/*
-	        &:hover {
-                fill: lighten( @area-adjdivavg-flow-fill, 30% );
-	        }
-			*/
+	          &:hover {
+              fill: lighten( @area-adjdivavg-flow-fill, 30% );
+	          }
+			  */
             &.highlight, &:hover {
                 stroke: highlight;
                 fill: @highlight;
@@ -281,16 +282,16 @@ g.areas {
             }
         }
     }
- 
+	
     path.expectedflowafterdiv {
 
         &.area {
 	        fill: @area-divavg-flow-fill;
 			/*
-	        &:hover {
-                fill: lighten( @area-divavg-flow-fill, 30% );
-	        }
-			*/
+	          &:hover {
+              fill: lighten( @area-divavg-flow-fill, 30% );
+	          }
+			  */
             &.highlight, &:hover {
                 stroke: highlight;
                 fill: @highlight;
@@ -322,9 +323,9 @@ g.areas {
 
 
 .line3 {
-  fill: none;
-  stroke: orange;
-  stroke-width: 1.5px;
+	fill: none;
+	stroke: orange;
+	stroke-width: 1.5px;
 }
 
 .timebar {
@@ -343,40 +344,40 @@ g.areas {
     stroke: white;
     stroke-width: 1px;
     font-size: 8pt;
-//    font-family: Arial;
+	//    font-family: Arial;
 
 }
- 
+
 .hidden {
     visibility:hidden;
 }
 
 .line2, circle.area2 {
-  fill: none;
-  stroke: yellow;
-  stroke-width: 2px;
+	fill: none;
+	stroke: yellow;
+	stroke-width: 2px;
 }
- 
+
 circle.area {
-  fill: #fff;
+	fill: #fff;
 }
 
 .ylabels {
-   font-size: 8pt;
-   padding-right: 10px;
+	font-size: 8pt;
+	padding-right: 10px;
 }
 
 .xlabels {
-   font-size: 8pt;
+	font-size: 8pt;
 }
 
 #scaleslider {
-  width: 200px;
-//  display: inline;
+	width: 200px;
+	//  display: inline;
 }
 #maxspdslider {
-  width: 200px;
-//  display: inline;
+	width: 200px;
+	//  display: inline;
 }
 
 #alpha {
@@ -402,15 +403,15 @@ td.unit {
 }
 
 #segments path {
-  fill: none;
-  stroke-linecap: round;
-//  stroke-width: 4px;
+	fill: none;
+	stroke-linecap: round;
+	//  stroke-width: 4px;
 }
 
 #ends circle {
-  fill: yellow;
-  stroke: black;
-  r: 1px;
+	fill: yellow;
+	stroke: black;
+	r: 1px;
 }
 
 #ends path {
@@ -419,46 +420,49 @@ td.unit {
 }
 
 #copy, #copy a {
-  color: #1AA398;
+	color: #1AA398;
 }
 
-.fullcontainer {
-    width:@mapwidth + @tsdwidth + @fmargin;
-    clear:both;
-}
+/*
+  .fullcontainer {
+  width:@mapwidth + @tsdwidth + @fmargin;
+  clear:both;
+  }
+  */
 
 #mapbox {
     background-color: #006;
-    text-align: left;
-    border: 2px solid #eee;
+    //text-align: left;
+    //border: 2px solid #eee;
     padding: 0px;
     height: @mapheight;
-    width: @mapwidth;
-    float:right;
-    margin-right:@margin/2;
+    //width: @mapwidth;
+    //float:right;
+    //margin-right:@margin/2;
 }
 
 #tsdbox {
     background-color: #006;
-    text-align: right;
-    border: 2px solid #eee;
-    width: @tsdwidth;
+    //text-align: right;
+    //border: 2px solid #eee;
+    //width: @tsdwidth;
     height: @tsdheight;
     padding: 0px;
 }
 
-#chartcontainer h3 {
-    text-align:center;
+#chartcontainer {
+	height: @chartheight;
 }
+
 #chartbox {
     margin-top:1em;
     background-color: #006;
-    text-align: right;
+    //text-align: right;
     border: 0px;
     padding: 0px;
-    width: @chartwidth;
-    height: @chartheight;
-    float: left;
+    width: 100%;
+	height:100%;  // extend 
+    //float: left;
 }
 
 circle.incidentLocation {
@@ -471,10 +475,6 @@ circle.incidentLocation {
     padding-left:2em;
 }
 
-#databox table {
-    font-size: 8pt;
-}
-
 table {
     font-size: 8pt;
 }
@@ -483,37 +483,11 @@ table {
     text-weight: bold;
 }
 
-#detail {
-    #chartbox {
-	margin-top:1em;
-	background-color: #006;
-	text-align: right;
-	border: 0px;
-	padding: 0px;
-	width: @chartwidth;
-	height: @chartheight;
-	float: left;
-    }
-
-    .leftbox {
-	border: 2px solid #eee;
-	background-color: #006;
-
-	width: @leftwidth;
-	height: @leftheight;
-	float:left;
-	margin-left:@margin/2;
-    }
-    .rightbox {
-	width: @rightwidth;
-	height: @rightheight;
-	float:right;
-	margin-right:@margin/2;
-    }
+.fullheight {
+	min-height:@mainheight;
 }
 
 table.parambox {
-    float:left;
     border: solid 1px #fff;
 }
 

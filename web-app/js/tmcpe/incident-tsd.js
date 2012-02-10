@@ -134,7 +134,6 @@ if ( !tmcpe ) var tmcpe = {};
       tsdParamsView.container = function(x) {
 	      if (!arguments.length) return container;
 	      container = x;
-	      container.attr("class", "tsdParams");
 	      init();
 	      return tsdParamsView;
       }
@@ -2080,14 +2079,22 @@ if ( !tmcpe ) var tmcpe = {};
           panes.selectAll('div').remove();
           
 	      // create the children
-          var genstats = panes.append('div').attr('id','generalStatsContainer');
-          var ltc = panes.append('div').attr('id','logtableContainer');
+          var genstats = panes.append('div')
+			  .attr('id','generalStatsContainer')
+			  .attr('class', 'tab-pane' )
+			  .attr('data-toggle', 'tab') // twitter bootstrap
+		  ;
+          var ltc = panes.append('div')
+			  .attr('id','logtableContainer')
+			  .attr('class', 'tab-pane' )
+			  .attr('data-toggle', 'tab') // twitter bootstrap
+		  ;
 
 
           // Create the tabs. These must be created before we execute the
 	      // dataTable() call on the child elements because otherwise the size
 	      // of the container is not determined for the dataTable().
-          $("#databox .tabs").tabs( 'div.panes > div' );
+          //$("#databox .tabs").tabs( 'div.panes > div' );
 
 
           var gst = genstats.append('table')
@@ -2151,6 +2158,10 @@ if ( !tmcpe ) var tmcpe = {};
           var ul = genstats.append('ul');
           ul.append('li').append('a').attr('id','tmcpe_tsd_download_link');
           ul.append('li').append('a').attr('id','tmcpe_report_analysis_problem_link');
+
+		  // show the first tab
+		  $('.nav-tabs a').tab('show');
+		  $('.nav-tabs a:first').tab('show');
 
       }
 
@@ -2369,6 +2380,7 @@ if ( !tmcpe ) var tmcpe = {};
       $('#generalStats #facility').html(id.children[0].innerHTML);
   }
 
+
   /************ MAIN APP CODE ************/
   $(document).ready(function() {
 
@@ -2394,6 +2406,37 @@ if ( !tmcpe ) var tmcpe = {};
 
       // update the params
       //tsdParamsView.touch();
+
+	  // attach the action buttons
+	  var orgheight = $('#chartcontainer').css('height');
+	  $('#btn-show-all').click(function(e){
+		  e.preventDefault();
+		  $('#chartcontainer').attr('class','span6')
+		  $('#databox').css('display','block');
+		  $('#tsdcontainer').css('display','block');
+		  $('#mapbox').css('display','block');
+
+		  $('#chartcontainer')
+			  .removeClass('span12')
+			  .addClass('span6')
+			  .css('height',orgheight);
+		  cumflowView.resize();
+		  cumflowView.redraw();
+	  })
+	  $('#btn-only-show-chart').click(function(e){
+		  e.preventDefault();
+		  $('#databox').css('display','none');
+		  $('#tsdcontainer').css('display','none');
+		  $('#mapbox').css('display','none');
+		  var fullheight = $(window).height() - 150;
+		  $('#chartcontainer')
+			  .removeClass('span6')
+			  .addClass('span12')
+			  .css('min-height',orgheight)
+			  .css('height',fullheight);
+		  cumflowView.resize();
+		  cumflowView.redraw();
+	  })
       
 
       ///// bind events /////

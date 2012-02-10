@@ -637,7 +637,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      +'<tr title="The approximate percent of time-space cells sampled for the incident"><th>Sample%:</th><td>{{((properties.samplePercent*100)||0).toFixed(1)}}%</td></tr>'
 	      +'</table>'
 	      +'<hr/>'
-	      +'<div style="width=100%;text-align:center;"><a target="_blank" href="'+tsdurl+'" title="Open a new window showing a time-space diagram of this incident and details of the delay analysis">Show detailed analysis</a></div>'
+	      +'<div style="width=100%;text-align:center;"><a class="btn btn-primary" target="_blank" href="'+tsdurl+'" title="Open a new window showing a time-space diagram of this incident and details of the delay analysis">Show detailed analysis</a></div>'
       )
       ;
 

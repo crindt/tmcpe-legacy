@@ -40,6 +40,13 @@ grails.project.dependency.resolution = {
 
         // supporting missing deps for cached-resources plugin
         compile ":cache-headers:1.0.4"
+
+		// twitter bootstrap
+		runtime ":twitter-bootstrap:2.0.0.16"
+		runtime ':fields:1.0.1'
+
+		runtime ":browser-detection:0.3.3"
+		
     }
 
 }

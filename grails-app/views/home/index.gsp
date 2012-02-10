@@ -1,7 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>TMC Performance Evaulation</title>
-    <meta name="layout" content="main" />
+    <meta name="layout" content="tmcpe" />
 <!--
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 -->

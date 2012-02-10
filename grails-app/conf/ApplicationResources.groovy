@@ -9,7 +9,9 @@
 modules = { 
     common  { 
         resource url:"js/tmcpe/common.js"
-        resource url:"less/tmcpe-base.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_common'
+		dependsOn 'bootstrap-less'
+		resource url:"less/tmcpe-bootstrap.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_common'
+        //resource url:"less/tmcpe-base.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_common'
     }
 
     'jquery-tools' { 
@@ -60,17 +62,21 @@ modules = {
         resource url:"less/tmcpe-incident-tsd.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_tmcpe-incident-tsd'
     }
 
+	/*
 	'ctmlabs-bar-remote' { 
 		dependsOn 'jquery'
 		resource url: 'http://anne.its.uci.edu/css/ctmlbanner.css'
 		resource url: 'http://anne.its.uci.edu/loggedout/banner.js'
 		resource url: 'http://anne.its.uci.edu/js/ctmlbanner.js'
 	}
+	*/
 
 	'ctmlabs-bar' { 
 		//dependsOn 'ctmlabs-bar-remote'
 		resource url: "css/ctmlbanner.css"
         resource url: "less/ctmlabs-menu.less", attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_ctmlabs-bar'
 	}
+
+	
     
 }

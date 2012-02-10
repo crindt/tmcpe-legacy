@@ -10,16 +10,16 @@ class UrlMappings {
       }
     }
     //        "/"(view:"/home/index")
-    /*
-      "/" {
+    "/" {
       controller = "home"
       action = [GET: "index"]
-      }
-    */
+    }
+	/*
     "/" {
       controller = "incident"
       action = [GET: "summary"]
     }
+	*/
     "500"(view:'/error')
   }
 }
