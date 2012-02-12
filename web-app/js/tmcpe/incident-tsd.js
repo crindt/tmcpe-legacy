@@ -1112,12 +1112,6 @@ if ( !tmcpe ) var tmcpe = {};
 		          d.incflow = base + incflowrate*(t2pCell-t2Cell)*60*5 + clearflowrate*(j-t2pCell)*60*5;
 	          }
 
-			  // don't allow projection to be greater than observed
-			  /*
-			  if ( d.incflow > d.obs ) {
-				  d.incflow = d.obs;
-			  }
-			  */
 
 	          // don't allow projection to be greater than avg.
 	          if ( d.incflow > d.adjdivavg && j > startCell ) {
@@ -1127,6 +1121,18 @@ if ( !tmcpe ) var tmcpe = {};
                   d.incflow = d.adjdivavg;
               }
 
+			  // don't allow projection to be greater than observed
+			  if ( d.incflow > d.obs && j <= finishCell ) {
+				  d.incflow = d.obs;
+			  }
+
+			  // set the baseline for "observed"
+			  // should be max of d.obs and d.incflow
+			  d.incbl = d.obs;
+			  if ( d.obs < d.incflow ) {
+				  d.incbl = d.incflow
+			  }
+
 	      });
 
           // project t3p
@@ -1134,7 +1140,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 
 	      // add zeroed elements at the beginning
-	      data.unshift( { x:json.timesteps[0].getTime()/1000,obs:0,avg:0,divavg:0,adjdivavg:0,incflow:0} );
+	      data.unshift( { x:json.timesteps[0].getTime()/1000,obs:0,avg:0,divavg:0,adjdivavg:0,incflow:0,incbl:0} );
 	      
 	      // Compute the maximum cumulative flow across all sections (to set the max scale)
 	      var maxflow = Array.max( json.data.map( function( r ) { 
@@ -1151,7 +1157,7 @@ if ( !tmcpe ) var tmcpe = {};
 	          .domain([json.timesteps[startTime ? startTime : 0 /*0*/].getTime()/1000,
 		               json.timesteps[endTime ? endTime-1: json.timesteps.length-1].getTime()/1000+300])
 	          .range([0, ww]),
-	      y = d3.scale.linear().domain(/*[0,20]*/[0, maxflow]).range([hh, 0]),
+	      y = d3.scale.linear().domain([0, maxflow]).range([hh, 0]),
 	      now = new Date();
 	      
 	      var vis = d3.select("#chartbox")
@@ -1163,7 +1169,7 @@ if ( !tmcpe ) var tmcpe = {};
 	          .append("svg:g")
 	          .attr("transform", "translate(" 
 		            + 6*p      // shift left 5p (1p margin on right)
-		            + "," + p  // shift down 1p (1p margin on top)
+		            + "," + 1.5*p  // shift down 1p (1p margin on top)
 		            + ")");
 	      
 	      // create some data for the section rules
@@ -1250,27 +1256,15 @@ if ( !tmcpe ) var tmcpe = {};
 	          .attr("d", d3.svg.area()
 		            .x(function(d) { 
 			            return x(d.x); })
-                    .y0(function(d) { return y(d.adjdivavg); })  /* subtract from divavg */
-		            //.y0(function(d) { return y(d.divavg); })  /* subtract from divavg */
-		            .y1(function(d) { 
-			            return y(d.avg); }))
+					/* subtract from divavg */
+                    .y0(function(d) { return y(d.adjdivavg); })
+		            .y1(function(d) { return y(d.avg); }))
 	          .on("mouseover", function( d,i ) { 
 		          $('#cumflowChartTip').html("Diverted Flow" );
 	          } )
 	          .on("mouseout", function (d,i) { 
 		          $('#cumflowChartTip').html("" );
 	          } );
-
-	      
-          /*
-	        chg.append("svg:path")
-	        .attr("class", "line expectedflow")
-	        .attr("d", d3.svg.line()
-	        .x(function(d) { return x(d.x); })
-	        .y(function(d) { return y(d.avg); }));
-          */
-
-
           
 	      // adjdivavg
 	      if ( section == incidentSectionIndex ) {
@@ -1278,7 +1272,8 @@ if ( !tmcpe ) var tmcpe = {};
 		          .attr("class", "area adjexpectedflowafterdiv")
 		          .attr("d", d3.svg.area()
 			            .x(function(d) { return x(d.x); })
-			            .y0(function(d) { return y(d.obs);})    /* subtract from obs */
+						/* subtract from obs */
+			            .y0(function(d) { return y(d.incbl);})
 			            .y1(function(d) { return y(d.adjdivavg); }))
 		          .on("mouseover", function( d,i ) { 
 		              $('#cumflowChartTip').html( "TMC Savings due to diversion");
@@ -1303,7 +1298,8 @@ if ( !tmcpe ) var tmcpe = {};
 		          .attr("class", "area expectedflowafterdiv")
 		          .attr("d", d3.svg.area()
 			            .x(function(d) { return x(d.x); })
-			            .y0(function(d) { return y(d.obs);})    // subtract from obs
+						// subtract from obs
+			            .y0(function(d) { return y(d.obs);})
 			            .y1(function(d) { return y(d.divavg); }))
 		          .on("mouseover", function( d,i ) { 
 		              $('#cumflowChartTip').html( "TMC Savings due to diversion");
@@ -1312,34 +1308,36 @@ if ( !tmcpe ) var tmcpe = {};
 		              $('#cumflowChartTip').html( "");
 		          } );
 	          
-              /*
-	            chg.append("svg:path")
-		        .attr("class", "line expectedflowafterdiv")
-		        .attr("d", d3.svg.line()
-		        .x(function(d) { return x(d.x); })
-		        .y(function(d) { return y(d.divavg); }));
-              */
-
+			  // add line to show diverted flow
+/*
+	          chg.append("svg:path")
+		          .attr("class", "line expectedflowafterdiv")
+		          .attr("d", d3.svg.line()
+						.x(function(d) { return x(d.x); })
+						.y(function(d) { return y(d.divavg); }));
+*/			  
 	      }
 
 	      // observed
+		  // this needs to be split into two sections
 	      chg.append("svg:path")
 	          .attr("class", "area observed")
 	          .attr("d", d3.svg.area()
 		            .x(function(d) { return x(d.x); })
-		            .y0(function(d) {return y(d.incflow);})  /* subtract from whatif */
-		            .y1(function(d) { return y(d.obs); }))
+					/* subtract from whatif */
+		            .y0(function(d) {return y(d.incflow);})
+		            .y1(function(d) { return y(d.incbl); })
+				   )
 	          .on("mouseover", obsmouseover )
-	          .on("mouseout", function () { } );
+	          .on("mouseout", function () { } )
+		  ;
 
 	      
-          /*
 	        chg.append("svg:path")
 	        .attr("class", "line observed")
 	        .attr("d", d3.svg.line()
 	        .x(function(d) { return x(d.x); })
 	        .y(function(d) { return y(d.obs); }));
-          */
 
 	      // what-if
 	      chg.append("svg:path")
@@ -1354,17 +1352,14 @@ if ( !tmcpe ) var tmcpe = {};
 	          .on("mouseout", function () {  } );
 
 	      
-          /*
-	        chg.append("svg:path")
-	        .attr("class", "line whatif")
-	        .attr("d", d3.svg.line()
-	        .x(function(d) { return x(d.x); })
-	        .y(function(d) { return y(d.incflow); }))
-	        .on("mouseover", function() { 
-	        $('#cumflowChartTip').html( "Estimated cumulative flow without TMC");
-	        } )
-	        .on("mouseout", function () {  } );
-          */
+/*
+	      chg.append("svg:path")
+	          .attr("class", "line whatif")
+	          .attr("d", d3.svg.line()
+					.x(function(d) { return x(d.x); })
+					.y(function(d) { return y(d.incflow); }))
+		  ;
+*/
 
 	      $(chg[0]).tooltip({position:"center right", tip: '#cumflowChartTip'});
 
@@ -1372,13 +1367,13 @@ if ( !tmcpe ) var tmcpe = {};
 	      // draw start of incident
 
 	      var tr = [ 
-	          { t:t0, n: "t0", l:"Onset of incident" }, //"t<tspan baseline-shift='sub'>0</tspan>" },
-	          { t:t1, n: "t1", l:"Verification" }, 
-	          { t:t2, n: "t2", l:"Roadway clear" }, 
-	          { t:t3, n: "t3", l:"Queue dissipated" }, 
-	          { t:t1p, n: "t1p", l:"Verification without TMC (estimated)", adjtop: 12},
-	          { t:t2p, n: "t2p", l:"Clearance time without TMC (estimated)", adjtop: 12},
-              { t:t3p, n: "t3p", l:"Queue dissipated without TMC (estimated)", adjtop: 12},
+	          { t:t0, b: "obs",  n: "t0", l:"Onset of incident" }, //"t<tspan baseline-shift='sub'>0</tspan>" },
+	          { t:t1+300, b: "obs", n: "t1", l:"Verification" }, 
+	          { t:t2+300, b: "obs", n: "t2", l:"Roadway clear" }, 
+	          { t:t3+300, b: "obs", n: "t3", l:"Queue dissipated" }, 
+	          { t:t1p+300, n: "t1p", l:"Verification without TMC (estimated)", adjtop: 12},
+	          { t:t2p+300, n: "t2p", l:"Clearance time without TMC (estimated)", adjtop: 12},
+              { t:t3p+300, n: "t3p", l:"Queue dissipated without TMC (estimated)", adjtop: 12},
 	      ].filter( function( d ) { return d.t != null; } );
 
 	      var times = vis.selectAll("g.timebar")
@@ -1394,7 +1389,10 @@ if ( !tmcpe ) var tmcpe = {};
 	          .attr("x2", function (d) { 
 		          return x(d.t) } )
 	          .attr("y1", function(d) { return  0 - ( d.adjtop ? d.adjtop : 0 ) } )
-	          .attr("y2", hh - 1 )
+	          .attr("y2", 
+					//function(d) { return y(d[obs]) }
+					hh - 1
+				   )
 	          .on("mouseover", function(d,i) {
 		          this.style.stroke="red";
 		          $('#cumflowTimebarTip').html( $.format.date( new Date(d.t*1000), "HH:mm" ) + ":: " + d.l );

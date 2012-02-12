@@ -194,6 +194,8 @@ svg text {
 @area-expected-flow-fill:  #4682B4; /* steelblue */
 @area-observed-flow-fill:  #008a00;    /* green */
 @area-divavg-flow-fill:    #f00;    /* red */
+@area-divavg-flow-stroke:    #ff0;    /* grey */
+@observed-flow-stroke:     #ff0;
 @area-adjdivavg-flow-fill: #0f0;    /* green */
 @area-whatif-flow-fill:    #333;    /* transparent */
 @highlight: cyan;
@@ -222,7 +224,7 @@ g.areas {
             }
         }
         &.line {
-            stroke: lighten( @area-observed-flow-fill, 30% );
+            stroke: @observed-flow-stroke;
 			/*
               &:hover {
               stroke: #ff0;
@@ -230,8 +232,10 @@ g.areas {
 			  */
 
             &.highlight, &:hover {
+				/*
                 stroke: highlight;
                 fill: @highlight;
+				*/
             }
 
         }
@@ -246,14 +250,14 @@ g.areas {
               }
 			  */
             &.highlight, &:hover {
-                stroke: highlight;
+                //stroke: highlight;
                 fill: @highlight;
             }
         }
         &.line {
             stroke: lighten( @area-expected-flow-fill, 30% );
             &.highlight {
-                stroke: highlight;
+                //stroke: highlight;
                 fill: @highlight;
             }
         }
@@ -269,7 +273,7 @@ g.areas {
 	          }
 			  */
             &.highlight, &:hover {
-                stroke: highlight;
+                //stroke: highlight;
                 fill: @highlight;
             }
         }
@@ -277,7 +281,7 @@ g.areas {
             //stroke: lighten( @area-adjdivavg-flow-fill, 30% );
             stroke: @area-adjdivavg-flow-fill;
             &.highlight {
-                stroke: highlight;
+                //stroke: highlight;
                 fill: @highlight;
             }
         }
@@ -293,15 +297,16 @@ g.areas {
 	          }
 			  */
             &.highlight, &:hover {
-                stroke: highlight;
+                //stroke: highlight;
                 fill: @highlight;
             }
         }
         &.line {
             //stroke: lighten( @area-divavg-flow-fill, 30% );
-            stroke: @area-divavg-flow-fill;
+            stroke: @area-divavg-flow-stroke;
+			stroke-width: 2px;
             &.highlight {
-                stroke: highlight;
+                //stroke: @highlight;
                 fill: @highlight;
             }
         }
@@ -331,7 +336,7 @@ g.areas {
 .timebar {
     stroke: purple;
     stroke-width: 4px;
-	pointer-events: none;
+	//pointer-events: none;
 }
 
 .logtimebar {
