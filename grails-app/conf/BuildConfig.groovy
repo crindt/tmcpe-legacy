@@ -18,6 +18,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://mirrors.ibiblio.org"
         //mavenRepo "http://download.java.net/maven/2/"
         mavenRepo "http://repository.jboss.com/maven2/"
+		mavenRepo "http://m2repo.spockframework.org/snapshots/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -35,17 +36,37 @@ grails.project.dependency.resolution = {
     }
     plugins {
         // supporting missing deps for hibernate-spatial-postgis
+        //compile ":plugin-config:0.1.5"
+
+		// testing
+		compile ':spock:0.6-SNAPSHOT'
+
+		// security
+		runtime ":spring-security-cas:1.0.2"
+		runtime ":spring-security-core:1.2.7"
+		runtime ":spring-security-ldap:1.0.5"
+
+		// resources
+		runtime ":jquery:1.7.1"
+		runtime ":resources:1.1.6"
+		runtime ":zipped-resources:1.0"
+		compile ":lesscss-resources:1.0.1"
+		compile ":cdn-resources:0.2"
+		runtime ":cached-resources:1.0"
+        compile ":cache-headers:1.0.4" // redq'd by cached-resources
+
+		// databases
+		compile ":mongodb:1.0.0.RC4"
         compile ":hibernate-spatial:0.0.4"
-        compile ":plugin-config:0.1.5"
 
-        // supporting missing deps for cached-resources plugin
-        compile ":cache-headers:1.0.4"
-
-		// twitter bootstrap
-		runtime ":twitter-bootstrap:2.0.0.16"
-		runtime ':fields:1.0.1'
-
+		// app support code
+		runtime ":javascript-url-mappings:0.1.1"
 		runtime ":browser-detection:0.3.3"
+
+		// layout
+		compile ":twitter-bootstrap:2.0.0.16"
+		runtime ':fields:1.0.1' // req'd by twitter bootstrap
+		runtime ":markdown:1.0.0.RC1"
 		
     }
 

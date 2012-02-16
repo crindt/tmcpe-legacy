@@ -26,7 +26,7 @@ modules = {
     }
     
     stdui { 
-        dependsOn "jquery-tools, dthree"
+        dependsOn "dthree"
         resource url:"js/underscore.js"
         resource url:"js/mustache.js"
         resource url:"less/tabs-no-images.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_stdui'
@@ -42,6 +42,8 @@ modules = {
         dependsOn "jquery"
         resource url:"js/jquery.format-1.2.min.js"
         resource url:"js/jquery.dataTables.js"
+        resource url:"js/jquery.dataTables.js"
+		resource url:"js/datatables/fixed-header/FixedHeader.min.js"
     }
 
     'tmcpe-incident-summary' { 

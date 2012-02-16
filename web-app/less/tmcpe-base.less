@@ -92,111 +92,11 @@ body {
     border: 1px solid white;
 }
 
-#account {
-    float: right;
-}
-
 /* the following two records are used to position the nav div at the bottom of the info element */
 #info {
     position:relative;
 }
 
-
-#account {
-    float: right;
-}
-
-
-
-/* the overlayed element */
-.simple_overlay {
-	
-	/* must be initially hidden */
-	display:none;
-	
-	/* place overlay on top of other elements */
-	z-index:10000;
-	
-	width:675px;	
-	min-height:200px;
-	border:1px solid #666;
-
-	padding: 5px;
-	
-	/* CSS3 styling for latest browsers */
-	-moz-box-shadow:0 0 90px 5px #000;
-	-webkit-box-shadow: 0 0 90px #000;	
-	
-	/* styling */
-	background-color:@info-background;
-	color: @info-color;
-
-	&.error {
-	    background-color:@alert-background;
-	    color: @alert-color;
-
-	    table {
-
-			td {
-				background-color: darken( @alert-background, 10% );
-				color: saturate( @alert-color, 30% );
-				text-weight: bold;
-				font-size: @font-size * 1.2;
-				padding: 5px;
-				text-shadow: darken( @alert-background, 20% ) 1px 1px;
-
-				&.label { text-align: right }
-			}
-	    }
-	}
-
-}
-
-/* close button positioned on upper right corner */
-.simple_overlay .close {
-	background-image:url(../images/jquery-tools/overlay/close.png);
-	position:absolute;
-	right:-15px;
-	top:-15px;
-	cursor:pointer;
-	height:35px;
-	width:35px;
-}
-
-/* from jquery tools tooltip styling. by default the element to be styled is .tooltip  */
-.tooltip {
-	font-size:12px;
-	height:70px;
-	width:160px;
-	padding:25px;
-	color:@tooltip-color;	
-	z-index:10000;
-	text-overflow: ellipsis;
-
-	/* default is to position on top */
-	background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow.png);
-
-
-	&.bottom {
-	    background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow_bottom.png);
-	    padding-top: 35px; /* shift the text down a bit */
-	}
-
-	&.right {
-	    background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow_right.png);
-	    padding-left: 35px;
-	}
-
-	&.left {
-	    background:transparent no-repeat url(../images/jquery-tools/tooltip/black_arrow_left.png);
-	    padding-right: 35px;
-	}
-
-	&.noarrow {
-	    background:transparent no-repeat url(../images/jquery-tools/tooltip/black_no_arrow.png);
-	    //padding-right: 35px;
-	}
-}
 
 .text-center {
     text-align: center;
@@ -205,3 +105,4 @@ body {
 .text-right {
     text-align: right;
 }
+

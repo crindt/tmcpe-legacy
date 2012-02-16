@@ -2,6 +2,10 @@
 @import "tmcpe-mixins.less";
 @import "tmcpe-map-common.less";
 
+// Twitter boostrap features
+//@import "variables.less";
+//@import "mixins.less";
+
 
 #incident-list {
     position:relative;
@@ -184,56 +188,55 @@
     font-size: 10pt;
 
     table {
-	table-layout: fixed;
-	width: 100%;
-	font-size: 10pt;
+		table-layout: fixed;
+		width: 100%;
+		font-size: 10pt;
 
-	td {
-	    vertical-align:top;
-	    white-space:nowrap;
-	    overflow-x:hidden;
-	    text-overflow:ellipsis;
-	}
+		td {
+			vertical-align:top;
+			white-space:nowrap;
+			overflow-x:hidden;
+			text-overflow:ellipsis;
+		}
 
-	th {
-	    vertical-align:top;
-	    white-space:nowrap;
-	    overflow-x:hidden;
-	    text-overflow:ellipsis;
-	    text-align:right;
-	    vertical-align:top;
-	    width: 75px;
-	}
+		th {
+			vertical-align:top;
+			white-space:nowrap;
+			overflow-x:hidden;
+			text-overflow:ellipsis;
+			text-align:right;
+			vertical-align:top;
+			width: 75px;
+		}
     }
 
     h1 {
-	font-size: 12pt;
-	font-weight: bold;
-	text-align:center;
-	color: black;
-	background: gray;
+		font-size: 12pt;
+		font-weight: bold;
+		text-align:center;
+		color: black;
+		background: gray;
     }
     
     ul {
-	margin-left: 0px;
-	padding-left: 0px;
+		margin-left: 0px;
+		padding-left: 0px;
     }
 
-    li {
-	visibility:hidden;
-	display:none;
-	
-	&.selected {
-	    /*color: yellow;*/
-	    visibility:visible;
-	    display:block;
+	#cluster-list {
+		margin-top: 5px;
+
+		li {
+			visibility:hidden;
+			display:none;
+			
+			&.selected {
+				/*color: yellow;*/
+				visibility:visible;
+				display:block;
+			}
+		}
 	}
-    }
-    
-    a {
-	text-align:center;
-	color: white;
-    }
 }
 
 .navbutton {
@@ -244,17 +247,17 @@
     border: 1px solid gray;
 
     &:hover {
-	.highlight-dark-block( @content-background, @content-color );
+		.highlight-dark-block( @content-background, @content-color );
     }
 
     &.disabled {
-	background-color: @disabled-background;
-	color: @disabled-color;
-	
-	&:hover {
-	    background-color: @disabled-background;
-	    color: @disabled-color;
-	}
+		background-color: @disabled-background;
+		color: @disabled-color;
+		
+		&:hover {
+			background-color: @disabled-background;
+			color: @disabled-color;
+		}
     }
 }
 
@@ -263,7 +266,23 @@
     margin-top: 5px;
 }
 
-#cluster-list {
-    margin-top: 5px;
+#fixedpane {
+	position: fixed;
+	width: 100%;
 }
 
+#asidepane {
+	//.clearfix();
+	position: fixed;
+}
+
+@fluidGridColumnWidth:    6.382978723%;
+@fluidGridGutterWidth:    2.127659574%;
+
+.fluidOffset(@gridColumnWidth, @gridGutterWidth, @columns) {
+    margin-left: (@gridColumnWidth * @columns) + (@gridGutterWidth * (@columns - 2)) + (@gridGutterWidth * 2) *1%; 
+}
+
+#force-content {
+	.fluidOffset( @fluidGridColumnWidth, @fluidGridGutterWidth, 3 );
+}

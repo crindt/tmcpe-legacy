@@ -46,10 +46,12 @@ if ( !tmcpe ) var tmcpe = {};
 
       function formAsModel() {
 	      var form = [];
+		  /*
           $('input:range',container).each(function(i,e) {
               var t = e.value;
               form[e.name] = t;
           });
+*/
 	      $('input:radio:checked',container).each(function(i, e) {
 	          var t = e.value;
 	          form[e.name] = t;
@@ -68,36 +70,36 @@ if ( !tmcpe ) var tmcpe = {};
 	      // handle some element styling
           tmcpctslider =
               $('input[name=tmcpctslider]')
-              .rangeinput()
-	          .tooltip({position: "right", tipClass: "tooltip right"})
+              //.rangeinput()
+	          .tooltip({placement: "right"})
               .change(function(e,v){
 		          $(window).trigger("tmcpe.tsd.tmcPctChanged", formAsModel() );
               });
           verdelslider =
               $('input[name=verdelslider]')
-              .rangeinput()
-	          .tooltip({position: "right", tipClass: "tooltip right"})
+              //.rangeinput()
+	          .tooltip({placement: "right", tipClass: "tooltip right"})
               .change(function(e,v){
 		          $(window).trigger("tmcpe.tsd.verificationDelayChanged", formAsModel() );
               });
           respdelslider =
               $('input[name=respdelslider]')
-              .rangeinput()
-	          .tooltip({position: "right", tipClass: "tooltip right"})
+              //.rangeinput()
+	          .tooltip({placement: "right", tipClass: "tooltip right"})
               .change(function(e,v){
 		          $(window).trigger("tmcpe.tsd.responseDelayChanged", formAsModel() );
               });
 
           maxspdslider = 
               $('input[name=maxspdslider]')
-              .rangeinput({api:true})
+              //.rangeinput({api:true})
               .change(function(e,v){
 		          $(window).trigger("tmcpe.tsd.maxSpeedChanged", formAsModel() );
               });
 
           scaleslider = 
               $('input[name=scaleslider]')
-              .rangeinput({api:true})
+              //.rangeinput({api:true})
               .change(function(e,v){
 		          $(window).trigger("tmcpe.tsd.scaleChanged", formAsModel() );
               });
@@ -127,8 +129,8 @@ if ( !tmcpe ) var tmcpe = {};
 	          });
 
 	      // set up tooltips
-	      $('input[title]').tooltip({position: "center right", tipClass: "tooltip right"});
-	      $('select[title]').tooltip({position: "center right", tipClass: "tooltip right"});
+	      $('input[title]').tooltip({placement: "right"});
+	      $('select[title]').tooltip({placement: "right"});
       }
 
       tsdParamsView.container = function(x) {
@@ -1361,7 +1363,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  ;
 */
 
-	      $(chg[0]).tooltip({position:"center right", tip: '#cumflowChartTip'});
+	      $(chg[0]).tooltip({placement:"center right", tip: '#cumflowChartTip'});
 
 
 	      // draw start of incident
@@ -1448,7 +1450,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 
 
-	      $(container).find('.timebar').tooltip({position:"center right", tip: '#cumflowTimebarTip', offset: [20, 0]});
+	      $(container).find('.timebar').tooltip({placement:"center right", tip: '#cumflowTimebarTip', offset: [20, 0]});
 
 
 	      cumflow.updateStats();
@@ -2349,7 +2351,7 @@ if ( !tmcpe ) var tmcpe = {};
       tmcpe.loadData(url,function(e){
 	      if ( e == null || e.timesteps == null ) {
 	          // this is an error condition
-	          $('#server_error').overlay({load:true});
+	          $('#server_error').modal();
 	          return;
 	      }
 
@@ -2436,6 +2438,9 @@ if ( !tmcpe ) var tmcpe = {};
 		  cumflowView.redraw();
 	  })
       
+	  $('#btn-change-settings').click(function(e){
+		  $('#tsdParams').modal('show');
+	  })
 
       ///// bind events /////
 
@@ -2446,7 +2451,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 
       // attach tooltips
-      //$('[title]').tooltip({position: "bottom center", tipClass:"tooltip bottom"});
+      //$('[title]').tooltip({placement: "bottom center", tipClass:"tooltip bottom"});
 
       
       // Grab the TSD for the first incident, success callback is updateData, which redraws the TSD

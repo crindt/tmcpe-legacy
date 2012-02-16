@@ -90,25 +90,27 @@
     
 
     <!-- Some overlays we'll bring up from time to time -->
-    <div class="simple_overlay" id='loading'>
-	  <div id='loading_block'>Loading data...</div>
-    </div>
+	<div class="overlay_container">
+      <div class="simple_overlay" id='loading'>
+		<div id='loading_block'>Loading data...</div>
+      </div>
 
-    <div class="simple_overlay error" id="error_overlay">
-	  <h1>There was a error in the code that resulted in an unexpected program state:</h1>
-	  
-	  <table>
-	    <tr><td class="label">file:</td><td class="errfile"></td></tr>
-	    <tr><td class="label">line:</td><td class="errline"></td></tr>
-	    <tr><td class="label">message:</td><td class="errmsg"></td></tr>
-	  </table>
-	  
-	  <ul>
-	    <li><a href="#" onclick="window.location.reload()">try reloading the page,</a></li>
-	    <li class="report"><a target="_blank" href="http://tracker.ctmlabs.net/projects/tmcpe/issues/new?issue[tracker_id]=1&issue[subject]=Logical error">report a problem</a> using the CTMLabs tracker, or</li>
-	    <li>try again later...</li>
-	  </ul>
-    </div>
+      <div class="simple_overlay error" id="error_overlay">
+		<h1>There was a error in the code that resulted in an unexpected program state:</h1>
+		
+		<table>
+	      <tr><td class="label">file:</td><td class="errfile"></td></tr>
+	      <tr><td class="label">line:</td><td class="errline"></td></tr>
+	      <tr><td class="label">message:</td><td class="errmsg"></td></tr>
+		</table>
+		
+		<ul>
+	      <li><a href="#" onclick="window.location.reload()">try reloading the page,</a></li>
+	      <li class="report"><a target="_blank" href="http://tracker.ctmlabs.net/projects/tmcpe/issues/new?issue[tracker_id]=1&issue[subject]=Logical error">report a problem</a> using the CTMLabs tracker, or</li>
+	      <li>try again later...</li>
+		</ul>
+      </div>
+	</div>
 
     <r:layoutResources/>
     </body>	

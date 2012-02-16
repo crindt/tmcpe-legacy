@@ -15,7 +15,7 @@ if ( !tmcpe ) var tmcpe = {};
              // create the ul
              whatul = d3.select("#loading").append("ul");
          }
-	 loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
+		 loadingOverlay = $("#loading").modal();
 
          if ( what == null ) what = "Item "+loadCount;
 
@@ -57,7 +57,7 @@ if ( !tmcpe ) var tmcpe = {};
 
 	         
 	         if ( loadingOverlay && !(--loadCount) ) {
-                     loadingOverlay.close();
+                     loadingOverlay.modal('hide');
 	             $(window).trigger("tmcpe.loadingFinished");
                  }
                  
@@ -263,7 +263,7 @@ if ( !tmcpe ) var tmcpe = {};
 	     }
 	     
 	     $('#error_overlay li.report a').attr("href","http://tracker.ctmlabs.net/projects/tmcpe/issues/new?"+keyPairs.join("&"));
-	     $('#error_overlay').overlay({load:true});
+	     $('#error_overlay').modal({});
 	 });
      });
  })();

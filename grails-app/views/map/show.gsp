@@ -22,16 +22,19 @@
 
   </head>
   <body>
-	<div class='row-fluid'>
-	  <div class='span2'>
-		<div id='mapview' class="mapcontainer" tabindex="1" title="Click on a visible circle to view the incidents at that location"></div>
+	<div class="row-fluid" style="position:fixed;">
+	  <aside id='asidepane' class='span3'>
+		<div id='mapview' class="mapcontainer" tabindex="1" title="Click on a visible circ
+le to view the incidents at that location"></div>
 		<div id='cluster-detail'>
 		  <ul id='cluster-list'>
 		  </ul>
 		  <p id='cluster-stats'></p>
 		</div>
-	  </div>
-	  <div class='span10'>
+	  </aside>
+	</div>
+	<div class='row-fluid'>
+	  <div id="force-content" class='span9'>
 		<div id='content'>
 		  <!--
 			  <div class='input-block'>
