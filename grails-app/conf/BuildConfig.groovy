@@ -6,19 +6,20 @@ grails.project.dependency.resolution = {
     inherits "global" // inherit Grails' default dependencies
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {        
-        grailsPlugins()
+		grailsPlugins()
         grailsHome()
+        grailsCentral()
+        mavenLocal()
+        mavenCentral()
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
-        //mavenLocal()
-        mavenCentral()
         mavenRepo "http://snapshots.repository.codehaus.org"
         mavenRepo "http://repository.codehaus.org"
         mavenRepo "http://mirrors.ibiblio.org"
-        //mavenRepo "http://download.java.net/maven/2/"
         mavenRepo "http://repository.jboss.com/maven2/"
-		mavenRepo "http://m2repo.spockframework.org/snapshots/"
+		mavenRepo "http://m2repo.spockframework.org/snapshots"
+
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -36,37 +37,58 @@ grails.project.dependency.resolution = {
     }
     plugins {
         // supporting missing deps for hibernate-spatial-postgis
-        //compile ":plugin-config:0.1.5"
 
 		// testing
-		compile ':spock:0.6-SNAPSHOT'
+
+        if (Environment.current == Environment.DEVELOPMENT) {
+            compile ":build-test-data:2.0.0",
+                    ":fixtures:1.1"
+        }
+        else {
+            test    ":build-test-data:2.0.0",
+                    ":fixtures:1.1"
+        }
+        
+        test    ":geb:0.6.2",
+                ":spock:0.6-SNAPSHOT", {
+            excludes 'xml-apis'
+        }
 
 		// security
 		runtime ":spring-security-cas:1.0.2"
-		runtime ":spring-security-core:1.2.7"
+		runtime ":spring-security-core:1.2.7.2"
 		runtime ":spring-security-ldap:1.0.5"
 
 		// resources
 		runtime ":jquery:1.7.1"
-		runtime ":resources:1.1.6"
+
+		runtime ":resources:1.1.5"
 		runtime ":zipped-resources:1.0"
 		compile ":lesscss-resources:1.0.1"
 		compile ":cdn-resources:0.2"
 		runtime ":cached-resources:1.0"
-        compile ":cache-headers:1.0.4" // redq'd by cached-resources
+		// redq'd by cached-resources
+        compile ":cache-headers:1.0.4"
 
 		// databases
+		compile ":hibernate:2.0.1"
 		compile ":mongodb:1.0.0.RC4"
+
+		// hibernate spatial postgres and deps
+        compile ":hibernate-spatial-postgresql:0.0.4"
         compile ":hibernate-spatial:0.0.4"
+        compile ":plugin-config:0.1.5"
 
 		// app support code
 		runtime ":javascript-url-mappings:0.1.1"
 		runtime ":browser-detection:0.3.3"
 
 		// layout
-		compile ":twitter-bootstrap:2.0.0.16"
+		compile ":twitter-bootstrap:2.0.1.19"
 		runtime ':fields:1.0.1' // req'd by twitter bootstrap
 		runtime ":markdown:1.0.0.RC1"
+
+        build   ":tomcat:2.0.1"
 		
     }
 

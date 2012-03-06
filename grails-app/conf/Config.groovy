@@ -116,6 +116,11 @@ log4j = {
 	//info   'edu.uci.its.tmcpe'
 	
 	warn   'org.mortbay.log'
+
+    debug   'grails.plugins.springsecurity'
+    debug   'org.codehaus.groovy.grails.plugins.springsecurity'
+    debug   'org.springframework.security'
+    debug   'org.jasig.cas.client'
 }
 
 vdsdata {

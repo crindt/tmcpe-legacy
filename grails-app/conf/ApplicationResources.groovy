@@ -14,6 +14,13 @@ modules = {
         //resource url:"less/tmcpe-base.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_common'
     }
 
+	'docs' {
+	    dependsOn 'common'
+		resource url: "less/tmcpe-docs.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_docs'
+		resource url: "css/twitter-docs.css"
+		resource url: "js/tmcpe/docs.js"
+	}
+
     'jquery-tools' { 
         dependsOn "jquery"
         resource url:"js/jquery.tools.min.js"
@@ -29,7 +36,7 @@ modules = {
         dependsOn "dthree"
         resource url:"js/underscore.js"
         resource url:"js/mustache.js"
-        resource url:"less/tabs-no-images.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_stdui'
+        //resource url:"less/tabs-no-images.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_stdui'
         resource url:"less/range-input.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_stdui'
     }
 

@@ -32,7 +32,7 @@
 		<r:layoutResources/>
 	</head>
 
-	<body>
+	<body  data-spy="scroll" data-target=".subnav" data-offset="50" data-rendering="true">
 
 		<nav class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
@@ -73,7 +73,8 @@
 						  <g:link controller='login' title="Log in using CTMLabs CAS server">Login</g:link>
 						</li>
 					  </sec:ifNotLoggedIn>
-					  <li><a href="http://tracker.ctmlabs.net/projects/tb/issues/new" title="Report a problem with this website">Report Problem</a></li>
+					  <li>
+						<g:link controller='problem' title="Report a problem with this website">Report Problem</g:link>
 					</ul>
 				</div>
 			</div>

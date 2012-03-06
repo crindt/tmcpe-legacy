@@ -21,16 +21,16 @@
     <div id="tmcpeapp" class="row-fluid">
 	  <div id="content" class="span10">
 		<h3>Performance Summary (total number of incidents)</h3>
-		<div class='querybox'>
+		<div class='querybox tabbable'>
 		  <!-- the tabs -->
-		  <ul class="tabs">
-			<li><a href="#">Basic Query</a></li>
-			<li><a href="#">Advanced Query</a></li>
+		  <ul class="nav nav-tabs">
+			<li class="active"><a href="#basicQueryPane" data-toggle="tab">Basic Query</a></li>
+			<li><a href="#advancedQueryPane" data-toggle="tab">Advanced Query</a></li>
 		  </ul>
 	      
 		  <!-- tab "panes" -->
-		  <div class="panes">
-			<div id="basicQueryPane" class="queryPane">
+		  <div class="tab-content">
+			<div id="basicQueryPane" class="tab-pane active queryPane">
 			  <table>
 				<tr>
 				  <th>
@@ -77,7 +77,7 @@
 				</tr>
 			  </table>
 			</div>
-			<div class="queryPane">
+			<div id="advancedQueryPane" class="tab-pane queryPane">
 			  <table>
 				<tr>
 				  <th>

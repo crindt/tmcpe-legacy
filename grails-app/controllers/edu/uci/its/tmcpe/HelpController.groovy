@@ -41,15 +41,13 @@ class HelpController {
     // Only authenticated users will be automatically redirected to the user guide
     @Secured(['ROLE_USER'])
     def fullHelp = {
-	redirect(target:"_blank", url:'http://localhost/redmine/projects/tmcpe/wiki/User_Guide')
+		redirect(target:"_blank", url:'http://localhost/redmine/projects/tmcpe/wiki/User_Guide')
     }
 
     def browserHelp = {
-	flash.message = ["Your browser",
-			 userAgentIdentService.getBrowserType(),
-			 "version",
-			 userAgentIdentService.getBrowserVersion(),
-			 "is not supported"].join(" ")
+	flash.message = """\
+       Your browser <b>${userAgentIdentService.getBrowserName()}-${userAgentIdentService.getBrowserVersion()}</b> 
+       is not supported."""
     }
 
     def prezi = {

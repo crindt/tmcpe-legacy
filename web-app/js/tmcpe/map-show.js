@@ -137,7 +137,10 @@ if ( !tmcpe ) var tmcpe = {};
 		  divs.remove();
 
 		  // create the table skeleton
-		  element = container.append('table').attr('id','incident-list');
+		  element = container.append('table')
+			  .attr('id','incident-list');
+		  // twitter styling
+		  //$(element[0]).addClass('table table-bordered table-condensed');
 		  thead = element.append('thead');
 		  hrow = thead.append('tr');
 		  hrow.selectAll('th').data(fields).enter()
@@ -181,6 +184,7 @@ if ( !tmcpe ) var tmcpe = {};
 		  var rows = tbody.selectAll("tr").data(_.filter(x.features,function(d){return d!=null;}) ,function(d,i) { 
 			  if ( d ) return d.cad;
 		  } );
+		  $(tbody[0]).find("tr").tooltip({placement:"left"});
 		  
 		  rows.enter().append("tr")
 			  .attr("id", function( d ) { 
@@ -306,7 +310,7 @@ if ( !tmcpe ) var tmcpe = {};
 				  'aaSorting':[[1,"asc"]],
 				  "bFilter": false,
 			  })
-		  new FixedHeader( otab );
+		  //new FixedHeader( otab );
 
 		  return;
 
@@ -553,10 +557,10 @@ if ( !tmcpe ) var tmcpe = {};
 
       function highlightIncident( elem ) {
 		  // remove all currently selected
-		  $('circle.selected').removeClass("selected");
+		  d3.select('circle.selected').classed('selected', false);
 		  
-		  sel = $('circle[cads~="'+elem.properties.cad+'"]');
-		  sel.addClass("selected");
+		  d3.select('circle[cads~="'+elem.properties.cad+'"]')
+			  .classed('selected',true);
       }
 
 
@@ -644,9 +648,9 @@ if ( !tmcpe ) var tmcpe = {};
 		  ''
 			  +'<h1 style="background:{{color}}">{{cad}}</h1>'
 			  +'<hr/>'
-			  +'<table>'
+			  +'<table class="table table-condensed table-bordered">'
 			  +'<tr><th>Type:</th><td>{{eventType}}</td></tr>'
-			  +'<tr><th>Location:</th><td>{{properties.locString}}</td></tr>'
+			  +'<tr title="Facility, direction, postmile and vdsid of nearest station to incident"><th>Location:</th><td>{{properties.locString}}</td></tr>'
 			  +'<tr title="The delay associated with this event following the Caltrans method of using 35mph as the baseline"><th>Delay<35:</th><td>{{(properties.d12_delay||0).toFixed(0)}} veh-hr</td></tr>'
 			  +'<tr title="The delay associated with this event following the TMCPE method of using a average time-space speed as the baseline"><th>Delay:</th><td>{{(properties.tmcpe_delay||0).toFixed(0)}} veh-hr</td></tr>'
 			  +'<tr title="The fraction of savings attributable to TMC actions"><th>Savings:</th><td>{{(properties.savings||0).toFixed(0)}} veh-hr</td></tr>'
@@ -662,6 +666,17 @@ if ( !tmcpe ) var tmcpe = {};
 
 		  // empty container
 		  $(container[0]).children().remove();
+
+		  var countbox = container
+			  .append("div")
+			  .attr('style','width:100%;text-align:center')
+		  var count = countbox.append("span")
+			  .attr('class','nav-count')
+			  .attr('title',"Click on an incident above or from the table to see its details below")
+			  .html("No incident cluster selected");
+		  $(count[0]).tooltip({placement:'right'})
+
+		  
 
 		  nav = container
 			  .append("div")
@@ -684,9 +699,6 @@ if ( !tmcpe ) var tmcpe = {};
 					  checkDetailButtons();
 				  }
 			  });
-		  nav.append("span")
-			  .attr('class','nav-count')
-			  .html("");
 		  nav.append("li")
 			  .attr("class","next")
 			  .append("a")
@@ -804,7 +816,12 @@ if ( !tmcpe ) var tmcpe = {};
 					++idx );
 			  if ( idx > selectedCluster.elements.length )
 				  alert( "Can't find selected incident in detail cluster" );
-			  nav.selectAll('.nav-count').html("Incident " + (idx+1) + " of " + selectedCluster.elements.length );
+			  var nc = container.selectAll('.nav-count')
+				  .html("Incident " + (idx+1) + " of " + selectedCluster.elements.length )
+				  .attr('title','There are '+selectedCluster.elements.length+' incidents at this approximate location')
+				  .attr('data-original-title','There are '+selectedCluster.elements.length+' incidents at this approximate location');
+			  $(nc[0]).tooltip({placement:'right'});
+			  
 			  $(container[0]).find("li.selected").removeClass('selected');
 			  $(container[0]).find("li[cad~='"+d.cad+"']").addClass('selected');//style("color","yellow");
 		  } else {

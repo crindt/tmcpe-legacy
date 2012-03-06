@@ -28,7 +28,6 @@ Class<?> dirObjectFactoryClass = Class.forName(conf.ldap.context.dirObjectFactor
 // Place your Spring DSL code here
 beans = {
 
-
     // We want to look up user details using LDAP---not the GormUserDetailsService!
 	contextSource(DefaultSpringSecurityContextSource, conf.ldap.context.server) {
 		userDn = conf.ldap.context.managerDn

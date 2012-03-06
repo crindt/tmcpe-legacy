@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.Point
   import grails.converters.JSON
   import java.util.Calendar
 */
+import org.hibernate.criterion.*
 
 /**
  * A Incident that has impacted the capacity of the roadway
@@ -117,7 +118,7 @@ class ProcessedIncident {
     SimpleIncidentModel pullModel()
     { 
         def model = SimpleIncidentModel.withCriteria{ eq 'cad', cad} //SimpleIncidentModel.findByCad(cad)
-        log.info("GOT MODEL ${model} for ${cad}")
+        //log.info("GOT MODEL ${model} for ${cad}")
         if (model && model.size() > 0)
             return model?.first()
         else
@@ -331,5 +332,227 @@ class ProcessedIncident {
             analysesCount( analyses?.size() )
         }
     }
+
+	static namedQueries = { 
+		idInList { listString ->
+			if ( listString ) { 
+				'in'( "id", listString.split(",")*.toInteger())
+			}
+		}
+
+		// section can be defined in params as fwy+dir or by location_id (vdsid)
+		sectionMatches { params ->
+			def fwy = ( ( params.freeway ?: params.facility_id ) ?: params.freeway_id ) ?: '';
+			if ( fwy != '' ) {
+				eq( "freewayId", fwy.toInteger() )
+			}
+			def dir = ( params.direction ?: params.freeway_dir ) ?: '';
+			if ( dir != '' ) {
+				eq( "freewayDir", dir )
+			}
+
+
+			if ( params.location_id == '-' ) {
+				isNull( 'id' )
+			} else if ( params.location_id ) {
+				'in'( 'id', params.location_id.split(',')*.toInteger() )
+			} 
+		}
+
+		startTimeDuringYear { yearstr ->
+			if ( yearstr ) { 
+				def year = yearstr.toInteger()
+				def from = Date.parse("yyyy-MM-dd", "${year}-01-01")
+				def to =   Date.parse("yyyy-MM-dd", "${year+1}-01-01")
+				//log.info("============DATES: ${from} <<>> ${to}")
+				between( 'startTime', from, to )
+			}
+		}
+
+		startTimeDuringMonth { monthstr -> 
+			if ( monthstr ) { 
+				def month = monthstr.split(",").grep{ 
+					try {
+						def val = it.toInteger(); 
+						if ( val >= 1 && val <= 12 ) return true
+
+					} catch ( java.lang.NumberFormatException e ) {
+						// oops, coverting to integer failed
+						log.warn( "Invalid month of year '${it}' passed as query argument" )
+						return false
+					}
+					return false
+				}
+
+				if ( month.size() > 0 ) {
+					addToCriteria( 
+						Restrictions.sqlRestriction( 
+							// fixme: the this_ prefix here is a HQL-specific modifier to avoid name ambiguity
+							"extract( month from this_.start_time ) IN ( ${month.join(',')} )"
+						) 
+					)
+				}
+			}
+		}
+		
+		startTimeDuringHour { hourstr ->
+			if ( hourstr ) { 
+				// grep out anything that's not 0..23
+				def hour = hourstr.split(",").grep{ 
+					try {
+						def val = it.toInteger(); 
+						if ( val >= 0 && val <= 23 ) return true
+						
+					} catch ( java.lang.NumberFormatException e ) {
+						// oops, coverting to integer failed
+						log.warn( "Invalid hour of day '${it}' passed as query argument" )
+						return false
+					}
+					return false
+				}
+				
+				if ( hour.size() > 0 ) {
+					addToCriteria( 
+						Restrictions.sqlRestriction( 
+							// fixme: the this_ prefix here is a HQL-specific modifier to avoid name ambiguity
+							"extract( hour from this_.start_time ) IN ( ${hour.join(',')} )"
+						) )
+				}
+			}
+		}
+
+		startTimeBetweenDate { startDateStr, endDateStr ->
+			if ( startDateStr || endDateStr ) { 
+				def early = startDateStr ? startDateStr : '0000-00-00'
+				def from = Date.parse( "yyyy-MM-dd", early )
+				def to = ( endDateStr
+						   ? Date.parse( "yyyy-MM-dd", endDateStr ) 
+						   : new Date() )
+				log.info("============DATES: " + from + " <<>> "  + to )
+				
+				between( 'startTime', from, to )
+			}
+		}
+
+		startTimeBetweenTimeOfDay {  earliestTimeStr, latestTimeStr ->
+			if ( earliestTimeStr || latestTimeStr ) {
+				def early = earliestTimeStr ? earliestTimeStr : '00:00'
+				def late  = latestTimeStr ? latestTimeStr : '23:59'
+
+				// We need an explicit query to do time of day restrictions
+				addToCriteria(
+					Restrictions.sqlRestriction(
+						"""start_time::time between '${early}' AND '${late}'"""
+					))
+
+				//between( 'startTime', from.toString(), to.toString() )
+			}
+		}
+
+		analysisStatusMatches { analyzedStr ->
+			if ( analyzedStr == "ONLYANALYZED" || analyzedStr == "TRUE") {
+				// Limit to analyzed...
+				not { sizeEq("analyses", 0) }
+	    
+			} else if ( analyzedStr == "UNANALYZED" || analyzedStr == "FALSE" ) {
+				// ...or unanalyzed incidents
+				sizeEq("analyses", 0)
+			}
+		}
+
+		startTimeDuringDayOfWeek { dowStr ->
+			if ( dowStr ) {
+
+				// grep out anything that's not 0..6
+				def dow = dowStr.split(",").grep{ 
+					try {
+						def val = it.toInteger(); 
+						if ( val >= 0 && val <= 6 ) return true
+
+					} catch ( java.lang.NumberFormatException e ) {
+						// oops, coverting to integer failed
+						log.warn( "Invalid DayOfWeek '${it}' passed as query argument" )
+						return false
+					}
+					return false
+				}
+      
+				// if there's anything left after the grep, add to criteria.
+				// Note, postgresql specific implementation here
+				if ( dow.size() > 0 ) {
+					addToCriteria( 
+						Restrictions.sqlRestriction( 
+							"extract( dow from start_time ) IN ( ${dow.join(',')} )"
+						) )
+				}
+			}
+		}
+		
+		eventTypeMatches { eventTypeStr ->
+			if ( eventTypeStr && eventTypeStr != '' && eventTypeStr != '<Show All>' ) {
+				eq( 'eventType', eventTypeStr )
+			}
+		}
+
+		incidentIsLocated { 
+			or {
+				isNotNull( 'locationGeom' )
+				isNotNull( 'section' )
+			}
+		}
+
+		incidentIsSigalert { 
+			not { isNull ('sigalertBegin' ) }
+		}
+
+		solutionStatusMatches { solutionStatus ->
+			if ( solutionStatus ) { 
+				createAlias("analyses","a")
+				createAlias("a.incidentFacilityImpactAnalyses", "ii");
+				if ( solutionStatus != "bad" || solutionStatus == "good" ) {
+					isNull( 'ii.badSolution' )
+				}
+				if ( solutionStatus == "notBounded" ) {
+					and {
+						isFalse( 'ii.solutionTimeBounded' )
+						isFalse( 'ii.solutionSpaceBounded' )
+					}
+				}
+				if ( solutionStatus == "bad" ) {
+					not { isNull( 'ii.badSolution' ) }
+				}
+			}
+		}
+
+		incidentInBBOX { bboxstr, projstr ->
+			if ( bboxstr != null && projstr != null ) { 
+				def bbox = bboxstr.split(",")
+				log.debug("============BBOX: " + bbox.join(","))
+
+				// Parse out the projection
+				def proj_re_res = ( projstr =~ /^EPSG\:(\d+)/ )
+				def proj = proj_re_res[0][1]
+
+				or {
+					// This does a bounding box query around the iCAD
+					// location. Note: postgresql specific implementation
+					// here
+					//addToCriteria(
+					Restrictions.sqlRestriction( 
+						"""( st_transform( best_geom, $proj ) &&
+                                     st_transform(
+                                     st_setsrid( 
+                                        st_makebox2d(
+                                           st_makepoint( ${bbox[0]}, ${bbox[1]} ), 
+                                           st_makepoint( ${bbox[2]}, ${bbox[3]} ) 
+                                           ), 
+                                        4326 ), $proj )
+                                   )"""
+					)
+					//)
+				}
+			}
+		}
+	}
 
 }
