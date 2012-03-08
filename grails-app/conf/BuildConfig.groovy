@@ -55,9 +55,9 @@ grails.project.dependency.resolution = {
         }
 
 		// security
-		runtime ":spring-security-cas:1.0.2"
-		runtime ":spring-security-core:1.2.7.2"
-		runtime ":spring-security-ldap:1.0.5"
+		compile ":spring-security-cas:1.0.2"
+		compile ":spring-security-core:1.2.7.2"
+		//runtime ":spring-security-ldap:1.0.5"
 
 		// resources
 		runtime ":jquery:1.7.1"
