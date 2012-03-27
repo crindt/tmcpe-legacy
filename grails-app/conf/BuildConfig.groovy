@@ -4,7 +4,7 @@ grails.project.test.reports.dir	= "target/test-reports"
 grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.dependency.resolution = {
     inherits "global" // inherit Grails' default dependencies
-    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "info" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {        
         grailsPlugins()
         grailsHome()
@@ -13,12 +13,13 @@ grails.project.dependency.resolution = {
         // from public Maven repositories
         //mavenLocal()
         mavenCentral()
-        mavenRepo "http://snapshots.repository.codehaus.org"
-        mavenRepo "http://repository.codehaus.org"
-        mavenRepo "http://mirrors.ibiblio.org"
+        //mavenRepo "http://snapshots.repository.codehaus.org"
+        //mavenRepo "http://repository.codehaus.org"
+        //mavenRepo "http://mirrors.ibiblio.org"
         //mavenRepo "http://download.java.net/maven/2/"
-        mavenRepo "http://repository.jboss.com/maven2/"
-		mavenRepo "http://m2repo.spockframework.org/snapshots/"
+        //mavenRepo "http://repository.jboss.com/maven2/"
+		//mavenRepo "http://m2repo.spockframework.org/snapshots/"
+		//mavenRepo "http://m2repo.spockframework.org"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -36,10 +37,10 @@ grails.project.dependency.resolution = {
     }
     plugins {
         // supporting missing deps for hibernate-spatial-postgis
-        //compile ":plugin-config:0.1.5"
+        compile ":plugin-config:0.1.5"
 
 		// testing
-		compile ':spock:0.6-SNAPSHOT'
+		compile ':spock:0.6'
 
 		// security
 		runtime ":spring-security-cas:1.0.2"
