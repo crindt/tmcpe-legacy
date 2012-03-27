@@ -177,11 +177,16 @@ grails.plugins.springsecurity.cas.useSingleSignout = true
 
 grails.plugins.springsecurity.securityConfigType = SecurityConfigType.Annotation
 
+google.analytics.webPropertyID = "UA-30207196-1"
+google.analytics.customTrackingCode = "_gaq.push(['_setDomainName', 'ctmlabs.net']);  _gaq.push(['_trackPageview']);"
+
 environments {
 	production {
+		google.analytics.enabled=true
 	}
 	development {
         // Disable resource caching in development.  Useful for editing help files
+		google.analytics.enabled=false
         grails.resources.debug=false
 	}
 }

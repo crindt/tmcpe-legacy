@@ -82,6 +82,7 @@ grails.project.dependency.resolution = {
 		// app support code
 		runtime ":javascript-url-mappings:0.1.1"
 		runtime ":browser-detection:0.3.3"
+		compile ":google-analytics:1.0"
 
 		// layout
 		compile ":twitter-bootstrap:2.0.1.19"

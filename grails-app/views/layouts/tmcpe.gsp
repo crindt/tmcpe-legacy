@@ -30,6 +30,7 @@
 
 	<g:layoutHead/>
 	<r:layoutResources/>
+	<ga:trackPageview/>
   </head>
 
   <body  data-spy="scroll" data-target=".subnav" data-offset="50" data-rendering="true">
