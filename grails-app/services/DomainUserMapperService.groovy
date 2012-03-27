@@ -10,7 +10,7 @@ class DomainUserMapperService implements DomainUserMapper{
 
 	Object newUser(String username, AttributePrincipal principal){
 		//TODO:  Use the correct attributes given from your CAS installation and the correct User Profile Class in your application
-		def user = new User(
+		def user = new GrailsUser(
 			username:	username
             /*
 			name:  		principal.attributes["name"],
@@ -30,6 +30,6 @@ class DomainUserMapperService implements DomainUserMapper{
 	
 	//TODO: How can I find your user's profiles?
 	Object findUserByUsername(String username){
-		User.findByUsername(username)
+		GrailsUser.findByUsername(username)
 	}
 }

@@ -2,7 +2,7 @@
   <!-- Streamlined GSP for rendering incident list view -->
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="help" />
+    <meta name="layout" content="tmcpe-doc" />
     <title>Incident List</title>
 
     <!-- frameworks -->

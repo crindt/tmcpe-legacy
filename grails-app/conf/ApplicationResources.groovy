@@ -11,6 +11,8 @@ modules = {
         resource url:"js/tmcpe/common.js"
 		dependsOn 'bootstrap-less'
 		resource url:"less/tmcpe-bootstrap.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_common'
+		resource url:"less/tmcpe-common.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_common'
+		resource url: "css/curl.css"
         //resource url:"less/tmcpe-base.less",attrs:[rel: "stylesheet/less", type:'css'], bundle:'bundle_common'
     }
 

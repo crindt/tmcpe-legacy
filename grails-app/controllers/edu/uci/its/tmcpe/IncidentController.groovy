@@ -3,6 +3,7 @@ package edu.uci.its.tmcpe
 import grails.converters.*
 import org.hibernate.criterion.*
 import javax.servlet.http.Cookie 
+import grails.gorm.DetachedCriteria
 
 import grails.plugins.springsecurity.Secured
 
@@ -48,13 +49,45 @@ class IncidentController extends BaseController {
         log.debug("=============LISTING: " + params )
 
 		
-		def c = ProcessedIncident.createCriteria()
+		//def c = ProcessedIncident.createCriteria()
+		def c = new DetachedCriteria(ProcessedIncident);
 
-		def theList = c { 
+		def year = params.year.toInteger()
+		def from = Date.parse("yyyy-MM-dd", "${year}-01-01")
+		def to =   Date.parse("yyyy-MM-dd", "${year+1}-01-01")
+		//log.info("============DATES: ${from} <<>> ${to}")
+
+		def month = params.month.split(",").grep{ 
+			try {
+				def val = it.toInteger(); 
+				if ( val >= 1 && val <= 12 ) return true
+				
+			} catch ( java.lang.NumberFormatException e ) {
+				// oops, coverting to integer failed
+				log.warn( "Invalid month of year '${it}' passed as query argument" )
+				return false
+			}
+			return false
+		}
+
+		def cc = c.build {
+			between( 'startTime', from, to )
+			//ProcessedIncident.startTimeDuringYear( params.year )
+			//ProcessedIncident.startTimeDuringMonth( params.month )
+			addToCriteria( 
+				Restrictions.sqlRestriction( 
+					// fixme: the this_ prefix here is a HQL-specific modifier to avoid name ambiguity
+					"extract( month from this_.start_time ) IN ( ${month.join(',')} )"
+				) 
+			)
+		}
+
+		def theList = cc.list()
+		//def theList = c { 
 		//.idInList( params.idIn )
 		//.sectionMatches( params )
-			ProcessedIncident.startTimeDuringYear( params.year )
-			ProcessedIncident.startTimeDuringMonth( params.month )
+		//ProcessedIncident.startTimeDuringYear( params.year )
+		//	ProcessedIncident.startTimeDuringMonth( params.month )
 		// .startTimeDuringHour( params.hour )
 		// .startTimeBetweenDate( params.startDate, params.endDate )
 		// .startTimeBetweenTimeOfDay( params.earliestTime, params.latestTime )
@@ -62,7 +95,7 @@ class IncidentController extends BaseController {
 		// .analysisStatusMatches( params.analyzed )
 			//ProcessedIncident.eventTypeMatches( params.eventType )
 			//ProcessedIncident.solutionStatusMatches( params.solution )
-		}
+		//}
 		
 		// .incidentInBBOX( params.bbox, params.proj )
 		

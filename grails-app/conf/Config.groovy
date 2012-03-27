@@ -187,6 +187,6 @@ environments {
 }
 
 // Added by the Spring Security Core plugin:
-grails.plugins.springsecurity.userLookup.userDomainClassName = 'net.ctmlabs.CtmlabsUser'
-grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'net.ctmlabs.UserRole'
-grails.plugins.springsecurity.authority.className = 'net.ctmlabs.Role'
+grails.plugins.springsecurity.userLookup.userDomainClassName = 'net.ctmlabs.auth.CtmlabsUser'
+grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'net.ctmlabs.auth.CtmlabsUserCtmlabsRole'
+grails.plugins.springsecurity.authority.className = 'net.ctmlabs.auth.CtmlabsRole'

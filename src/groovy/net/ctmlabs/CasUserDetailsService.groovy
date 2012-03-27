@@ -1,5 +1,7 @@
 package net.ctmlabs
 
+import net.ctmlabs.auth.*
+
 import org.springframework.security.core.userdetails.User
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.springframework.security.core.GrantedAuthority
@@ -64,39 +66,3 @@ class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
         return new GrailsUser(casUsername, "no_password", true, true, true, true, casAuthorities, /*localUser.id*/-1)
     }
 }
-
-/*
-class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
-    private static final List NO_ROLES = [new GrantedAuthorityImpl(SpringSecurityUtils.NO_ROLE)]
-
-    // Custom attribute names that should be mapped over into Spring Security roles
-    private static final String[] authorityAttribNamesFromCas = ["cas_authority"]
-
-    private GrantedAuthorityFromAssertionAttributesUserDetailsService grantedAuthoritiesService = new GrantedAuthorityFromAssertionAttributesUserDetailsService(authorityAttribNamesFromCas)
-
-    @Override
-    protected UserDetails loadUserDetails(Assertion casAssert) {
-        casAssert.principal.attributes.each { key, value ->
-            log.info("CUSTOM ATTRIBUTE FROM CAS: ${key} = ${value}")
-            // TODO - do something intelligent with the attributes
-        }
-
-        def casUsername = casAssert.getPrincipal().getName()
-        def localUser = CtmlabsUser.findByUsername(casUsername)
-
-        //Create the user profile if it does not already exist
-        if (!localUser) {
-            localUser = new CtmlabsUser(username: casUsername)
-        }
-
-        // Load the authorities from CAS
-        def casUser = grantedAuthoritiesService.loadUserDetails(casAssert)
-        def casAuthorities = casUser.authorities ?: NO_ROLES
-
-		return new CtmlabsUser(username: casUser.username,
-							   password: "no_password",
-							   authorities: casAuthorities,
-							   id: localUser.id )
-    }
-}
-*/
