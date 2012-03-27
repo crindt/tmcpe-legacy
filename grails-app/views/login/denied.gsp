@@ -1,54 +1,29 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="bare" />
-    <title>TMC Performance Evaulation - Login Error</title>
-
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name='layout' content='tmcpe' />
+    <title><g:message code="springSecurity.denied.title" /></title>
   </head>
-
+  
   <body>
-    <div id='tmcpeapp'>
-      <!-- Start of content block -->
-      <div class='content'>
-	<!-- Start of left info box -->
-	<div id='leftbox' class="">
-	  <!--
-	      <h1>Aggregates</h1>
-	  -->
-	  <p>
-	    The TMC Performance Evaluation project is designed to offer measures
-	    of effectiveness for Caltrans Traffic Management centers by
-	    analyzing the delay impacts of accidents, maintenance activities,
-	    construction activities, and special events.
-	  </p>
-	  <p>
-	    The analyses compute delays for incidents using an optimization
-	    algorithm to bound the range of incident-induced delay and infer
-	    savings attributable to TMC activity by projecting the likely
-	    impacts of the same events if TMC management actions weren't taken.
-	  </p>
-	  <p>
-	    The chart to the right offers a summary of the analyses.  Clicking
-	    on the bars will open a new window providing the details of the
-	    associated group of incidents.
-	  </p>
-	</div>
-	<div id='content'>
-	  <h1>Access denied</h1> 
-	  <p>
-	    The TMC Performance Evaluation project is not a public project at
-	    this time due to the sensitivity of the data.  We may open the data
-	    to general users at a later date.
-	  </p>
-	  <p>
-	    If you would like access to the project, you can send a specific
-	    request to 
-	    <a href="mailto:support@ctmlabs.net?subject=Access to TMCPE website">
-	      support@ctmlabs.net
-	    </a>
-	    and request access.
-	  </p>
-	</div>
+    <div class="row-fluid">
+      <div class="span6 offset3">
+	    <div class="alert alert-error">
+          <h3><g:message code="springSecurity.denied.message" /></h3>
+          <p>
+            The TMCPE application is restricted to users who have been
+            approved by Caltrans.  If you would like to request access
+            or believe that you should have access, please
+            contact <a href="mailto:support@ctmlabs.net">CTMLabs
+            support</a>.
+          </p>
+          <p>
+            Otherwise, you may return to the <g:link controller="home"
+            action="index">TMCPE home page</g:link> or the
+            main <a href="http://www.ctmlabs.net">CTMLabs home
+            page</a> to learn about other CTMLabs applications.
+          </p>
+        </div>
       </div>
     </div>
   </body>

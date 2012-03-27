@@ -1,5 +1,9 @@
 class UrlMappings {
   static mappings = {
+	"/help/browserHelp"{
+		controller="help"
+		action = [GET: "browserHelp"]
+	}
     "/help/$term?"{
       controller="help"
       action = [GET: "page"]

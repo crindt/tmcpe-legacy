@@ -663,12 +663,12 @@ if ( !tmcpe ) var tmcpe = {};
       // create view event bindings
       var loadingOverlay;
       $(window).bind("tmcpe.aggregatesRequested", function(caller, d) { 
-	  loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
+	  loadingOverlay = $("#loading").modal();
       } );
 
       $(window).bind("tmcpe.aggregatesLoaded", function(caller, d) { 
 	  aggchart.data(d);
-	  if ( loadingOverlay ) loadingOverlay.close();
+	  if ( loadingOverlay ) loadingOverlay.modal('hide');
       } );
       
 
@@ -680,9 +680,6 @@ if ( !tmcpe ) var tmcpe = {};
 
 
       /////////// QUERY FORM MANIP
-
-      // jquerytools tabs
-      $('ul.tabs').tabs('div.panes > div');
 
       // create basic query form
       //$('groupby')

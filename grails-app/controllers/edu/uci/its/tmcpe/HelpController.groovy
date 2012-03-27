@@ -8,16 +8,17 @@ class HelpController {
 
     def userAgentIdentService
 
+	def grailsApplication
 	
     static allowedMethods = []
 	
     def index = {
 		
-	if ( springSecurityService.isLoggedIn() ) {
-	    redirect( action: 'fullHelp' )
-	} else {
-	    redirect( action: 'anonymousUser' )
-	}
+		if ( springSecurityService.isLoggedIn() ) {
+			redirect( action: 'fullHelp' )
+		} else {
+			redirect( action: 'anonymousUser' )
+		}
     }
 
     def page = {
@@ -26,7 +27,8 @@ class HelpController {
       if ( params.term && params.term != "" ) {
         theterm = params.term
       }
-      def f = new File( "web-app/mdown/" + theterm + ".mdown" )
+      //def f = new File( grailsApplication.mainContext.servletContext.getRealPath("/WEB-INF/web-app/mdown/") + "/" + theterm + ".mdown" )
+	  def f = new File( "web-app/mdown" + "/" + theterm + ".mdown" )
       if ( f.exists() ) {
         render(view: "helpRender", model: [content: f.getText()])
       } else {
@@ -41,15 +43,13 @@ class HelpController {
     // Only authenticated users will be automatically redirected to the user guide
     @Secured(['ROLE_USER'])
     def fullHelp = {
-	redirect(target:"_blank", url:'http://localhost/redmine/projects/tmcpe/wiki/User_Guide')
+		redirect(target:"_blank", url:'http://localhost/redmine/projects/tmcpe/wiki/User_Guide')
     }
 
     def browserHelp = {
-	flash.message = ["Your browser",
-			 userAgentIdentService.getBrowserType(),
-			 "version",
-			 userAgentIdentService.getBrowserVersion(),
-			 "is not supported"].join(" ")
+	flash.message = """\
+       Your browser <b>${userAgentIdentService.getBrowserName()}-${userAgentIdentService.getBrowserVersion()}</b> 
+       is not supported."""
     }
 
     def prezi = {

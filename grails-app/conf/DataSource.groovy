@@ -17,7 +17,7 @@ environments {
             dbCreate = "update"
             username = "postgres"
             password = ''
-            loggingSql = false
+            loggingSql = true
             driverClassName = "org.postgresql.Driver"
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
@@ -117,8 +117,3 @@ environments {
     }
 }
 
-/* Added by the Hibernate Spatial Plugin. */
-dataSource {
-   driverClassName = "org.postgresql.Driver"
-   dialect = org.hibernatespatial.postgis.PostgisDialect
-}
