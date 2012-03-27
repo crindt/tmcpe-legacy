@@ -68,6 +68,7 @@
     </div>
 
 	<r:layoutResources/>
+	<script src="http://www.ctmlabs.net/js/ctmlabs-banner.js?appname=TMCPE&appurl=http://tmcpe.ctmlabs.net/&fluid=true&redmineproject=tmcpe&apphelp=help/overview"></script>
 
   </body>
 </html>
