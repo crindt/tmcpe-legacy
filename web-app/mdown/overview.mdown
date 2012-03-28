@@ -1,4 +1,5 @@
 # TMC Performance Evaluation
+<hr class="soften-right tight"/>
 
 A tool for evaluating the benefits of Traffic Management Centers using
 observed incidents as a baseline for comparison.
