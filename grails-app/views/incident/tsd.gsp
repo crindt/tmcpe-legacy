@@ -72,112 +72,121 @@
 		</div>
 		
 		<div id="tsdParams" class="modal" style="display:none">
-          <div class="row-fluid">
-		    <div  class="span6">
-			  <table style="float:left;display:none;">
-			    <tr>
-				  <th>Facility:</th>
-				  <td>
-				    <select id="ifia" name="ifia">
-					  <g:each in="${incidentInstance.analyses}">
-					    <g:each var="ifia" in="${it.incidentFacilityImpactAnalyses}">
-						  <option selected="true" value="${ifia.id}">${ifia.location.freewayId}-${ifia.location.freewayDir}</option>
-					    </g:each>
-					  </g:each>	      
-				    </select>
-				  </td>
-			    </tr>
-			  </table>
-		    </div>
-		    <div class="span6">
-			  <table class="parambox">
-			    <tr>
-				  <th>Cell theme:</th>
-				  <td>
-				    <select id="theme" name="theme" title="Select whether to display the speed colors based upon standard deviation from the mean or absolute distance from the mean.">
-					  <option value="stdspd" >Std Deviation</option>
-					  <option selected="true" value="spd">Absolute</option>
-				    </select>
-				  </td>
-			    </tr>
-			    <tr>
-				  <th>Display delay as:</th>
-				  <td>
-				    <form style="display:inline;" title="Choose whether to show delays as vehicle-hours or dollars">
-					  <input type="radio" name="delayUnit" checked="true" value="vehhr">veh-hr</input>
-					  <input type="radio" name="delayUnit" value="usd">USD</input>
+          <div class="modal-header">
+            <a href="#" class="close" data-dismiss="modal">x</a>
+            <h3>Settings</h3>
+          </div>
+          <div class="modal-body">
+            <div class="row-fluid">
+		      <div  class="span12">
+			    <table style="float:left;display:none;">
+			      <tr>
+				    <th>Facility:</th>
+				    <td>
+				      <select id="ifia" name="ifia">
+					    <g:each in="${incidentInstance.analyses}">
+					      <g:each var="ifia" in="${it.incidentFacilityImpactAnalyses}">
+						    <option selected="true" value="${ifia.id}">${ifia.location.freewayId}-${ifia.location.freewayDir}</option>
+					      </g:each>
+					    </g:each>	      
+				      </select>
+				    </td>
+			      </tr>
+			    </table>
+		      </div>
+		      <div class="span12">
+			    <table class="parambox">
+			      <tr>
+				    <th>Cell theme:</th>
+				    <td>
+				      <select id="theme" name="theme" title="Select whether to display the speed colors based upon standard deviation from the mean or absolute distance from the mean.">
+					    <option value="stdspd" >Std Deviation</option>
+					    <option selected="true" value="spd">Absolute</option>
+				      </select>
+				    </td>
+			      </tr>
+			      <tr>
+				    <th>Display delay as:</th>
+				    <td>
+				      <form style="display:inline;" title="Choose whether to show delays as vehicle-hours or dollars">
+					    <input type="radio" name="delayUnit" checked="true" value="vehhr">veh-hr</input>
+					    <input type="radio" name="delayUnit" value="usd">USD</input>
 				    </form>
-				  </td>
-			    </tr>
-			    <tr>
-				  <th>Value of Time</th>
-				  <td>
-				    <input disabled="disabled" type="text" value="13.11" id="valueOfTime" name="valueOfTime" 
-						   title="The factor used to convert minutes of delay into a dollar equivalent" />
-				  </td>
-			    </tr>
-			    <tr style="display:none"> <!-- hide this -->
-				  <th>Max Incident Speed:</th>
-				  <td>
-				    <div id="maxspdslider" title="Select the percent of observed diversion attributable to TMC actions">
-					  <input type="range" name="maxspdslider" min="0" max="80" value="50"/>
-				    </div>
-				  </td>
-			    </tr>
-			    <tr style="display:none"> <!-- hide this -->
-				  <th>Incident Evidence Scale:</th>
-				  <td>
-				    <div id="scaleslider" title="Select the multiple of stddev speed ">
-					  <input type="range" name="scaleslider" min="0" max="5" value="10"/>
-				    </div>
-				  </td>
-			    </tr>
-			  </table>
-			  <table class="parambox">
-			    <!--
-				    <tr >
-				      <th>Align map to:</th>
-				      <td>
-				        <form style="display:inline;">
-				          <input type="radio" name="align" checked="true" value="cardinal" onclick="rotateMap(this);">Cardinal directions</option>
+				    </td>
+			      </tr>
+			      <tr>
+				    <th>Value of Time</th>
+				    <td>
+				      <input disabled="disabled" type="text" value="13.11" id="valueOfTime" name="valueOfTime" 
+						     title="The factor used to convert minutes of delay into a dollar equivalent" ></input>
+				    </td>
+			      </tr>
+			      <tr style="display:none"> <!-- hide this -->
+				    <th>Max Incident Speed:</th>
+				    <td>
+				      <div id="maxspdslider" title="Select the percent of observed diversion attributable to TMC actions">
+					    <input type="range" name="maxspdslider" min="0" max="80" value="50"></input>
+				      </div>
+				    </td>
+			      </tr>
+			      <tr style="display:none"> <!-- hide this -->
+				    <th>Incident Evidence Scale:</th>
+				    <td>
+				      <div id="scaleslider" title="Select the multiple of stddev speed ">
+					    <input type="range" name="scaleslider" min="0" max="5" value="10"></input>
+				      </div>
+				    </td>
+			      </tr>
+			    </table>
+			    <table class="parambox">
+			      <!--
+				      <tr >
+				        <th>Align map to:</th>
+				        <td>
+				          <form style="display:inline;">
+				            <input type="radio" name="align" checked="true" value="cardinal" onclick="rotateMap(this);">Cardinal directions</option>
 <input type="radio" name="align" value="incident" onclick="rotateMap(this)">Incident</option>
 </form>
 </td>
 </tr>
 -->
-			    <tr>
-				  <th>TMC Diversion %:</th>
-				  <td>
-				    <div id="tmcpctslider" title="Select the percent of observed diversion attributable to TMC actions">
-					  <input type="range" name="tmcpctslider" min="0" max="100" value="20"/>
-				    </div>
-				  </td>
-			    </tr>
-			    <tr>
-				  <th>
-				    Verification Delay without TMC
-				  </th>
-				  <td>
-				    <div id="verdel" title="Select the number of additional minutes expected for verification if the TMC wasn't there">
-					  <input type="range" name="verdelslider" min="0" max="60" value="15"/>
-					  minutes
-				    </div>
-				  </td>
-			    </tr>
-			    <tr>
-				  <th>
-				    Response Delay without TMC
-				  </th>
-				  <td>
-				    <div id="respdel" title="Select the number of additional minutes expected for the response to restore capacity if the TMC wasn't there">
-					  <input type="range" name="respdelslider" min="0" max="60" value="15"/>
-					  minutes
-				    </div>
-				  </td>
-				  
-			    </tr>
-			  </table>
-		    </div>
+			      <tr>
+				    <th>TMC Diversion %:</th>
+				    <td>
+				      <div id="tmcpctslider" title="Select the percent of observed diversion attributable to TMC actions">
+					    <input type="range" class="slider" name="tmcpctslider" min="0" max="100" value="20"></input>
+				      </div>
+				    </td>
+			      </tr>
+			      <tr>
+				    <th>
+				      Verification Delay without TMC
+				    </th>
+				    <td>
+				      <div id="verdel" title="Select the number of additional minutes expected for verification if the TMC wasn't there">
+					    <input type="range" class="slider" name="verdelslider" min="0" max="60" value="15"></input>
+					    minutes
+				      </div>
+				    </td>
+			      </tr>
+			      <tr>
+				    <th>
+				      Response Delay without TMC
+				    </th>
+				    <td>
+				      <div id="respdel" title="Select the number of additional minutes expected for the response to restore capacity if the TMC wasn't there">
+					    <input type="range" class="slider" name="respdelslider" min="0" max="60" value="15"></input>
+					    minutes
+				      </div>
+				    </td>
+				    
+			      </tr>
+			    </table>
+		      </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <a href="#" class="btn btn-primary" data-dismiss="modal">OK</a>
           </div>
 		</div>
 	  </div>

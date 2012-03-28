@@ -46,12 +46,10 @@ if ( !tmcpe ) var tmcpe = {};
 
       function formAsModel() {
 	      var form = [];
-		  /*
-          $('input:range',container).each(function(i,e) {
+          $('input.slider',container).each(function(i,e) {
               var t = e.value;
               form[e.name] = t;
           });
-*/
 	      $('input:radio:checked',container).each(function(i, e) {
 	          var t = e.value;
 	          form[e.name] = t;
@@ -1350,8 +1348,11 @@ if ( !tmcpe ) var tmcpe = {};
 		            .y1(function(d) { return y(d.incflow); }))
 	          .on("mouseover", function() { 
 		          $('#cumflowChartTip').html( "Estimated cumulative flow without TMC");
+				  $('#cumflowChartTip').tooltip('show');
 	          } )
-	          .on("mouseout", function () {  } );
+	          .on("mouseout", function () {  
+				  $('#cumflowChartTip').tooltip('hide');
+			  } );
 
 	      
 /*
