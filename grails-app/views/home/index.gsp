@@ -20,19 +20,22 @@
 	</header>
 	<div class="row">
 	  <div class="span6">
-		<h2>Summary Statistics Page</h2>
+		<h2>Explore the application</h2>
 		<p>
-		  This tool summarizes the analyses performed on incidents in the database.
+		  Click through to view a summary of analyzed incidents in the database.
+		  From there you can select groups of incidents or view individual
+		  analyses.
 		</p>
 		<a class="btn" href="${createLink(controller:'incident', action:'summary')}">
 		  View details &raquo;
 		</a>
 	  </div>
 	  <div class="span6">
-		<h2>Custom report generator</h2>
+		<h2>Request access</h2>
 		<p>
-		  This tool allows one to generate reports for groups of incidents based
-		  upon criteria specified by the user.
+		  The TMCPE application requires a CTMLabs account.  If you are
+		  interested in obtaining access, contact Craig Rindt <a href="mailto:crindt@ctmlabs.net"><code>crindt@ctmlabs.net</code></a> at CTMLabs and we'll
+		  create an account for you.
 		</p>
 		<a class="btn" href="${createLink(controller:'incident', action:'summary')}">
 		  View details &raquo;

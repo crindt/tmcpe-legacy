@@ -31,7 +31,7 @@ class HelpController {
 	  def f = null
 	  switch ( Environment.current ) { 
 		case Environment.PRODUCTION:
-			f = new File( grailsApplication.mainContext.servletContext.getRealPath("/WEB-INF/web-app/mdown/") + "/" + theterm + ".mdown" )
+			f = new File( grailsApplication.mainContext.servletContext.getRealPath("/mdown/") + "/" + theterm + ".mdown" )
 			break;
 		case Environment.DEVELOPMENT:
 		default:

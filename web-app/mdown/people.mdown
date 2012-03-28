@@ -1,14 +1,14 @@
 # List of contacts
 
 #### Investigators:
-Will Recker, PI; (949) 824–5642; [wwrecker@uci.edu](mailto:wwrecker@uci.edu)<br/>
-Craig Rindt; (949) 824–1074; [crindt@uci.edu](mailto:crindt@uci.edu)<br/>
+Will Recker, PI; (949) 824–5642; [<code>wwrecker@uci.edu</code>](mailto:wwrecker@uci.edu")<br/>
+Craig Rindt; (949) 824–1074; [<code>crindt@ctmlabs.net</code>](mailto:crindt@ctmlabs.net)<br/>
 Institute of Transportation Studies<br/>
 University of California, Irvine<br/>
 Irvine, CA 92697
 
 #### Project Monitor:
-Fred Yazdan; (949) 936–3462; [fred.yazdan@dot.ca.gov](mailto:fred.yazdan@dot.ca.gov)<br/>
+Fred Yazdan; (949) 936–3462; [<code>fred.yazdan@dot.ca.gov</code>](mailto:fred.yazdan@dot.ca.gov)<br/>
 Caltrans, Division of Research and Innovations<br/>
 Office of Technology Applications<br/>
 Advanced Testbed Program Branch<br/>
@@ -17,4 +17,4 @@ Advanced Testbed Program Branch<br/>
 # Getting more information about this site
 
 This website is currently maintained by UCI ITS. The primary UCI ITS contact is
-Craig Rindt: [crindt@uci.edu](mailto:crindt@uci.edu)
+Craig Rindt: [<code>crindt@ctmlabs.net</code>](mailto:crindt@ctmlabs.net)
