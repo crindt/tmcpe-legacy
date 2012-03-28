@@ -26,6 +26,9 @@
 		  <li class="nav-header">Views</li>
 		  <li><a href="#" id="btn-show-all">4-pane</a><li>
 		  <li><a href="#" id="btn-only-show-chart">Chart only</a><li>
+		  <li><a href="#" id="btn-only-show-table">Table only</a><li>
+		  <li><a href="#" id="btn-only-show-map">Map only</a><li>
+		  <li><a href="#" id="btn-only-show-tsd">TSD only</a><li>
           <li class="nav-header">Settings</li>
           <li><a href="#" id="btn-change-settings">Change Settings</a></li>
 	  </div>
@@ -59,15 +62,12 @@
 		<div class="row-fluid">
 		  <div id="tsdcontainer" class="span6">
 			<div id="tsdbox"></div>
+		    <div style="text-align:center" class="span6">
+			  <div id="cellDetail"></div>
+		    </div>
 		  </div>
 		  <div id="mapbox" class="span6">
 			<div id="map" tabindex="1"></div>
-		  </div>
-		</div>
-		
-		<div id="msg" class="row-fluid">
-		  <div style="text-align:center" class="span6">
-			<div id="cellDetail"></div>
 		  </div>
 		</div>
 		

@@ -1651,16 +1651,22 @@ if ( !tmcpe ) var tmcpe = {};
 	      if ( !arguments.length ) return secjson;
 
 	      secjson = x;
+	      
+		  segmap.redrawSegments();
 
+	      return segmap;
+      }
+
+	  segmap.redrawSegments = function() {
 	      // 
 	      addSegmentLayer();
 	      // order is important here if we're drawing arrows
 	      zoomExtents();
 	      rotateLayer();
 	      addEndsLayer();
-	      
-	      return segmap;
-      }
+
+		  return segmap;
+	  }
 
 
       segmap.hh = function() { return $(container).height()-2; };
@@ -2155,9 +2161,11 @@ if ( !tmcpe ) var tmcpe = {};
 
 
           
+		  /*
           var ul = genstats.append('ul');
           ul.append('li').append('a').attr('id','tmcpe_tsd_download_link');
           ul.append('li').append('a').attr('id','tmcpe_report_analysis_problem_link');
+		  */
 
 		  // show the first tab
 		  $('.nav-tabs a').tab('show');
@@ -2214,6 +2222,7 @@ if ( !tmcpe ) var tmcpe = {};
 	      });
 
 	      // Update the download analysis link.  Currently tied to the currently displayed analysis...
+		  /*
 	      $('#tmcpe_tsd_download_link').html( 'Download spreadsheet for facility analysis ' + json.id );
 	      $('#tmcpe_tsd_download_link').attr( 'href', 
                                               g.createLink({controller:'incidentFacilityImpactAnalysis', 
@@ -2221,9 +2230,11 @@ if ( !tmcpe ) var tmcpe = {};
 			                                                params: {id: json.id} 
 			                                               })
                                             );
+											*/
 
 
 	      // Update the report problem link
+		  /*
 	      $('#tmcpe_report_analysis_problem_link').html( 'Report problem with this analysis' );
 	      url = "http://tracker.ctmlabs.net/projects/tmcpe/issues/new?tracker_id=3&"
 	          + encodeURIComponent( "issue[subject]=Problem with analysis of Incident "+json.cad+"["+json.id+"]" )
@@ -2234,6 +2245,7 @@ if ( !tmcpe ) var tmcpe = {};
 					                    )
 	      $('#tmcpe_report_analysis_problem_link').attr('href',url);
 	      $('#tmcpe_report_analysis_problem_link').attr('target', "_blank" );
+		  */
       }
   }
 
@@ -2411,18 +2423,57 @@ if ( !tmcpe ) var tmcpe = {};
 	  var orgheight = $('#chartcontainer').css('height');
 	  $('#btn-show-all').click(function(e){
 		  e.preventDefault();
-		  $('#chartcontainer').attr('class','span6')
-		  $('#databox').css('display','block');
-		  $('#tsdcontainer').css('display','block');
-		  $('#mapbox').css('display','block');
+		  $('#databox')
+			  .removeClass('span12')
+			  .addClass('span6')
+			  .css('height',orgheight)
+			  .css('display','block')
+		  ;
+
+		  $('#tsdcontainer')
+			  .removeClass('span12')
+			  .addClass('span6')
+			  .css('display','block')
+		  ;
+		  $('#tsdbox')
+			  .css('height',orgheight);
+		  tsdView.container( $('#tsdbox')[0]);
+		  tsdView.resize();
+		  tsdView.redraw();
+
+		  $('#mapbox')
+			  .removeClass('span12')
+			  .addClass('span6')
+			  .css('height',orgheight)
+			  .css('display','block')
+		  ;
+		  //mapView.resize();
+		  mapView.redraw();
+		  mapView.redrawSegments();
 
 		  $('#chartcontainer')
 			  .removeClass('span12')
 			  .addClass('span6')
-			  .css('height',orgheight);
+			  .css('height',orgheight)
+			  .css('display','block')
+		  ;
 		  cumflowView.resize();
 		  cumflowView.redraw();
-	  })
+	  });
+	  $('#btn-only-show-table').click(function(e){
+		  e.preventDefault();
+		  var fullheight = $(window).height() - 150;
+		  $('#databox')
+			  .removeClass('span6')
+			  .addClass('span12')
+			  .css('min-height',orgheight)
+			  .css('height',fullheight)
+			  .css('display','block')
+		  $('#tsdcontainer').css('display','none');
+		  $('#mapbox').css('display','none');
+		  $('#chartcontainer').css('display','none');
+	  });
+
 	  $('#btn-only-show-chart').click(function(e){
 		  e.preventDefault();
 		  $('#databox').css('display','none');
@@ -2433,14 +2484,49 @@ if ( !tmcpe ) var tmcpe = {};
 			  .removeClass('span6')
 			  .addClass('span12')
 			  .css('min-height',orgheight)
-			  .css('height',fullheight);
+			  .css('height',fullheight)
+			  .css('display','block')
+		  ;
 		  cumflowView.resize();
 		  cumflowView.redraw();
-	  })
+	  });
+	  $('#btn-only-show-map').click(function(e){
+		  e.preventDefault();
+		  $('#databox').css('display','none');
+		  $('#tsdcontainer').css('display','none');
+		  $('#chartcontainer').css('display','none');
+		  var fullheight = $(window).height() - 150;
+		  $('#mapbox')
+			  .removeClass('span6')
+			  .addClass('span12')
+			  .css('min-height',orgheight)
+			  .css('height',fullheight)
+			  .css('display','block')
+		  ;
+		  mapView.redraw();
+		  mapView.redrawSegments();
+	  });
+	  $('#btn-only-show-tsd').click(function(e){
+		  e.preventDefault();
+		  $('#databox').css('display','none');
+		  $('#chartcontainer').css('display','none');
+		  $('#mapbox').css('display','none');
+		  var fullheight = $(window).height() - 150;
+		  $('#tsdcontainer')
+			  .removeClass('span6')
+			  .addClass('span12')
+			  .css('display','block')
+		  ;
+		  $('#tsdbox')
+			  .css('min-height',orgheight)
+			  .css('height',fullheight);
+		  tsdView.resize();
+		  tsdView.redraw();
+	  });
       
 	  $('#btn-change-settings').click(function(e){
 		  $('#tsdParams').modal('show');
-	  })
+	  });
 
       ///// bind events /////
 
