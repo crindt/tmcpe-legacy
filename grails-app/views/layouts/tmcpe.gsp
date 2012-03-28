@@ -48,18 +48,28 @@
 	</div>
 
     <!-- Some overlays we'll bring up from time to time -->
-    <div class="simple_overlay modal fade" id='loading'>
-	  <div id='loading_block'>Loading data...</div>
+    <div class="simple_overlay modal" id='loading'>
+	  <div class="modal-header" id='loading_block'>
+        <h3>Loading data...</h3>
+      </div>
     </div>
     
     <div class="simple_overlay modal error" id="error_overlay" style="display:none;">
-	  <h1>There was a error in the code that resulted in an unexpected program state:</h1>
-	  
-	  <table>
-	    <tr><td class="label">file:</td><td class="errfile"></td></tr>
-	    <tr><td class="label">line:</td><td class="errline"></td></tr>
-	    <tr><td class="label">message:</td><td class="errmsg"></td></tr>
-	  </table>
+      <div class="modal-header">
+	    <h3>There was a error in the code that resulted in an unexpected program state:</h3>
+</div>
+      <div class="modal-body">
+	    <table>
+	      <tr><td class="label">file:</td><td class="errfile"></td></tr>
+	      <tr><td class="label">line:</td><td class="errline"></td></tr>
+	      <tr><td class="label">message:</td><td class="errmsg"></td></tr>
+	    </table>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer">
+          <a href="#" class="btn btn-primary" data-dismiss="modal">OK</a>
+        </div>
+      </div>
 	  
 	  <ul>
 	    <li><a href="#" onclick="window.location.reload()">try reloading the page,</a></li>
