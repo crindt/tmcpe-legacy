@@ -181,9 +181,16 @@ if ( !tmcpe ) var tmcpe = {};
 
       // Update the table view with the given data (change in the model)
       function update(x) {
-		  var rows = tbody.selectAll("tr").data(_.filter(x.features,function(d){return d!=null;}) ,function(d,i) { 
-			  if ( d ) return d.cad;
-		  } );
+		  var rows = tbody.selectAll("tr").data(
+			  _.filter(x.features,
+					   function(d){
+						   return d!=null && 
+							   d.properties.savings < 3500 &&
+							   d.properties.savings/d.properties.tmcpe_delay <= 5
+					   }),
+			  function(d,i) { 
+				  if ( d ) return d.cad;
+			  } );
 		  $(tbody[0]).find("tr").tooltip({placement:"left"});
 		  
 		  rows.enter().append("tr")
@@ -200,6 +207,7 @@ if ( !tmcpe ) var tmcpe = {};
 						   ? tmcpe.fadedDelayColorScale(d.properties.tmcpe_delay)
 						   : tmcpe.nodatacolor )
 			  } )
+		  
 			  .on("click",function(d,e) { 
 				  $(window).trigger( "tmcpe.incidentSelected", d );
 			  } )

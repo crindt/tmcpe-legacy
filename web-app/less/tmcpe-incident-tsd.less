@@ -68,11 +68,11 @@
     tr {
 		&.odd td {
 			background-color: darken( @content-background, 20% );
-			color: @content-color;
+			color: #000; //@content-color;
 		}
 		&.even td {
 			background-color: @content-background;
-			color: spin( lighten(@content-background,20%), -10);
+			color: #000; // spin( lighten(@content-background,20%), -10);
 		}
     }
 }

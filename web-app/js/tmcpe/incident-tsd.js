@@ -1136,7 +1136,14 @@ if ( !tmcpe ) var tmcpe = {};
 	      });
 
           // project t3p
-          
+		  // if t3p is null at this point, it means we haven't found
+		  // the place where measured flow catches projected demand
+		  // (for now we just cap it at the max)
+		  if ( t3p == null ) 
+			  t3p = (json.timesteps[json.timesteps.length-1].getTime()+900000)/1000;
+
+		  // don't allow t3p to be less than t2p
+		  if ( t3p < t2p ) t3p = t2p;
 
 
 	      // add zeroed elements at the beginning
@@ -1260,10 +1267,12 @@ if ( !tmcpe ) var tmcpe = {};
                     .y0(function(d) { return y(d.adjdivavg); })
 		            .y1(function(d) { return y(d.avg); }))
 	          .on("mouseover", function( d,i ) { 
-		          $('#cumflowChartTip').html("Diverted Flow" );
+				  setChartTip("Diverted Flow");
+		          //$('#cumflowChartTip').html("Diverted Flow" );
 	          } )
 	          .on("mouseout", function (d,i) { 
-		          $('#cumflowChartTip').html("" );
+				  setChartTip("");
+		          //$('#cumflowChartTip').html("" );
 	          } );
           
 	      // adjdivavg
@@ -1276,10 +1285,12 @@ if ( !tmcpe ) var tmcpe = {};
 			            .y0(function(d) { return y(d.incbl);})
 			            .y1(function(d) { return y(d.adjdivavg); }))
 		          .on("mouseover", function( d,i ) { 
-		              $('#cumflowChartTip').html( "TMC Savings due to diversion");
+					  setChartTip("TMC Savings due to diversion");
+		              //$('#cumflowChartTip').html( "TMC Savings due to diversion");
 		          } )
 		          .on("mouseout", function (d,i) { 
-		              $('#cumflowChartTip').html( "");
+					  setChartTip("");
+		              //$('#cumflowChartTip').html( "");
 		          } );
 	          
               /*
@@ -1302,10 +1313,12 @@ if ( !tmcpe ) var tmcpe = {};
 			            .y0(function(d) { return y(d.obs);})
 			            .y1(function(d) { return y(d.divavg); }))
 		          .on("mouseover", function( d,i ) { 
-		              $('#cumflowChartTip').html( "TMC Savings due to diversion");
+					  setChartTip("TMC Savings due to diversion");
+		              //$('#cumflowChartTip').html( "TMC Savings due to diversion");
 		          } )
 		          .on("mouseout", function (d,i) { 
-		              $('#cumflowChartTip').html( "");
+					  setChartTip("");
+		              //$('#cumflowChartTip').html( "");
 		          } );
 	          
 			  // add line to show diverted flow
@@ -1329,7 +1342,7 @@ if ( !tmcpe ) var tmcpe = {};
 		            .y1(function(d) { return y(d.incbl); })
 				   )
 	          .on("mouseover", obsmouseover )
-	          .on("mouseout", function () { } )
+	          .on("mouseout", function () { setChartTip("") } )
 		  ;
 
 	      
@@ -1347,11 +1360,8 @@ if ( !tmcpe ) var tmcpe = {};
 		            .y0(hh - 1)
 		            .y1(function(d) { return y(d.incflow); }))
 	          .on("mouseover", function() { 
-		          $('#cumflowChartTip').html( "Estimated cumulative flow without TMC");
-				  $('#cumflowChartTip').tooltip('show');
 	          } )
 	          .on("mouseout", function () {  
-				  $('#cumflowChartTip').tooltip('hide');
 			  } );
 
 	      
@@ -1442,7 +1452,11 @@ if ( !tmcpe ) var tmcpe = {};
 	          .attr("y2", hh - 1 )
 	          .on("mouseover", function(d,i) { 
 		          this.style.stroke="red";
-		          $('#cumflowTimebarTip').html( "Log: " + new Date(d.stampDateTime).toLocaleTimeString() + ": " + d.memoOnly );
+				  $('#chartbox').tooltip('hide')
+					  .attr('data-original-title',"Log: " + new Date(d.stampDateTime).toLocaleTimeString() + ": " + d.memoOnly)
+					  .tooltip('fixTitle')
+					  .tooltip('show');
+
 	          })
 	          .on("mouseout", function(d,i) {
 		          this.style.stroke="";
@@ -1457,20 +1471,29 @@ if ( !tmcpe ) var tmcpe = {};
 	      cumflow.updateStats();
 
 	      function avgmouseover(d,i) {
-	          $('#cumflowChartTip').html( "Expected Cumulative Flow");
+			  $('#chartbox').tooltip('hide')
+				  .attr('data-original-title',"Expected Cumulative Flow")
+				  .tooltip('fixTitle')
+				  .tooltip('show');
 	      }
 
 	      function obsmouseover(d,i) {
-	          $('#cumflowChartTip').html( "TMC Savings due to restoration");
+	          //$('#cumflowChartTip').html( "TMC Savings due to restoration");
+			  setChartTip( "Estimated cumulative flow without TMC")
 	      }
 
 	      function updateText(msg) {
 	          d3.select("#msgtxt").html(msg);
 	      }
 
-
       }
 
+	  function setChartTip(msg) {
+		  $('#chartbox').tooltip('hide')
+			  .attr('data-original-title',msg)
+			  .tooltip('fixTitle')
+			  .tooltip('show');
+	  }
 
       function updateCumFlowStats() {
           //cumflow.tmcDivPct( $("#tmcpct").text() );
@@ -1517,54 +1540,56 @@ if ( !tmcpe ) var tmcpe = {};
 
       $(window).bind("tmcpe.tsd.d12DelayHover", function( caller, paramsa ) {
           d3.select('path.expectedflowafterdiv').classed("highlight",true);
-          $('#cumflowChartTip').css('display','block');
-	      $('#cumflowChartTip').html("Region of Net Delay<35" );
+		  setChartTip("Region of Net Delay<35");
+		  $("#chartbox").tooltip('show');
       });
       $(window).bind("tmcpe.tsd.d12DelayUnhover", function( caller, paramsa ) {
           d3.select('path.expectedflowafterdiv').classed("highlight",false);
-          $('#cumflowChartTip').css('display','none');
-	      $('#cumflowChartTip').html("" );
+		  $("#chartbox").tooltip('hide');
+	      setChartTip("");
       });
 
       $(window).bind("tmcpe.tsd.netDelayHover", function( caller, paramsa ) {
           d3.select('path.expectedflowafterdiv').classed("highlight",true);
-          $('#cumflowChartTip').css('display','block');
-	      $('#cumflowChartTip').html("Region of Net Delay w/TMC" );
+		  setChartTip("Region of Net Delay w/TMC");
+		  $("#chartbox").tooltip('show');
       });
 
       $(window).bind("tmcpe.tsd.netDelayUnhover", function( caller, paramsa ) {
           d3.select('path.expectedflowafterdiv').classed("highlight",false);
-          $('#cumflowChartTip').css('display','none');
-	      $('#cumflowChartTip').html("" );
+		  setChartTip("");
+		  $("#chartbox").tooltip('hide');
       });
 
       $(window).bind("tmcpe.tsd.whatIfDelayHover", function( caller, paramsa ) {
           d3.select('path.adjexpectedflowafterdiv').classed("highlight",true);
           d3.select('path.expectedflowafterdiv').classed("highlight",true);
           d3.select('path.observed').classed("highlight",true);
-          $('#cumflowChartTip').css('display','block');
-	      $('#cumflowChartTip').html("Region of Net Delay w/out TMC" );
+		  setChartTip("Region of Net Delay w/out TMC");
+		  $("#chartbox").tooltip('show');
 
       });
       $(window).bind("tmcpe.tsd.whatIfDelayUnhover", function( caller, paramsa ) {
           d3.select('path.adjexpectedflowafterdiv').classed("highlight",false);
           d3.select('path.observed').classed("highlight",false);
           d3.select('path.expectedflowafterdiv').classed("highlight",false);
-          $('#cumflowChartTip').css('display','none');
-	      $('#cumflowChartTip').html("" );
+		  setChartTip("");
+		  $("#chartbox").tooltip('hide');
       });
 
       $(window).bind("tmcpe.tsd.tmcSavingsHover", function( caller, paramsa ) {
           d3.select('path.adjexpectedflowafterdiv').classed("highlight",true);
           d3.select('path.observed').classed("highlight",true);
-          $('#cumflowChartTip').css('display','block');
-	      $('#cumflowChartTip').html("Region of TMC Savings" );
+		  setChartTip("Region of TMC Savings");
+		  $("#chartbox").tooltip('show');
       });
       $(window).bind("tmcpe.tsd.tmcSavingsUnhover", function( caller, paramsa ) {
           d3.select('path.adjexpectedflowafterdiv').classed("highlight",false);
           d3.select('path.observed').classed("highlight",false);
           $('#cumflowChartTip').css('display','none');
 	      $('#cumflowChartTip').html("" );
+		  setChartTip("");
+		  $("#chartbox").tooltip('hide');
       });
 
       $(window).bind("tmcpe.tsd.paramsChanged", function( caller, paramsa ) {

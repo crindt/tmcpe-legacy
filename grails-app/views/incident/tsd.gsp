@@ -40,8 +40,10 @@
 			<h3>Cumulative Vehicle Count at <span id="chart_location"></span></h3>	  
 			<div id="chartbox"></div>
 			<span id="msgtxt">&nbsp;</span>
+            <!--
 			<div id="cumflowChartTip" class="tooltip noarrow" style="display:none"></div>
 			<div id="cumflowTimebarTip" class="tooltip right" style="display:none"></div>
+            -->
 		  </div>
 		  <div id="databox" class="span6">
 			<ul class="nav nav-tabs">
