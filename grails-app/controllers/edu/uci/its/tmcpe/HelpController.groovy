@@ -1,6 +1,7 @@
 package edu.uci.its.tmcpe
 
 import grails.plugins.springsecurity.Secured
+import grails.util.Environment
 
 class HelpController {
 	
@@ -27,9 +28,17 @@ class HelpController {
       if ( params.term && params.term != "" ) {
         theterm = params.term
       }
-      //def f = new File( grailsApplication.mainContext.servletContext.getRealPath("/WEB-INF/web-app/mdown/") + "/" + theterm + ".mdown" )
-	  def f = new File( "web-app/mdown" + "/" + theterm + ".mdown" )
-      if ( f.exists() ) {
+	  def f = null
+	  switch ( Environment.current ) { 
+		case Environment.PRODUCTION:
+			f = new File( grailsApplication.mainContext.servletContext.getRealPath("/WEB-INF/web-app/mdown/") + "/" + theterm + ".mdown" )
+			break;
+		case Environment.DEVELOPMENT:
+		default:
+			f = new File( "web-app/mdown" + "/" + theterm + ".mdown" )
+	  }
+	  
+      if ( f != null && f.exists() ) {
         render(view: "helpRender", model: [content: f.getText()])
       } else {
         render(view: "helpMissingPage", model: [page: theterm, f: f.canonicalPath] )
