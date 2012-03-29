@@ -2130,7 +2130,10 @@ if ( !tmcpe ) var tmcpe = {};
 
 
           var gst = genstats.append('table')
-              .attr('id','generalStats');
+              .attr('id','generalStats')
+			  .classed('table',true)
+			  .classed('table-striped', true)
+		  ;
           var gsthr = gst.append('thead').append('tr');
           gsthr.selectAll('th')
               .data([{class:"label",html:"Facility"},
@@ -2168,6 +2171,7 @@ if ( !tmcpe ) var tmcpe = {};
           ;
 
           var gs = $("#generalStats");
+		  /*
           gs.dataTable({
 	          "bPaginate": false,
 	          "sScrollY": gs.parent().height()*.5,
@@ -2183,6 +2187,7 @@ if ( !tmcpe ) var tmcpe = {};
 	              {"sWidth": "20%", "sType":"number", "sClass":"left" }
 	          ]
           } );
+		  */
           
 
 
@@ -2309,6 +2314,8 @@ if ( !tmcpe ) var tmcpe = {};
 	      .append("table")
 	      .attr("id","activityLog")
 	      .style("width","100%")
+		  .classed('table',true)
+		  .classed('table-striped', true)
       ;
       
       var head = tab.append("thead");
@@ -2359,10 +2366,12 @@ if ( !tmcpe ) var tmcpe = {};
 	      .attr("class", function(d,i) { return aoCols[i].key } )
 	      .text( function(dd) { return dd; } );
 
+	  /*
       $("#activityLog").dataTable({ 
 	      bPaginate: false, sScrollY:"200px","bAutoWidth":false,"bFilter": false,
 	      "aoColumns": aoCols 
       });
+	  */
 
   }
 
