@@ -14,8 +14,10 @@ class BaseController {
 		log.info( "BROWSER VERSION: ${ver.join('..')}" )
         log.info( "BROWSER TYPE:    ${userAgentIdentService.getBrowserName()}:${userAgentIdentService.getBrowserVersion()}")
         if ( userAgentIdentService.isChrome(ComparisonType.GREATER, "10") 
-             || userAgentIdentService.isFirefox(ComparisonType.GREATER, "4.0") ) {
-            //
+             || userAgentIdentService.isFirefox(ComparisonType.GREATER, "4.0") 
+             || userAgentIdentService.isSafari(ComparisonType.GREATER, "3") 
+		   ) {
+            // All OK, don't redirect
         } else {
             redirect(controller:'help',action:'browserHelp')
         }
