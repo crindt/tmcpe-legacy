@@ -560,6 +560,13 @@ if ( !tmcpe ) var tmcpe = {};
 	          //updateText( "NO DELAY SOLUTION AVAILBLE BECAUSE: " + json.analysis.badSolution );
 	      }
 
+		  $('.popover').remove();
+
+		  $('#tsdsvg').popover({title:"Time-space cell details",
+								content: "Hover over a cell for details",
+								placement: 'bottom'
+							   });
+
 	      return tsd;
 
       }
@@ -747,9 +754,15 @@ if ( !tmcpe ) var tmcpe = {};
       function init() {
           // assert
           if ( container == null || container.length == 0 ) 
-              throw "Can't initialize cell detail view in null container";
+              //throw "Can't initialize cell detail view in null container";
+			  return;
 
-          table = container.append('table').classed('cellDetail',true);
+		  $(container[0]).empty();
+
+          table = container.append('table')
+			  .classed('cellDetail',true)
+			  .classed('table',true)
+		  ;
           
           var tr = table.append("tr");
           tr.append("th").classed('title',true).html("&nbsp;");
@@ -774,7 +787,9 @@ if ( !tmcpe ) var tmcpe = {};
       }
 
       $(window).bind("tmcpe.tsd.activeTsdCell", function(caller, adata ) {
-          update( adata )
+		  if ( cellDetail.container != d3.select(".popover-content") )
+			  cellDetail.container(d3.select(".popover-content"));
+          update( adata );
       });
 
       $(window).bind("tmcpe.tsd.analysisLoaded", function(caller, adata) {

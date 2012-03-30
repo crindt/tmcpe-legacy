@@ -65,9 +65,6 @@
 		<div class="row-fluid">
 		  <div id="tsdcontainer" class="span6">
 			<div id="tsdbox"></div>
-		    <div style="text-align:center" class="span6">
-			  <div id="cellDetail"></div>
-		    </div>
 		  </div>
 		  <div id="mapbox" class="span6">
 			<div id="map" tabindex="1"></div>
