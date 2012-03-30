@@ -1,0 +1,23 @@
+### commit e389cd1f79a36b291170f6884e7315c80b74834e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:01:22 2010 -0700
+
+    Release 0.2.4
+
+### commit f7ab32cdb335d3cb5dbbcd3cdaa390b5c1fcabdf
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:00:31 2010 -0700
+
+    Fixed base url for deployment.
+
+### commit 80ce2249d6b7d4db1066e606bfb1caa5434c7896
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 04:47:53 2010 -0700
+
+    Release 0.2.5
+
+### commit 0673c6c6c04a20092f5aab76fdebc19213b9ead6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:45:27 2010 -0700
+
+    Remove openlayers from git.

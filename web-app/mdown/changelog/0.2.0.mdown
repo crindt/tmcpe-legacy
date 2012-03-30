@@ -1,0 +1,77 @@
+### commit 93da525c7b7a89c5760496dfcb83da700b613c7d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 9 15:25:22 2010 -0700
+
+    Release 0.2.0
+
+### commit 89ea455e8e1950b17c372b15c0b6f54cb54c2838
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 9 15:14:12 2010 -0700
+
+    Enhanced (partial) summary statistics on front page.
+    Added ability to filter for specific event types (refs [#228](http://tracker.ctmlabs.net/issues/228)).
+    Added time to verify field and domain support (refs [#175](http://tracker.ctmlabs.net/issues/175))-still needs work
+    Confirmed limit to analyzed is working-fixes [#219](http://tracker.ctmlabs.net/issues/219).
+    Removed some uses of deprecated createLinkTo in favor of resource().
+    Improved some styling (refs [#155](http://tracker.ctmlabs.net/issues/155)).
+
+### commit 68846868b9009bb7117adfe5134e2e908de6fbc2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 8 16:38:08 2010 -0700
+
+    Added "Home" page for general information about and statistics from the application (refs [#155](http://tracker.ctmlabs.net/issues/155)).  Also some help (refs [#211](http://tracker.ctmlabs.net/issues/211)).
+    Improved some styling (refs [#155](http://tracker.ctmlabs.net/issues/155)).
+    Fixed bug in "facdir" selector (refs [#228](http://tracker.ctmlabs.net/issues/228)).
+    Stop re-query when the map view changes but the geographic queries are off.
+
+### commit ecfbec24e6e481dab1217b9b315665818511e030
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 8 12:12:29 2010 -0700
+
+    Added ability to restrict/unrestrict location query refs [#228](http://tracker.ctmlabs.net/issues/228).
+    URL fix linking to "show incident" from incidentList.
+
+### commit 94a6806e5fba5099b55b1d2b89c4a42749af03eb
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 6 16:29:16 2010 -0700
+
+    Work to improve query pane, including limit to analyzed.  Refs [#228](http://tracker.ctmlabs.net/issues/228).
+
+### commit 9f8f1ebd94b71c222dd736c9a94e2eb3a3726206
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jun 22 12:33:14 2010 -0700
+
+    Added .lst .gms and .json to .gitignore.
+
+### commit 0fb62e87d70cc509ed36d0a4b7c8e4538590d751
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri May 28 13:22:56 2010 -0700
+
+    I few minor comments to html code.
+
+### commit f60f1acc38d63e436f70fa5a7bcf4645760135be
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri May 28 12:19:42 2010 -0700
+
+    Incidents with no analyses will no longer crash the showCustom view.  Instead, a message is displayed that allows the user to report the missing analysis to the issue tracker.  Fixes [#215](http://tracker.ctmlabs.net/issues/215).
+
+### commit 0f29332d59df2597176f148989bcdbade601c2cc
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu May 27 15:53:11 2010 -0700
+
+    More work on getting the custom incident view to properly display
+    analyses.  Some success here getting the TimeSpaceDiagram widget to
+    synchronize with the IncidentView widget and the associated UI
+    elements.
+
+### commit beb50c2a286d5113ffc27e4efbd25d0a69d0655b
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon May 24 11:31:21 2010 -0700
+
+    Hacked fix to prevent error messages when viewing unanalyzed incidents (refs [#215](http://tracker.ctmlabs.net/issues/215)).
+
+### commit 2f282fec55604a860281edde26b3d40f0557e388
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed May 19 12:56:05 2010 -0700
+
+    Minor tweaks to the commit script.

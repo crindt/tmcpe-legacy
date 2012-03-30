@@ -1,0 +1,7 @@
+### commit 0ff12d1ea67f7ebfa378fc06ec7e22489cedb676
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue May 18 15:29:03 2010 -0700
+
+    Solved incident boundary problems (fixes [#214](http://tracker.ctmlabs.net/issues/214)).
+    Added segment length to objective function to weight larger segments more.
+    Added band parameter to IncidentFacilityImpactAnalysis domain class and now use it to set the default TimeSpaceDiagram band slider value.

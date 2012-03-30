@@ -1,0 +1,285 @@
+### commit 12d99c7e663d9f5aad4ce253d68effe62d403d8b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 3 23:11:33 2011 -0700
+
+    Added check on iCad data to check-data.pl.  Refs [#886](http://tracker.ctmlabs.net/issues/886).
+
+### commit f53e6d2a097c5df1b8ede31911ef098a9fdd887d
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 3 22:46:40 2011 -0700
+
+    Added scripts for automated data updates and QA checks on data updates.
+    
+    * scripts/cron-script.pl is intended to be called nightly to execute import-al.pl on imported data
+    * scripts/check-data.pl is intended to be called nightly (after the above) to confirm that relevant data is being updated.  Currently, check-data checks for D12 Activity Log replication (not including iCad yet), pems_5min data updates, and TMCPE delay calculations.
+    * refs [#886](http://tracker.ctmlabs.net/issues/886)
+
+### commit bdf259a5f29e7fa65f0b7ec62306498ff3d9139d
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 3 22:42:12 2011 -0700
+
+    Modifications to improve location parser.
+    
+    * Fixed bad use of deprecated EWKT in ungeolocated incident (LocationParser.pm).  Refs [#902](http://tracker.ctmlabs.net/issues/902).
+    * Tweaked import-al.pl to report when incidents are skipped due to missing location
+    * Adjusted data/actlog/test-rule.pl to take a list of strings to parse from a file.  Ultimately refs [#323](http://tracker.ctmlabs.net/issues/323).
+
+### commit 4fc0bf9be24f09f5119a0cd495f064df15544182
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 3 22:42:12 2011 -0700
+
+    Modifications to improve location parser.
+    
+    * Fixed bad use of deprecated EWKT in ungeolocated incident (LocationParser.pm).  Refs [#902](http://tracker.ctmlabs.net/issues/902).
+    * Tweaked import-al.pl to report when incidents are skipped due to missing location
+    * Adjusted data/actlog/test-rule.pl to take a list of strings to parse from a file.  Ultimately refs [#323](http://tracker.ctmlabs.net/issues/323).
+
+### commit 383afc0d2646dcbd2be6aec2de80b974fe752972
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 3 22:51:25 2011 -0700
+
+    Added common map styling file previously omitted from commit
+
+### commit c8829dd7ece42ad33d69cd62eb8da36c85acb7a3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 3 22:39:20 2011 -0700
+
+    Incremental improvements to grouped/aggregate queries
+
+### commit 8cb6ead4927aeb877d109bc14ef714ef46762f9d
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 3 13:00:05 2011 -0700
+
+    A few fixes to incident/summary and group queries.
+    * Some tweaks to groups and filters (refs [#863](http://tracker.ctmlabs.net/issues/863))
+    * Fixed implementation of month and solution queries for map/show
+    * Some minor styling tweaks.
+
+### commit 597e3e99c9f235646bed2213d428882614c6f44b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Sep 30 15:57:31 2011 -0700
+
+    Initial changes toward [#863](http://tracker.ctmlabs.net/issues/863) and [#882](http://tracker.ctmlabs.net/issues/882)
+
+### commit 64e03e84cfae1e5f3f78b99dbb1c103f7cce41d5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Sep 30 14:53:04 2011 -0700
+
+    Changed XLS->spreadsheet.  Fixes [#885](http://tracker.ctmlabs.net/issues/885)
+
+### commit bbca257882e5da657e4114fd62e99572b316d096
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Sep 30 14:21:44 2011 -0700
+
+    Added tooltips to incident/summary.
+    * Hover on *any* chart bars raises descriptive tooltip. Fixes [#899](http://tracker.ctmlabs.net/issues/899).
+    * Hover on chart bars updates detail box.  Fixes [#891](http://tracker.ctmlabs.net/issues/891).
+    * General improvements to incident/summary styling.  Fixes [#864](http://tracker.ctmlabs.net/issues/864).
+    * Legend is done.  Fixes [#851](http://tracker.ctmlabs.net/issues/851).
+
+### commit d8fdcd50f2c28f7ebeb0a31da04b4f7d9b544fe9
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Sep 30 10:19:02 2011 -0700
+
+    Work on tooltips for incident/summary.
+    * refs [#891](http://tracker.ctmlabs.net/issues/891) and [#899](http://tracker.ctmlabs.net/issues/899).
+    * Includes separation of some reusable js code into tmcpe/common.js.
+
+### commit 777c1596899e40a226b8c39e1e6041e837df2406
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Sep 27 15:09:31 2011 -0700
+
+    Block of changes related to aggregate queries and styling.
+    
+    * Added beginnings of filter interface to incident/summary query form.  Refs [#863](http://tracker.ctmlabs.net/issues/863).
+    * Added some introductory text to summary/index landing page
+    * Partially fixed TSD parameters form using the model/view approach---work remains.  Did fix slider by using jquery.tools.slider that now fixes [#890](http://tracker.ctmlabs.net/issues/890).
+    * Improved chart styling and fixed failing panes on new incident/tsd implementation.
+    * Implemented hover highlighting on incident/summary chart (refs [#864](http://tracker.ctmlabs.net/issues/864))
+
+### commit 806882b75d0579087bf5ba9d630888f773126c71
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Sep 26 22:20:12 2011 -0700
+
+    Large group of changes related to styling and general interface improvements.
+    
+    * Worked to consolidate styling using lesscss stylesheets to simplify consistency.  Moved chart styling to CSS using dummy elements and jquery (fixes [#877](http://tracker.ctmlabs.net/issues/877))
+    * Dumped tipsy tooltips in favor of jquery.tools.  Styling handled via lesscss.  Building out toolstips to all pages. Fixes [#852](http://tracker.ctmlabs.net/issues/852).
+    * Some styling improvements to charts
+    * Blew up incident/tsd styling, leaving some work in progress.
+    * Added an error handler to report thrown failures (including failed assertions) to the user using a jquery.tools overlay.  Fixes [#363](http://tracker.ctmlabs.net/issues/363), fixes [#456](http://tracker.ctmlabs.net/issues/456), fixes [#294](http://tracker.ctmlabs.net/issues/294), and fixes [#679](http://tracker.ctmlabs.net/issues/679).
+    * Renamed map/summary to incident/summary.
+    * Performed a fair amount of code refactoring to consolidate onto practices developed over time.
+
+### commit 1d06bd1cd7c77ff38dccb45b4bf93f38795b0b4a
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Sep 19 15:15:28 2011 -0700
+
+    Minor tweak to handle analyzed=true as a filter parameter
+
+### commit 54a1d1f15ccffbc0109e03e02139ebec9e55e57c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Sep 19 15:14:16 2011 -0700
+
+    Housecleaning to remove unused files
+
+### commit ce6e2c160ffeb0739a88467b4f7927b151e137a1
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Sep 19 14:57:39 2011 -0700
+
+    Numerous changes to aggregate query form, user feedback, and styling.
+    
+    * Improved the aggregate query form to properly synchronize with the actual
+      query sent.  This is achieved using events to synchronize between model
+      objects (which are updated via server-side controllers) and view objects.
+      This refs [#863](http://tracker.ctmlabs.net/issues/863).  Still to do: add filter interface to the form.
+    
+    * Added jquerytools modal overlays for loading dialog, network error dialog
+      (refs [#679](http://tracker.ctmlabs.net/issues/679)).
+    
+    Some side-effects
+    
+    * Moved summary/index to map/summary.  This allows the query form to be
+      generated server-side using gsp tags rather than (asynchronous) AJAX calls.
+      The latter was causing some interaction problems.
+    
+    * Switched to using more flexible mustache templates rather than underscore
+      templates.
+    
+    * Deleted the SummaryController, which is no longer necessary.  In short,
+      summary/index => map/summary.
+    
+    * Default url mapping is map/summary
+
+### commit 088d1880173d55fcd8140b1cb5b4516ce39674b5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Sep 16 15:15:05 2011 -0700
+
+    Started implementing basic query form for grouped aggregates in summary/index.
+    * Refs [#863](http://tracker.ctmlabs.net/issues/863).
+    * Also, started to less-ify the styling for map/show. Refs [#878](http://tracker.ctmlabs.net/issues/878)
+
+### commit 7748a381a8ec76a740148d4806c4b4b7ff33e39e
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Sep 16 13:12:35 2011 -0700
+
+    Began transition to using 'less' stylesheets to simplify consistent styling across the site.  Refs [#878](http://tracker.ctmlabs.net/issues/878).
+
+### commit cac2b734dd68985bb0028db936b7265809831453
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 15 12:04:36 2011 -0700
+
+    Created basic tab setup for advanced/basic query menu
+
+### commit fe65977acb60ba0cf3886dbbc5b13d7eddcaeffe
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 15 10:59:07 2011 -0700
+
+    Stopped SQL logging
+
+### commit 1dc2759d05e3558610429eeca1e689bf41791882
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 15 10:58:49 2011 -0700
+
+    Added additional filter and group handlers
+
+### commit f82858d7b9a83e53bca6749dfe6054a6beb6ddb8
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 15 10:58:32 2011 -0700
+
+    Removed query box from map/show as this will now be governed by summary/index
+
+### commit 4afc05a3a60e16803b315ff668b777b41b04f1d5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 15 10:39:01 2011 -0700
+
+    Color tweaks.
+
+### commit 358f3cb59c219826845e73cb922bfe0ee097aac1
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Sep 12 13:16:55 2011 -0700
+
+    Minor formatting changes.  And for whatever reason, FFox user agent string encoding on report problem link appears to be working.  So fixes [#865](http://tracker.ctmlabs.net/issues/865).
+
+### commit 25b646a24aec86da1fe9f6d88cf01b20fad13d26
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Sep 12 12:59:19 2011 -0700
+
+    Generalized handling of listGroup parameters.
+    
+    The problem here is that to create a good query interface, we need to be able to
+    present the user with the set of possible group/stack/filter options.  The
+    existing implementation hardcoded these in the controller logic in a manner that
+    would be difficult to maintain.  This commit implements an approach that maps
+    possible parameters to the backend database implementations.  This mapping
+    permits the possible parameters to be offered to the UI via the controller and
+    interpreted by the controller when sent as part of a GET.
+    
+    * Refs [#863](http://tracker.ctmlabs.net/issues/863)
+
+### commit e1b7272ea9fe0a46e789ec63b5166e99cac36c11
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Sep 9 15:40:02 2011 -0700
+
+    Some styling changes, including an increase of the chart size on summary/index.
+
+### commit 8612acc97a79a19bd4078b11deb87bdd8e29fd10
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 8 12:13:29 2011 -0700
+
+    Basic summary/index legend working for eventType grouping, but still need to generalize.  Refs [#862](http://tracker.ctmlabs.net/issues/862).
+
+### commit f5c7e2dc00027d9afcab181be1a66e87ea310349
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 8 10:53:37 2011 -0700
+
+    Finished basic version of grouped aggregates as default screen
+    * Fixed conversion of summary/index group aggregate filters into links for map/show.
+    * Made summary/index the default screen
+    * Grouped aggregate queries and chart now work as advertised so fixes [#835](http://tracker.ctmlabs.net/issues/835) in a basic sense.  See follow on tasks for needed improvments:
+      * Needs improved and streamlined implementation
+      * Needs improved chart styling
+
+### commit e68d75366f07ea3f9311d7f2fac3ac7c98a9b931
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 8 10:24:44 2011 -0700
+
+    Slightly generlized filtering implementation for grouped aggregate filters.
+    
+    * Refs [#835](http://tracker.ctmlabs.net/issues/835)
+
+### commit e906f4c900a0a285554a277a6fe65a31cfe1e1f5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Sep 8 10:22:07 2011 -0700
+
+    Added recursive call to get x displacement of stacked bars.  Fixes [#860](http://tracker.ctmlabs.net/issues/860).
+
+### commit c28a07a835e6b121dbed707fe3caa42816fd272d
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Sep 2 11:27:43 2011 -0700
+
+    Added ability to place query parameters in the url for map/show supporting cross-linking from summary/index.  Refs [#835](http://tracker.ctmlabs.net/issues/835)
+
+### commit 7dfeec33063e6f17b12344590200f007bf51ee14
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 29 17:08:22 2011 -0700
+
+    Improvements to chart for displaying aggregates with stacked bars.  Core functionality demonstrated. Refs [#835](http://tracker.ctmlabs.net/issues/835).
+
+### commit 3202643a9c9a5498ae08b118dbefe8dbda3055cd
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 29 15:06:44 2011 -0700
+
+    Basic first cut of chart for displaying aggregates with stacked bars.  Refs [#835](http://tracker.ctmlabs.net/issues/835).
+
+### commit ce1af0f337b32889b4c5ce12023ae0c5df3cf02b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 29 13:40:21 2011 -0700
+
+    Basic first cut of chart for displaying aggregates.  Refs [#835](http://tracker.ctmlabs.net/issues/835).
+
+### commit 69dda637b3cc2c08a3e5a8cfc5a433dff2a479de
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 29 11:21:08 2011 -0700
+
+    Turned off sql logging

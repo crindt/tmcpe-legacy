@@ -1,0 +1,30 @@
+### commit a9d6ca332568063cc8b3733537d47a4b4001ecec
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 16:45:27 2010 -0700
+
+    Release 0.2.2
+
+### commit 4aaaea8d10f4519463ea72e764b356e52e5a653b
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 16:15:59 2010 -0700
+
+    Added additional tooltips to the query interface.  refs [#211](http://tracker.ctmlabs.net/issues/211).
+
+### commit ea7717e6759a963309a47dd24c864a3d83ee54a0
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 16:14:32 2010 -0700
+
+    Added additional help text in the How To Use the Site section.  Also, improved the summary statistics table on the home page to pull in delay statistics.  Refs [#211](http://tracker.ctmlabs.net/issues/211).
+
+### commit a5483e86f84eb9f86b2437a247ebfa190ba497d6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 15:14:10 2010 -0700
+
+    Updated home pages to include basic documentation and a reference to the project wiki and user guide.  Refs [#211](http://tracker.ctmlabs.net/issues/211).
+
+### commit 9a23aa2b71f73259492f267b8730ee7e28274204
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 14:46:14 2010 -0700
+
+    Collapsed device fields in incidentView to a single column based upon (transient) getDeviceSummary method in TmcLogEntry.  Fixes [#227](http://tracker.ctmlabs.net/issues/227).
+    Added more standardized "loading" message using dojo theming to the TSD pane. Refs [#190](http://tracker.ctmlabs.net/issues/190).

@@ -1,0 +1,736 @@
+### commit 892b0f73dd3da57ea8c9db04bfb2d2562ca439d3
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 19 08:58:02 2010 -0700
+
+    Bumped to v0.4.
+
+### commit 00ea6fc10698dbb640df53ee59b2a175344e0fa2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 19 08:53:24 2010 -0700
+
+    Release 0.3.5
+
+### commit 24ddcea4f737adae357a0e1ef620b3c3867ef7da
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 19 08:51:42 2010 -0700
+
+    Reverted back to using a single table and css classes for TSD.
+    
+    * The layered method was inconsistent across browsers
+    * Bumped the DBIxC schemas
+    * More themeing tweaks
+
+### commit 9f6220960e0faeba75fd7d156ce2e29651c160e8
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 18 11:26:19 2010 -0700
+
+    Merged CommLog data into the incident detail view.
+    
+    * The log table now includes by activity log and comm log entries
+    * A generic "resource" field now carries interpretations of the
+      individual log entries as appropriate
+    * Log rows are set to classes: .activityLog and .commLog, as
+      appropriate.  These are styled in tmcpe.css
+    * Fixes [#320](http://tracker.ctmlabs.net/issues/320)
+
+### commit 0a7d75ad02884f09f79183fd7953cd14fe89134a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 18 10:07:45 2010 -0700
+
+    Refined only-sigalerts implementation to be sql condition rather than a post-filter
+
+### commit ad8c55a4240e544d270b0d8bcd2d7badebf56e4b
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 18 10:06:46 2010 -0700
+
+    Removed unnecessary logging
+
+### commit d314bcb94dac89482888fac25a960c7307be0395
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 18 09:59:06 2010 -0700
+
+    Added maxIncidentSpeed DC parameter to TSD UI.
+    
+    * Allows user to approximate D35 cells by setting to 35-mph
+    * Still needs some UI polish
+    * Fixes [#341](http://tracker.ctmlabs.net/issues/341)
+
+### commit 3b98c1152d5f7c21d8d76a393744f54a8d00432d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 16 04:27:15 2010 -0700
+
+    Revamped the TimeSpaceDiagram view implementation for Xbrowser and efficiency.
+    
+    Now, instead of redrawing the tables (or styles) when theme elements
+    are to change, the table(s) are implemented with styling that can be
+    controlled via css3.  Further, (vertical) flipping is handled by
+    reversing the existing table rows rather than redrawing the whole
+    table.
+    
+    * Fixes [#338](http://tracker.ctmlabs.net/issues/338)
+
+### commit 414deab25db9c50b2152a6318ea123d83e14b3ce
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 16 04:25:32 2010 -0700
+
+    Fixed cross browser date problems that broke the log entry display on firefox.
+    
+    Refs [#336](http://tracker.ctmlabs.net/issues/336).
+
+### commit dadf295aed43acc0bf9fdd15c7314100b6db07b2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 15 17:26:58 2010 -0700
+
+    Loading window now disappears if there's no analysis.
+    
+    Fixes [#340](http://tracker.ctmlabs.net/issues/340).
+
+### commit 97e44b5285c3bc84cfa2e3aa3a448545c58e6c22
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 15 17:00:58 2010 -0700
+
+    Added additional parsing to catch more gams/cplex errors.
+    
+    Noted while working on [#308](http://tracker.ctmlabs.net/issues/308).
+
+### commit 7a2cee7d4211c58dbef6e91b31c5f549cd4e8829
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 15 16:38:46 2010 -0700
+
+    Added max-incident-speed parameter that puts an upper bound on speed.
+    
+    This commit actually just adds the parameter as a command line option.
+    It also modifies the TimeSpaceDiagram view to use similar logic.  The
+    TSD view, however, hardcodes the parameter at 60mph, rather than
+    providing options and/or reading it from a file.
+
+### commit b8afa73a384e6f16935e599e28c339ad56401220
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 15 15:56:19 2010 -0700
+
+    Tweaked the incident flip TSD incident to relink cells to features.
+
+### commit b18a470d7e6815d75dc53d48017248a23a0a004c
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 15 15:11:32 2010 -0700
+
+    Some minor configuration changes that help CAS over https work better.
+
+### commit e65295a2170062a0191a55478837c66514bf3681
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 14 12:52:29 2010 -0700
+
+    More enhancements/fixes to TSD view.
+    
+    * Fixes [#334](http://tracker.ctmlabs.net/issues/334): evidence layer now adjusts with slide.  This produced
+      the beginnings of a theme revamp for the TSD window.
+    * Fixes [#335](http://tracker.ctmlabs.net/issues/335): added UI element to flip TSD on the time pane.
+
+### commit 4ec1f7502d18f5eb6a8664f86766332901a2db12
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 14 10:33:53 2010 -0700
+
+    Added ability to force inc bounds to be later than some time.
+    
+    Also, fixed a bug in the shockwave bounds to enforce them at the start
+    of the plume too.  This requires the equations to determine the plume
+    start cell to be turned on.
+
+### commit 16f3c93b3158714a0a301f2bde5a4b7b28465bcf
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 14 02:45:22 2010 -0700
+
+    Minor tweaks and bug fixes.
+
+### commit 2f560bcc688b43884a27097fba4b6f385775f302
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 14 02:22:55 2010 -0700
+
+    Altered objective to allow cells to be weighted based upon distance from the estimated location of the incident.
+    
+    The benefit of this approach is that in cases where the feasible space
+    contains multiple congestion plumes or is just generally noisy, the
+    algorithm will favor the plume nearest the estimated incident location.
+    
+    * Fixes [#330](http://tracker.ctmlabs.net/issues/330)
+    * The sensitivity of the distance weighting is adjustable via a
+      command line parameter.
+
+### commit dfb3086763ac7b748aafe7116f0c2bbfef3377de
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Oct 13 23:01:46 2010 -0700
+
+    In incident view, station hover now highlights segment on map in color of active TSD cell.
+    
+    * Fixes [#325](http://tracker.ctmlabs.net/issues/325).
+
+### commit 74fa7ab56a75321c05f2f77df0ac64aa1ba47fba
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Oct 13 22:09:41 2010 -0700
+
+    Added generated OSM DBIx::Schema classes to repo.
+
+### commit 41bacd82f2efef9f50512f897a4b172131773daa
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Oct 13 21:53:22 2010 -0700
+
+    Custom map view now zoom/centers on impacted region (fixes [#329](http://tracker.ctmlabs.net/issues/329)) plus other minor interface changes/fixes.
+    
+    * Added additional CPLEX solver options to the command line
+    * Fixed bug in specifying delay comp date ranges
+    * More comments and minor refactoring
+    * Minor fixes to D35 summary calc
+    * TSD interface improvements: evidence as shaded rectangle
+
+### commit 0f26915ef6e67bcd1380cb1f0da9e261b5d2cccd
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 12 13:00:34 2010 -0700
+
+    Added D35 delay computation and tuned the TMCPE delay computation.
+    
+    Fixes [#326](http://tracker.ctmlabs.net/issues/326).
+    
+    The delay is:
+    
+         SUM( (j,m), D(j,m) * L(J) * ( 1 / V_obs(j,m) - 1/V_base(j,m) ) * F_obs(j,m) )
+    
+    where
+    
+       * j is an index over freeway sections
+       * m is an index over time steps
+       * D(j,m) is 1 if the incident impacted this region, 0 otherwise
+       * L(J) is the length of section J
+       * V_obs is the observed speed on section j at time m
+       * V_base is the baseline speed on section j at time m.  For D35,
+            V_base is 35-mph, for Dtmcpe, V_base is the average speed at
+            section j for the time of day and day of week of m over the
+    	past year of observations.
+       * F_obs(j,m) is the observed flow (volume) on section j at time m.
+
+### commit 3cbe772487fca1b3e99cd3918af377c417163212
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 12 11:19:17 2010 -0700
+
+    Flipped the orientation of the stations in the xls output to match the on-screen view.
+
+### commit 448d8a82720a1fe63fc6095afc4711178a59d824
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 12 10:13:53 2010 -0700
+
+    Added option to use osm data to obtain approximate location of incidents.
+    
+    Fixes [#324](http://tracker.ctmlabs.net/issues/324).
+    
+    Often, the facility and cross street in the activity logs for incident
+    location do not readily match to a vds name.  In the absense of icad
+    x/y data, this leaves a lot of incident unlocated, and therefore
+    unanalyzed.  The osm highway data provides a means for obtaining an
+    approximate location by looking for the intersection of a mainline
+    facility with other ways in the osm data.  Since this is a large set,
+    we cull it by only looking at ways whose names are sufficiently
+    similar to the provided cross street.  Given this hint, the
+    LocationParser is pretty good at getting close to the actual incident
+    location.
+    
+    Also,
+    
+    * added some improvements to the test scripts for the LocationParser.
+    * added DBIx::Class schemas for the OSM database.
+    
+    Augmented the osm database as follows (see osm-routes.sql)
+    
+    * loaded the trigram support (from postgres/contrib)
+    * added a routes view for convenience.
+
+### commit 4f756444f05447b51582f236fb49014d9bf0b444
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 11 17:19:08 2010 -0700
+
+    Added tables and code for importing D12 communications logs.  Refs [#322](http://tracker.ctmlabs.net/issues/322).
+    
+    This approach basically mirrors that taken for loading the activity log.
+    
+    Work still needs to be done to incoporate these logs into the critical
+    event analysis.
+
+### commit 4e443d34a2090a9a89bf00a6139b68539fadf969
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 11 17:15:23 2010 -0700
+
+    Added a hardcode transformation from the "241 freeway" to "GYPSUM".
+    
+    This is a hack that needs to be revisited.  Refs [#321](http://tracker.ctmlabs.net/issues/321).
+
+### commit d7eb69192e0506510a5bb52f485b6cf0b15128a9
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 11 17:14:44 2010 -0700
+
+    Tweaked the screen feedback and removed the unused write_to_json function.
+
+### commit 2b5ff8c2f8299aa206f35267431317f9f6b2ac0e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 11 17:13:10 2010 -0700
+
+    Fixed a bug with date conversion that was leading to incorrect date entries in the incident view table.
+
+### commit c10e363025c667425648ef1a5b7524edcc9c545c
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 11 14:03:42 2010 -0700
+
+    Code cleansing and commentary.
+
+### commit 89d425a09c87439d79ba0015c79ad0e6ce4d755c
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 11 09:59:08 2010 -0700
+
+    Cleaned up the DelayComputation code and documented a bit.
+
+### commit b575499f4fdac442132b641cceb9e65fa89f4b7b
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sun Oct 10 01:24:05 2010 -0700
+
+    Modified display of incidents to be overlayed table instead of colors.
+    
+    The effect is that the incident region appears to be a window onto the
+    time-space-diagram.  It's more effective and more flexible for adding
+    later effects.
+    
+    The new approach is implementing using div positioning, the z-index
+    css style parameter, and the opacity parameter.
+
+### commit 67385dcbdd7b0015d316b59f920225bfece7203e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 9 23:08:24 2010 -0700
+
+    Fixed bug with clearing shockwave equation (8b) causing a number of bad solutions.
+    
+    Fixes [#311](http://tracker.ctmlabs.net/issues/311).
+    Fixes [#237](http://tracker.ctmlabs.net/issues/237).
+    Per [#313](http://tracker.ctmlabs.net/issues/313), fixed results parser to handle EXECERROR returned by solver.
+
+### commit 33f1a2f9a706b3a6e5148d64daff41e147768a34
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 23:04:15 2010 -0700
+
+    Removed residual code causing a bug.
+
+### commit 670d8df3f3727dd89121ce11103415f5b0e43281
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 20:36:05 2010 -0700
+
+    Added support for caching pems averages.  Fixes [#306](http://tracker.ctmlabs.net/issues/306).
+    
+    Making queries to the database to obtain statistics is expensive.  The
+    changes in this commit make it so that these computations only have to
+    happen once---on demand---at which point they are added to the
+    pems_5min_annual_avg table.  Future need for that data (e.g., if an
+    analysis is re-run with different parameters) will use the data from
+    that table instead of recomputing them.
+    
+    The use of the cache can be turned off with the switch
+          --dc-dont-use-pems-cache
+    
+    As part of this change, the query for average data has been separated
+    such that the average for each period is queried separately.  Probably
+    marginally slower but more flexible.
+
+### commit 5ca2fd913c84e2ca16ce01084dd29c805a95b027
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 20:36:05 2010 -0700
+
+    Added support for caching pems averages.  Fixes [#306](http://tracker.ctmlabs.net/issues/306).
+    
+    Making queries to the database to obtain statistics is expensive.  The
+    changes in this commit make it so that these computations only have to
+    happen once---on demand---at which point they are added to the
+    pems_5min_annual_avg table.  Future need for that data (e.g., if an
+    analysis is re-run with different parameters) will use the data from
+    that table instead of recomputing them.
+    
+    The use of the cache can be turned off with the switch
+          --dc-dont-use-pems-cache
+    
+    As part of this change, the query for average data has been separated
+    such that the average for each period is queried separately.  Probably
+    marginally slower but more flexible.
+
+### commit 1b2425911627f8e794b8fc87377a8eb99bdab7ac
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 13:34:34 2010 -0700
+
+    Added additional command-line arguments for tuning the GAMS/CPLEX solver.
+    
+    The change will automatically push any options with the '--cplex-'
+    prefix into the cplex.opt file for use by the solver.  Documentation
+    of these options are in the CPLEX user guide.
+
+### commit 03b8f9de6920ebeea98e8d39a25ed0e70ac9cb13
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 11:45:34 2010 -0700
+
+    Added ability to fine-tune gams solution parameters from the command line.
+    
+    This solution also writes the gams.opt file dynamically from the .gms
+    file, which is much more portable before.  Added options:
+    
+    * --dc-optcr = the relative termination tolerance: solver terminates
+        when the objective is within 100*optcr of the best possible
+        solution.
+    
+    * --dc-reslim = the maximum number of cpu seconds for attempting to
+        find a solution
+    
+    * --dc-probe = the amount of probing (per the CPLEX definition)
+
+### commit bd3c154a4d76f2d563c30e024c23dff947767db5
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 11:23:46 2010 -0700
+
+    Added flag for problems link on completed analyses.  Fixes [#292](http://tracker.ctmlabs.net/issues/292).
+    
+    The link goes to the new issue page in redmine with some boiler plate.
+
+### commit 4cceebd6bd19d6eb537af6283890b0d182765b65
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 09:49:22 2010 -0700
+
+    Miscellaneous changes that don't belong to any other commit.
+
+### commit 6b596643c499fa5749bb5b0a0fea9ba1d9dab517
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 09:48:21 2010 -0700
+
+    Updated changed select-data that should have been associated with
+    commit cafbe9d0b7b794321701e726f8e21b80b3970418
+
+### commit 26af60d10facb9dd4a28f84064a2a9c890901e8a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 09:47:26 2010 -0700
+
+    Updated the TimeSpaceDiagram with an overlay containg location and
+    activity log entries.
+    
+    * Added Postmile information to JSON output for FacilitySection.
+    * Fixed a bug in the output of the day_of_month TmcLogEntry date
+      stamp
+    * Used relative positioning to add div to overlay location/log
+      info.  TSD table now sits in TSD container div.
+    * Wired up events to display active moused log entry over TSD.
+    * Removed some long commented code
+
+### commit cafbe9d0b7b794321701e726f8e21b80b3970418
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Oct 7 09:41:32 2010 -0700
+
+    Added additional options for delay computation.  Some code cleaning.
+    
+    * Added option to automatically compute vds fallback (how far to
+      look upstream)
+    * Tweaked import-al to allow all Incident summary data to be
+      updated upon reparsing.
+    * Added option to all the unknown evidence value (normally 0.5)
+      to be specified
+    * Centralized computation of time bounds (when compute delay is
+      first called
+    * Removed some long-commented code for cleanliness
+
+### commit 5038c5d145bf7d40f4b9028e2597f41f22d754b2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 5 16:12:32 2010 -0700
+
+    Fixed directional bugs related to formulating the delay computation.  Added additional constraints.
+    
+    The existing code was not correctly ordering the GAMS program for all
+    freeway directions.  Similfied the sorting code and synchronized with
+    GUI logic.
+    
+    The ability to limit the program require that the incident boundary
+    start within a particular window is also now included as an option.
+    
+    Fixed some logic problems in the LocationParser code that selects the
+    best vds location based upon distance from the icad location.
+    Existing code was sorting furthest to nearest rather than nearest to
+    furthest.
+
+### commit 933d9c52c8dc3554637d4205b00498d494676334
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 5 16:09:28 2010 -0700
+
+    Fixed bad synchronization between incident list table and incident detail.  Refs [#218](http://tracker.ctmlabs.net/issues/218) and [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 53d410a89fe533a18fca565060266a54b57f2aa5
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 4 15:16:21 2010 -0700
+
+    Made the option processing more flexible.
+    
+    Now options are processed in a more standardized manner and can be
+    added and changed more easily.  Negation of options is now processed
+    automatically.
+
+### commit d8e9575dd21115d2ecc0774db65cc10bc8ca913d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 1 21:40:48 2010 -0700
+
+    Added some rough documentation of delay calculation command-line arguments.
+
+### commit 5facb8dbe6b3194a43a3934a8cc6964707ff1e21
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 1 21:38:03 2010 -0700
+
+    Bumped version number in pom.
+
+### commit 2a788f79087e81d4b4928c2d91347e53b125fd66
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 1 21:37:08 2010 -0700
+
+    Added link from custom incident view to report problems with facility displayed facility analysis.
+
+### commit 3e323c1e3e9fd2fd6bb47be80b5377e07529cc72
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 1 21:36:46 2010 -0700
+
+    Moved to compressed dojo source.
+
+### commit 9056ae047c426398ce74a90ff3431a3886e87d9c
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 1 21:35:23 2010 -0700
+
+    Fixed bug preventing incident status from being displayed in TimeSpaceDiagram.
+
+### commit caab35986faa012da077f89297b83d10ec5e5e82
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 1 21:34:19 2010 -0700
+
+    Fixed minor filename bug for GAMS intermediate files.
+
+### commit 1094d52024f76ead12c02b1274c7a7509d21a433
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 1 16:40:06 2010 -0700
+
+    Further tuning of the delay calculation constraints.
+    
+    Tweaked the outer rectangle constriants to be blanket constraints at the upstream/later edge of the incident region.  Basically, if a cell is at the upstream/later edge of the incident region then there can't be any more incident cells later in /any/ section.
+    
+    Also added the ability to force the value of specific cells from the command line.  This is a debugging tool.
+    
+    Made clearing and loading shockwave constraint parameters independent.
+
+### commit 80c79f9ff691cbfca88ee425227f3da4b318971d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 1 14:03:53 2010 -0700
+
+    Fixed some bugs in the delay formulation.  Added more options for tuning as well.
+    
+    The delay formulation was incorrectly constraining the solution based
+    upon boundaries.  Basically, the problem was a summation going in the
+    wrong direction (upstream instead of downstream).  The solution
+    quality is much better now.
+    
+    Also added the capability of limiting the (implied) speed of
+    shockwaves in the solution by adding additional constraints (eqs8).
+    
+    All of these tweaks are tunable from command line parameters.
+
+### commit 7046af889c20bdf83b438dedc9636c1bd9ce99ac
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Sep 29 09:15:39 2010 -0700
+
+    Altered the TmcLogEntry views to parse out the memo field from the performance measures fields stored in the raw memo field.
+    
+    The new activity log implementation uses the memo field to store
+    multiple records.  In addition to the actual memo entered into the
+    log, it stores performance measures and route/dir/location data from
+    the log as fields separated by a :DOSEP: record.  This change splits
+    out these subfields and makes them accessible via transient "setters".
+    
+    This new interface is used to get the true memo into the relevant
+    fields on pages served.
+
+### commit 83c441c81dbb337f588756ae23570bd67760a542
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit edd607cc3d5184b20796ee303a7e53e14d2aeb2b
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit 57bb435fbdab16b27d7c8f3bdf32ec2e593cf720
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 9866db8a4d13a0758ef17302a281ecd47b9101f8
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Aug 19 05:37:01 2010 -0700
+
+    Some tweaks to allow better dojo debugging.
+
+### commit 21651a5f45476ac9e5abc8553a39416e361523b6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:49:33 2010 -0700
+
+    Release 0.3.1
+
+### commit f505be9e5cd2ae402840ff91bd259882bb2a33e0
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit 58aba0b826cb3b38ae127363d7c88fed76fd4d63
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:11:27 2010 -0700
+
+    Release 0.3.0
+
+### commit 791482de1f58c9e2d112e441be66e5d6ef81260a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:10:48 2010 -0700
+
+    Push cluster work onto 0.3 branch.
+
+### commit 2a87508a228fe60060bfc382a5c4e861771c6f33
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit 81207753da9a6c86ecfb1fa5c67e0eaf92de2579
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:18:25 2010 -0700
+
+    Added feature tooltip capabilities.
+
+### commit 0b46a5d93a6400b4275fee37678cbc4d1bab7613
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit ed964fcc999e7e3814be53db3efb82fd9709500d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 23 16:19:17 2010 -0700
+
+    Partial implementation of incident icon clustering.  refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 08e057e03e77a7aaa6a5b50f6d98926334a8b1b6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Aug 19 05:37:01 2010 -0700
+
+    Some tweaks to allow better dojo debugging.
+
+### commit cd50e21c007130a1c7ac2ef32ef1d2deb5e76426
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:49:33 2010 -0700
+
+    Release 0.3.1
+
+### commit 074ce4f9f75fc01b662960366b41583eb130f83d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit 7ca08502b3cf1f527132b7b75f28acaae579d26a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:11:27 2010 -0700
+
+    Release 0.3.0
+
+### commit e86f6cea501123be469f0ffbe0c610239588dd8e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:10:48 2010 -0700
+
+    Push cluster work onto 0.3 branch.
+
+### commit c364713894cfbab1178d79b48cfa5688408e3ece
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit a3924bc8df6a6bdacc32920984bc888c05a2aa8f
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:18:25 2010 -0700
+
+    Added feature tooltip capabilities.
+
+### commit fb6e122e2a4b733043b902186c4d7426ebc6526f
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 2179e9916b79c3b6bf4ff0ec9eef685c07859a8b
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 23 16:19:17 2010 -0700
+
+    Partial implementation of incident icon clustering.  refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 1eea95ffcbac23cbfb6ca5a00d0f695423a9e7c2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Aug 19 05:37:01 2010 -0700
+
+    Some tweaks to allow better dojo debugging.
+
+### commit fc5b2ac7e0bb18c4ae7a4a6f12b384085fdd71f6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:49:33 2010 -0700
+
+    Release 0.3.1
+
+### commit ec2327bd2fd02506e333b89fb42824e2ea1862bc
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit 464605755ae39ee0f9d6766956d7c176c6a1e790
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:11:27 2010 -0700
+
+    Release 0.3.0
+
+### commit 4adb7299aeade94a248a9a4e82e47f468f16ae21
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:10:48 2010 -0700
+
+    Push cluster work onto 0.3 branch.
+
+### commit 11d81721479edb03f560bd51f4e0ca36fe38a418
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit 16290fc17a4c8805ab44af55d1e2108205da9140
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:18:25 2010 -0700
+
+    Added feature tooltip capabilities.
+
+### commit 1a86094796f183860b16cb4efd717d20f87425cc
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 366955c48ee61f8f79936953dddade206183cb2d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 23 16:19:17 2010 -0700
+
+    Partial implementation of incident icon clustering.  refs [#257](http://tracker.ctmlabs.net/issues/257).

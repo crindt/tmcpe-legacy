@@ -1,0 +1,11 @@
+### commit 151d0e062513645106fbca3125d36b6cc9debed5
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:44:37 2010 -0700
+
+    Release 0.2.5
+
+### commit e613b78cd0a7b2029b70db26da823669975c36b4
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:40:34 2010 -0700
+
+    Adjusted TimeSpaceDiagram view to visually indicate when data is suspect---partial fix.  Refs [#192](http://tracker.ctmlabs.net/issues/192).

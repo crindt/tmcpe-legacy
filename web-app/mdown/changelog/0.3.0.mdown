@@ -1,0 +1,36 @@
+### commit 2ceb4f8b759fddd308a4ded0eacdf1cf75fb3a9e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:11:27 2010 -0700
+
+    Release 0.3.0
+
+### commit 3b2fee7a9006b4fdeab2fc9e361b60c87e282f52
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:10:48 2010 -0700
+
+    Push cluster work onto 0.3 branch.
+
+### commit 3b3c43f28bec31df097099aaacb87ff27355e1ac
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit 8b0c021caef4cf15ae70633139808c1d69d5f972
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:18:25 2010 -0700
+
+    Added feature tooltip capabilities.
+
+### commit 943aec42532425f74ca05acc9e02e518e01adc97
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 0835b9a0f9f46829577db7d48d46d7cf9394ff7a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 23 16:19:17 2010 -0700
+
+    Partial implementation of incident icon clustering.  refs [#257](http://tracker.ctmlabs.net/issues/257).

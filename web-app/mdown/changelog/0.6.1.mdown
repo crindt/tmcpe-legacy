@@ -1,0 +1,133 @@
+### commit d5270627254dacfedab8f3351df93239fd018649
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon May 2 11:30:24 2011 -0700
+
+    Omitted DataTables from uiperformance optimizations.
+
+### commit fbfbde9d682848da314af41c6e592e1a16a39bab
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon May 2 10:57:03 2011 -0700
+
+    Switched testbed controller links to put to d3 implementations.
+
+### commit 12d3edb4b51a2510aa6dc75bcc84ef853ea13aed
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 15:27:27 2011 -0700
+
+    Another baseurl fix.
+
+### commit dcdd9a72bbed4563386e3834b6073f18ed4274f9
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 15:24:16 2011 -0700
+
+    Updated TestbedController to point links to d3 tsd implementation.
+
+### commit 6075e5d4344858e1ea67817cbf80d2565c1a27c3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 15:11:22 2011 -0700
+
+    Another baseurl fix.
+
+### commit af6667c5b1264c03436ebcf6b81660436eb9aa9c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 14:51:12 2011 -0700
+
+    Removed use of po.hash() from polymaps for now (breaks with baseurl).
+
+### commit d71ab39e441e0522da89493c80fbdb2f7ca0e568
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 14:41:42 2011 -0700
+
+    More baseurl fixes.
+
+### commit e17631f383c824db8f0f6e47e04d9125d41166da
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 14:32:11 2011 -0700
+
+    More baseurl revisions.
+
+### commit 5dd3dc79e81748c997854dd481f33f0e2574240b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 14:28:31 2011 -0700
+
+    More fixes to base url.
+
+### commit 67a690f89a5d1257c38328b0ffc31789de7f39da
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 14:19:05 2011 -0700
+
+    Added baseurl to d3 pages to allow them to be pushed to tomcat.
+
+### commit ce5705ed83ee605002f0f5cc51c5615a0fa73478
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 13:42:34 2011 -0700
+
+    Added a several js libraries to uiperformance exceptions.
+
+### commit 5885eb742f2cf65b7ad9a10e8ac4613dcb4c284a
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 13:31:18 2011 -0700
+
+    Added force flag to release-script
+
+### commit 801b9fb4d1979719b987976f187238076b14b513
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 13:30:05 2011 -0700
+
+    Added polymaps to uiperformance exceptions.
+
+### commit b6fa07c15652d7bf28b9387e1dca9c0d59caebd0
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Apr 29 13:22:13 2011 -0700
+
+    Big commit of shift to jquery/d3 approach.
+    
+    Major development branch.
+
+### commit 6d3fd84425671318ed0041e3f76b9bdac636fac9
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Apr 4 10:07:42 2011 -0700
+
+    Modified widget classes to better match jquery/d3 idioms
+
+### commit fc9c144d29a4f6edaaf7539bcfa5032b0bd1af82
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Mar 31 14:25:47 2011 -0700
+
+    Bulk changes to revamped version
+
+### commit bb3419fdf3604221a764e0f4c6234061f5ac866f
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Mar 28 13:25:24 2011 -0700
+
+    More d3 hacks---stash prior to trying datatables again
+
+### commit 5afe42d4302aec43eb1361ea7d7d87dda133a2bb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 22 14:40:46 2011 -0700
+
+    More bulk changes to d3/polymaps version
+
+### commit 3c38e1fd4cb08e4266807d2dddf7675f96fc6553
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 22 14:38:08 2011 -0700
+
+    Bulk changes to d3/polymaps-based interface
+
+### commit 06c30cc23507022c82a1bf68bd70293a950de5e6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Mar 21 14:18:48 2011 -0700
+
+    First d3 implementations
+
+### commit 5310021824418c855aaf06dc9373a494116943c3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Feb 28 10:07:37 2011 -0800
+
+    Continued revamp using d3.  Basic features working
+
+### commit 06383d9eb85ea0091b125813a046ac34381e869c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Feb 22 07:40:40 2011 -0800
+
+    Fixed some width problems with the chart

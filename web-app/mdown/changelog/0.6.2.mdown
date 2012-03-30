@@ -1,0 +1,43 @@
+### commit cb74173b27749fd0ef6df92541391c03d5f4ed46
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 3 10:01:08 2011 -0700
+
+    TMC Savings fix.
+
+### commit 647556d5862a22e67b51c400743bb4ea75cdc11b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 3 06:59:29 2011 -0700
+
+    Fixes to tsd status updating.
+
+### commit 94ae360abfdfd0d7c5ccea2a0b2808b60bc52206
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 3 01:07:37 2011 -0700
+
+    Several formatting improvements
+    
+    * Added better date formatting to tsd time values.
+    * Added labels for t0->t3
+
+### commit 68b71a8c417bd046178a69578fe604e87a827e73
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon May 2 19:15:25 2011 -0700
+
+    Removed dojo-src from d3 branch
+
+### commit 45cf75f39d6bb66bec45bbdc28cc1cf4c5d1c576
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon May 2 18:55:52 2011 -0700
+
+    Fixes to the access denied screen.
+
+### commit a6dec8dfa68b22c1132d31603887000945e00458
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon May 2 18:37:31 2011 -0700
+
+    Broad set of improvements to updated TMCPE interface.
+    
+    * Improved styling and use of 960-fluid.
+    * Added consistent header bar
+    * Moved the settings to the header bar
+    * Added interface elements to enhance experience (e.g., Activity log)

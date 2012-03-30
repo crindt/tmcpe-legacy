@@ -1,0 +1,43 @@
+### commit 4a76450fa0f339674133f2e75a5c32ce33be1904
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Nov 28 09:50:44 2011 -0800
+
+    Version 0.9.7
+    
+    * Chart enhancements
+    * Auto-computed non-TMC verification
+    * Versioned database
+
+### commit 2365aea85d7e4d480d02254ea0aa43bcdc54850c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Nov 28 09:48:11 2011 -0800
+
+    Implemented basic general states/chart hover highlights and tooltips.
+    
+    * fixes [#1098](http://tracker.ctmlabs.net/issues/1098)
+
+### commit 2c958f05011d2b577d0c4133d2f356ca5cfc5625
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Nov 28 06:16:47 2011 -0800
+
+    Tweaked compute_incident_clear to project last vehicle until section < start location rather than <=
+
+### commit 7ef55a8aba0cab564190213d5f03363312baa6dd
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Nov 28 06:15:18 2011 -0800
+
+    Added additional parse to set lanes_clear on subject='close incident'
+
+### commit 5a55126466e4904111557b9627039b87fe634017
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Sun Nov 27 23:47:37 2011 -0800
+
+    Use CHP arrival as non-TMC verification time.
+    
+    Domain class method parses icad details for "CHP Unit On Scene".  IFIA
+    controller uses this to return onScene parameter, which is used to compute the
+    verification and response delays in the non-TMC case.
+    
+      * Fixes [#1073](http://tracker.ctmlabs.net/issues/1073)
+    
+      * Refs [#927](http://tracker.ctmlabs.net/issues/927) (more icad parsing still needed)

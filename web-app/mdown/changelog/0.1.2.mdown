@@ -1,0 +1,5 @@
+### commit c1ad931c3a202ebf7c7bf5e23c9aede000ddbbd2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue May 18 16:38:03 2010 -0700
+
+    Release 0.1.2

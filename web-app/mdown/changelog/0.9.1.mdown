@@ -1,0 +1,17 @@
+### commit 83b1d0469c7593b62719540e80881b0d0b29bf64
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 16:18:15 2011 -0700
+
+    Fixed from use of img tag to <p:image> tag so uiperformance will properly optimize the CTMLabs logo.  Fixes [#718](http://tracker.ctmlabs.net/issues/718)
+
+### commit 31f49a15d36f93bc723e509493007f4be792ecf6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 16:09:42 2011 -0700
+
+    Tweaked update-js to not sync datatables:images/favicon.ico.  Forward ported correct favicon.ico.  Fixes [#718](http://tracker.ctmlabs.net/issues/718).
+
+### commit 607f4dd6d03abc3b0bc21d11a252e4d983e226de
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 16:01:36 2011 -0700
+
+    Tweaked update-js script to omit jquery-ui's index.html.  Fixes [#719](http://tracker.ctmlabs.net/issues/719)

@@ -1,0 +1,41 @@
+### commit e26c0978825657252a792382eb81ddd16a5a10f5
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 10:32:33 2010 -0700
+
+    Release 0.2.1
+
+### commit a6d6960e26ab98ebb4e716bc2f13cc708906c8ff
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 10:14:45 2010 -0700
+
+    Altered design to push help document out to redmine, for now.  Refs [#211](http://tracker.ctmlabs.net/issues/211).
+
+### commit d769268f03b67e49d10a5e2f667d546fe68be7cd
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 10:11:01 2010 -0700
+
+    Fixed url mapping configuration so that the root url maps properly to home/index.  Fixes [#231](http://tracker.ctmlabs.net/issues/231).
+
+### commit 96c313cf83c1fd5d81f0b1fdd9e1c8e79ae3f275
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 12 12:00:43 2010 -0700
+
+    Added Help domain class and basic controller/view that uses markdown formatter plugin.
+
+### commit 7828290dbfc26c561019acdb889e7c8e64dfe847
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 13 12:16:54 2010 -0700
+
+    Added script for uploading PeMS 5 minute data to the testbed sensor database.  refs [#198](http://tracker.ctmlabs.net/issues/198).
+
+### commit 0ce0a711e90b000dd39fe5cc6607284314f80e87
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 12 15:28:09 2010 -0700
+
+    Confirmed prior work to automate the delay computation using perl scripting.  Fixes [#51](http://tracker.ctmlabs.net/issues/51).
+
+### commit 058cdd3a8fb3dc19159c386b8741f2c00d7db6c5
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 12 11:01:31 2010 -0700
+
+    Some tweaks to the analysis scripts to allow the user to specify the target database to store the results in.  Fixes [#230](http://tracker.ctmlabs.net/issues/230).

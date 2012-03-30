@@ -1,0 +1,11 @@
+### commit 6190e882c5a53e6772f4d209377fff0fb46a5227
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Sep 28 07:10:07 2010 -0700
+
+    Release 0.3.4
+
+### commit ed10b10ad6cd57414c692f66a15a0696be7aba55
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Sep 28 07:09:07 2010 -0700
+
+    A collection of styling changes.

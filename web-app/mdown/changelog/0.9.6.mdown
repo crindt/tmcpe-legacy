@@ -1,0 +1,158 @@
+### commit bad4982c8460da5f136836d48d335d24a40970db
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Nov 7 06:34:45 2011 -0800
+
+    Version bump to 0.9.6.
+    
+    * Removed datatables plugins from UIperformance consideration
+
+### commit cf7b5569783c36c16e8588a3c1a7ee72f57e6dba
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Nov 7 06:02:12 2011 -0800
+
+    Improvments to tsd to make it more understandable.
+    
+      * dropped fill on what-if portion of chart
+      * fixed some bugs with summary chart related to value of time
+      * fixed some bugs with summary chart related to tmc div pct (refs [#695](http://tracker.ctmlabs.net/issues/695))
+
+### commit 78a6f7b58cf301ac317bcf09971d33c74b6ec636
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Nov 7 04:17:19 2011 -0800
+
+    Made the default summary query month/year.
+
+### commit 9707183d26339f2b7269699ba4e8e4f429c2454a
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Nov 4 13:42:40 2011 -0700
+
+    Some improvements to cell detail table to display obs and avg data.  Styling still needed.  Refs [#1042](http://tracker.ctmlabs.net/issues/1042).
+
+### commit dca0eabf10b79f72445c2bcbe9dab3b922d0febb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Nov 4 11:24:29 2011 -0700
+
+    Relabeled 'delays' as 'net delays' in general stats table.  Fixes [#1042](http://tracker.ctmlabs.net/issues/1042).
+
+### commit 751cc74c2069c6226aa10bacf5ca1ad300f59ceb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 18 15:12:05 2011 -0700
+
+    Removed tooltips from incident/tsd TSD timebar.  Fixes [#1016](http://tracker.ctmlabs.net/issues/1016).
+
+### commit a0fb968eed495aadf4fbe2b98e0299a0b41a0e2f
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 18 13:57:01 2011 -0700
+
+    Minor tweak to hidden div
+
+### commit e08c5b6ccd15c6c3163ec1f927a97d513f9fe689
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Oct 13 14:25:55 2011 -0700
+
+    Created cellDetail widget to display details upon changes to activeTsdCell.
+    Also worked on popups across incident/tsd.
+    
+      * Active cell details now displayed in a table across the top. Fixes [#887](http://tracker.ctmlabs.net/issues/887) and refs [#888](http://tracker.ctmlabs.net/issues/888).
+      * Tweaked cumflow popup handling.  Fixes [#909](http://tracker.ctmlabs.net/issues/909).
+      * More styling fixes needed, but deferred to [#878](http://tracker.ctmlabs.net/issues/878).
+
+### commit 2a153c6a19215e9b2f392e474d46ceedf7c780d0
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Oct 13 11:42:51 2011 -0700
+
+    Basic help system implemented using the help controller, urlmappings, and the
+    markdown plugin to serve raw markdown files from web-app/mdown as wrapped TMCPE
+    pages using a help.gsp style.
+    
+      * URL /tmcpe/help/<term> will serve web-app/mdown/<term>.mdown formatted as
+        HTML (using the markdown plugin) and wrapped in a TMCPE standard page.
+      * Would like markdown-extra support, but markdownj isn't there yet.
+      * Still need conversion to pdf.
+      * Changed Config.groovy to not cache resources in development (allows mdown
+        resources to be edited and reserved.
+      * Fixes [#211](http://tracker.ctmlabs.net/issues/211)
+
+### commit ac727a9fc7e979f58cf80431f4f7972cc4af6f3c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 11 16:07:52 2011 -0700
+
+    Implemented basic idea of markdown-formatted help
+
+### commit f749173d1f690222513cd20d87dc72a3186e9cf3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 11 15:37:41 2011 -0700
+
+    Changed D12 reference to caltrans
+
+### commit b77777713cfee8549f35a87fff4d2a6fc9055ed4
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 11 15:13:58 2011 -0700
+
+    Removed references to jquery.svg and protovis that are no longer used.
+    
+      * Fixes [#925](http://tracker.ctmlabs.net/issues/925)
+
+### commit d886dcd5104ab21732dba14787ae73bc1ebb73c3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 11 14:53:38 2011 -0700
+
+    Created general purpose map legend for linear color scales and synchronized
+    parameter handling for incident/tsd.
+    
+      * Defined tmcpe.legendForLinearScale that draws a color scale legend for on
+        the side of polymaps windows given a d3.scale.linear and some sizing
+        parameters.
+    
+      * incident/tsd:
+    
+        * Consolidated color handling
+        * Added speed legend to map using the new legend object.  Fixes [#370](http://tracker.ctmlabs.net/issues/370).
+        * General styling improvements. Fixes [#225](http://tracker.ctmlabs.net/issues/225).
+        * Continued move to model/view approach to screen widgets and synchronized
+          parameter handling.  Refs [#922](http://tracker.ctmlabs.net/issues/922).
+    
+      * map/show:
+    
+        * Consolidated color handling
+        * Added delay legend to map using the new legend object.  Fixes [#934](http://tracker.ctmlabs.net/issues/934).
+        * General styling improvements. Fixes [#933](http://tracker.ctmlabs.net/issues/933).
+
+### commit 09817c69197cf1c96ecb80ab0e53473223853e17
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 10 15:49:57 2011 -0700
+
+    Added speed legend to incident/tsd map and partially refactored the model/view
+    implementation.
+    
+      * Refs [#370](http://tracker.ctmlabs.net/issues/370):
+        * Uses d3 to emit a rectangle with a linear gradient matching the speed scale
+        * Ticks drawn with text rendered as foreignObjects to deal with blurring
+        * Styling mostly pushed into less stylesheets
+        * Remaining: consolidate the speed scale between TSD and map (using event)
+    
+      * More work on refactoring the incident/tsd implementation to use the
+        model/view pattern.
+
+### commit b6558ec6f3f1b627d5d6a92402d67bd6532ff169
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Oct 7 15:35:40 2011 -0700
+
+    Fixed failing access denied page and removed dependency on 960-fluid.css.
+    
+      * Changed the layout of login/denied to bare.gsp from thin.gsp
+      * Since thin.gsp was the last ref to 960-fluid.gsp: removed 960-fluid.css
+      * Fixes [#879](http://tracker.ctmlabs.net/issues/879)
+      * Some minor improvements to the access denied page (refs [#921](http://tracker.ctmlabs.net/issues/921))
+
+### commit 6e100579d7bcb738ef9111a360ae8a57c0e7fd81
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Oct 7 12:15:14 2011 -0700
+
+    Improved synchronization between backend analysis and incident/tsd interface.
+    
+      * Added hidden maxspd slider to hold max speed parameter sent with active ifia.
+      * Used event handling code to update the slider with parameters
+      * Used subsequent parameters as model for cumflow stats modelUI
+      * This still needs work and generalization (to all parameters)
+      * Refs [#922](http://tracker.ctmlabs.net/issues/922)

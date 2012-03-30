@@ -1,0 +1,448 @@
+### commit 9846bd304bbcf1be6d3243c6c914fe0a69c5ffe5
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 22:36:10 2010 -0700
+
+    Minor tweaks to config.
+
+### commit 8943fe610f65df79ade2a1bb3898ff570b3725d4
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 22:32:43 2010 -0700
+
+    Release 0.3.2
+
+### commit 0a24f3c6b0201e9644b86b16b850bd6a6761f589
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 21:44:25 2010 -0700
+
+    Release 0.3.2
+
+### commit f08df83be34f0d6f516c71420cff36f4b9b003eb
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 21:40:03 2010 -0700
+
+    Revert back to compressed dojo.
+
+### commit c519c3f81c19d30bc04482ef67936efcc930853e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 20:06:40 2010 -0700
+
+    Fixed a bug that broke the show incident detail button when reselecting a cluster.
+
+### commit de30bdc0387b0e5039ccc70c03b289a512c8eb5d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit 79eadcacfe48b99d7402a9207701b71a65169532
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit 089e56639af37da0c0c4fd8ea0b78ce9aa85d1c6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit b787c037e132adc0b7da954022865c0bcb4fc766
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit 99bae604eba3e1fd60ffbfd0cf125fbf9c743ca7
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit 12ebe51c8e5edc09500288dd631d089919692a78
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 4fe7d9cb7fb20fba43550030c536963a23645927
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit 8ecf0fabbe51c304c2242172a5238a5e55e92cd7
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit 5601404dc2887af21812761d7873f5401f55045a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit f3f4c4869783e89eb3e1cc1ad715899dc274c693
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 23 16:19:17 2010 -0700
+
+    Partial implementation of incident icon clustering.  refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit d704620ab00299c9643585cb251f35bef51452fe
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Aug 19 05:37:01 2010 -0700
+
+    Some tweaks to allow better dojo debugging.
+
+### commit 6dd44c3ff8953f33d699e1f37a0c9ce1fa1f8a10
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:49:33 2010 -0700
+
+    Release 0.3.1
+
+### commit 2170aeaf15806268ffc753ee646024d534caf380
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit 54b5428a2661e16c51baa31052ec32a50dc804a9
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:11:27 2010 -0700
+
+    Release 0.3.0
+
+### commit 12f4aa958884aadb270b629a1c2360c7d3f8fed8
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:10:48 2010 -0700
+
+    Push cluster work onto 0.3 branch.
+
+### commit a116b7b146df4eaf5a9d557beeeebeb9075c3604
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit f8913349a968d885f5b77c7b7438ff145b0ff4c2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:18:25 2010 -0700
+
+    Added feature tooltip capabilities.
+
+### commit 982b6c8990a48eeb75b8244777629e92917ae5f8
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit a1b23302dd3005ce984181488083bd12f2dacc58
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 23 16:19:17 2010 -0700
+
+    Partial implementation of incident icon clustering.  refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 017bada8eba06c3985c6d972721c60f6a4024c24
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 18:59:57 2010 -0700
+
+    Updated Class::DBIx schemas.
+
+### commit 75ea05dd7743c41bb4dbb767caf85c5eeb1539c1
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 18:59:41 2010 -0700
+
+    Some tweaks to the config for better portability.
+
+### commit d13914640bcd4574fcf3844d7c3ab3bf7c65d6a4
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 18:53:57 2010 -0700
+
+    Fixed hidden bug that prevented deletion of old analyses.  Fixes [#289](http://tracker.ctmlabs.net/issues/289).
+
+### commit 00299be41603575ed6328f53fe42ec9a7c1d5e9d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 18:52:52 2010 -0700
+
+    Added ability to specify the "showCustom" incident using cadid instead of db id.
+    
+    This is to make debugging easier as specific cadids can now be specified in the url.
+
+### commit 13cc5b90c5c839133c7da616e912a6816be48414
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 18:27:19 2010 -0700
+
+    Custom incident view now displays the location of the incident (fixes [#283](http://tracker.ctmlabs.net/issues/283)).
+    
+    The IncidentView.js now adds an "incidents" layer that is filled with
+    a listing of incidents that match the id of the incident being
+    displayed.  Since ids are unique, exactly one incident will be displayed.
+
+### commit d20198ff6a00215d54965454a38a9b0ff491b89c
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 18:25:54 2010 -0700
+
+    Tweaked the TimeSpaceDiagram to fail a bit more gracefully.
+
+### commit eb5756f1db77f12f1f23e139c01e3f0777adbe9b
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 18:23:23 2010 -0700
+
+    Added ability (command line option) to skip delay calculation if there's already an analysis in the database.
+
+### commit 62cd804c8cab9d338ecc635e3ca6e2ac616c2829
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 16:42:40 2010 -0700
+
+    Added more command line options to fine tune the delay computation.
+    
+    Notable additions:
+    	* The ability to specify the band (alpha)
+    	* The ability to specify the resource and iteration limits
+    	* The ability to specify min-avg-days and min-obs-pct
+    	* The ability to select specific constraint sets
+    	* The ability to skip delay analysis if one already exists
+
+### commit 657b7abe7ea4158836cce5ff1c9056c6281e3405
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 14:47:47 2010 -0700
+
+    Tweaked the incident boundary in the TSD display to be cyan instead of blue.
+
+### commit 66bdc8162119c0c446f9dcfdfe91ac1cfbd699f9
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 14:44:22 2010 -0700
+
+    Fixed bug in delay computation formulation.  Added commentary.  Added a "FORCE" equation.
+    
+    EQ 3 was formulated to ensure that:
+       "if j1,m1 is a boundary in space (-, downstream) at time m1, the sum of all D's later that M1 at section J1 must be <= 0"
+    
+    This constraint is unnecessary and it seems to overconstrain the
+    problem (as formulated).  Removing it produces correct solutions
+    (based upon visual inspection of a sample.
+    
+    The FORCEEQ can be used to require certain cells are in the solution.
+    It is primarily a debugging tool.  It's use is strictly through
+    hardcode modification, though a command-line version is possible.
+
+### commit c31106caff4102e18e4fb55cd64d9565a8fd7fd0
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 12:14:08 2010 -0700
+
+    Added additional options for tuning the Delay Computation.
+
+### commit f25728b17063a193124d4ffc3447dfaf26ddcc61
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 12:03:04 2010 -0700
+
+    Fixed a bug in the generation of the gams script that omitted the length of the first segment considered.
+
+### commit 0f390012633d0caf0caba9c07a7a14118fc196be
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 11:28:00 2010 -0700
+
+    Modified the location parser to optionally use a known incident location (from icad) to better select the closest vds to the incident.
+    
+    If the icad isn't available, the parser falls back to using name similarity.
+
+### commit 6e67e9813b10cb76d097576fd247929436590e14
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 11:23:48 2010 -0700
+
+    Fixed buggy time and direction calcs in the DelayComputation module.
+    
+    Incorrect computations on the time stamps meant that delays wouldn't
+    be calculated for incidents whose start/end times didn't fall on 5
+    minute boundaries.  Fixed this by correcting flawed modulus logic.
+    
+    Also, it appears that the ordering on the W/E logic was reversed for getting stations upstream of an incident location.
+
+### commit afb55eb969aa2456fadcbfabc573d25e3d87098e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 21:03:48 2010 -0700
+
+    Added TSD image that was accidentially left from an earlier commit.
+
+### commit fa876eda36f77d99cc903c67476356087f81fb62
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 00:58:25 2010 -0700
+
+    Minor tweaks to TSD theming.
+
+### commit 106fb54cb2dbcd414aec7df0ee40f81f3944bf2f
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 00:56:23 2010 -0700
+
+    Updated the Class::DBIx schema mappings.
+
+### commit eb904f95c8028aa7560653a007b060fc8f1d6006
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 00:55:26 2010 -0700
+
+    Added the ability to use cplex options for tuning the delay calculation.
+
+### commit cd50c69ef94cc19d60319cce65203f2aa76d44f8
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 00:53:27 2010 -0700
+
+    Some improvements to the LocationParser to better capture location references freeways in activity log memos.
+
+### commit dc2200db05eb5b95cf8f9ba58671fc93f8edac15
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 00:49:11 2010 -0700
+
+    Removed unneeded logfiles from the repository.
+
+### commit a841a0b47b5294e31bf147981569d3b67c47eb7f
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 00:46:13 2010 -0700
+
+    Minor changes to table mappings in the Vds and FacilitySection classes to track changes in the osm segmentation script.
+    
+    To keep track of the upstream changes, I added the osm project as a submodule.
+
+### commit c3394ffd5a2c159628127dfa343e65d0efa1bc1f
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 00:19:09 2010 -0700
+
+    Altered the pems select data query to use the full pems table rather than just the "mini" table.
+
+### commit b3dc03079832e16f9d9eae3ccae626b93f49f2f3
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Sep 25 00:10:22 2010 -0700
+
+    Fixes and improvements to the activity log importing script.
+    
+    In particular:
+    * added some options that can be passed to the Delay Calculation script.
+    * fixed some typos that were preventing the icad from getting read in properly.
+    * modified to only parse activity logs of incidents specified on the command line
+    * minor changes to the Class::DBIx regeneration script
+    * added a few options to the test-failed script for debugging location parser problems.
+
+### commit 7c9ab39c7374d7e1d065dc539edb39a4af6a8691
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Sep 24 23:58:06 2010 -0700
+
+    Tweaked the openlayers tag to select a different google maps api key based upon the grails run environment (production vs. development).
+    
+    Google generates APIs based upon the domain.  When running in
+    development mode, the server runs on localhost (or similar) while
+    production runs on parsons (or similar.  By embedding a single API
+    key, one mode or the other will get complaints from google.  This
+    tweak simply includes one key for development and testing
+    (192.168.0.2) and one key for production (parsons.its.uci.edu).
+
+### commit e43c9635f05794e2f1adfb957ee71175a262f82e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Sep 24 23:51:13 2010 -0700
+
+    Added ability to download an xls workbook contining raw and processed incident data.  Refs [#195](http://tracker.ctmlabs.net/issues/195).
+    
+    Extended the IncidentFacilityImpactAnalysisController to accept
+    requests with the .xls extension to download.  E.g.,
+    
+    http://localhost/tmcpe/incidentFacilityImpactAnalysis/show.xls?id=123
+    
+    Will return an xls spreadsheet containing the raw and processed data
+    associated with facilityimpactanalysis number 123.
+    
+    A direct link to this was added to the custom incident view (under the
+    time-space diagram).
+    
+    The implementation uses apache's poi library to generate the workbook
+    on the fly.
+
+### commit 9112353229d282b3d7de81e2500c783859c848d2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 20 15:25:45 2010 -0700
+
+    Incidents with no analyses will no longer crash the showCustom view.  Instead, a message is displayed that allows the user to report the missing analysis to the issue tracker.  Fixes [#215](http://tracker.ctmlabs.net/issues/215).
+    
+    Conflicts:
+    
+    	grails-app/views/incident/showCustom.gsp
+    	web-app/js/tmcpe/TimeSpaceDiagram.js
+
+### commit 9b836ae65b2102f4d547cd24f83616a6345e76b4
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 20 11:48:09 2010 -0700
+
+    Additional tweaks to the CAS version of the TMCPE website.
+
+### commit 0489229396baa346f4599035e0f2fec4a906e672
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Sep 9 12:36:23 2010 -0700
+
+    Got the basics of spring security working with CAS backed by LDAP for user details.
+    
+    This approach uses the grails-spring-security-cas plugin to defer authentication to CAS.  This, by overriding the default implementation in resources.groovy, we set the UserDetailsService to use LDAP to obtain user information---including group affliations, which are translated into ROLEs using the CtmlabsLdapAuthoritiesGot the basics of spring security working with CAS backed by LDAP for user details.  Refs [#194](http://tracker.ctmlabs.net/issues/194).
+
+### commit acd76afb132bb68900c7d02bddc2cc76be04e7c9
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Aug 19 14:18:53 2010 -0700
+
+    Tweaked the TestbedController to send links to the TPI.  Fixes [#255](http://tracker.ctmlabs.net/issues/255).
+
+### commit c932c342749c8993229e47ba99607cab4e7a37e9
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Aug 20 16:35:07 2010 -0700
+
+    Beginnings of a working CAS implementation.
+    
+    The approach taken here creates a custom CASUserDetails and CASUserDetailsService
+    that overrides the default GormUserDetailsService (loaded in resources.groovy) to bypass looking
+    up user data in local database tables in favor of pulling data directly from the CAS response or
+    from an LDAP lookup.
+    
+    The basics work, but it's more of a proof of concept than a long term solution.  Further work is necessary.
+
+### commit abadfd40bc877e1a8c85b64dc25712dbc2e62da2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Aug 20 09:49:37 2010 -0700
+
+    Imported tmcpe-webapp into eclipse.
+    
+    Adding the eclipse project files to the repo.
+
+### commit 1454f930f7b60b74111da4ba7f6eec6f8633a115
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Aug 20 09:48:56 2010 -0700
+
+    Updated jodatime plugin.
+    
+    This automatically added some mods to the Config.groovy to add some persistance mapping types.
+
+### commit 8a3f7d68a918c815ca090ecdcfdf10d9486feaae
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Aug 20 09:47:52 2010 -0700
+
+    Removed some unneeded elements from Incident.groovy.
+
+### commit dea5f6c357a50600223a9cacae9082318420f233
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Aug 19 14:18:53 2010 -0700
+
+    Tweaked the TestbedController to send links to the TPI.
+
+### commit 151d0e062513645106fbca3125d36b6cc9debed5
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:44:37 2010 -0700
+
+    Release 0.2.5
+
+### commit 4233167d732a5cfadb7f447ffc8b019d5e255b44
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 23 09:39:56 2010 -0700
+
+    Added TestbedController to implement the Testbed API.
+    Currently a very basic implementation that responds to a jsonp request with summary data.
