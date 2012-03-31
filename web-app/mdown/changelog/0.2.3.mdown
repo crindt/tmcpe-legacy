@@ -1,0 +1,61 @@
+### commit 6a9224294f168dc73fe42845b9176fc48f2e55bd
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 20 16:13:35 2010 -0700
+
+    Fixed the fix for appName in Config.
+
+### commit 570a648d4eed6bd185e62aeadaf9ef93b648d66a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 20 16:03:35 2010 -0700
+
+    Fixed site name bug inserted in last commit.
+
+### commit 3466380597bf42678a4fa213cc55c83b1335ae4a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 20 15:53:16 2010 -0700
+
+    Release 0.2.3
+
+### commit f7534df3664b0352660ae07eca61d8817e833558
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 20 15:51:10 2010 -0700
+
+    Added the simple map interface to the MapController (so it can be accessed)
+
+### commit 12f6e82729b7d0297065e50c0a477248ade8eca7
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 20 15:50:38 2010 -0700
+
+    Added a simple map interface for demo purposes.
+
+### commit 532ecadb8b5ea84ba1118ca2f9882ecac5bd5b29
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 16 17:57:21 2010 -0700
+
+    Basic implementation of a summary row for the incidentList view that
+    includes columns for total delay (working) and total TMC savings (TBD)
+    partially addressing [#193](http://tracker.ctmlabs.net/issues/193).
+
+### commit 7ff9dcbb997d8188f1e25a7fe34f168bb37e2b71
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 16 17:56:14 2010 -0700
+
+    Modified the default layout to properly set the base href with an absolute URL instead of a relative one.
+
+### commit 7c5e89dfbdc7c2a15ec17b9227ac4dcb443a75ec
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 16 17:55:24 2010 -0700
+
+    Tweaked debug settings for uncompressed dojo.
+
+### commit 26bc34277a09b368b38c6d59bb8542bd67fda19a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 16 17:53:07 2010 -0700
+
+    Altered development URL to be 192.168.0.2 instead of localhost, allowing other machines on local network to be used for testing.
+
+### commit e2e66ebe9f73d707f86eaa040dd2c486b88b294c
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Jul 15 16:44:04 2010 -0700
+
+    Some hacky table-based formating to get a summary line to address [#193](http://tracker.ctmlabs.net/issues/193).

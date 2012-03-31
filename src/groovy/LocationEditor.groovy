@@ -1,7 +1,10 @@
 import java.text.DateFormat
 import java.beans.PropertyEditorSupport
-import org.postgis.Geometry
-import org.postgis.PGgeometry
+
+//import org.postgis.Geometry
+//import org.postgis.PGgeometry
+import com.vividsolutions.jts.geom.Geometry
+//import org.postgis.jts.JtsGeometry
 import org.apache.log4j.Logger
 
 class LocationEditor extends PropertyEditorSupport { 
@@ -14,7 +17,8 @@ class LocationEditor extends PropertyEditorSupport {
     public void setAsText(String text) { 
         def mytext = text
         log.info( "===============> TEXT IS: " + mytext )
-        value = PGgeometry.geomFromString( mytext )
+        //value = JTSGeometry.geomFromString( mytext )
+        throw new RuntimeException("LocationEditor is broken")
     }
 
     public String getAsText() { 

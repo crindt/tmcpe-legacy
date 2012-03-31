@@ -1,0 +1,310 @@
+### commit 3927d3efc3ed22398d6662fa96829a1a996dc48f
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 23:15:58 2010 -0700
+
+    Improved synchronization between map, detail, and list panes in Incident List view.
+    
+       * Fixes [#218](http://tracker.ctmlabs.net/issues/218): All features of the incident list view now properly sync
+       * Fixes [#257](http://tracker.ctmlabs.net/issues/257): Along with earlier commits, incident clustering on layers works
+         properly.
+
+### commit c4431f76d0005f99ce754794a14ce3cbc1a45543
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 23:14:34 2010 -0700
+
+    Fixed minor bug in pems loading routine.
+
+### commit 286477f405662f11b5a7e7376cdd6e93e3737b66
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 23:13:37 2010 -0700
+
+    Added explicit height and width to map styling to solve firefox layout bug.
+    
+       * Fixes [#375](http://tracker.ctmlabs.net/issues/375)
+
+### commit f23ff67b81a07d16cf85fe1f2f8286c8c76e88cd
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 15:26:53 2010 -0700
+
+    Removed "height" specification from TSD table tr and td.
+    
+    Allow the browser to compute the table height given its container.
+       * Fixes [#372](http://tracker.ctmlabs.net/issues/372)
+
+### commit 88c3e62db6b462a35a56393dc06251f0b8ebb005
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 15:24:40 2010 -0700
+
+    Fixed bug that sent some groovy gibberish to html file
+
+### commit 0b6e69672182d6b92a7a391e29e85fe4086e6f0d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 15:23:46 2010 -0700
+
+    Added avg spd,flw,occ to the facility analysis xls file
+
+### commit 10df811f923b4da754c972b3b52a5ff85aec9e56
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 15:23:17 2010 -0700
+
+    Final Quarterly Report
+
+### commit f41d5eb5a5d943a9697d0a5d01ad81ca2da7d077
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 15:22:56 2010 -0700
+
+    Bumped the max number of incidents that can be read from the server to 2500 from 1000
+
+### commit c630e0c9da91ccc9d0ca5a417c219cf6ee40b3f6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 15:22:20 2010 -0700
+
+    Fixed a rendering bug by removing an explicit width tag from css
+
+### commit ba5a6b0974c4a3ef3009a962d7922f6937adc060
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Oct 25 07:45:56 2010 -0700
+
+    Added draft of final QR
+
+### commit 6ad6e2e4448972386d0e3c60ee961af8227c6f7e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Oct 25 07:07:09 2010 -0700
+
+    Added separately maintained documentation to the repo.
+
+### commit 67559ab9a6c7fe427511170076e7cf6292ada2be
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sun Oct 24 00:24:01 2010 -0700
+
+    Moved TmcLogEntry and CommLogEntry domain classes to censored views of the database tables.
+    
+       * The censored views use regexp_replace to swap \d\d\d[-\s]\d\d\d\d (typical
+         phone number pattern) for XXX-XXXX.  The solution is not perfect, but it's
+         pretty robust.
+       * Fixes [#369](http://tracker.ctmlabs.net/issues/369)
+
+### commit c849a147e5c71c4ec3a300484bd4ccbd0684fb6d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sun Oct 24 00:02:53 2010 -0700
+
+    Styling and interface enhancements to the incident list.
+    
+    Incident list map incident icons are now themed based upon features of the
+    cluster they represent.  In particular:
+    
+       1. The radius of the circle is tied to the number of incidents at the
+          location, with a min (5) and max (15) radius to constrain it.  Fixes [#352](http://tracker.ctmlabs.net/issues/352).
+    
+       2. The fill color of the circle varies with the magnitude of the average
+          incident delay (Dtmcpe) from green (50 veh-hr of delay) to red (800 veh-hr
+          of delay) for all the incidents in the cluster that have Dtmcpe computed.
+    
+       3. The ordering of incidents (and the detail panes) for a given incident
+          cluster is now set to be Dtmcpe descending.  Fixes [#367](http://tracker.ctmlabs.net/issues/367).
+
+### commit 43d196c26a947a8afd43c72d8b47f9e0eaf15240
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 23 21:35:00 2010 -0700
+
+    Fixed bug in the code to /update/ the pems 5 minute averages.
+    
+    Use of incorrect loop variable was resulting in a database error for a bad
+    column reference.
+    
+       * Fixed the loop variable,
+       * added better reporting of database errors, and
+       * regenerated the DBIx::Class schema objects
+
+### commit a2ae26091a42168760ce3d748cfd7033ae114f6d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 23 21:31:57 2010 -0700
+
+    Fixed bug in incident detail display on incident list.
+    
+    A scoping problem in the button callback was making the interface return the
+    wrong incident analysis when cluster buttons were pressed.  Solved by scoping
+    the incident id properly.  Fixes [#368](http://tracker.ctmlabs.net/issues/368).
+
+### commit 6e57743a0f5d8fd6d389504e54cf8b3c215c7ccd
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 23 01:04:39 2010 -0700
+
+    Added 'censored' views of the activity and comm logs. Refs [#194](http://tracker.ctmlabs.net/issues/194)
+
+### commit 364c7395a21871c70722cb12f2e4bc0c10b8a2ba
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 23 01:01:15 2010 -0700
+
+    Put a missing conditional on a log statement
+
+### commit 503dd7f9ceabf79987e295b43a7b04f655ffea13
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 22 18:01:19 2010 -0700
+
+    Added log memo/status text to the log bars in the time-space-diagram.
+    
+       * The text appears below the bar.
+       * Defaults to memoOnly or, failing that, activitysubject
+       * Added event to track cell focus in the datagrid and update the log bar to
+         match.  This allows more control using the keyboard.
+       * Fixes [#362](http://tracker.ctmlabs.net/issues/362)
+       * Refs [#288](http://tracker.ctmlabs.net/issues/288)
+
+### commit d92310bd9bcb528eb39960593e5afbba5033da97
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 22 18:01:19 2010 -0700
+
+    Added log memo/status text to the log bars in the time-space-diagram.
+    
+       * The text appears below the bar.
+       * Defaults to memoOnly or, failing that, activitysubject
+       * Added event to track cell focus in the datagrid and update the log bar to
+         match.  This allows more control using the keyboard.
+       * Fixes [#362](http://tracker.ctmlabs.net/issues/362)
+
+### commit 2d4eb129de463d422ce9f56f7bc4cb4b77729dab
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 22 17:11:09 2010 -0700
+
+    Fixed the 'report a problem' link to include a link to the offending analysis.  Fixes [#366](http://tracker.ctmlabs.net/issues/366)
+
+### commit 2803fae6ee56e8c025051173fc7b1b49a980f1ce
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 22 17:01:24 2010 -0700
+
+    Minor tweak to json routine for incident to catch an error condition
+
+### commit d0dfb8e4bc0cea5d40a4cb465965e4b85fa0b1e8
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 22 16:57:58 2010 -0700
+
+    Implemented form and geographic data caching for the incident list view using cookies.
+    
+       * The incident list view now updates a cookie containing the user's query
+         parameters any time that query is updated OR the map moves (adjusting the
+         map extents).
+       * When the page is first loaded, this cookie is read (if it exists) and used
+         to set the values in the form (and for the initial query).
+       * Fixes [#360](http://tracker.ctmlabs.net/issues/360)
+
+### commit 43e17ff98161c4a53233c08a713f8a552b0ff270
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 22 12:40:27 2010 -0700
+
+    Several changes related to themeing and query persistence:
+    
+       * Incident List incident themeing now takes into consideration the number of
+         incidents.  Still need to tune it.  Refs [#352](http://tracker.ctmlabs.net/issues/352).
+       * Incident view vds segments theming now uses stylemaps to implement theming
+         rather than going through and setting the styles of features individually.
+         Similar cost, but more consistent with the openlayers way
+       * Basic use of cookies to store start and end dates of prior query for next
+         time.  More general implementation needed, but valid proof of concept.
+         Refs [#360](http://tracker.ctmlabs.net/issues/360).
+
+### commit 50e56be69d2f16eb60fea839fa372988c3ecd43a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 22 03:08:29 2010 -0700
+
+    Big cluster of commits.
+    
+       * Fixed problems with geographic query in incident list controller (refs [#355](http://tracker.ctmlabs.net/issues/355)
+         and [#358](http://tracker.ctmlabs.net/issues/358))
+    
+       * A number of styling changes on both:
+          * The TimeSpaceDiagram and
+          * the incident location display
+    
+       * Tweaks to how the tag library is used
+    
+       * Added dojo/dijit/dojox trunk as a submodule for local use
+    
+       * Removed declarative onRowMouseOver definition in incident view log grid in
+         favor of a programmatic one that works properly in firefox (refs [#354](http://tracker.ctmlabs.net/issues/354)).
+         Also, so styling tweaks here that make ffox display the time-based log
+         bars.
+    
+       * Set the default date range on the incident list query to be the past three
+         months from "now."  Fixes [#359](http://tracker.ctmlabs.net/issues/359).
+    
+       * Removed the use of some deprecated dojo interfaces
+    
+       * Improvements to the incident list progress bar implementation
+    
+       * Moved the incident table update to be called from loadend instead of
+         features added.  This significantly speeds loading of incident data (refs
+         [#355](http://tracker.ctmlabs.net/issues/355))
+    
+       * Tweaked the ItemVectorLayerReadStore to accept a query parameter that
+         limits the fetch results to only those features that are actually
+         on-screen.  This is necessary due to the use of the BBOX strategy
+         that can load features that it doesn't actually draw.
+
+### commit cfe3f173e164d43e02fcb06d6e65eba14385de9f
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Oct 20 14:03:49 2010 -0700
+
+    Removed legacy reference to openlayers_latest tag
+
+### commit 19f86d8a0c134a555f9328ce082d26b90438968c
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Oct 20 13:38:42 2010 -0700
+
+    A series of performance tweaks.
+    
+    Optimized server side of incident list in an effort to speed up load time (refs [#355](http://tracker.ctmlabs.net/issues/355)):
+    * Added dow index on actlog.full_incidents
+    * Reduced amount of data sent as JSON
+    * Turned of 'count' query on json generation (no paging here)
+    * Went back to hosted openlayers.  Inserted as a git submodule.
+    
+    Also, performed some code refactoring and commentary.
+
+### commit 419023619b704c4dc1496005daa25d34dbebdd43
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Oct 20 13:38:42 2010 -0700
+
+    A series of performance tweaks.
+    
+    Optimized server side of incident list in an effort to speed up load time (refs [#355](http://tracker.ctmlabs.net/issues/355)):
+    * Added dow index on actlog.full_incidents
+    * Reduced amount of data sent as JSON
+    * Turned of 'count' query on json generation (no paging here)
+    
+    Also, performed some code refactoring and commentary.
+
+### commit f398ec479cc159ca71934e8ef70d9f5002f1c9d2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 19 17:40:30 2010 -0700
+
+    Fixed bug that extended the time header beyond the bottom of the TSD table.
+
+### commit cf46fbed14bc7ae0b2ee3ce8dd0bdc93061d3c0a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 19 16:42:34 2010 -0700
+
+    Added uiperformance plugin to optimize speed.
+    
+    * Refs [#355](http://tracker.ctmlabs.net/issues/355)
+
+### commit eb49d3b8abb8682d1f5f711f397cee56584ef7aa
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 19 16:40:56 2010 -0700
+
+    Changed to using google hosted dojo and hosted openlayers.
+    
+    * Some minor changes required in source
+    * Refs [#355](http://tracker.ctmlabs.net/issues/355).
+
+### commit 35e4ad5e9503426c2c5e1f1af28ab3ccf334ecc7
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 19 10:45:20 2010 -0700
+
+    Release 0.4.0
+
+### commit 1878bab98c7a5cc57d577d6df84374379fb204c9
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Oct 19 10:44:38 2010 -0700
+
+    Added CommLogEntry to datasource

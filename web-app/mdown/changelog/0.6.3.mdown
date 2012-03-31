@@ -1,0 +1,46 @@
+### commit ab3bd63f11817a588922ebcbed8f88ac71764747
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 10 04:13:37 2011 -0700
+
+    Bug fixes and ui improvements
+    * Improved verification and lanes_clear parsing
+    * Several UI improvements
+      * Added a simple top menu
+      * Added a report problem link
+    * Better interactivity between the server process and the UI
+
+### commit 85f23d4c2479cd7777242a00f1ebee2d5b882d70
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon May 9 22:09:03 2011 -0700
+
+    Big bundle of changes.
+    
+    * Numerous fixes to the import-al and delay calc script
+    * Numerous fixes to tsd page
+    * Added tabbed view to tsd page allow viewing of multiple types of data associated with an analysis
+      * Improved the general stats view (in a tab).  This will eventually support displaying multiple facilities (refs [#677](http://tracker.ctmlabs.net/issues/677))
+      * Added activity log to tsd page.  Fixes [#684](http://tracker.ctmlabs.net/issues/684)
+    * Sorted the inversion issue.  Fixes [#685](http://tracker.ctmlabs.net/issues/685).  Fixes [#678](http://tracker.ctmlabs.net/issues/678).
+    * Some work on zooming tsd, refs [#683](http://tracker.ctmlabs.net/issues/683)
+    * Simplified formatting in map incident list to get proper sorting behavior (fixes [#675](http://tracker.ctmlabs.net/issues/675))
+
+### commit 79c7e9106964cbc2f4748d8787d54d3a47dc6df7
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri May 6 08:27:16 2011 -0700
+
+    Changed default TMC diversion percent to 75%
+
+### commit faabc314dcb99bb50fda225364304dde1c54264f
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri May 6 08:08:39 2011 -0700
+
+    Added ability to display delay numbers in USD in addition to veh-hr (TSD view only).
+    
+    * refs [#297](http://tracker.ctmlabs.net/issues/297), using $13.11 as value of time as a default (per D12) (see TMCPE minutes)
+    * Some tweaks to try to solve FF BBox problem ([#674](http://tracker.ctmlabs.net/issues/674))
+
+### commit 0bded33ce9646cb6eb2465af29144a8f3cf136cd
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 5 14:20:12 2011 -0700
+
+    Fixed bug in in-line conditional.

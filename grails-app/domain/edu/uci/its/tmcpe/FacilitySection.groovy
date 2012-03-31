@@ -1,10 +1,7 @@
 package edu.uci.its.tmcpe
 
-import org.postgis.Geometry
-import org.postgis.Point
-import org.postgis.LineString
-import org.postgis.hibernate.GeometryType
-
+import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.LineString
 
 
 // This needs to map into spatialvds
@@ -31,14 +28,15 @@ class FacilitySection {
     }
 
     String toString() {
-        return [ freewayId, freewayDir, "@", absPostmile, "[" + name + "]" ].join( " " )
+		return "$freewayId $freewayDir @ $absPostmile ($id) [$vdsType:$name]"
     }
 
     static mapping = {
-//        table 'temp_vds_data'
+        //        table 'temp_vds_data'
         table name: 'vds_view', schema: 'tbmap'
 
-        id column: 'id'
+        // FIXME: mongodb doesn't like it with id's have a different name
+        //id column: 'id'
         name column: 'name'
         lanes column: 'lanes'
         segmentLength column: 'length'
@@ -48,9 +46,7 @@ class FacilitySection {
         vdsType column: 'vdstype'
         absPostmile column: 'abs_pm'
         geom column: 'geom'
-        geom type:GeometryType 
         segGeom column: 'seg_geom'
-        segGeom type:GeometryType 
 
         version false
     }

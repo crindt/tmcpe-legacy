@@ -1,0 +1,313 @@
+### commit 71802401e65d8867c03d944856083129e87c23e3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 00:24:21 2011 -0700
+
+    Fixed bad logo link in css.
+
+### commit 02d4c0c6fb0c11df8ee7d0c04df48d619af664ca
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 00:20:22 2011 -0700
+
+    Fixed production database url.
+
+### commit 63f170aeb19e503cf5eb597958bf7be235a8f9ea
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 00:16:06 2011 -0700
+
+    Fixed another config typo for production.
+
+### commit c4aef81e36770d1ef4aa41ab473a206b2c05b36e
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 00:14:54 2011 -0700
+
+    Fixed config typo for production version.
+
+### commit ef7d1c59e9c3a2ad98d320519b807de4809fb457
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 23:48:17 2011 -0700
+
+    Fixed a missing closing quote
+
+### commit c2fc16110375c781b8dcc8958174a19267776e58
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 23:25:51 2011 -0700
+
+    Shifted to streamlined map view mimicking a few gmail features for more
+    consistent scrolling performance..
+    
+    This is a major layout shift and has consequently affected a number of standing
+    issues as follows:
+    
+    * Fixes [#704](http://tracker.ctmlabs.net/issues/704) (speed is significantly better)
+    * Fixes [#688](http://tracker.ctmlabs.net/issues/688) (date sorting works)
+    * Fixes [#841](http://tracker.ctmlabs.net/issues/841)
+    * Fixes [#709](http://tracker.ctmlabs.net/issues/709)
+    * Fixes [#813](http://tracker.ctmlabs.net/issues/813) (resize bug is not longer relevant)
+    * Refs [#336](http://tracker.ctmlabs.net/issues/336) (ffox is not compatible with map/show)
+
+### commit 10950fe1001c4b57abcbc3ab93600c535b505087
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 23:25:51 2011 -0700
+
+    Shifted to streamlined map view mimicking a few gmail features for more
+    consistent scrolling performance
+    
+    This is a major layout shift and has consequently affected a number of standing
+    issues as follows:
+    
+    * Fixes [#704](http://tracker.ctmlabs.net/issues/704) (speed is significantly better)
+    * Fixes [#688](http://tracker.ctmlabs.net/issues/688) (date sorting works)
+    * Fixes [#841](http://tracker.ctmlabs.net/issues/841)
+    * Fixes [#709](http://tracker.ctmlabs.net/issues/709)
+    * Fixes [#813](http://tracker.ctmlabs.net/issues/813) (resize bug is not longer relevant)
+    * Refs [#336](http://tracker.ctmlabs.net/issues/336) (ffox is not compatible with map/show)
+
+### commit 0ec11a4ca221843e2274815a2cce6aa98f42fed5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 23:22:02 2011 -0700
+
+    Altered table name for the user class to avoid a postgres collision
+
+### commit 7836b2ff9dfdb90628a6d756c9adda73f2a5fd62
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 23:06:51 2011 -0700
+
+    Removing legacy files and cruft
+
+### commit 680eb7b2bef1b55583ed9c94562eca9c75f83388
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 22:32:56 2011 -0700
+
+    Flexible aggregation query now built into IncidentController.
+    
+    * The implementation is currently a bit of a hack and needs refinement.
+      Nonetheless, it generally works for allowing grouped and filtered queries
+      producing aggregate statistics as json outputs.
+    * This is relevant to:
+      * [#180](http://tracker.ctmlabs.net/issues/180) because summary views depend on aggregate stats
+      * [#337](http://tracker.ctmlabs.net/issues/337) because the monthly report depends on aggregate stats grouped by month
+      * [#758](http://tracker.ctmlabs.net/issues/758) because grouped queries give more control over returned data and thus
+         can help resolve oversized queries
+      * [#835](http://tracker.ctmlabs.net/issues/835) (especially) because a grouped (aggregate) query screen requires
+         aggregate queries.
+
+### commit 9adc6333db49229d067a6e61185c03efbdafaccb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 15:35:49 2011 -0700
+
+    Fixed bug with mouseover events on TSD activity log not displaying timebars on the chart.
+    
+    * The problem was d3 data collections and fixed with .data(d,function(d){})
+      to differentiate log bars from critical event bars
+    * Refs [#385](http://tracker.ctmlabs.net/issues/385)
+
+### commit b83fba33733f77f59cecf01028e054fd36d435d1
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 12:02:06 2011 -0700
+
+    Baby steps toward inherited classes for Incidents
+
+### commit 223418d9d555d01e22e023a715e8e515e5af4cad
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 22 12:01:07 2011 -0700
+
+    Tweaked definition of 'bounded incident' to require two border cells
+
+### commit a1dc1f4d34112ae78937e25f25d68364b96c85fb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Aug 18 10:35:21 2011 -0700
+
+    Beginnings of pulling aggregate data by user-defined groupings
+
+### commit 21b520e3f206bd4a9f73b00d61da8ef871402378
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 23:21:32 2011 -0700
+
+    Added staged javascript libraries.
+
+### commit c2d63e41d906e52df30a850d9aa393c9add0d7a9
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 23:18:50 2011 -0700
+
+    Minor layout tweaks.
+
+### commit 0ffcda18e6620bcc23d8ea44314ecc49229b5f25
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 23:17:39 2011 -0700
+
+    Continued tweaks for projections on the incident queries.
+
+### commit a7c5fa6d0b525e243edfb9efd8ebb9ea05973c0c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 23:15:49 2011 -0700
+
+    Updated .gitignore
+
+### commit 3dfbb7328e5bb9061ba25b56c4f5a896d88affa8
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 23:15:27 2011 -0700
+
+    Cleaned up git commits with some residual files previously left out
+
+### commit 03f0bc248754f10c6d9fe86aae70f58665fee676
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 23:10:59 2011 -0700
+
+    Updated the jquery-format repo to behave nicely.
+
+### commit 98b8a8bc010b6923cbfb8d7e65261f49afed268a
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 22:57:02 2011 -0700
+
+    Added updated perl schema files
+
+### commit 1a6b6da1291a76583e41518d0c49981d9df230fc
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 19:10:07 2011 -0700
+
+    Work toward querying incidents by analysis results.
+    
+    * Got projections working following [this
+      guide](http://grails.1312388.n4.nabble.com/querying-transient-properties-td1373849.html)
+    * Big step toward finalizing the interface
+    * Refs [#843](http://tracker.ctmlabs.net/issues/843)
+
+### commit 22c94d2142fb925bfd51f555ddb14b54529a1eee
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 15:06:17 2011 -0700
+
+    Removed js files from web-app in favor of git submodule versions
+
+### commit 1d7bca8d8839f1b9d8adb2c15309d656ed269b4e
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 15:05:03 2011 -0700
+
+    Removed intermediate js source files in favor of git submodules
+
+### commit df971db7b53b77782ecb6bb996d3db5e11de8ca8
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 14:55:48 2011 -0700
+
+    Added underscore.js as a git submodule.
+
+### commit a002884dfaa01a71bfaa80b812029a5ae0ce67e0
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 14:48:39 2011 -0700
+
+    Added polymaps-cluster as a submodule
+
+### commit 8ebb7f295916368beab88877117cef8c8d601bd6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 14:11:53 2011 -0700
+
+    Formatting fixes for small screens.  Refs [#839](http://tracker.ctmlabs.net/issues/839)
+
+### commit c55097a1d4c6f24bae1ca3383eca45f2b6f4e19c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Aug 19 12:42:54 2011 -0700
+
+    More presentation experiments
+
+### commit 4aa5c7a1b417a1b4725ac7fd42127b3e9de1c10a
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Aug 18 13:20:41 2011 -0700
+
+    Hacking transforms
+
+### commit dcc7d440418bfccc75c34bdf39bd55dff41f17f0
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Aug 18 10:36:47 2011 -0700
+
+    Basic web-based presentation ideas working
+
+### commit bae81a2d03b6c33528954a677478a0fcd25febb5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 16 11:18:28 2011 -0700
+
+    Fixed absolute url reference.
+
+### commit ed3eadb7da7c418e4cd89ccf25420e1213e2bebc
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 16 11:10:07 2011 -0700
+
+    Added catch for null values in template.
+
+### commit fc323ab9cf186ac434d9922c3e29187a07d0cd57
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 16 10:53:12 2011 -0700
+
+    Continued refinements toward 1.0 release.
+
+### commit ea021e9316175ddace8bc874dc90874e9868b6da
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 8 17:28:57 2011 -0700
+
+    Added forced height on incident stats to make scrolling to the bottom cleaner
+
+### commit 1bfc5fec6d163dda64d7158802d119efe847b33e
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 8 17:27:47 2011 -0700
+
+    Updated d3 and jquery-format scripts.
+
+### commit 7b775096164296df4f5e44f0141984f1b6cc7fba
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 8 17:27:34 2011 -0700
+
+    Added revamp_map to map controller
+
+### commit 84412c53294810da7d6fc7ab064d1a07571c170b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 8 17:26:18 2011 -0700
+
+    Fixed some table styling problems on resize and scroll.
+
+### commit 58a2d397bae5be933c64f0ff88e2d0aba885f0f3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 8 17:25:30 2011 -0700
+
+    Made problem and help links open new windows
+
+### commit 3308bfc085d829d304883369b6cc02af7be5ab86
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Aug 8 17:23:23 2011 -0700
+
+    web-app/js/tmcpe/tmcpe-revamp.js
+
+### commit 4363920ddf6c2eccc7970c9dd662035cb77d6b8f
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Sat Aug 6 23:15:30 2011 -0700
+
+    Ditched backbone in favor of revamped version of a d3-driven app
+
+### commit e1377c4e3e9e9d45ad4bb2557ce5fccc6b4bdb1e
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Aug 4 16:30:30 2011 -0700
+
+    Continued implementing a backbone-based app to simplify event handling.
+
+### commit 7ba693369241b99086771bb7ad616da741385f98
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 2 16:41:34 2011 -0700
+
+    Experimental port to use backbone.js
+
+### commit 1178c27c05a000dc153d2c4aea34107f44d0e0a8
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Jul 28 13:18:53 2011 -0700
+
+    Some tweaks to the css to make it happy in firefox
+
+### commit 8ee179edf3ea2a9332eb9cbbded3d7e8c1425e64
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Jul 7 11:29:30 2011 -0700
+
+    Added option to omit OSM geography lookup from incident parsing, which is pretty slow.
+    
+    * Refs [#807](http://tracker.ctmlabs.net/issues/807).
+
+### commit 602a23ebd5c462d3ff418f50b337033615a45de6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 16:22:52 2011 -0700
+
+    Tweaked link in incident detail on map page to open analysis in new window.  this was lost in recent commits

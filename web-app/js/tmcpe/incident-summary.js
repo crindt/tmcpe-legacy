@@ -21,20 +21,20 @@ if ( !tmcpe ) var tmcpe = {};
       ;
 
       function executeQuery() {
-	  if ( url == null ) throw "undefined URL in tmcpe.aggquery.executeQuery()";
-	  
-	  $(window).trigger( "tmcpe.aggregatesRequested", query );
-	  
-	  tmcpe.loadData( url, function(e) {
-		       // Catch network errors
-		       if ( e == null ) throw "Error retreiving query data from server.";
-		       
-		       // hold the json response here
-		       data = e;
-		       
-		       // broadcast the newly loaded data
-		       $(window).trigger( "tmcpe.aggregatesLoaded", data );
-	  }, "Loading aggregate data" );
+	      if ( url == null ) throw "undefined URL in tmcpe.aggquery.executeQuery()";
+	      
+	      $(window).trigger( "tmcpe.aggregatesRequested", query );
+	      
+	      tmcpe.loadData( url, function(e) {
+		      // Catch network errors
+		      if ( e == null ) throw "Error retreiving query data from server.";
+		      
+		      // hold the json response here
+		      data = e;
+		      
+		      // broadcast the newly loaded data
+		      $(window).trigger( "tmcpe.aggregatesLoaded", data );
+	      }, "Loading aggregate data" );
       }
 
       function modelToUrl() {
@@ -43,14 +43,14 @@ if ( !tmcpe ) var tmcpe = {};
 	  if ( model.groups == null ) throw "Undefined model.groups in tmcpe.aggquery";
 	  if ( model.stackgroups == null ) throw "Undefined model.stackgroups in tmcpe.aggquery";
 
-	  var url = g.createLink( { controller: 'incident',
-					 action: 'listGroups.json',
-					 params: {
-					     groups: model.groups,
-					     stackgroups: model.stackgroups,
-					     filters: model.filters
-					 }
-				       });
+	  var url = tmcpe.createFormattedLink( { controller: 'incident',
+				             action: 'listGroups.json',
+				             params: {
+					         groups: model.groups,
+					         stackgroups: model.stackgroups,
+					         filters: model.filters
+				             }
+				           });
 	  return url;
       }
 
@@ -663,12 +663,12 @@ if ( !tmcpe ) var tmcpe = {};
       // create view event bindings
       var loadingOverlay;
       $(window).bind("tmcpe.aggregatesRequested", function(caller, d) { 
-	  loadingOverlay = $("#loading").overlay({load:true, closeOnClick:false, api:true});
+	  loadingOverlay = $("#loading").modal();
       } );
 
       $(window).bind("tmcpe.aggregatesLoaded", function(caller, d) { 
 	  aggchart.data(d);
-	  if ( loadingOverlay ) loadingOverlay.close();
+	  if ( loadingOverlay ) loadingOverlay.modal('hide');
       } );
       
 
@@ -681,18 +681,15 @@ if ( !tmcpe ) var tmcpe = {};
 
       /////////// QUERY FORM MANIP
 
-      // jquerytools tabs
-      $('ul.tabs').tabs('div.panes > div');
-
       // create basic query form
       //$('groupby')
 
       // update if the querybox changes
       $("#advancedqueryinput").keypress(function(e){
 	  if(e.which == 13){
-	      var url = g.createLink( { controller: 'incident',
-					action: 'listGroups.json'
-				      } ) + "?"+this.value;
+	      var url = tmcpe.createFormattedLink( { controller: 'incident',
+					             action: 'listGroups.json'
+				                   } ) + "?"+this.value;
 	      aggquery.url(url);
 	  }
 

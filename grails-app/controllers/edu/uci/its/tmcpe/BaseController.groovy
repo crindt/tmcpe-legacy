@@ -2,6 +2,7 @@ package edu.uci.its.tmcpe
 
 
 import org.geeks.browserdetection.UserAgentIdentService
+import org.geeks.browserdetection.ComparisonType
 
 class BaseController {
 
@@ -9,21 +10,17 @@ class BaseController {
     def userAgentIdentService
 
     def beforeInterceptor = {
-	def ver = userAgentIdentService.getBrowserVersion().split("\\.")
-	log.info( "BROWSER VERSION: " + ver.join("..") )
-	switch ( userAgentIdentService.getBrowserType() ) {
-	case UserAgentIdentService.FIREFOX:
-	    if ( [ver[0],ver[1]].join(".").toFloat() < 3.5 ) {
-		redirect(controller:'help',action:'browserHelp');
-	    }
-	    break;
-	case UserAgentIdentService.CHROME:
-	    break;
-	default:
-	    redirect(controller:'help',action:'browserHelp');
-	    break;
-	}
+		def ver = userAgentIdentService.getBrowserVersion().split("\\.")
+		log.info( "BROWSER VERSION: ${ver.join('..')}" )
+        log.info( "BROWSER TYPE:    ${userAgentIdentService.getBrowserName()}:${userAgentIdentService.getBrowserVersion()}")
+        if ( userAgentIdentService.isChrome(ComparisonType.GREATER, "10") 
+             || userAgentIdentService.isFirefox(ComparisonType.GREATER, "4.0") 
+             || userAgentIdentService.isSafari(ComparisonType.GREATER, "3") 
+		   ) {
+            // All OK, don't redirect
+        } else {
+            redirect(controller:'help',action:'browserHelp')
+        }
     }
-
 }
 

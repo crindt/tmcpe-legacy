@@ -1,0 +1,113 @@
+### commit 0eb1515b4dd4b581874b6e85f01911aaea8aef75
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 18 14:27:04 2011 -0700
+
+    Tweaked version definition in TmcpeTagLib to use app.minorversion to show hotfix
+    versions.  Major versions are still stored in app.version.  The result is that
+    new releases will overwrite minor version (hotfixes) from the last minor
+    version, but major releases (0.9 vs 1.0) will not overwrite.
+
+### commit 3b0c5f107cffef3deb6f9e5ee54f4340fe2016b6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 18 14:16:14 2011 -0700
+
+    Fixed bad links in common menu by using grails createLink method.  Fixes [#1012](http://tracker.ctmlabs.net/issues/1012).
+
+### commit 49cb48560b24b21e5a491ad7647e63a205c5c2a3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Oct 5 20:35:35 2011 -0700
+
+    More moves toward a event-based model/view pattern for incident/tsd.
+    * Specific form/parameter changes are propagated as events.
+    * Re-implemented delay unit updates.  Fixes [#850](http://tracker.ctmlabs.net/issues/850).
+
+### commit a7cf524efd6d0cb11b0affa7fbc06de2bdb59f1f
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Oct 5 11:18:00 2011 -0700
+
+    Improvements to the loading overlay to display (and remove) details of individual calls to the server for data
+
+### commit fa310bea43755f5d12b43cf375ea7b540409b13b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Oct 5 10:27:22 2011 -0700
+
+    Removed dependency on protovis in favor of using d3 functions exclusively. Fixes [#857](http://tracker.ctmlabs.net/issues/857).
+
+### commit e69f4e7511719011754bb57e151d5369b791bbe5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Oct 5 09:41:16 2011 -0700
+
+    Dropped the arrow from the tsd cumflow chart tooltip
+
+### commit d3f19d70711896ac51db97ba3b9ece3243b6b717
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 14:46:24 2011 -0700
+
+    Basic, popups for incident/tsd
+    * refs [#909](http://tracker.ctmlabs.net/issues/909).
+
+### commit 7db05ce2dfbe6f93c84be2be8d630db92e497eff
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 14:14:41 2011 -0700
+
+    Along with commit:806882b7, styles TSD cells grey if underlying data is suspect.
+    
+    * Fixes [#843](http://tracker.ctmlabs.net/issues/843).
+    * Refs [#878](http://tracker.ctmlabs.net/issues/878).
+
+### commit 6446efa2afe38865e13d796407c23a9a58489cd3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 13:19:41 2011 -0700
+
+    Fixed problems with the push-database script.  Should work now. Refs [#886](http://tracker.ctmlabs.net/issues/886) to the extent that at some point we'll need to synchronize between the development and production databases in an automated manner.
+
+### commit 78c936481930a9e39667f242cecb063c474cf51b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 07:03:20 2011 -0700
+
+    Tweaked t primes parameters to be additions to existing
+
+### commit 4d43cbb8760fff8d2feb77593c6f84d2c9384e22
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 06:48:24 2011 -0700
+
+    Tweaks to make things work with ffox
+
+### commit cea606e9cbf209eba3567b274ca5189d15a5dec1
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 06:31:05 2011 -0700
+
+    Fixes to t prime calculations.  Refs [#833](http://tracker.ctmlabs.net/issues/833).
+
+### commit 19e2b6a907b266b74e74cd776d68087bcf16c4ad
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 03:44:21 2011 -0700
+
+    Added loop to identify valid group label.  Fixes [#904](http://tracker.ctmlabs.net/issues/904).
+
+### commit f68c17f069e83925c5ec19d6957d467a698d0fc9
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 01:31:39 2011 -0700
+
+    Added a script to sync the development database with the production database
+
+### commit ac3452c8c2c18a60b19884b5cc7b5cc955d7bd12
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 4 00:45:10 2011 -0700
+
+    Made necessary modifications to make lesscss work in production.
+    
+    * See [the github page](https://github.com/davidmarquis/grails-lesscss) for
+      details, but basically, I had to create <g:if/> tags on the
+      environment=(development|production) and select <p:css> tags for production
+      and <less:> tags for development.  Should happen automatically, but it
+      doesn't.
+    
+    * Also, slightly improved error handling to properly show error dialog with AJAX
+      calls fail.
+
+### commit e2744db515598f3415cfd8116f6638a44faa3712
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Oct 3 23:30:35 2011 -0700
+
+    Removed css from uiperformance bundles---lesscss handles css optimization directly

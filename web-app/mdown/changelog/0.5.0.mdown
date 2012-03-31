@@ -1,0 +1,352 @@
+### commit c9a0e3371f083f4aef3393c2aec79f29f59bbef0
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Dec 7 15:14:31 2010 -0800
+
+    Bump to version 0.5 (for development)
+
+### commit 1c7ef16e46a3f8fb8ac88f60348056143f003f42
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Dec 7 15:08:01 2010 -0800
+
+    Tweaked TestbedController to return url in JSON as well as memo and locstring.
+    
+    This is an extension to the CTMLabs API that will provide more flexibility to
+    how the CTMLabs project interface displays data from projects.
+    
+       * Refs [#381](http://tracker.ctmlabs.net/issues/381) (in the CTMLabs Project Interface project)
+
+### commit 7669f9b443a8a62458f3f38d95456934b1df5ec3
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Dec 7 14:54:21 2010 -0800
+
+    Final report updates.
+
+### commit 6871a0eefd9ae5cab9d88c8cd3f4d0ea77045f47
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Dec 6 10:14:05 2010 -0800
+
+    Added final report to repo.
+
+### commit 0bf793086f5f3b52b38a3070f7beaad644e2d6b2
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Dec 3 16:05:43 2010 -0800
+
+    Removed (commented) reference to legacy openlayers_latest tag.
+    
+    This fixes grails errors on the error and access denied pages.
+    
+    * refs [#456](http://tracker.ctmlabs.net/issues/456)
+
+### commit 4f91213c8fd745d82117cef27d8fcd1577070100
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Dec 3 14:38:30 2010 -0800
+
+    Implemented basic browser detection and handling.
+    
+    * Installed browser_detection plugin
+    
+    * Implemented controller base class that does browser checking and refers to a
+      browser help page when there's a violation.
+    
+    * Implemented bare bones browser help page
+    
+    * Made the IncidentController subclass the BaseController class (and therefore
+      do browser checking).  Note: The MapController was previously commited
+    
+    * Moved development server back to 192.168.0.2 for internal debugging.
+    
+    * refs [#454](http://tracker.ctmlabs.net/issues/454).
+
+### commit 3099b9e1876a70660e8ded00612b6ccfbf9caeb9
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Dec 3 14:37:28 2010 -0800
+
+    Whitespace
+
+### commit f187e55c9dd93f192832a6e734e9dff39c17978e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Dec 3 12:13:32 2010 -0800
+
+    class path tweaks
+
+### commit 4ef8289adf083e2e9df0449ed09e00e61e11d143
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Dec 3 12:09:45 2010 -0800
+
+    Changed landing page to the query screen (this forces login).
+    
+    This is only a temporary solution.  Need to better rethink the use cases.
+
+### commit 6884029ecec5e1b6364d29e56380fca71db8efab
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Dec 3 12:07:46 2010 -0800
+
+    Updated production baseurl to point to https://tmcpe.ctmlabs.net.
+    
+       * refs [#301](http://tracker.ctmlabs.net/issues/301)
+
+### commit 1d08444d5ed197fe3b971cc259b841590445b532
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Nov 29 14:47:40 2010 -0800
+
+    Updated CAS server to point to cas.ctmlabs.net
+
+### commit ffdf8b1cf8a2e5bef983d43338bd4d31173b5171
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Nov 8 23:14:31 2010 -0800
+
+    Tweak to force push
+
+### commit 3b4f417f5d9fd38f50a6b46484bec076d3fda0b8
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Nov 3 22:32:09 2010 -0700
+
+    Updated schemas to handle changes induced by perl (and DBIx::Class) upgrade
+
+### commit 0ce40a90068b839bcf4543c4f0d9e1bb48537cde
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed Nov 3 12:56:47 2010 -0700
+
+    Added user agent string to the predefined issue[description] in problem reporting links.
+    
+       * Fixes [#406](http://tracker.ctmlabs.net/issues/406)
+
+### commit 65bc60bbd1928f1206e543bafe4b8cb9cb5b00b6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 16:18:10 2010 -0700
+
+    A test commit
+
+### commit d50ffba920ac7b5ad650836eac7f78c1b46bd040
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 14:56:51 2010 -0700
+
+    Inserted logic to handle negative delays (fixes [#261](http://tracker.ctmlabs.net/issues/261)), (refs [#299](http://tracker.ctmlabs.net/issues/299))
+
+### commit ced0e98148548ebde79a7127b3d86a439782e1be
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 14:55:18 2010 -0700
+
+    Fixed labels and widths in the incident list table.
+
+### commit 7dcea01e31f766ef0f991624c17f88d9cb46702b
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 14:52:55 2010 -0700
+
+    Fixed some bugs in the import/dc script.
+    
+       * The script can now properly handle situations when observed data are
+           missing
+       * Fixed a bug in how the only-type switch was implemented that prevented any
+           general analyses from being performed
+
+### commit 0a1fe6eef3f3c5b41eb89c07476af0ada9ae86eb
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 07:38:04 2010 -0700
+
+    Fixed verify time computation.
+
+### commit 0be7f6e8e82c1bd351fb0a17ed9b9b233fda902d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 03:50:18 2010 -0700
+
+    Tweaked map centering to zoom out one step to make sure the whole incident is in the viewport.
+
+### commit e2d5cd5c4b9a77553c82359fa2d7f4b7968426b0
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 03:49:39 2010 -0700
+
+    Finalized basic labels for TSD plot.  Fixes [#288](http://tracker.ctmlabs.net/issues/288).
+
+### commit 6c644f030fbf9d53e8170ade26220e1a4b092a8a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 03:00:02 2010 -0700
+
+    Removed ability to flip TSD until its ready for prime time
+
+### commit cace6388142b1cc91176a15b485b4c022a0334d7
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 02:34:35 2010 -0700
+
+    Moved css image to proper location
+
+### commit 6a38b5e5a55880e31bd4bbb434d611c23735b9e0
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 02:33:33 2010 -0700
+
+    Formatted incident start date properly for Detail Pane.  Fixes [#374](http://tracker.ctmlabs.net/issues/374)
+
+### commit 2aaaef76d9570a371e7fc340b379454f72f0aecc
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 02:22:00 2010 -0700
+
+    Tweaked incident summary logic to only consider incidents on screen
+
+### commit 88122f6cf7e1570b2e266aaf771b22de1eebec08
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Nov 2 01:56:59 2010 -0700
+
+    Further improvements to incidentList summary view.
+    
+       * More direct synchronizatin of summary columns with main table.  Still some
+         minor discrepancy between FF and chrome, but it's minor.
+       * Refs [#193](http://tracker.ctmlabs.net/issues/193)
+
+### commit cfe6363b08a3a6f20e75dec79afb9fbc6bee2c2f
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Nov 1 20:47:54 2010 -0700
+
+    Moved to programmatic generation of incident summary grid.
+    
+    Persistent formatting issues led to attempting to dynamically determine the
+    column widths for the summary grid.  Partial success here.  It is currently tuned for FF.  Chromium doesn't work so well with this implementation.
+    
+      * refs [#193](http://tracker.ctmlabs.net/issues/193)
+
+### commit ef64654dafb2b290d76a2f9948ffb6fe74aced26
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Nov 1 17:46:20 2010 -0700
+
+    Fixed time-of-day query.
+    
+    The old gorm stuff was broken here.  The current solution is using
+    postgresql-specific time type conversions.
+    
+       * Fixes [#287](http://tracker.ctmlabs.net/issues/287)
+
+### commit 59200f59fdaa3a05cb69df8e2e3a494181d2eb10
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Nov 1 17:18:21 2010 -0700
+
+    Minor change to support completed .lst files being moved to done subdir
+
+### commit 72258294e8379cc733e400d40eefbe7a37f879ee
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Nov 1 15:30:31 2010 -0700
+
+    Fixed relative paths in production version.  All resources now found.
+    
+    The ui-performance plugin does some magic to compress and bundle resources to
+    minimize download times.  Some incorrect use of this plugin via its config and
+    tags was resulting in these resources coming up missing in the production
+    version.  This commit fixes all current resource loading errors.
+    
+       * Fixes [#392](http://tracker.ctmlabs.net/issues/392)
+       * Refs [#355](http://tracker.ctmlabs.net/issues/355)
+
+### commit 5a94373087abdb01989cbdcfc7867143e75f9f1e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Nov 1 13:58:59 2010 -0700
+
+    Fixed synchronization between incident map, grid, and detail widgets in incident list view.
+    
+       * Add three widgets can now be used to select the active incident (the one
+           shown in the detail pane.
+       * Scrolling in the data grid now works more or less as expected.  The grid
+           doesn't scroll if the incident's row is currently visible in the grid.
+       * Fixes [#391](http://tracker.ctmlabs.net/issues/391)
+
+### commit 98883527f0d12a35fcdd378fd57a3acc8962dfee
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Nov 1 13:55:48 2010 -0700
+
+    Fixed references to some css resources and added custom openlayers build.
+    
+       * refs [#355](http://tracker.ctmlabs.net/issues/355)
+
+### commit 016777821d7acbbe6a6c311a7eaed50cb0ca9ec8
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sun Oct 31 23:42:33 2010 -0700
+
+    Added date to sort field of the write_to_db routine in the delay computation.
+    
+    The prior approach sorted results on time-of-day only which produced a bad time
+    offset when the incident crossed the midnight boundary.  By sorting on date + '
+    ' + time, this problem is resolved and the offset is correst.  Also added the
+    timestamp to the analyzed_timesteps in the incident facility impact analysis
+    sent to the browser.
+    
+       * Fixes [#389](http://tracker.ctmlabs.net/issues/389)
+       * Fixes [#390](http://tracker.ctmlabs.net/issues/390)
+
+### commit 1897487f62b046452e2e7e462688dd58855e9d47
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 30 22:04:08 2010 -0700
+
+    Added location forcing for events, where the location is known a priori.
+
+### commit 0b4afa70114a3fd1107a2cb647c9134697775fc5
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 30 00:48:19 2010 -0700
+
+    Removed unused cookie logic from incident controller.
+
+### commit 6692bf9415358e44efb19ef43563dee6528c160a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Sat Oct 30 00:47:44 2010 -0700
+
+    Some general refactoring and documentation.
+
+### commit 5396383940431c2fa2939d96ee95a46c6353dbc1
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 29 23:31:40 2010 -0700
+
+    Bundle of performance changes (refs [#355](http://tracker.ctmlabs.net/issues/355)).
+    
+       * Now using ui-performance plugin
+    
+       * Modifed tags used in gsp to generally use the <p:> variant.
+    
+       * Moved javascript includes into <p:dependantJavascript> tags to optimize
+         their loading at the end of the file.
+    
+       * Pushed dojo.require calls into addOnLoad functions.
+    
+       * Some formatting tweaks---particularly on datagrids
+    
+       * Added "preloader" to blank screen while initial dojo layout is rendered
+    
+       * Fixed some javascript bugs caught by the js compiler used in ui-performance
+         (typically, using class: instead of className: in dojo.create calls)
+    
+       * Deactivated rowmouseover log highlighting in favor of cell focus-based
+         highlighting.
+    
+       * Deactivated mostly ineffectual loading progress bar.
+    
+       * Moved to using locally generated compiled openlayers.
+    
+       * Styling tweaks improve TSD table, including time labels (refs [#288](http://tracker.ctmlabs.net/issues/288)).
+
+### commit 456d096be94c67bf0234fa5f0d2587559c3ef5ee
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 29 14:08:36 2010 -0700
+
+    Removed temp files
+
+### commit 42aab6d161e3b308e95637c9e9c2e67b0a002a79
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 29 14:06:34 2010 -0700
+
+    Tweaked the TestbedController to provide an https link instead of http
+
+### commit f0b4b30fa6c6047aa0d4a5dd6ffed0f0f1a57fc4
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 29 14:05:32 2010 -0700
+
+    Set default distance weighting in DC to 3
+
+### commit 153635c5c108e32c4a895243ad00936dc8133c43
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 29 13:59:49 2010 -0700
+
+    Tweaks to TimeSpaceDiagram styling.
+    
+    Tuned the interplay between border-collapse, td.padding, and border-style to get
+    consistency between the view with incident border and without.  Fixes [#384](http://tracker.ctmlabs.net/issues/384).
+
+### commit a9e3d33d9e60f7bcef87184aaf56ea89676139d0
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Oct 29 11:06:37 2010 -0700
+
+    Changed favicon to TSD screenshot.

@@ -1,0 +1,519 @@
+@import "tmcpe-colors.less";
+@import "tmcpe-map-common.less";
+
+@mainwidth: 960px;
+@mainheight: 650px;
+@fmargin: 50px;
+@margin: @fmargin - 10px;
+
+
+
+@mapwidth: 100%;/*(@mainwidth - @margin)/2*/
+@tsdwidth: @mapwidth;
+@chartwidth: @mapwidth;
+@databoxwidth: @mapwidth;
+
+@mapheight: (@mainheight - @margin)/2;
+@tsdheight: @mapheight;
+@chartheight: @mapheight;
+@databoxheight: @mapheight;
+
+@leftwidth: @tsdwidth;
+@leftheight: @tsdheight;
+@rightwidth: @mapwidth;
+@rightheight: @mapheight;
+
+@tsdstroke: #eee;
+@tsddatapoor: #999;
+@incident-boundary-color: #00f;
+@incident-boundary-width: 2;
+
+.content {
+    left: 0px;
+}
+
+.map {
+    path {
+		&.datapoor {
+			stroke: @tsddatapoor;
+		}
+    }
+
+}
+
+#databox {
+    //width: @databoxwidth;
+    //height: @databoxheight;
+    //float:right;
+
+    table {
+		//color: lighten(spin(@content-background, 8), 25%);
+//		margin-top:1em;
+		font-size: 8pt;
+    }
+}
+
+#settings {
+    display:inline;
+    float:right;
+    margin-left:10px;
+}
+
+#database #tabs {
+    height:100%;
+}
+
+body {
+	min-width: 1024px;
+	min-height: 768px;
+}
+
+.dataTables_scrollHead, .dataTables_scrollBody, .dataTables_scrollFoot {
+    /*background-color: #fff;*/
+    border-top: 4px solid #000;
+    border-bottom: 4px solid #000;
+}
+
+#logtableContainer,#generalStatsContainer {
+    /*background-color: #fff;*/
+    border: 4px solid #ccc;
+    padding: 5px;
+    min-height: @databoxheight - 20;
+    height: @databoxheight - 20;
+	overflow-y: scroll;
+
+	#generalStats,#activityLog {
+		width:100%;
+	}
+	#generalStats {
+		tr > th:first-child {
+			width: 20%;
+		}
+	}
+	#activityLog {
+		tr > th:first-child {
+			width: 10em;
+		}
+	}
+}
+
+#generalStatsContainer {
+    table { 
+        th {
+            vertical-align: bottom;
+        }
+        td.delayValue {
+            &:hover {
+	            background-color: black;
+	            color: yellow;
+            }
+        }
+    }
+}
+
+#tabs .ui-tabs-panel {
+    height:250px;
+}
+
+#tabs table td,#tabs table th {
+    color: black;
+}
+
+
+#tabs table th {
+    vertical-align: bottom;
+}
+
+svg {
+	//  border: solid 1px #ccc;
+  fill: #006;
+}
+
+.tsd {
+    path.incidentBoundary {
+		stroke: @incident-boundary-color;
+		stroke-width: @incident-boundary-width;
+		fill: none;
+    }
+    .evidence {
+		circle {
+            pointer-events: none; /* Pass click events through */
+		}
+    }
+
+    rect.tsdcell {
+		stroke-width: 1px;
+
+		&.datapoor {
+			fill: @tsddatapoor;
+		}
+    }
+    
+}
+
+rect {
+	fill: lightsteelblue;
+	stroke: #eee;
+	stroke-width: 1px;
+}
+rect.d1 {
+	fill: steelblue;
+}
+rect.d2 {
+	fill: darkblue;
+}
+
+svg text {
+    fill: #eee;
+	//    letter-spacing: 0.5pt;
+    font-family: Arial;
+}
+
+
+.rule line {
+	stroke: #ddd;
+	//  stroke-width: 1px;
+	//  shape-rendering: crispEdges;
+}
+
+.rule2 line {
+	stroke: #ddd;
+	//  stroke-width: 1px;
+	//  shape-rendering: crispEdges;
+}
+
+.rule line.axis {
+	stroke: #000;
+}
+
+.rule2 line.axis {
+	stroke: #000;
+}
+
+
+
+
+@area-expected-flow-fill:  #4682B4; /* steelblue */
+@area-observed-flow-fill:  #008a00;    /* green */
+@area-divavg-flow-fill:    #f00;    /* red */
+@area-divavg-flow-stroke:    #ff0;    /* grey */
+@observed-flow-stroke:     #ff0;
+@area-adjdivavg-flow-fill: #0f0;    /* green */
+@area-whatif-flow-fill:    #333;    /* transparent */
+@highlight: cyan;
+
+g.areas {
+
+    path.line {
+        fill: none;
+        stroke-width: 2px;
+        &:hover {
+            stroke: #ff0; /* highlight line color */
+        }
+    }
+
+    path.observed {
+        &.area {
+	        fill: @area-observed-flow-fill;
+			/*
+	          &:hover {
+              fill: lighten( @area-observed-flow-fill, 30% );
+	          }*/
+
+            &.highlight, &:hover {
+                stroke: highlight;
+                fill: @highlight;
+            }
+        }
+        &.line {
+            stroke: @observed-flow-stroke;
+			/*
+              &:hover {
+              stroke: #ff0;
+              }
+			  */
+
+            &.highlight, &:hover {
+				/*
+                stroke: highlight;
+                fill: @highlight;
+				*/
+            }
+
+        }
+    }
+
+    path.expectedflow { 
+        &.area {
+            fill: @area-expected-flow-fill;
+			/*
+              &:hover {
+              fill: lighten( @area-expected-flow-fill, 30% );
+              }
+			  */
+            &.highlight, &:hover {
+                //stroke: highlight;
+                fill: @highlight;
+            }
+        }
+        &.line {
+            stroke: lighten( @area-expected-flow-fill, 30% );
+            &.highlight {
+                //stroke: highlight;
+                fill: @highlight;
+            }
+        }
+    }
+
+    path.adjexpectedflowafterdiv {
+
+        &.area {
+	        fill: @area-adjdivavg-flow-fill;
+			/*
+	          &:hover {
+              fill: lighten( @area-adjdivavg-flow-fill, 30% );
+	          }
+			  */
+            &.highlight, &:hover {
+                //stroke: highlight;
+                fill: @highlight;
+            }
+        }
+        &.line {
+            //stroke: lighten( @area-adjdivavg-flow-fill, 30% );
+            stroke: @area-adjdivavg-flow-fill;
+            &.highlight {
+                //stroke: highlight;
+                fill: @highlight;
+            }
+        }
+    }
+	
+    path.expectedflowafterdiv {
+
+        &.area {
+	        fill: @area-divavg-flow-fill;
+			/*
+	          &:hover {
+              fill: lighten( @area-divavg-flow-fill, 30% );
+	          }
+			  */
+            &.highlight, &:hover {
+                //stroke: highlight;
+                fill: @highlight;
+            }
+        }
+        &.line {
+            //stroke: lighten( @area-divavg-flow-fill, 30% );
+            stroke: @area-divavg-flow-stroke;
+			stroke-width: 2px;
+            &.highlight {
+                //stroke: @highlight;
+                fill: @highlight;
+            }
+        }
+    }
+
+    path.whatif {
+
+        &.area {
+	        fill: none;
+	        &:hover {
+                fill: none;
+	        }
+        }
+        &.line {
+            stroke: lighten( @area-whatif-flow-fill, 30% );
+        }
+    }
+}
+
+
+.line3 {
+	fill: none;
+	stroke: orange;
+	stroke-width: 1.5px;
+}
+
+.timebar {
+    stroke: purple;
+    stroke-width: 4px;
+	//pointer-events: none;
+}
+
+.logtimebar {
+    stroke: yellow;
+    stroke-width: 4px;
+    font-size: 8pt;
+}
+
+.timebar .critical-time {
+    stroke: white;
+    stroke-width: 1px;
+    font-size: 8pt;
+	//    font-family: Arial;
+
+}
+
+.hidden {
+    visibility:hidden;
+}
+
+.line2, circle.area2 {
+	fill: none;
+	stroke: yellow;
+	stroke-width: 2px;
+}
+
+circle.area {
+	fill: #fff;
+}
+
+.ylabels {
+	font-size: 8pt;
+	padding-right: 10px;
+}
+
+.xlabels {
+	font-size: 8pt;
+}
+
+#scaleslider {
+	width: 200px;
+	//  display: inline;
+}
+#maxspdslider {
+	width: 200px;
+	//  display: inline;
+}
+
+#alpha {
+    display:inline;
+    
+}
+
+th.label, td.label {
+    text-align: left;
+}
+
+th.numlabel, td.numlabel {
+    text-align: right;
+}
+
+td.value, td.delayValue {
+    text-align: right;
+    width: 4em;
+}
+
+td.unit {
+    text-align: left;
+}
+
+#segments path {
+	fill: none;
+	stroke-linecap: round;
+	//  stroke-width: 4px;
+}
+
+#ends circle {
+	fill: yellow;
+	stroke: black;
+	r: 1px;
+}
+
+#ends path {
+    stroke: black;
+    stroke-width: 1px;
+}
+
+#copy, #copy a {
+	color: #1AA398;
+}
+
+/*
+  .fullcontainer {
+  width:@mapwidth + @tsdwidth + @fmargin;
+  clear:both;
+  }
+  */
+
+#mapbox {
+    background-color: #006;
+    //text-align: left;
+    //border: 2px solid #eee;
+    padding: 0px;
+    height: @mapheight;
+    //width: @mapwidth;
+    //float:right;
+    //margin-right:@margin/2;
+}
+
+#tsdbox {
+    background-color: #006;
+    //text-align: right;
+    //border: 2px solid #eee;
+    //width: @tsdwidth;
+    height: @tsdheight;
+    padding: 0px;
+}
+
+#chartcontainer {
+	height: @chartheight;
+}
+
+#chartbox {
+    margin-top:1em;
+    background-color: #006;
+    //text-align: right;
+    border: 0px;
+    padding: 0px;
+    width: 100%;
+	height:100%;  // extend 
+    //float: left;
+}
+
+circle.incidentLocation {
+    stroke-width: 2px;
+    stroke: red;
+    fill: rgba(255,0,0,0.25);
+}
+
+#tmcpct {
+    padding-left:2em;
+}
+
+table {
+    font-size: 8pt;
+}
+
+#activityLog_info {
+    text-weight: bold;
+}
+
+.fullheight {
+	min-height:@mainheight;
+}
+
+table.parambox {
+    border: solid 1px #fff;
+}
+
+
+/* */
+.popover-inner {
+	width: 30em;
+}
+
+table.cellDetail {
+	width: 100%;
+    td,th {
+        text-align: right;
+        &.incident {
+            text-align:center;
+        }
+    }
+
+    th:first-child {
+        min-width: 10em;
+    }
+}

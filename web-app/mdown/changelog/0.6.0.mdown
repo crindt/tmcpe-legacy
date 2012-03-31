@@ -1,0 +1,238 @@
+### commit d03e1fd79dfe1e0335b07be72ca865e7062d63e5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Feb 22 07:14:29 2011 -0800
+
+    Improved d3 implementation including charting.
+    
+    * Added ability to select charting by freeway section.
+
+### commit f0e168e5f8b3c22d411940bb7ad275dcf71b1ade
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Feb 21 16:16:04 2011 -0800
+
+    Updates to delay computation adding critical events to the facility impact analysis
+
+### commit 31a6da2633cf942e5378c19445f9e0238160e356
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Feb 21 16:15:30 2011 -0800
+
+    Core working elements for updated TSD and cumulative flow chart using d3
+
+### commit 4270286ac6bdd4bab70a3b2320f9fe8df19c7d58
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Feb 17 13:52:38 2011 -0800
+
+    Improvements to query form and TmcFacilityImpactAnalysis support.
+    
+    * Added ability to search based upon CADID and fixed time/date and
+      freeway/direction query parameters.  Fixes [#228](http://tracker.ctmlabs.net/issues/228).
+    
+    * Added initial support for TmcFacilityImpactAnalysis to interface.  Refs [#173](http://tracker.ctmlabs.net/issues/173).
+
+### commit 6f858e8696ea8c1763f9046b652f56760d62e244
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 10 16:28:22 2011 -0800
+
+    Updated DBIx::Class schemas in support of commit:99667a50c63502eec857bee6aa6abd6941fc0beb
+
+### commit 177a6c3c26c2563646541cf830ea26e7394e13ed
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 10 16:27:09 2011 -0800
+
+    Added ability to filter for sigalerts only.
+    
+    * Refs [#300](http://tracker.ctmlabs.net/issues/300).
+
+### commit 99667a50c63502eec857bee6aa6abd6941fc0beb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 10 16:18:46 2011 -0800
+
+    Added functions to store delay computation parameters and to identify the bounds
+    of the analysis.
+    
+    This commit does two main things:
+    
+    1. It stores most of the parameters (as well as the command line) used to
+       execute the delay analysis.  This will support better user interaction going
+       forward and fixes [#332](http://tracker.ctmlabs.net/issues/332).
+    
+    2. It adds functions to determine the "bounds" of the delay plume, which will be
+       used to support the what-if analysis ([#173](http://tracker.ctmlabs.net/issues/173)).  Specifically:
+    
+       * The computed start location of the incident
+    
+       * The time and location of the last vehicle delay attributable to this
+         incident
+    
+       * The latest that the last vehicle would cross the computed incident
+         location.
+
+### commit c89d75821f3fdf6f49f1a799a13d5586bc18576c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 10 16:12:47 2011 -0800
+
+    Some work on properly identifying critical events from the activity log.
+    
+    Tweaked the parsing to properly identify t0->t3 events.
+    
+    Added critical event fields obtained from the activity log to the Incident
+    class.
+    
+    * Refs [#260](http://tracker.ctmlabs.net/issues/260)
+    * Refs [#322](http://tracker.ctmlabs.net/issues/322)
+
+### commit d481cb82458e852e35443911c267346cfd1f25c1
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Jan 4 10:53:52 2011 -0800
+
+    Added schema files that were omitted from earlier commit
+
+### commit 25f610b508bc39b4b6717ee1f387f4ec98a4aa2b
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Jan 3 07:26:52 2011 -0800
+
+    Final TMCPE final report changes
+
+### commit 5acd54e34e40f40cf057749ad3ebf0d3296f759a
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Wed Dec 29 02:57:41 2010 -0800
+
+    More changes per Caltrans comments.
+
+### commit 7ff5aba7e30b17400c1c92d089daa26d15c4117d
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Wed Dec 29 02:55:57 2010 -0800
+
+    Fixed direction and numbering so ramps are correctly on the left and side of the road
+
+### commit 21e8bad854a10295eea2b23d47b5780ee7474d31
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Tue Dec 28 01:35:32 2010 -0800
+
+    65A0252_Technical_Report_Documentation_(APP-3).doc
+
+### commit f30a12a7bc1a7b2cb128af2da93c390a28109d88
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Tue Dec 28 01:34:49 2010 -0800
+
+    Starting point for research notes document
+
+### commit 15a5ebf4356143cbc97c9804cfb0f139b0e3dd7c
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Tue Dec 28 01:34:20 2010 -0800
+
+    First round of Caltrans comments
+
+### commit 73880910d11981931deda1fe5d25536b7afe4437
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Dec 21 14:27:56 2010 -0800
+
+    More final report modifications and additions
+
+### commit fd379bed428af2100fa2ea703bd57244128edc74
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Tue Dec 21 11:45:47 2010 -0800
+
+    More final report improvements
+
+### commit ff7a5444916cbf1f1b0e2440b8efe3c4efb74bfb
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Dec 20 16:41:26 2010 -0800
+
+    Final report updates
+
+### commit 992c39633dba744b95cca72af5b5522a8640626a
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:54:13 2010 -0800
+
+    Big updates to final report
+
+### commit 674534addca773112834bf534c7e517bee78633a
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:53:55 2010 -0800
+
+    Update .gitignore for latex temp files
+
+### commit a82a2782e76a567ae7e33ff3cf250bc8f21a7dab
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:52:59 2010 -0800
+
+    Added final report pdf to repo
+
+### commit 1aba134abaf7dc8dd45df6aed27454f48b0b1b7c
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:52:38 2010 -0800
+
+    Added Caltrans Tech Report Documentation document
+
+### commit 6c484822282f405fbac78b0ec749771d7966185f
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:51:48 2010 -0800
+
+    Added Special Solutions final report
+
+### commit 83247de8ee1344ad9526588998c78d1e27a48f2b
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:50:45 2010 -0800
+
+    Added script to generate cached copies of tikz images
+
+### commit 3fcbd7d3934ef625f25614d59eaabea5b1dd2716
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:49:57 2010 -0800
+
+    Remove temp files from repo
+
+### commit b0b27fcf3661e3aa24ec08c7e39a2fd4144cfd6b
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:49:15 2010 -0800
+
+    Remove temp files from repo
+
+### commit 0c7e932581b7757141790eaa4392fe03ab8e24be
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:48:16 2010 -0800
+
+    Add older budget pngs to repo
+
+### commit d31bd4efaf427867a36c4c5a0e8d5533881d7715
+* Author Craig Rindt <crindt@gmail.com>
+* Date   Mon Dec 20 09:47:41 2010 -0800
+
+    Add interim tikz pdf figures to repo
+
+### commit cc7228ac1b51c26aa728a3a8d88d7b59a7d5e766
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Dec 16 10:02:56 2010 -0800
+
+    Dropped the query that computes the total number of incidents in the database.
+    
+    Since postgresql is inefficient at count(*) queries out of the box, it's costly
+    to compute the total number of incidents, especially when the ctmlabs API
+    doesn't need it.  So dropped the totalCount db call, which should make ctmlabs
+    API calls twice as fast.
+    
+    * refs [#355](http://tracker.ctmlabs.net/issues/355)
+
+### commit ec8b10d91010684dc079b4177915b397bbe7382a
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Thu Dec 16 10:01:55 2010 -0800
+
+    Tweaked the browser version logic to better handle firefox.
+    
+    * refs [#454](http://tracker.ctmlabs.net/issues/454)
+
+### commit 0abfd9fa55a9870f69709cdb5693b88ffc6cbb48
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Dec 13 20:19:55 2010 -0800
+
+    Working on final CTMLabs.project_inteface polish.
+    
+    * Added missing security import
+    * Changed to use of memoOnly field to dump performance measures data from the project interface outputs.
+
+### commit be5379189b2cb4b8bea5aa31125f4d0125e30160
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Dec 13 16:49:04 2010 -0800
+
+    Making the TestbedController secure again for JSONP

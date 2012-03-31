@@ -1,0 +1,31 @@
+svg {
+    background: white;
+
+    path {
+        stroke-width: 2px;
+        fill: none;
+
+
+        &.baselineExpectedDemand, &.obsline_0div {
+            stroke: #333;
+            stroke-dasharray: 9, 5;
+        }
+
+        &.expectedDemand {
+            stroke: #000;
+        }
+
+        &.obsFlowNoDiv {
+            stroke: #00f;
+        }
+
+
+        &.estDemWithDiv {
+            stroke: #444;
+        }
+        &.obsFlowWithDiv {
+            stroke: #f00;
+        }
+
+    }
+}

@@ -104,10 +104,6 @@ log4j = {
 	debug 'edu.uci.its.tmcpe' //,
 	//'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
 	//'edu.uci.its',
-	//'org.springframework.security',
-	//'org.springframework.security.web',
-	//'org.springframework.security.cas',
-	//'org.jasig.cas'
 	
 	//,'org.svenson.JSONParser'
 	
@@ -116,6 +112,11 @@ log4j = {
 	//info   'edu.uci.its.tmcpe'
 	
 	warn   'org.mortbay.log'
+
+    debug   'grails.plugins.springsecurity'
+    debug   'org.codehaus.groovy.grails.plugins.springsecurity'
+    debug   'org.springframework.security'
+    debug   'org.jasig.cas.client'
 }
 
 vdsdata {
@@ -127,6 +128,20 @@ vdsdata {
 
 // Added by the Joda-Time plugin:
 grails.gorm.default.mapping = {
+   /* Added by the Hibernate Spatial Plugin. */
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Geometry)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.GeometryCollection)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.LineString)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Point)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Polygon)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.MultiLineString)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.MultiPoint)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.MultiPolygon)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.LinearRing)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Puntal)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Lineal)
+   'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Polygonal)
+/* FIXMA:JODA
 	"user-type" type: org.joda.time.contrib.hibernate.PersistentDateTime, class: org.joda.time.DateTime
 	"user-type" type: org.joda.time.contrib.hibernate.PersistentDuration, class: org.joda.time.Duration
 	"user-type" type: org.joda.time.contrib.hibernate.PersistentInstant, class: org.joda.time.Instant
@@ -135,14 +150,17 @@ grails.gorm.default.mapping = {
 	"user-type" type: org.joda.time.contrib.hibernate.PersistentLocalTimeAsString, class: org.joda.time.LocalTime
 	"user-type" type: org.joda.time.contrib.hibernate.PersistentLocalDateTime, class: org.joda.time.LocalDateTime
 	"user-type" type: org.joda.time.contrib.hibernate.PersistentPeriod, class: org.joda.time.Period
+*/
 }
 
 // Added by the Spring Security Core plugin:
+/*
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'edu.uci.its.auth.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'edu.uci.its.auth.UserRole'
 grails.plugins.springsecurity.authority.className = 'edu.uci.its.auth.Role'
 grails.plugins.springsecurity.requestMap.className = 'edu.uci.its.auth.Requestmap'
 grails.plugins.springsecurity.securityConfigType = grails.plugins.springsecurity.SecurityConfigType.Requestmap
+*/
 //grails.plugins.springsecurity.registerLoggerListener = true
 //grails.plugins.springsecurity.rejectIfNoRule = true
 
@@ -155,79 +173,25 @@ grails.plugins.springsecurity.cas.proxyCallbackUrl = "${grails.serverURL}/secure
 grails.plugins.springsecurity.cas.proxyReceptorUrl = '/secure/receptor'
 // Single-sign-out
 grails.plugins.springsecurity.logout.afterLogoutUrl = "${grails.casURL}/logout?service=${grails.serverURL}/"
+grails.plugins.springsecurity.cas.useSingleSignout = true
 
 grails.plugins.springsecurity.securityConfigType = SecurityConfigType.Annotation
-grails.plugins.springsecurity.openid.domainClass = 'edu.uci.its.auth.OpenID'
 
-
-// For LDAP spring security plugin
-grails.plugins.springsecurity.ldap.context.managerDn = 'cn=Manager,dc=ctmlabs,dc=org'
-grails.plugins.springsecurity.ldap.context.managerPassword = 'ctmlabs.org'
-grails.plugins.springsecurity.ldap.context.server = 'ldap://hyperion.its.uci.edu:389'
-grails.plugins.springsecurity.ldap.authorities.groupSearchBase ='ou=groups,dc=ctmlabs,dc=org'
-grails.plugins.springsecurity.ldap.authorities.ldapGroupSearchFilter = 'uniquemember={0}'
-grails.plugins.springsecurity.ldap.search.base = 'ou=people,dc=ctmlabs,dc=org'
-ldap.mapper.userDetailsClass = 'inetOrgPerson'
-
-// Search for explicit validation tags on classes that aren't domain classes
-grails.validateable.packages = ['edu.uci.its.auth']
+google.analytics.webPropertyID = "UA-30207196-1"
+google.analytics.customTrackingCode = "_gaq.push(['_setDomainName', 'ctmlabs.net']);  _gaq.push(['_trackPageview']);"
 
 environments {
 	production {
-	    uiperformance {
-		enabled=true
-		debug = false
-		statsEnabled = false
-		html.compress = true
-		html.debug = false
-	    }
+		google.analytics.enabled=true
 	}
 	development {
-	    uiperformance {
-		enabled=false
-		debug = true
-		statsEnabled = true
-		html.compress = true
-		html.debug = true
-	    }
-            // Disable resource caching in development.  Useful for editing help files
-            grails.resources.debug=true
+        // Disable resource caching in development.  Useful for editing help files
+		google.analytics.enabled=false
+        grails.resources.debug=false
 	}
 }
-uiperformance.html.includePathPatterns = [".*\\.geojson"]
-uiperformance.html.includeContentTypes = [ "text/geojson", "application/json" ]
 
-uiperformance.exclusions = [
-    "**/grails_logo.jpg",
-    "**/dojo/**",
-    "**/dojo-src/**",
-    "**/navigation*/**",
-    "**/tmcpe/**",
-    "**/openlayers*/**",
-    "**/jquery*/**",
-    "**/d3/**",
-    "**/polymaps/**",
-    "**/protovis/**",
-    "**/tablesorter/**",
-    "**/tablescroll/**",
-    "**/numberformat/**",
-    "**/DataTables/**",
-    "**/d3.*",
-    "**/jquery.*.js",
-    "**/underscore*.js",
-    "**/polymaps*.js",
-    "**/protovis*.js",
-    "**/mustache*.js",
-    "**/less*.js",
-    "**/lesscss*/**",
-    "**/prototype/**",
-    "**/plugins/**",
-    "**/datatables/**",
-]
-
-uiperformance.bundles = [
-    [type: 'js',
-     name: 'application-core',
-     files: ['application']
-    ],
-]
+// Added by the Spring Security Core plugin:
+grails.plugins.springsecurity.userLookup.userDomainClassName = 'net.ctmlabs.auth.CtmlabsUser'
+grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'net.ctmlabs.auth.CtmlabsUserCtmlabsRole'
+grails.plugins.springsecurity.authority.className = 'net.ctmlabs.auth.CtmlabsRole'

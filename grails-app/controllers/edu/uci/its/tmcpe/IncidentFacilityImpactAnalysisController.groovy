@@ -245,6 +245,7 @@ class IncidentFacilityImpactAnalysisController {
     }
 
     def tsdData = {
+		use ([groovy.time.TimeCategory]) { 
         def ifia = IncidentFacilityImpactAnalysis.get(params.id)
         if (!ifia) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'incidentFacilityImpactAnalysis.label', default: 'IncidentFacilityImpactAnalysis'), params.id])}"
@@ -282,7 +283,7 @@ class IncidentFacilityImpactAnalysisController {
 				    : null ),
 			sec: ifia.computedStartLocation?.id,
 			t0: ifia.computedStartTime,
-			t1: ifia.verification,
+			t1: ifia.verification ?: ifia.computedStartTime + 5.minutes,
 			t2: ifia.lanesClear,
 			t3: ifia.computedIncidentClearTime,
             onScene: chp == null ? null : chp.stamp,
@@ -330,8 +331,10 @@ class IncidentFacilityImpactAnalysisController {
 
                     render json as JSON
                 }
-	    }
-	}
+			}
+		}
+		}
+		
     }
 
     def edit = {

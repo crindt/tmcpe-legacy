@@ -1,0 +1,17 @@
+### commit 5065ba8379204da848a6560302fbf6d965f5eb5d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 23:41:38 2010 -0700
+
+    Release 0.3.3
+
+### commit f24ca81c081239d7721d2530b4eb4a1cd8acaa03
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 23:39:28 2010 -0700
+
+    Fixed some minor layout and security issues.
+
+### commit 109659d6c5d1a2a7c8a8bc2aeb18a8ab974f5715
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Sep 27 23:38:17 2010 -0700
+
+    Added bias parameter to command-line arguments.

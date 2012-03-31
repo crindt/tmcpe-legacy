@@ -1,0 +1,192 @@
+*** FILEVERSION: 1
+*** CAD: ${ifpa?.cad}
+*** FACILITY: ${ifpa?.facility}-${ifpa?.direction}
+*** COMMAND LINE [${modelConfigStr}]
+\$ONUELLIST
+OPTIONS ITERLIM = 500000000
+OPTIONS RESLIM = ${ifpa?.modelConfig?.resourceLimit}
+*
+OPTIONS WORK = 800000
+OPTION MIP = CPLEX;
+
+SETS
+	J1	Sections	/S0*S${ifpa?.sections?.size()-1}/
+	M1	Time Steps	/0*${ifpa?.timesteps?.size()}/
+<% for ( t in ifpa?.timesteps ) { out << '*               ' + t.format('yyyy-MM-dd HH:mm:ss') + "\n" } %>
+
+ALIAS ( J1, K1 )
+ALIAS ( M1, R1 )
+
+PARAMETERS
+
+	PM( J1 ) section postmile
+	    /
+		<% for ( i in 0..(ifpa.sections.size()-1) ) { %>
+*		S${i} = <% out << ifpa.sections[i]?.vdsid %> <% out << ifpa.sections[i]?.name %>
+		S${i} <% out << ifpa.sections[i]?.pm } %>
+
+	    /
+	    
+	L( J1 ) section length
+	    /
+		<% for ( i in 0..(ifpa.sections.size()-1) ) { %>
+*		S${i} = <% out << ifpa.sections[i]?.vdsid %> <% out << ifpa.sections[i]?.name %>
+		S${i} <% out << ifpa.sections[i]?.len %><% } %>
+
+	    /
+    TABLE P(J1,M1) Evidence
+     <% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5d", j ) } %>
+<% for ( i in 0..(ifpa.sections.size()-1) ) { %>
+   S${i}<% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5.1f", ifpa.obsConditions[i][j]?.p ) } } %>
+	TABLE V( J1, M1 ) 
+     <% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5d", j ) } %>
+<% for ( i in 0..(ifpa.sections.size()-1)) { %>
+   S${i}<% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5.1f", ifpa.obsConditions[i][j]?.spd ) } } %>
+	TABLE AV( J1, M1 )
+     <% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5d", j ) } %>
+<% for ( i in 0..(ifpa.sections.size()-1)) { %>
+   S${i}<% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5.1f", ifpa.avgConditions[i][j]?.spd ) } } %>
+	TABLE F( J1, M1 )
+     <% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5d", j ) } %>
+<% for ( i in 0..(ifpa.sections.size()-1)) { %>
+   S${i}<% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5d", (int)ifpa.obsConditions[i][j]?.vol ) } } %>
+	TABLE AF( J1, M1 )
+     <% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5d", j ) } %>
+<% for ( i in 0..(ifpa.sections.size()-1)) { %>
+   S${i}<% for ( j in 0..(ifpa.timesteps.size()-1)) { out << sprintf( " %5d", (int)ifpa.avgConditions[i][j]?.vol ) } } %>
+
+VARIABLES
+	Z		objective
+	D(J1,M1)	incident state
+	S(J1,M1)	start point
+	CW(J1,M1)	cell weight
+	CV(J1,M1)	cell val
+	Y		total incident delay
+	A		average delay
+	N		net delay
+        STB             solution time bound sum
+        SSB             solution space bound sum
+
+BINARY VARIABLE D
+BINARY VARIABLE S
+
+EQUATIONS
+OBJECTIVE
+ EQ1
+ EQ2
+ EQ3
+ EQ3b
+* EQ3c
+* EQ3d
+ EQ4
+ EQ5
+ EQ6
+ EQ7
+ EQ8
+ EQ8_START
+ EQ8b
+TOTDELAY
+AVGDELAY
+NETDELAY
+CWEIGHT
+CVALUE
+ ONESTART
+ NOSTART_NOREGION
+ IFSTART_THEN_D
+ START_BOUNDARY
+* START_CONSTRAINT
+* START_CONSTRAINT2
+ BOUND_INCIDENT_TIME
+SOLUTION_BOUNDED_IN_TIME
+SOLUTION_BOUNDED_IN_SPACE
+
+;
+
+ OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, ${ifpa.modelParams.weight_for_distance}* (1-(${ifpa.modelConfig.bias})) * ${ifpa.modelParams.weight_for_length} * ( P( J1, M1 ) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ) ); 
+* OBJECTIVE ..	Z=E=SUM( J1, SUM( M1, 1.0/power(1 + sqrt(sqr(5*(ORD(M1)-4)/60.0)+sqr(PM(J1)-17.319)),3) * (1-(0)) * L( J1 ) * ( P( J1, M1 ) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) ) ) ); 
+
+***             if j1,m1 is a boundary in space (-, upstream) at time m1, the sum of all D's upstream at time M1 must be <= 0
+ EQ1(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+***             if j1,m1 is a boundary in time (+, later) at J1, the sum of all D's later than M1 at section J1 must be <= 0
+ EQ2(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1, M1+1 ) );
+***             if j1,m1 is a boundary in space (+, downstream) at time m1, the sum of all D's later that M1 at section J1+1 must be <= 0
+***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
+ EQ3(J1,M1) ..	SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( J1+1, R1 ) ) =l= CARD(M1) -  CARD(M1) * ( D( J1, M1 ) - D( J1+1, M1 ) );
+** EQ3(J1,M1) ..	D( J1-1, M1+1 ) =l= CARD(M1) +  CARD(M1) * ( D( J1, M1 ) - D( J1-1, M1 ) );
+***             if j1,m1 is a boundary in time (-, earlier) at section j1, the sum of all D's upstream from j1 at section time M1-1 must be <= 0
+***             The point of this is to ensure that congestion only grows upstream from the head of the incident, not downstream
+ EQ3b(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), D( K1, M1-1 ) ) =l= CARD(J1) -  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
+** EQ3b(J1,M1) ..	D( J1+1, M1-1 ) =l= CARD(J1) +  CARD(J1) * ( D( J1, M1 ) - D( J1, M1-1 ) );
+***             if 
+***             the sum over all cells upstream and later than the target cell must be zero if the target cell is a boundary cell in space(-) and time(+)
+***             We tweak this to require that all sections at time M1+1 and all times at section J1-1 are non-incident as well
+ EQ4(J1,M1) ..	SUM( K1, SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
+                  =l= (2+CARD(M1)+CARD(J1))*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) )
+                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1))+SUM(K1,1-D(K1,M1+1)));
+*  EQ4(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
+*                   =l= (2+CARD(M1)+CARD(J1))*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) )
+*                        - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1))+SUM(K1,1-D(K1,M1+1)));
+***             the sum over all cells downstream and later than the target cell must be zero if the target cell is a boundary cell in space(+) and time(+)
+ EQ5(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), SUM( R1\$(ORD( R1 ) > ORD( M1 ) ), D( K1, R1 ) ) ) 
+                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1+1, M1 ) + D( J1, M1 ) - D( J1, M1+1 ) );
+***             the sum over all cells downstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(+) and time(-)
+ EQ6(J1,M1) ..	SUM( K1\$(ORD( K1 ) > ORD( J1 ) ), SUM( R1\$(ORD( R1 ) < ORD( M1 ) ), D( K1, R1 ) ) ) 
+                  =l= 2*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1+1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) );
+***             the sum over all cells upstream and earlier than the target cell must be zero if the target cell is a boundary cell in space(-) and time(-)
+***             We tweak this to require that all sections at section J1-1 are non-incident as well
+ EQ7(J1,M1) ..	SUM( K1\$(ORD( K1 ) < ORD( J1 ) ), SUM( R1\$(ORD( R1 ) < ORD( M1 ) ), D( K1, R1 ) ) ) 
+                  =l= (2+CARD(M1))*CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( D( J1, M1 ) - D( J1-1, M1 ) + D( J1, M1 ) - D( J1, M1-1 ) )
+                       - CARD(M1) * CARD(J1) * (SUM(R1,1-D(J1-1,R1)));
+***** SHOCKWAVE CONSTRAINT
+*** Loading wave
+ EQ8(J1,M1) .. SUM( K1\$((${ifpa.modelParams.shockdir}) * PM( K1 ) < (${ifpa.modelParams.shockdir})*(PM(J1)-(${ifpa.modelParams.shockdir})*${ifpa.modelParams.MAX_LOAD_SHOCK_DIST}), D(K1,M1+1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1-1,M1) );
+* Enforce the loading wave constraint at the start too
+ EQ8_START(J1,M1) .. SUM( K1\$((${ifpa.modelParams.shockdir}) * PM( K1 ) < (${ifpa.modelParams.shockdir})*(PM(J1)-(${ifpa.modelParams.shockdir})*${ifpa.modelParams.MAX_LOAD_SHOCK_DIST})), D(K1,M1) ) =l= CARD(M1) - CARD(M1)*( S(J1,M1) );
+** Clearing wave
+ EQ8b(J1,M1) .. SUM( K1\$((${ifpa.modelParams.shockdir}) * PM( K1 ) > (${ifpa.modelParams.shockdir})*(PM(J1)+(${ifpa.modelParams.shockdir})*${ifpa.modelParams.MAX_LOAD_SHOCK_DIST})), D(K1,M1-1) ) =l= CARD(M1) - CARD(M1)*( D(J1,M1) - D(J1+1,M1) );
+TOTDELAY ..	Y=E=SUM( J1, SUM( M1, L( J1 ) / V(J1,M1) * F( J1, M1 ) * D(J1,M1) ) );
+AVGDELAY ..	A=E=SUM( J1, SUM( M1, L( J1 ) / AV(J1,M1) * AF( J1, M1 ) * D(J1,M1) ) );
+NETDELAY ..	N=E=Y-A;
+CWEIGHT(J1,M1) .. CW(J1,M1)=E=${ifpa.modelParams.weight_for_distance};
+CVALUE(J1,M1) .. CV(J1,M1)=E=${ifpa.modelParams.weight_for_distance} * (1-(${ifpa.modelConfig.bias})) * ${ifpa.modelParams.weight_for_length} * ( P( J1, M1 ) * D( J1, M1 ) + ( 1 - P( J1, M1 ) ) * ( 1 - D( J1, M1 ) ) );
+ ONESTART .. (SUM(J1,SUM(M1,S(J1,M1)))) =L= 1;
+ NOSTART_NOREGION .. SUM(J1,SUM(M1,D(J1,M1))) =L= CARD(M1)*CARD(J1)*(SUM(J1,SUM(M1,S(J1,M1))));
+ IFSTART_THEN_D(J1,M1) .. D(J1,M1) =G= S(J1,M1);
+ START_BOUNDARY(J1,M1) .. SUM( K1, D( K1, M1-1 ) ) + SUM( R1, D( J1 + 1, R1 ) ) 
+                  =l= CARD(M1) * CARD(J1) -  CARD(M1) * CARD(J1) * ( S( J1, M1 ) );
+** REQUIRE THAT IF THERE IS ANY BOUNDARY, IT MUST INCLUDE CELLS WITHIN A CERTAIN DISTANCE OF THE EXPECTED TIME-SPACE LOCATION OF THE DISRUPTION
+* START_CONSTRAINT .. SUM( J1, SUM( M1, S(J1,M1) ) ) =l= CARD(M1) * CARD(J1) * SUM( K1\$(ABS(PM(K1)-17.319)<=10000), SUM( R1\$(ABS(ORD(R1)-4)*5<=10000), S(K1,R1)));
+** REQUIRE THAT THE START IS ON A CELL WITH POSITIVE EVIDENCE FOR AN INCIDENT
+* START_CONSTRAINT2(J1,M1) .. S(J1,M1) =l= (1 - P(J1,M1));
+
+** Incident time bound constraint: All cells with time index less than the incident start time must be zero
+ BOUND_INCIDENT_TIME .. SUM( J1, SUM( M1\$(ORD(M1)<${ifpa.modelParams.incstart_index}+1), D(J1,M1) ) ) =L= 0;
+
+** Compute if the solution is bounded in time and/or space
+SOLUTION_BOUNDED_IN_TIME  .. STB=E=SUM(M1\$(ORD(M1) eq CARD(M1)), SUM(J1, D(J1,M1)));
+SOLUTION_BOUNDED_IN_SPACE .. SSB=E=SUM(J1\$(ORD(J1) eq 1), SUM(M1, D(J1,M1)));
+
+
+MODEL BASE / ALL /;
+
+*** Use the cplex.opt options file---should contain probe(3) to speed solution!
+BASE.OptFile=1;
+
+*** Write the options file
+file opt cplex options file /cplex.opt/;
+put opt;
+put 'optcr   0'/;
+put 'threads   2'/;
+put 'logline   2'/;
+put 'mipdisplay   4'/;
+put 'mipinterval   1'/;
+put 'quality   1'/;
+put 'simdisplay   2'/;
+
+putclose opt;
+
+SOLVE BASE USING MIP MINIMIZING Z;
+DISPLAY D.l;
+DISPLAY S.l;
+DISPLAY CW.l;
+DISPLAY CV.l;

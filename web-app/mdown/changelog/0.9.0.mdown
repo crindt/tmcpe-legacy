@@ -1,0 +1,140 @@
+### commit 95de0aefc1f5a2dc692caf0b07c335356b8415f6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 15:46:26 2011 -0700
+
+    Putting blank application.js into tree to prevent problems with uiperformance
+
+### commit 49d73e763d95bbfe88a04c8c8e37dec400391c80
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 15:36:28 2011 -0700
+
+    Removed legacy reference to application.js that was breaking uiperformance.
+
+### commit 36edfa4974cfd435e7bdbef145b2d2ed5af0bea9
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 15:31:16 2011 -0700
+
+    Modified automatic generation of (versioned) html title.
+    * Instead of using sed to modify the source, we instead use tmcpe.version in application properties and access that from the taglib.
+    * Also removed some legacy references to the navigation plugin that were causing problems on bootstrap.
+    * Fixes [#717](http://tracker.ctmlabs.net/issues/717)
+
+### commit 5f317df52ccf1eb7ac6c96f44f83cb47cf9d2181
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 15:04:47 2011 -0700
+
+    Removed a set of unused legacy files and plugins that just contributed to warfile size.
+    * With earlier commits, this fixes [#715](http://tracker.ctmlabs.net/issues/715).
+
+### commit 3ecfcbcb99a324f724876d7a092326bbdc439854
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 14:38:13 2011 -0700
+
+    Fixed bad links to datatables images.
+    * The bad links kill uiperformance optimizations and prevent war deployment.
+    * Refs [#715](http://tracker.ctmlabs.net/issues/715)
+
+### commit 811e0ac787f1cd5f0cb69e20fb1db478143d1d81
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 19 14:29:27 2011 -0700
+
+    Moved all javascript git subprojects to src/js and added script for generating javascript for the app from these source files.
+    
+    * The script for generating the javascript and stylesheets is a simple bash script in scripts/update-js.sh
+    * Synchronization with upstream must be done manually in src/js and then pushed to web-app/* using update-js.sh
+    * Eventually, all js under development should be moved to src/js?
+    * Refs [#715](http://tracker.ctmlabs.net/issues/715)
+
+### commit 5c8a01b4cd75d5af13fd9201517c803f3235dd92
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 17 16:15:10 2011 -0700
+
+    Updating submodules
+
+### commit a43322b812db98755bda5105f689edcb7f6857d9
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 17 15:25:32 2011 -0700
+
+    Version bump to 0.9 series, the 1.0 prerelease.
+
+### commit 259916143ddba8765ed007d641c45584e098d02e
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 17 14:56:28 2011 -0700
+
+    Some styling improvements to better fit a browser at default zoom.
+    * refs [#709](http://tracker.ctmlabs.net/issues/709)
+
+### commit eb5bbc60c8546a2d6e85d8c9718e62c54631906b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 17 14:05:12 2011 -0700
+
+    Altered clustering implementation to properly synchronize detail pager.
+    * Fixes [#713](http://tracker.ctmlabs.net/issues/713)
+
+### commit 848ef615b44df3c825b7705ddfa698296de962c6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 17 12:02:11 2011 -0700
+
+    Basic version of map clustering working on the new interface.
+    
+    * Method adapted a clustering routine jmarca@translab.its.uci.edu put together.
+    * Detail pane implemented using jquery_pagination plugin.
+    * Fixes [#707](http://tracker.ctmlabs.net/issues/707)
+    * Also, some styling changes.
+    * Also included a cluster of delayed commits, mostly submodules, that have been
+      lying around in the tree for some time.
+
+### commit 2d5c5e278725ab4a7e183c96674c1fa0f4fa7ec1
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue May 17 10:01:24 2011 -0700
+
+    Added link from new incident list detail to incident view page.
+
+### commit cf39330b46ce03612a11ae79c5b4d81bdeb1f3ec
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon May 16 17:47:18 2011 -0700
+
+    Partial implementation of clustering.
+
+### commit be5d17133fcb8f21260df97939eee0b5d2daa24f
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon May 16 10:33:41 2011 -0700
+
+    Secured analysis and log controllers
+
+### commit 4bc3d1b97468b9ad92cf2cae2546ecd32de7e4ea
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri May 13 00:05:27 2011 -0700
+
+    Added feature to import-al.pl that recomputes delay if existing solution is bounded in time and/or space.
+    * Fixes [#331](http://tracker.ctmlabs.net/issues/331)
+
+### commit 003090e0d40beab98098c673910c5918240576b7
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 12 15:38:21 2011 -0700
+
+    Finalized current implementation of download data link.  Future changes should be new issues.
+    
+    * Fixes [#195](http://tracker.ctmlabs.net/issues/195)
+
+### commit 5fd509a577e0fbca50b4ade4e08e98ccc4367b0c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 12 15:28:57 2011 -0700
+
+    Ported the incident data download link to the new interface.
+    * Refs [#195](http://tracker.ctmlabs.net/issues/195)
+    
+    Really should move this to into the table.
+
+### commit 97a991f4c368ac56a45e1ccfe56d4821b6b3d2a1
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu May 12 14:43:06 2011 -0700
+
+    Added report analysis problem link to general stats pane.
+    * Fixes [#478](http://tracker.ctmlabs.net/issues/478)
+
+### commit 6aa2dbc77267c6d1fe4625c8838c10a2e6442e85
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Jan 4 12:03:41 2011 -0800
+
+    Added database backup to the repo as I work on schema changes.

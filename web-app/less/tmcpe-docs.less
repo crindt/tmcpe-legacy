@@ -1,0 +1,21 @@
+#current-stats {
+	table {
+		td, th {
+			&.number { text-align: right; }
+		}
+		thead:first-child {
+			tr:last-child {
+				th {
+					border-bottom: 1px #000 solid;
+				}
+			}
+		}
+		tfoot:last-child {
+			tr:first-child {
+				th {
+					border-top: 1px #000 solid;
+				}
+			}
+		}
+	}
+}

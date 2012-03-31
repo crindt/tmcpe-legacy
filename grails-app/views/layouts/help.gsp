@@ -3,30 +3,18 @@
       <!-- layouts/bare.gsp head -->
       <title>Caltrans D12 TMC Performance Evaluation (Version <tmcpe:version />) <g:layoutTitle default="" /></title>
 
+      <g:external uri="images/favicon.ico" />
+
       <!-- set the base url to help -->
       <base href="${createLink(controller:'help')}/index"> 
 
-      <!-- less stylesheets -->
-      <g:if env="development">
-        <less:stylesheet name="tmcpe-base" />
-      </g:if>
-      <g:if env="production">
-        <p:css name="tmcpe-base" />
-      </g:if>
-
-      
-      <p:favicon src="images/favicon.ico" />
-
-      <!-- target page layout head -->
-      <g:layoutHead />
-
+      <!-- require the common resources bundle -->
+      <r:require module="common"/>
+	  
       <!-- common javascript -->
       <g:urlMappings/> <!-- custom grails js to emit controller/action urls -->
+      <r:layoutResources />
 
-      <less:scripts />
-
-      <!-- load common javascript -->
-      <p:javascript src="tmcpe/common" />
     </head>
 
     <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
@@ -102,9 +90,7 @@
 	</ul>
       </div>
 
-
-      <!-- Now render the rest of the page javascript -->
-      <p:renderDependantJavascript />
+      <r:layoutResources />
     </body>	
 
 </html>

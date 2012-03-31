@@ -1,0 +1,99 @@
+### commit f8faef07b16ccfbbcfaa42526f103fb040749868
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 12:29:16 2011 -0700
+
+    image url tweak
+
+### commit 92bf7d9caa635a3843922e0ba4552fef707b4508
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 12:27:27 2011 -0700
+
+    Added year selector back to map/show
+
+### commit e463f36fa1ce353ec813db90e965dab6dba5eb6b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 12:00:08 2011 -0700
+
+    Minor table formatting change
+
+### commit dbc6773245ccf4a3d58a02b7fe5466bc3c85ce3f
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 11:55:02 2011 -0700
+
+    More tweaks to the incident/tsd query screen to simplify it (refs [#832](http://tracker.ctmlabs.net/issues/832)) and minor styling changes to map/show table
+
+### commit d5570d2b375bbe6787405724aaca15d92cf0cdce
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 11:53:36 2011 -0700
+
+    CSS Tweaks for small screen. Refs [#839](http://tracker.ctmlabs.net/issues/839).
+
+### commit 7b73cd2714d76a0347bf985bb8ceb3f3d72e3542
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 11:52:41 2011 -0700
+
+    Fixed default url mapping to point to map/show
+
+### commit 7584d50d111852518ea5d7d0f5b38534b62750ed
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 11:32:43 2011 -0700
+
+    Disabled max speed slider in incident/tsd.  Still need to move to advanced menu.  Refs [#832](http://tracker.ctmlabs.net/issues/832)
+
+### commit 3c1d71853209f2f163fc0a9e8952c748b671e86c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 11:23:38 2011 -0700
+
+    Returned basic capability to alter the map/show query
+
+### commit 59d5e1549f56635427c6cd8c17ab7060044f97aa
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 11:22:41 2011 -0700
+
+    Added tabindex to map div to prevent it grabbing the keyboard.  Fixes [#840](http://tracker.ctmlabs.net/issues/840)
+
+### commit 90bd3701944f3d006aebb6bc5a622150d2ecda0d
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 09:50:12 2011 -0700
+
+    User interface improvments.
+    
+    * General styling changes
+    * Added tooltips to map/show
+    * Changed labels, fixes [#831](http://tracker.ctmlabs.net/issues/831)
+
+### commit 085436bb3c646c50476fd33d3ccd27f1ec677da6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 09:19:20 2011 -0700
+
+    General styling improvements
+
+### commit 4b79531ac04e7eaab8f53ba8a84e5b66a8b3de43
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 08:09:20 2011 -0700
+
+    Renamed controller/js/css for incident/tsd page
+
+### commit feec6afee17d25e80fb7336555c33aaec721ac01
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 08:04:21 2011 -0700
+
+    Adjusted import/delay calc script to store gams files in a subdirectory
+
+### commit 06f9b9d16fc0260c6a1b245cd09f1a3326e530dc
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 08:03:53 2011 -0700
+
+    Manually tweaked broken DBIx::Class schema for icad
+
+### commit 53aef7822f75715c2e35098bf33941e6eac65c08
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 08:03:20 2011 -0700
+
+    Removed json transformer for removed class
+
+### commit 329066b82c16b582dc578ffdb36df18ede93e4dc
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Aug 23 00:30:15 2011 -0700
+
+    Reverted css logo link and removed unused plugin

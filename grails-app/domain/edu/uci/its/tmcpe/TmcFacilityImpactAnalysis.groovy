@@ -2,9 +2,17 @@ package edu.uci.its.tmcpe
 
 class TmcFacilityImpactAnalysis {
 
-    // The facility impact analysis upon which this analysis is based
-    IncidentFacilityImpactAnalysis facilityImpactAnalysis
+    static mapWith = "mongo"
 
+    String id
+    String cad
+    String facility
+    List timesteps
+    List sections
+    List obsvol
+
+    static embedded = ['timesteps', 'sections', 'obsvol']
+    //static embedded = ['sections']
     static constraints = {
     }
 }

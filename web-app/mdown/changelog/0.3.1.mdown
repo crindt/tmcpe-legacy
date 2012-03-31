@@ -1,0 +1,55 @@
+### commit fc5b2ac7e0bb18c4ae7a4a6f12b384085fdd71f6
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:49:33 2010 -0700
+
+    Release 0.3.1
+
+### commit ec2327bd2fd02506e333b89fb42824e2ea1862bc
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:03:50 2010 -0700
+
+    Added button to pop up incident detail window for each incident in a cluster. (refs [#257](http://tracker.ctmlabs.net/issues/257))
+    Added tooltip to describe button.
+
+### commit 464605755ae39ee0f9d6766956d7c176c6a1e790
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:11:27 2010 -0700
+
+    Release 0.3.0
+
+### commit 4adb7299aeade94a248a9a4e82e47f468f16ae21
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 05:10:48 2010 -0700
+
+    Push cluster work onto 0.3 branch.
+
+### commit 11d81721479edb03f560bd51f4e0ca36fe38a418
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:21:53 2010 -0700
+
+    Improved incident list clustering display (refs [#257](http://tracker.ctmlabs.net/issues/257)).
+    Added feature tooltips to incident list map.
+
+### commit 16290fc17a4c8805ab44af55d1e2108205da9140
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 16:18:25 2010 -0700
+
+    Added feature tooltip capabilities.
+
+### commit 1a86094796f183860b16cb4efd717d20f87425cc
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Mon Jul 26 12:07:59 2010 -0700
+
+    Improvements to incident list clustering.  Can now step through list of incidents at cluster (akin to redfin implementation).  Refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit 366955c48ee61f8f79936953dddade206183cb2d
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Fri Jul 23 16:19:17 2010 -0700
+
+    Partial implementation of incident icon clustering.  refs [#257](http://tracker.ctmlabs.net/issues/257).
+
+### commit e613b78cd0a7b2029b70db26da823669975c36b4
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Tue Jul 27 06:40:34 2010 -0700
+
+    Adjusted TimeSpaceDiagram view to visually indicate when data is suspect---partial fix.  Refs [#192](http://tracker.ctmlabs.net/issues/192).

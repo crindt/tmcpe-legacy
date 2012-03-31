@@ -13,7 +13,7 @@ class IncidentController extends BaseController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
     def index = {
-        redirect(action: "list", params: params)
+        redirect(action: "summary", params: params)
     }
 
     def listFacilities = {

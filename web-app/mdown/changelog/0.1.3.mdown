@@ -1,0 +1,23 @@
+### commit 7d63eacb09568b482b83313362856a1fc8ec5364
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed May 19 12:37:17 2010 -0700
+
+    Added versioned release system and integrated it with the webapp templates (to advertise the version to users)
+
+### commit 15eae2447fc9df825370bfe6206c06e0cd6dec36
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed May 19 12:36:58 2010 -0700
+
+    Release 0.1.3
+
+### commit 62309e47684db30b87b3330f16a5830082f8159e
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed May 19 12:36:16 2010 -0700
+
+    Release
+
+### commit 72d79ee29d3f13085421f60b144d2d33da294638
+* Author Craig Rindt <crindt@uci.edu>
+* Date   Wed May 19 12:31:36 2010 -0700
+
+    Release 0.1.3
