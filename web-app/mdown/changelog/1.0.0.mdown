@@ -1,0 +1,420 @@
+### commit 270b90fa79d8baad4af93660218a2e53224ef1b3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Mar 30 23:21:31 2012 -0700
+
+    Finished tooltips on map/show.  Fixes [#884](http://tracker.ctmlabs.net/issues/884).
+
+### commit 686d9326481bf029d4ba8c72b06d6893c20f4099
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Mar 30 11:08:21 2012 -0700
+
+    Added support for safari (not opera) and tested on tablet w/safari core (dolphin).  Fixes [#1217](http://tracker.ctmlabs.net/issues/1217)
+
+### commit 07f6742c6c6486770f58e0965c3ba6b4a02273d3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Mar 30 10:56:02 2012 -0700
+
+    Commiting generalted changelogs though 0.9.7
+
+### commit 98f9e0da855a9c0afc6dcde157d2110fecdf7eb2
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Oct 18 16:24:33 2011 -0700
+
+    Added script to generate displayable changelogs using the help interface ([#211](http://tracker.ctmlabs.net/issues/211)).
+    
+      * Changelogs are accessible using tmcpe/help?term=changelog/<version> where
+        version is the tag you want to access.
+    
+      * Script uses standard git extraction and does some processing to point the
+        links into http://tracker.ctmlabs.net/
+    
+      * Refinement is needed, including an index page for listing all versions
+        available
+    
+      * Refs [#720](http://tracker.ctmlabs.net/issues/720)
+
+### commit 4c9af557b96ab4f015dd8162f4f0c2024d0c63bc
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Mar 30 10:39:53 2012 -0700
+
+    Switched to bootstrap popover for displaying cell detail table in tsd.  Fixes [#1071](http://tracker.ctmlabs.net/issues/1071)
+
+### commit 8469a1a5101b118ede4779975c745e78bcc7ba5f
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Mar 29 12:24:57 2012 -0700
+
+    Switched to bootstrap table styling for incident/tsd pages.
+    
+    Fixes [#1233](http://tracker.ctmlabs.net/issues/1233), but some refactoring still needed.
+
+### commit e63fda022eef64bca8747a8f5d2e40514f1b3192
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Mar 28 02:28:49 2012 -0700
+
+    Tooltip fixes in incident/tsd
+
+### commit 088e5fb1eefe1ce287acd499e54da4494dfddfbf
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Mar 28 00:56:44 2012 -0700
+
+    Updated message modals to better bootstrappiness
+
+### commit f6498744a9abb639c310706d4593a34e832072fb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Mar 28 00:52:01 2012 -0700
+
+    Updated incident/tsd settings form to better bootstrappiness
+
+### commit a870b3c779e8ea55d505fc1e952708c4ed404e38
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Mar 28 00:31:26 2012 -0700
+
+    Fixed settings form and handling so TSD in-browser computations work again
+
+### commit 29729c5e3463da5a6df883a676d05e0c09d8b065
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 23:45:58 2012 -0700
+
+    Finished implementation of map/chart resizing in incident/tsd.  Fixes [#701](http://tracker.ctmlabs.net/issues/701)
+
+### commit 97a5521769b200ee21241bd98d6fe5bab6c0531d
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 22:35:47 2012 -0700
+
+    Revert incidentController changes that broke list queries
+
+### commit 8497bb2188629a5690a1267281d14f863030ad9e
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 22:14:00 2012 -0700
+
+    Cleaning up overview page
+
+### commit 9bad79ff495ab5ca687dcfa5b1032f717eceeca2
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 22:06:53 2012 -0700
+
+    More unified styling, boiler plate, and some contacts
+
+### commit 6bf8710d9b72586672727350248cd39fc10c02ba
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 17:11:42 2012 -0700
+
+    Fixed problems with automatic menu help links
+
+### commit de9a38203e21c0e8aa6a557110810384024d6f83
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 15:49:43 2012 -0700
+
+    Enabled google analytics.  Fixes [#1231](http://tracker.ctmlabs.net/issues/1231).
+
+### commit ff49ea481f2404f5aba7d9692522121594ceb431
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 14:17:58 2012 -0700
+
+    Updated menu links
+
+### commit 9aca78b8410e8bbd3ba6ed3263ca68403410d0ea
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 13:41:19 2012 -0700
+
+    buncha changes toward release
+
+### commit 78238485349ee8641610b19e78e8fa44587308b9
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Mar 27 13:12:53 2012 -0700
+
+    Fixed dependency issues
+
+### commit 2c1d52ced2dc3b39a465b1adfd50bc04260fbe16
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Mar 8 13:36:36 2012 -0800
+
+    Core features working for pulling LDAP roles directly from CAS attributes.  Some refinement still needed.  Refs [#1168](http://tracker.ctmlabs.net/issues/1168).
+
+### commit 88d4019198949e2c1aedf0e5599804d18ef53949
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Mar 5 16:36:30 2012 -0800
+
+    Movements toward standarization using Twitter Bootstrap.  Refs [#1043](http://tracker.ctmlabs.net/issues/1043)
+
+### commit 5992e3dabcad0b2d858b77d644fc2b3305f38645
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Feb 16 09:59:03 2012 -0800
+
+    Bundle of work toward moving toward twitter bootstrap based scaffolding.  Refs [#1043](http://tracker.ctmlabs.net/issues/1043)
+
+### commit 966a8b161227d44ff4224e88a5f112a24ad55908
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Sat Feb 11 21:50:03 2012 -0800
+
+    Moves toward making map/show bootstrap compatible
+
+### commit 4375c8638fa9d7a379bb4a2d774c6b13a3daabbe
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Sat Feb 11 21:49:32 2012 -0800
+
+    Some cumflow plot tweaks
+
+### commit 018f74ada78626f9c240f86c46c7b1edc58cc857
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Feb 10 14:46:59 2012 -0800
+
+    Move toward using twitter bootstrap as layout toolkit ([#1043](http://tracker.ctmlabs.net/issues/1043))
+    
+    Also includes some code for resizing charts in TSD view ([#701](http://tracker.ctmlabs.net/issues/701)).
+
+### commit a7ecac8ce1f524e4448e63a3b74efe091a40e75e
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Feb 9 10:31:42 2012 -0800
+
+    Presentation tweaks (refs [#137](http://tracker.ctmlabs.net/issues/137))
+
+### commit 785642788f37ee53598df69251f454243e20758a
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Feb 9 10:20:38 2012 -0800
+
+    Work toward CTMLabs banner integration (refs [#1135](http://tracker.ctmlabs.net/issues/1135)).
+
+### commit fc0b6dc20c96b31b669633686f95a59380d814dd
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Feb 8 04:31:00 2012 -0800
+
+    Large cluster of changes related to TMC savings computation and display.
+    * Additions/fixes to delay/savings computation services (refs [#697](http://tracker.ctmlabs.net/issues/697))
+    * Improvements to use of mongodb
+    * Fixes to GAMS data file template
+    * Fixed incident/tsd chart colors (fixes [#1129](http://tracker.ctmlabs.net/issues/1129))
+    * Defined TMC savings (properly) on the graph (fixes [#1131](http://tracker.ctmlabs.net/issues/1131)) and fixed hovering (fixes [#1130](http://tracker.ctmlabs.net/issues/1130))
+    * Completed grails 2.0 migration (fixes [#1110](http://tracker.ctmlabs.net/issues/1110))
+    * Fixed problem with value-of-time/$$ display in TSD chart (fixes [#1133](http://tracker.ctmlabs.net/issues/1133))
+
+### commit ae89b3dfbd26ff702b662b47721f1b1604c6be48
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Jan 19 14:58:54 2012 -0800
+
+    Added conversion factor to saved quantities
+
+### commit 55b9894ab29207e49fa6d8fa04ab279aa3898afb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Jan 19 14:58:35 2012 -0800
+
+    Removed pointer events from timebars
+
+### commit 2774c90ca674b477a7b1bc8ee2b265b345989a63
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Jan 19 14:56:17 2012 -0800
+
+    Indent changes
+
+### commit bb88687ec8ce05667bbc433ebf809ce6f08c69eb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Jan 18 09:31:24 2012 -0800
+
+    Minor tweaks to implementation
+
+### commit ba5ee89bbe670edd0eb82dc8b73df36f48bfd146
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Jan 17 13:39:37 2012 -0800
+
+    More progress toward issue [#697](http://tracker.ctmlabs.net/issues/697)
+
+### commit 57a5e9af3d1f1e91a0f6208f5fdb020c745343b8
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 16 17:08:07 2012 -0800
+
+    More progress toward backend computation of TMC savings (refs [#697](http://tracker.ctmlabs.net/issues/697))
+    
+    * Added key methods to SimpleIncidentModelService
+    * Added SimpleIncidentModel class
+    * Integration test can:
+      * Parse a VERSION 1 data file,
+      * Identify critical events,
+      * Compute projected cumulative flows based upon revised critical events
+      * Estimate TMC savings
+      * Push the data to a mongo database backend
+
+### commit e05e58af145c6d68d7d8d247c15b1e897bb859fb
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Jan 13 23:31:15 2012 -0800
+
+    Progress toward backend computation of TMC Savings.  Refs [#697](http://tracker.ctmlabs.net/issues/697)
+    
+    * Implemented methods in SimpleIncidentModelService to do cumflow-based delay
+      computations using a baseline observed scenario and provided critical events.
+    * Added rudimentary versioning to gams data file parsing
+    * Wrote some supporting tests to evaluate the above model service and improve
+      existing service/domain tests
+
+### commit 8df4e014a559c6da7ef137d3149a223c96315355
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Jan 11 15:47:07 2012 -0800
+
+    Updated help views to use resources compliant tags
+
+### commit c24b18919d18a52d8f34c22fdf225b832669eadd
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Jan 11 15:46:45 2012 -0800
+
+    Updated production database to v1_0_0
+
+### commit 0cfa4d9ff4b925bed0111c6864837b0e5cb414ff
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Wed Jan 11 15:39:07 2012 -0800
+
+    Presentation updates
+
+### commit 7b5eddf6cca99588d15d5d90449eba3b84001181
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Jan 10 09:22:31 2012 -0800
+
+    Set up presentation controller and the current version of the overview slide.  Refs [#137](http://tracker.ctmlabs.net/issues/137).
+
+### commit 6c15097d8f96972aa98059f6c6644fbb0a1f09e3
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Jan 6 13:00:51 2012 -0800
+
+    Beginnings of TMCPE SVG presentation using Sozi.  Refs [#137](http://tracker.ctmlabs.net/issues/137)
+
+### commit 196ee01c6b8c556037eddbd4bdc10f06831b9ab1
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Dec 6 08:49:18 2011 -0800
+
+    Added emacs locals file
+
+### commit ab97f3ee2c9a642c150fb4353fcb912151583b32
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Jan 10 08:56:45 2012 -0800
+
+    Version bump to 0.9.8 (with major version 1.0).
+
+### commit 4ebbe14722babf69ecee950de8f42fe68b90967b
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Jan 10 08:39:37 2012 -0800
+
+    Bumped database version to 1.0.0
+
+### commit 6b9ed9dbe658c3c5192fb7eff2c3dbbca7616a76
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Jan 10 08:39:02 2012 -0800
+
+    Indent changes
+
+### commit 08ffe2529822f4ef87f9e145ceac44463a7fb324
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 9 16:23:29 2012 -0800
+
+    Enabled mongodb for IncidentFacilityPerformanceAnalysis and started writing integration tests
+    
+    * refs [#697](http://tracker.ctmlabs.net/issues/697)
+    * Added mongodb instances to DataSource for each environment (test/devel/prod)
+    * Had to comment id column: '' entries and create views on postgres tables that don't use 'id' for the key.  This is a workaround of something that looks buggish  that should be reported upstream.
+    * Removed some unused domain classes
+    * Wrote a test to persist an entry to mongodb that I analyzed by hand.  Test needs finishing to validate the persistence using an actual database read.
+
+### commit f388bc9a08cf6226f614617e3c80debe3ed51bc5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 9 12:13:32 2012 -0800
+
+    Various fixes related to 2.0 migration, resources plugin, and hibernate-postgres plugin
+    
+    * Updated remaining GSP (incident/tsd) to use resources bundles (refs [#1111](http://tracker.ctmlabs.net/issues/1111))
+    * Fixed previously migrated GSPs' bundle migrations
+    * Improved bundles
+    * Fixes to JTS geometry json marshalling.  Refs [#1112](http://tracker.ctmlabs.net/issues/1112)
+    * Added tmcpe.createFormattedLink function to encapsulate format handling in the grails/javascript mapping
+
+### commit 6c376700b10ce96c92c1b1fb46d38579d7baa71a
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 9 11:07:41 2012 -0800
+
+    Major cluster of messy changes combining migration to grails 2.0 ([#1110](http://tracker.ctmlabs.net/issues/1110)) with changes to backend savings computation ([#697](http://tracker.ctmlabs.net/issues/697)).
+    
+    * Migrated to grails 2.0 (fixes [#1110](http://tracker.ctmlabs.net/issues/1110))
+    
+      * Dropped using of datasources plugin in favor of grails-2.0 native multiple datasource handling (deleted conf/Datasources.groovy
+      * Moved from uiperformance to resources plugin (a 2.0-ism).  Refs [#1111](http://tracker.ctmlabs.net/issues/1111)
+        * Updated the sitemesh to use the resources features
+        * Created resources bundles for core features
+        * Updated some GSPs to use resources idioms
+        * added the zipped-resources and cached-resources plugins.
+        * needs more work and tuning
+      * Moved from lesscss plugin to lesscss-resources plugin (a 2.0-ism)
+      * Moved to spock-0.6-SNAPSHOT (for 2.0 support)
+      * Moved to using hibernate-spatial-postgresql plugin (away from custom code).
+        * This required additions to the marshalling code in conf/BootStrap.groovy
+        * Also required some custom dependencies in conf/BuildConfig.groovy
+    
+    * Broke JODA-time stuff (see [#1113](http://tracker.ctmlabs.net/issues/1113))
+    
+    * Updated browser-detection plugin
+      * No longer requiring custom code
+      * Updated BaseController.groovy to use it properly
+    
+    * Deleted some cruft
+    
+      * The Route domain class and controller
+      * The VdsRawDataController and c
+    
+    * Began work on server-side FacilityPerformance revamp ([#697](http://tracker.ctmlabs.net/issues/697))
+    
+      * Improvements to GamsDelayComputationService including beginnings of execution (to replace the delay compuation portion of import-al.pl)
+      * Added more tests wrt [#697](http://tracker.ctmlabs.net/issues/697)
+    
+    * UI improvements
+      * Fixes to support standard use of grails/javascript mapping plugin to support alternative format specification (e.g., .geojson) in controller URIs.  Earlier approach modified the plugin in place.  New implementation modifies returned URLs after the call to the library.  This is hackish and needs improvement (see [#1114](http://tracker.ctmlabs.net/issues/1114))
+
+### commit 1d780daccf04be50c8c40b9fb67aa2cd42feaf73
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Jan 9 10:10:05 2012 -0800
+
+    Incremental improvments to the TMCPE SOZI presentation. Refs [#137](http://tracker.ctmlabs.net/issues/137)
+
+### commit eb5089c932f063f7801c08ec29f3ef60e35d23da
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Dec 6 08:49:18 2011 -0800
+
+    Added emacs locals file
+
+### commit 3f2494d3cb136f80ed86f7ef5f73672973dbfa82
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Dec 6 08:48:18 2011 -0800
+
+    Improvements to generating model params.  Refs [#697](http://tracker.ctmlabs.net/issues/697)
+
+### commit f21678a362631785296873e89ccc40fcdaa9aab5
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Fri Dec 2 18:12:24 2011 -0800
+
+    More tests and implementation improvments on GamsDelayComputationService, FacilityPerformance, and IncidentFacilityPerformanceAnalysis.
+    
+    * Can now parse a basic gms/lst combo and regenerate, gms file, re-read it and show equivalence.
+    * refs [#697](http://tracker.ctmlabs.net/issues/697)
+
+### commit 1a73e8315539965eb7c3e178aa2b7a522095256c
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Thu Dec 1 16:48:14 2011 -0800
+
+    Continued movement toward backend incident processing.
+    
+    * Created a new service (and specifications) for processing gams results
+    * Improvements to the IncidentFacilityPerformanceAnalysis spec
+    * targeted at [#697](http://tracker.ctmlabs.net/issues/697)
+    * directly refs:  [#696](http://tracker.ctmlabs.net/issues/696), [#328](http://tracker.ctmlabs.net/issues/328), [#905](http://tracker.ctmlabs.net/issues/905)
+
+### commit f4f2efc9d4f3cbf82b0a990210c4e065791b27b6
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Tue Nov 29 17:00:21 2011 -0800
+
+    Moves toward mongodb-based storage of facility analyses.
+    
+    * Added mongodb plugin
+    * Began defining spock specs for FacilityPerformance class hierarchy that will subsume the existing implementation
+    * Targeted at [#697](http://tracker.ctmlabs.net/issues/697)
+    * Directly refs: [#696](http://tracker.ctmlabs.net/issues/696), [#328](http://tracker.ctmlabs.net/issues/328), [#905](http://tracker.ctmlabs.net/issues/905)
+    * Indirectly refs: [#176](http://tracker.ctmlabs.net/issues/176), [#807](http://tracker.ctmlabs.net/issues/807), [#721](http://tracker.ctmlabs.net/issues/721), [#712](http://tracker.ctmlabs.net/issues/712), [#757](http://tracker.ctmlabs.net/issues/757), [#342](http://tracker.ctmlabs.net/issues/342)
+
+### commit c240feeaa6d5ebe143fabac4a49bd9d5c6a34b92
+* Author Craig Rindt <crindt@translab.its.uci.edu>
+* Date   Mon Nov 28 13:56:17 2011 -0800
+
+    Indent fixes
