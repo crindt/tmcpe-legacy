@@ -13,9 +13,6 @@
 [submodule "src/js/dojo-src/dijit"]
 	path = src/js/dojo-src/dijit
 	url = /home/crindt/dojo-src/dijit
-[submodule "doc/reports/hutchins"]
-	path = doc/reports/hutchins
-	url = /home/crindt/hutchins
 [submodule "src/js/jquery"]
 	path = src/js/jquery
 	url = http://github.com/jquery/jquery.git
