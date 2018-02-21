@@ -207,7 +207,7 @@ dojo.declare("tmcpe.IncidentView", [ dijit._Widget ], {
 	    dojo.byId('tmcpe_tsd_xls_link').href = base+'incidentFacilityImpactAnalysis/show.xls?id='+this._facilityImpactAnalysis;
 
 	    dojo.byId('tmcpe_report_problem_link').innerHTML = 'Report problem with this facility analysis';
-	    url = "http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&"
+	    url = "http://***REMOVED***/redmine/projects/tmcpe/issues/new?tracker_id=3&"
 		+ encodeURIComponent( "issue[subject]=Problem with analysis of "+fiaSummary )
 		+ "&" + encodeURIComponent( "issue[description]=Bad analysis for available for ["+fiaSummary+"]("
 					    +base+'incident/showCustom?id='+this._incident.id					    

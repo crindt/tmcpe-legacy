@@ -17,7 +17,7 @@ psql -U postgres tmcpe -c 'ALTER TABLE d12_activity_log SET SCHEMA actlog'
 
 # grab tbmap.tvd and tbmap.vds_view from osm
 psql -U postgres tmcpe -c 'CREATE SCHEMA tbmap'
-ssh crindt@localhost pg_dump -U VDSUSER --inserts -t tbmap.tvd  -t tbmap.vds_segment_geometry -t tbmap.vds_view osm > tbmap.sql
+ssh crindt@***REMOVED*** pg_dump -U VDSUSER --inserts -t tbmap.tvd  -t tbmap.vds_segment_geometry -t tbmap.vds_view osm > tbmap.sql
 psql -U postgres tmcpe < tbmap.sql
 
 # create the sigalerts locations table

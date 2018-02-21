@@ -406,7 +406,7 @@ dojo.declare("tmcpe.TimeSpaceDiagram", [ dijit._Widget ], {
     {
 	this._hideLoading();  // hide the "loading" screen
 
-	var url = 'http://localhost/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Perform%20analysis%20of%20Incident ' + this.incident + '&issue[description]=No%20analysis%20is%20available%20for%20incident ' + this.incident + '.  Need to explore why this is not in the database.';
+	var url = 'http://***REMOVED***/redmine/projects/tmcpe/issues/new?tracker_id=3&issue[subject]=Perform%20analysis%20of%20Incident ' + this.incident + '&issue[description]=No%20analysis%20is%20available%20for%20incident ' + this.incident + '.  Need to explore why this is not in the database.';
 	this.domNode.appendChild
 	( dojo.create( "div",
 		       { id: "noAnalysisDiv",

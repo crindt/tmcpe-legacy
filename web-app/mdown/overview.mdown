@@ -81,7 +81,7 @@ and used in the analysis:
 
 The TMC Activity Log Data is preprocessed to identify the time and
 location of critical events in incident management as defined in the
-[event management flow charts](http://localhost/redmine/projects/tmcpe/wiki/Event_Management_Flowchart)
+[event management flow charts](http://***REMOVED***/redmine/projects/tmcpe/wiki/Event_Management_Flowchart)
 including: first call, verification, TMC response actions ranging from
 dispatching traffic management team to displaying CMS messages, TMC
 monitoring, and the end of incident management.
@@ -152,9 +152,9 @@ Incidents button in the top right corner of the page.
 ## Further Information
 
 Detailed documentation about the site is available from the
-[Testbed issue tracking tool](http://localhost/redmine/projects/tmcpe).
+[Testbed issue tracking tool](http://***REMOVED***/redmine/projects/tmcpe).
 You must be an authenticated user to use this site.  Useful links:
 
 * Tooltips are provided where possible to guide the user on how to use
   the interface
-* The [User Guide](http://localhost/redmine/projects/tmcpe/wiki)
+* The [User Guide](http://***REMOVED***/redmine/projects/tmcpe/wiki)

@@ -47,11 +47,11 @@ our $VERSION = '0.3.4';
 
 use Class::MethodMaker
     [
-#     scalar => [ { -default => "localhost" }, 'gams_host' ],
+#     scalar => [ { -default => "***REMOVED***" }, 'gams_host' ],
      scalar => [ { -type => 'SpatialVds::Schema',
            -default_ctor => sub {
                SpatialVds::Schema->connect(
-               "dbi:Pg:dbname=spatialvds;host=localhost",
+               "dbi:Pg:dbname=spatialvds;host=***REMOVED***",
                "VDSUSER", "VDSPASSWORD",
                { AutoCommit => 1 },
                );

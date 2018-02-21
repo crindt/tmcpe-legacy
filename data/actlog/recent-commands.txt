@@ -47,11 +47,11 @@
   165  rm -rf lib/
   166  sh ./createit.sh
   167  ls -lrt
-  168  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("Caltrans::ActivityLog::Schema", { debug => 1 }, [ "dbi:Mysql:dbname=actlog;host=trantor.its.uci.edu;user=ALUSER ;password=ALPASSWORD;port=3366" ])'
+  168  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("Caltrans::ActivityLog::Schema", { debug => 1 }, [ "dbi:Mysql:dbname=actlog;host=trantor.its.uci.edu;user=ALUSER;password=ALPASSWORD;port=3366" ])'
   169  perldoc dbi::mysql
   170  sudo -i
   171  equery list mysql
-  172  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("Caltrans::ActivityLog::Schema", { debug => 1 }, [ "dbi:mysql:dbname=actlog;host=trantor.its.uci.edu;user=ALUSER ;password=ALPASSWORD;port=3366" ])'
+  172  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("Caltrans::ActivityLog::Schema", { debug => 1 }, [ "dbi:mysql:dbname=actlog;host=trantor.its.uci.edu;user=ALUSER;password=ALPASSWORD;port=3366" ])'
   173  sh ./createit.sh
   174  psql -U postgres tmcpe_test 
   175  sh ./createit.sh
@@ -74,25 +74,25 @@
   192  perl -d import-al.pl
   193  perl import-al.pl
   194  cat ./createit.sh
-  195  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  195  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   196  rm ./lib/TMCPE/ActivityLog/Schema/CtAlTransaction.pm
-  197  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  197  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   198  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  199  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  199  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   200  perl import-al.pl
   201  perl import-al.pl
   202  perl import-al.pl
   203  perl import-al.pl
   204  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  205  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
-  206  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  205  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
+  206  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   207  ls
   208  find . -name Icad\*
   209  find . -name I\*
   210  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  211  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  211  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   212  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  213  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  213  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   214  cat createit.sh
   215  perl -d import-al.pl
   216  perl -d import-al.pl
@@ -100,17 +100,17 @@
   218  perl -d import-al.pl
   219  perldoc Date::Format
   220  fg
-  221  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  221  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   222  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  223  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  223  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   224  ./lib/TMCPE/ActivityLog/Schema/Icad.pm
   225  rm ./lib/TMCPE/ActivityLog/Schema/Icad.pm
   226  ./lib/TMCPE/ActivityLog/Schema/Icad.pm
-  227  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  227  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   228  rm ./lib/TMCPE/ActivityLog/Schema/IcadDetail.pm
-  229  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  229  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   230  fg
-  231  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  231  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   232  perl -d import-al.pl
   233  perl -d import-al.pl
   234  perl import-al.pl
@@ -130,10 +130,10 @@
   248  ls
   249  ssh crindt@hyperion
   250  ssh crindt@parsons.its.uci.edu
-  251  mysql -h trantor -p -u d12 actlog
-  252  mysql -h trantor -p -u d12 actlog -p 3366
-  253  mysql -h trantor -p -u d12 actlog -P 3366
-  254  mysql -h trantor -p -u d12 actlog -P 3366
+  251  mysql -h trantor -p -u ALUSER actlog
+  252  mysql -h trantor -p -u ALUSER actlog -p 3366
+  253  mysql -h trantor -p -u ALUSER actlog -P 3366
+  254  mysql -h trantor -p -u ALUSER actlog -P 3366
   255  psql -U postgres tmcpe
   256  psql -U postgres tmcpe_test
   257  ls -lrt
@@ -151,49 +151,49 @@
   269  psql -U postgres tmcpe_test -f /usr/share/postgresql-8.4/contrib/spatial_ref_sys.sql 
   270  psql -U postgres tmcpe_test 
   271  cat createit.sh
-  272  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  272  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   273  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  274  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  274  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   275  rm ./lib/TMCPE/ActivityLog/Schema/Icad.pm
-  276  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  276  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   277  rm ./lib/TMCPE/ActivityLog/Schema/IcadDetail.pm
-  278  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  278  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   279  psql -U postgres tmcpe_test 
-  280  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  280  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   281  psql -U postgres tmcpe_test 
   282  psql -U postgres tmcpe_test 
-  283  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  283  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   284  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  285  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  285  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   286  rm ./lib/TMCPE/ActivityLog/Schema/Incidents.pm
-  287  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  287  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   288  fg
   289  reset
   290  fg
   291  psql -U postgres tmcpe_test 
   292  psql -U postgres tmcpe_test 
-  293  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  293  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   294  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  295  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  295  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   296  rm ./lib/TMCPE/ActivityLog/Schema/Incidents.pm
-  297  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  297  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   298  rm ./lib/TMCPE/ActivityLog/Schema/PerformanceMeasures.pm
-  299  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  299  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   300  psql -U postgres tmcpe_test 
-  301  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  301  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   302  rm ./lib/TMCPE/ActivityLog/Schema/CriticalEvents.pm
-  303  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  303  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   304  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  305  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  305  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   306  rm ./lib/TMCPE/ActivityLog/Schema/CriticalEvents.pm
-  307  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  307  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   308  rm ./lib/TMCPE/ActivityLog/Schema/Icad.pm
-  309  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  309  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   310  rm ./lib/TMCPE/ActivityLog/Schema/IcadDetail.pm
-  311  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  311  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   312  ./lib/TMCPE/ActivityLog/Schema/PerformanceMeasures.pm
   313  rm ./lib/TMCPE/ActivityLog/Schema/PerformanceMeasures.pm
-  314  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  314  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   315  for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g'; done | less
   316  cd Downloads/tmcpe-
   317  cd Desktop/tmcpe/
@@ -230,61 +230,61 @@
   348  psql -U postgres tmcpe_test -f /usr/share/postgresql-8.4/contrib/spatial_ref_sys.sql 
   349  psql -U postgres tmcpe_test 
   350  cat createit.sh
-  351  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  351  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   352  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  353  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  353  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   354  rm ./lib/TMCPE/ActivityLog/Schema/Icad.pm
-  355  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  355  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   356  rm ./lib/TMCPE/ActivityLog/Schema/IcadDetail.pm
-  357  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  357  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   358  psql -U postgres tmcpe_test 
-  359  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  359  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   360  psql -U postgres tmcpe_test 
   361  psql -U postgres tmcpe_test 
-  362  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  362  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   363  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  364  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  364  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   365  rm ./lib/TMCPE/ActivityLog/Schema/Incidents.pm
-  366  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  366  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   367  fg
   368  reset
   369  fg
   370  psql -U postgres tmcpe_test 
   371  psql -U postgres tmcpe_test 
-  372  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  372  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   373  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  374  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  374  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   375  rm ./lib/TMCPE/ActivityLog/Schema/Incidents.pm
-  376  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  376  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   377  rm ./lib/TMCPE/ActivityLog/Schema/PerformanceMeasures.pm
-  378  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  378  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   379  psql -U postgres tmcpe_test 
-  380  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  380  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   381  rm ./lib/TMCPE/ActivityLog/Schema/CriticalEvents.pm
-  382  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  382  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   383  rm ./lib/TMCPE/ActivityLog/Schema/D12ActivityLog.pm
-  384  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  384  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   385  rm ./lib/TMCPE/ActivityLog/Schema/CriticalEvents.pm
-  386  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  386  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   387  rm ./lib/TMCPE/ActivityLog/Schema/Icad.pm
-  388  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  388  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   389  rm ./lib/TMCPE/ActivityLog/Schema/IcadDetail.pm
-  390  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  390  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   391  ./lib/TMCPE/ActivityLog/Schema/PerformanceMeasures.pm
   392  rm ./lib/TMCPE/ActivityLog/Schema/PerformanceMeasures.pm
-  393  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  393  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   394  for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g'; done | less
   395  (for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g' $f; done )| less
   396  rm lib/TMCPE/ActivityLog/*
   397  rm lib/TMCPE/ActivityLog/Schema/*.pm
-  398  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
-  399  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  398  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
+  399  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   400  rm lib/TMCPE/ActivityLog/Schema/*.pm
-  401  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
+  401  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
   402  fg
   403  psql -U postgres tmcpe_test 
-  404  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])';(for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g' $f > $f-hold && mv $f-hold $f; done )
-  405  rm lib/TMCPE/ActivityLog/Schema/*.pm; perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])';(for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g' $f > $f-hold && mv $f-hold $f; done )
+  404  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])';(for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g' $f > $f-hold && mv $f-hold $f; done )
+  405  rm lib/TMCPE/ActivityLog/Schema/*.pm; perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])';(for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g' $f > $f-hold && mv $f-hold $f; done )
   406  pg_dump -s -U postgres -s actlog > tt.sql
   407  pg_dump -s -U postgres -s actlog tmcpe_test > tt.sql
   408  pg_dump -U postgres -s actlog tmcpe_test > tt.sql
@@ -309,7 +309,7 @@
   427  fg
   428  psql -U postgres tmcpe_test -f crit-events.sql
   429  history
-  430  rm lib/TMCPE/ActivityLog/Schema/*.pm; perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])';(for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g' $f > $f-hold && mv $f-hold $f; done )
+  430  rm lib/TMCPE/ActivityLog/Schema/*.pm; perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::ActivityLog::Schema", { debug => 1, db_schema => "actlog" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])';(for f in lib/TMCPE/ActivityLog/Schema/*.pm; do sed 's/table("/table("actlog./g' $f > $f-hold && mv $f-hold $f; done )
   431  pushd ../../
   432  echo $PATH
   433  export PATH=/usr/local/src/grails-1.2.1/bin:$PATH
@@ -431,17 +431,17 @@
   549  psql -U postgres tmcpe_test -f crit-events.sql && sh regenerate-everything.sh  && perl import-al.pl --skip-icad --date-from='2007-01-01' --date-to='2007-01-07' --verbose
   550  rm ../analysis-tables/lib/TMCPE/DelayComputation.pm lib/TMCPE
   551  perl -d import-al.pl --skip-al --skip-incidents --skip-icad --date-from='2007-01-01' --date-to='2007-01-07' --verbose
-  552  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TBMAP::Schema", { debug => 1, db_schema => "tbmap" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])'
-  553  rm lib/TBMAP/Schema/*.pm && perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TBMAP::Schema", { debug => 1, db_schema => "tbmap" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])' && (for f in lib/TBMAP/Schema/*.pm; do sed 's/table("/table("tbmap./g' $f > $f-hold && mv $f-hold $f; done )
-  554  rm lib/TMCPE/Schema/*.pm && perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::Schema", { debug => 1, db_schema => "tmcpe" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])' && (for f in lib/TMCPE/Schema/*.pm; do sed 's/table("/table("tmcpe./g' $f > $f-hold && mv $f-hold $f; done )
-  555  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::Schema", { debug => 1, db_schema => "tmcpe" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])' && (for f in lib/TMCPE/Schema/*.pm; do sed 's/table("/table("tmcpe./g' $f > $f-hold && mv $f-hold $f; done )
+  552  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TBMAP::Schema", { debug => 1, db_schema => "tbmap" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])'
+  553  rm lib/TBMAP/Schema/*.pm && perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TBMAP::Schema", { debug => 1, db_schema => "tbmap" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])' && (for f in lib/TBMAP/Schema/*.pm; do sed 's/table("/table("tbmap./g' $f > $f-hold && mv $f-hold $f; done )
+  554  rm lib/TMCPE/Schema/*.pm && perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::Schema", { debug => 1, db_schema => "tmcpe" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])' && (for f in lib/TMCPE/Schema/*.pm; do sed 's/table("/table("tmcpe./g' $f > $f-hold && mv $f-hold $f; done )
+  555  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::Schema", { debug => 1, db_schema => "tmcpe" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])' && (for f in lib/TMCPE/Schema/*.pm; do sed 's/table("/table("tmcpe./g' $f > $f-hold && mv $f-hold $f; done )
   556  history
   557  perl -d import-al.pl --skip-al --skip-incidents --skip-icad --date-from='2007-01-01' --date-to='2007-01-07' --verbose
   558  cp ../analysis-tables/select-data.sql .
   559  fg
   560  perl import-al.pl --skip-al --skip-incidents --skip-icad --date-from='2007-01-01' --date-to='2007-01-07' --verbose
-  561  rm lib/TMCPE/Schema/*.pm && perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::Schema", { debug => 1, db_schema => "tmcpe" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])' && (for f in lib/TMCPE/Schema/*.pm; do sed 's/table("/table("tmcpe./g' $f > $f-hold && mv $f-hold $f; done )
-  562  rm lib/TMCPE/Schema/*.pm && perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::Schema", { debug => 1, db_schema => "tmcpe" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=TMCPUSER" ])' && (for f in lib/TMCPE/Schema/*.pm; do sed 's/table("/table("tmcpe./g' $f > $f-hold && mv $f-hold $f; done )
+  561  rm lib/TMCPE/Schema/*.pm && perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::Schema", { debug => 1, db_schema => "tmcpe" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])' && (for f in lib/TMCPE/Schema/*.pm; do sed 's/table("/table("tmcpe./g' $f > $f-hold && mv $f-hold $f; done )
+  562  rm lib/TMCPE/Schema/*.pm && perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:./lib -e 'make_schema_at("TMCPE::Schema", { debug => 1, db_schema => "tmcpe" }, [ "dbi:Pg:dbname=tmcpe_test;host=localhost;user=postgres" ])' && (for f in lib/TMCPE/Schema/*.pm; do sed 's/table("/table("tmcpe./g' $f > $f-hold && mv $f-hold $f; done )
   563  ls
   564  sh regenerate-everything.sh
   565  perl import-al.pl --skip-al --skip-incidents --skip-icad --date-from='2007-01-01' --date-to='2007-01-07' --verbose

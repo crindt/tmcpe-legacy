@@ -22,7 +22,7 @@ environments {
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
         dataSource_vds { 
-            url = 'jdbc:postgresql://localhost:5432/spatialvds'
+            url = 'jdbc:postgresql://***REMOVED***:5432/spatialvds'
             username = 'VDSUSER'
             password = 'VDSPASSWORD'
             readOnly = true
@@ -32,7 +32,7 @@ environments {
         }
 
 		dataSource_vds_partitioned {
-			url = 'jdbc:postgresql://localhost:5433/vds'
+			url = 'jdbc:postgresql://***REMOVED***:5433/vds'
 			username = 'postgres'
 			readOnly = true
 			dbCreate = 'update'
@@ -57,7 +57,7 @@ environments {
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
         dataSource_vds { 
-            url = 'jdbc:postgresql://localhost:5432/spatialvds'
+            url = 'jdbc:postgresql://***REMOVED***:5432/spatialvds'
             username = 'VDSUSER'
             password = 'VDSPASSWORD'
             readOnly = true
@@ -67,7 +67,7 @@ environments {
         }
 
 		dataSource_vds_partitioned {
-			url = 'jdbc:postgresql://localhost:5433/vds'
+			url = 'jdbc:postgresql://***REMOVED***:5433/vds'
 			username = 'postgres'
 			readOnly = true
 			dbCreate = 'update'
@@ -83,7 +83,7 @@ environments {
     }
     production {
         dataSource {
-            url = 'jdbc:postgresql://localhost:5433/tmcpe_v1_0_0'
+            url = 'jdbc:postgresql://***REMOVED***:5433/tmcpe_v1_0_0'
             dbCreate = "update"
             username = 'postgres'
             password = ''
@@ -92,7 +92,7 @@ environments {
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
         dataSource_vds { 
-            url = 'jdbc:postgresql://localhost:5432/spatialvds'
+            url = 'jdbc:postgresql://***REMOVED***:5432/spatialvds'
             username = 'VDSUSER'
             password = 'VDSPASSWORD'
             readOnly = true
@@ -101,7 +101,7 @@ environments {
             dialect = org.hibernatespatial.postgis.PostgisDialect
         }
 		dataSource_vds_partitioned {
-			url = 'jdbc:postgresql://localhost:5433/vds'
+			url = 'jdbc:postgresql://***REMOVED***:5433/vds'
 			username = 'postgres'
 			readOnly = true
 			dbCreate = 'update'
@@ -110,7 +110,7 @@ environments {
 		}
         grails { 
             mongo { 
-				host = "localhost"
+				host = "***REMOVED***"
                 databaseName = "tmcpe_analyses_v1_2"
             }
         }

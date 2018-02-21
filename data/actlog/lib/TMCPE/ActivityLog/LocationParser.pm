@@ -9,13 +9,13 @@ use OSM::Schema;
 
 use Class::MethodMaker
     [
-     scalar => [ { -default => "localhost" }, 'vds_db_host' ],
+     scalar => [ { -default => "***REMOVED***" }, 'vds_db_host' ],
      scalar => [ { -default => "VDSUSER" }, 'vds_db_user' ],
      scalar => [ { -default => "VDSPASSWORD" }, 'vds_db_password' ],
      scalar => [ { -type => 'SpatialVds::Schema',
 		   -default_ctor => sub {
 		       SpatialVds::Schema->connect(
-			   "dbi:Pg:dbname=spatialvds;host=localhost",
+			   "dbi:Pg:dbname=spatialvds;host=***REMOVED***",
 			   "VDSUSER", "VDSPASSWORD",
 			   { AutoCommit => 1 },
 			   );
@@ -24,7 +24,7 @@ use Class::MethodMaker
      scalar => [ { -type => 'OSM::Schema',
 		   -default_ctor => sub {
 		       SpatialVds::Schema->connect(
-			   "dbi:Pg:dbname=spatialvds;host=localhost",
+			   "dbi:Pg:dbname=spatialvds;host=***REMOVED***",
 			   "VDSUSER", "VDSPASSWORD",
 			   { AutoCommit => 1 },
 			   );
@@ -429,8 +429,8 @@ sub get_vds_xs {
 sub get_osm_geom {
     my ( $self, $facdir, $xs ) = @_;
 
-    my $dbh = DBI->connect('dbi:Pg:database=osm;host=localhost',
-		       'VDSUSER' );
+    my $dbh = DBI->connect('dbi:Pg:database=osm;host=***REMOVED***',
+		       'VDSPASSWORD' );
     
     my $qstr = qq{
     select distinct w.id,h.v hw,n.v as name,similarity( n.v, ? ) as sim,asewkt(st_intersection( q.rr,w.linestring)) as ii,st_distance(geomfromewkt('srid=4326;point(-117.830 33.693)'::text),st_intersection( q.rr,w.linestring)) as ocdist from ways w join way_tags h on (h.k='highway' AND h.way_id = w.id) left join way_tags n on ( n.way_id = w.id AND n.k='name' ) join ( select linestring rr from ways w join relation_members rm on ( w.id = rm.member_id ) where rm.relation_id in ( select id from routes r WHERE r.ref=? AND r.dir in (?,?) order by version desc limit 1) ) q on ( st_intersects( q.rr, w.linestring ) ) 

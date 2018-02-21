@@ -8,13 +8,13 @@ use SpatialVds::Schema;
 
 use Class::MethodMaker
     [
-     scalar => [ { -default => "localhost" }, 'vds_db_host' ],
+     scalar => [ { -default => "***REMOVED***" }, 'vds_db_host' ],
      scalar => [ { -default => "VDSUSER" }, 'vds_db_user' ],
      scalar => [ { -default => "VDSPASSWORD" }, 'vds_db_password' ],
      scalar => [ { -type => 'SpatialVds::Schema',
 		   -default_ctor => sub {
 		       SpatialVds::Schema->connect(
-			   "dbi:Pg:dbname=spatialvds;host=localhost",
+			   "dbi:Pg:dbname=spatialvds;host=***REMOVED***",
 			   "VDSUSER", "VDSPASSWORD",
 			   { AutoCommit => 1 },
 			   );

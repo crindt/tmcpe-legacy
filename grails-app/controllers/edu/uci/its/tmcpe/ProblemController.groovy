@@ -16,7 +16,7 @@ class ProblemController {
 			URLEncoder.encode( s, URLCodec.getEncoding())
 		}.join("&")
 		
-	    redirect(target:"_blank", url:'http://localhost/redmine/projects/tmcpe/issues/new?'+paramstr)
+	    redirect(target:"_blank", url:'http://***REMOVED***/redmine/projects/tmcpe/issues/new?'+paramstr)
 	}
 	
 	

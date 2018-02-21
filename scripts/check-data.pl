@@ -54,7 +54,7 @@ my $d12 = Caltrans::ActivityLog::Schema->connect(
     );
 
 my $vdsdb = SpatialVds::Schema->connect(
-    "dbi:Pg:dbname=spatialvds;host=localhost",
+    "dbi:Pg:dbname=spatialvds;host=***REMOVED***",
     $vdsuser, $vdspassword,
     { AutoCommit => 1 },
     );

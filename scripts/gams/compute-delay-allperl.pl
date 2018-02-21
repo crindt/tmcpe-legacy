@@ -180,8 +180,8 @@ print STDERR "\t".join( "",
 # has the mainline facility.  We'll use that to query for the
 # relevant vds from spatialvds
 $spatialvds_db = SpatialVds::Schema->connect(
-    "dbi:Pg:dbname=spatialvds;host=localhost",
-    "VDSUSER", undef,
+    "dbi:Pg:dbname=spatialvds;host=***REMOVED***",
+    "VDSPASSWORD", undef,
     { AutoCommit => 0 },
     );
 
@@ -253,8 +253,8 @@ map {
 # run the pems 5min query to get relevant results
 my $select_query < io("./select-data.sql");
 
-my $dbh = DBI->connect('dbi:Pg:database=spatialvds;host=localhost',
-		       'VDSUSER' );
+my $dbh = DBI->connect('dbi:Pg:database=spatialvds;host=***REMOVED***',
+		       'VDSPASSWORD' );
 
 my $select_data = $dbh->prepare( $select_query );
 foreach my $vds ( @avds ) {

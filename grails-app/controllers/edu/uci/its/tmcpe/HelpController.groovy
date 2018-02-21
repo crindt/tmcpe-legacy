@@ -52,7 +52,7 @@ class HelpController {
     // Only authenticated users will be automatically redirected to the user guide
     @Secured(['ROLE_USER'])
     def fullHelp = {
-		redirect(target:"_blank", url:'http://localhost/redmine/projects/tmcpe/wiki/User_Guide')
+		redirect(target:"_blank", url:'http://***REMOVED***/redmine/projects/tmcpe/wiki/User_Guide')
     }
 
     def browserHelp = {

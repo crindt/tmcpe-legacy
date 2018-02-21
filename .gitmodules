@@ -48,7 +48,7 @@
 	url = https://github.com/phstc/jquery-dateFormat
 [submodule "src/js/polymaps-cluster"]
 	path = src/js/polymaps-cluster
-	url = git@localhost:polymaps-cluster
+	url = git@***REMOVED***:polymaps-cluster
 [submodule "src/js/underscore"]
 	path = src/js/underscore
 	url = https://github.com/documentcloud/underscore.git

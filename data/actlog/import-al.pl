@@ -122,7 +122,7 @@ my $procopt = {
     use_osm_geom => 0,  # this is expensive!
     tmcpe_db_host => "localhost",
     tmcpe_db_name => "tmcpe_test",
-    tmcpe_db_user => "postgres",
+    tmcpe_db_user => "TMCPEUSER",
     tmcpe_db_password => "",
     replace_existing => 1,
     ignore_unprocessed => 0,
@@ -176,7 +176,7 @@ my $tmcpe_db_password = $procopt->{tmcpe_db_password};
 
 my $d12 = Caltrans::ActivityLog::Schema->connect(
     "dbi:mysql:dbname=actlog;host=trantor.its.uci.edu;port=3366",
-    "d12", "VDSPASSWORD",
+    "ALUSER", "ALPASSWORD",
     { AutoCommit => 1 },
     );
 
@@ -194,7 +194,7 @@ my $tmcpe = TMCPE::Schema->connect(
 
 
 my $vdsdb = SpatialVds::Schema->connect(
-    "dbi:Pg:dbname=spatialvds;host=localhost",
+    "dbi:Pg:dbname=spatialvds;host=***REMOVED***",
     "VDSUSER", "VDSPASSWORD",
     { AutoCommit => 1 },
     );
