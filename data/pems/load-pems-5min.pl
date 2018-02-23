@@ -15,7 +15,7 @@ foreach my $ff (@ARGV) {
 		    $f,
 		    "\' ",
 		    'CSV"');
-    my $fcmd = "echo $cmd" . "| psql -U VDSUSER -h ***REMOVED*** spatialvds";
+    my $fcmd = "echo $cmd" . "| psql -U VDSUSER -h localhost spatialvds";
     print $fcmd;
     system ( $fcmd ) && die "FAILED!";
     system ( "rm $f" ) && die "FAILED REMOVING";
